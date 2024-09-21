@@ -1,36 +1,14 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Pet App
+This repository contains the code for my Pet Application created with NextJS.
 
-## Getting Started
+## What is PET?
+The technical definition of the PET or Physiological Equivalent Temperature is a method to measure the air temperature at which, in a typical indoor setting (without wind and solar radiation), the heat budget of the human body is balanced with the same core and skin temperature as under the complex outdoor conditions to be assessed.  In other words, the PET measures thermal comfort based on temperature, humidity, wind speed, solar radiation, and clothing.  Based on this [study](https://bjsm.bmj.com/content/55/15/825), there is evidence to suggest that the PET may do a better job at measuring heat stress than other measures like WBGT and UTCI.
 
-First, run the development server:
+## Purpose of the application
+This application shows how PET has changed from 2000 to 2013 in the top 500 largest cities in the United States.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Home Page
+The homepage contains an interactive map of the top 500 largest cities in the US, with the ability to select a city that will pull up a graph of the change of either the average (default) or max Pet values over time, along with a link to view additional graphs. 
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## City Page
+If you select to get more information about a city, you will see the graph mentioned above, along with an interactive graph that will allow you to compare the PET in 2023 vs a year of your choosing.

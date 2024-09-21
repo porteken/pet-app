@@ -1,75 +1,88 @@
 "use client";
+
 import Plot from "react-plotly.js";
-import { FetchTrendGraphData } from "./fetchData";
+import { FetchTrendGraphData } from "./fetchClient";
 import { LayoutProps, TrendGraphDataProps } from "./types";
-export const GenerateTrendGraph = async (
-  id: number,
-  option: string,
+
+// Generate trend graph based on selected option and location ID
+export const GenerateTrendGraph = (
+  years: number[],
+  type: string,
+  year_pets: number[],
+  trendline_pets: number[],
   size?: number,
-) => {
-  const { type, years, pets, trendline_pets }: TrendGraphDataProps =
-    await FetchTrendGraphData(option, id);
-  var layout: LayoutProps = {
+): JSX.Element => {
+  // Fetch graph data
+
+  // Define layout with optional size adjustment
+  const layout: LayoutProps = {
     xaxis: { title: "Year" },
-    yaxis: { title: "Pet" },
-    title: `${type} Pet from 2000-2023`,
+    yaxis: { title: "PET" },
+    title: `${type} PET (2000-2023)`,
+    ...(size && { width: size, height: size }), // Apply size if provided
   };
-  layout = size ? { ...layout, width: size, height: size } : layout;
+
+  // Return the rendered Plot component
   return (
     <Plot
       data={[
         {
           x: years,
-          y: pets,
+          y: year_pets,
           type: "scatter",
-          name: "pet",
           mode: "lines+markers",
           marker: { color: "red" },
+          name: "PET",
         },
         {
           x: years,
           y: trendline_pets,
           type: "scatter",
-          name: "trendline",
           mode: "lines",
           line: { dash: "dashdot", color: "black" },
+          name: "Trendline of PET",
         },
       ]}
       layout={layout}
     />
   );
 };
+
+// Generate reference graph comparing a specific year with the current year
 export const GenerateReferenceGraph = async (
-  reference_year: string,
+  referenceYear: string,
   dates: Date[],
   referencePets: number[],
   currentPets: number[],
-) => {
-  var layout: LayoutProps = {
-    xaxis: { title: "Year", tickformat: "%b, %-d" },
-    yaxis: { title: "Pet" },
-    title: `Pet during summer 2023 vs ${reference_year}`,
+): Promise<JSX.Element> => {
+  // Define layout
+  const layout: LayoutProps = {
+    xaxis: { title: "Date", tickformat: "%b %-d" },
+    yaxis: { title: "PET" },
+    title: `PET in Summer 2023 vs ${referenceYear}`,
   };
+
+  // Return the rendered Plot component
   return (
     <Plot
       data={[
         {
           x: dates,
           y: currentPets,
-          hovertemplate: `date: %{x|%b %-d} pet: %{y}`,
           type: "scatter",
-          name: `2023 pet`,
           mode: "lines+markers",
           marker: { color: "red" },
+          hovertemplate: "Date: %{x|%b %-d}<br>Pets: %{y}",
+          name: "2023 PET",
         },
         {
           x: dates,
           y: referencePets,
-          hovertemplate: `date: %{x|%b %-d} pet: %{y}`,
           type: "scatter",
-          name: `${reference_year} pet`,
           mode: "lines+markers",
           line: { dash: "dashdot", color: "black" },
+          hovertemplate: "Date: %{x|%b %-d}<br>Pets: %{y}",
+          name: `${referenceYear} PET`,
         },
       ]}
       layout={layout}

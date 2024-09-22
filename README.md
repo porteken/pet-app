@@ -1,6 +1,6 @@
 # Pet App
 
-This repository contains the code for my Pet Application created with NextJS.
+This repository contains the code for my Pet Application created with NextJS hosted [here](https://pet-app-vd6wy.ondigitalocean.app/)
 
 ## What is PET?
 

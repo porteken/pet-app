@@ -8,7 +8,7 @@ import { MapProps } from "./types";
 import { FC } from "react";
 import { GraphOptions } from "../selectOptions";
 import { GenerateTrendGraph } from "../generateGraph";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
@@ -35,7 +35,6 @@ const defaultGraphType = "avg";
 const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
 
   const initialGraphType = searchParams.get("type") || defaultGraphType;
 
@@ -94,7 +93,7 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
   return (
     <>
       <HeaderBar LocationOptions={LocationOptions} />
-      <MapContainer center={[39.5, -98.35]} zoom={5} scrollWheelZoom={false}>
+      <MapContainer center={[39.5, -98.35]} zoom={5} scrollWheelZoom={true}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

@@ -7,18 +7,19 @@ import { LayoutProps, TrendGraphDataProps } from "./types";
 // Generate trend graph based on selected option and location ID
 export const GenerateTrendGraph = (
   years: number[],
-  type: string,
+  option: string,
   year_pets: number[],
   trendline_pets: number[],
   size?: number,
 ): JSX.Element => {
   // Fetch graph data
+  const graph_type = option === "avg" ? "Average" : "Max";
 
   // Define layout with optional size adjustment
   const layout: LayoutProps = {
     xaxis: { title: "Year" },
     yaxis: { title: "PET" },
-    title: `${type} PET (2000-2023)`,
+    title: `${graph_type} PET (2000-2023)`,
     ...(size && { width: size, height: size }), // Apply size if provided
   };
 

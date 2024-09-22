@@ -7,21 +7,23 @@ import { HeaderBar } from "../headerBar";
 const About: FC<AboutProps> = ({ LocationOptions }: AboutProps) => {
   return (
     <>
-      <div className="grid-cols-1 grid gap-10">
-        <HeaderBar LocationOptions={LocationOptions} />
-        <div>
-          <Link
-            href={"https://github.com/porteken/pet-app"}
-            className="text-blue-600"
-          >
-            View Source code
-          </Link>
+      <HeaderBar LocationOptions={LocationOptions} />
+      <div className="grid flex-col gap-5">
+        <div className="w-1/2">
+          <h1 className="text-2xl font-extrabold dark:text-white">
+            Purpose of the Application
+          </h1>
+          <p>
+            This application shows how the Physiological Equivalent Temperature
+            or PET has changed from 2000 to 2013 in the top 500 largest cities
+            in the Contiguous United States.
+          </p>
         </div>
         <div>
           <h1 className="text-2xl font-extrabold dark:text-white">
             What is PET?
           </h1>
-          <p>
+          <p className="w-1/2">
             The technical definition of the PET or Physiological Equivalent
             Temperature is a method to measure the air temperature at which, in
             a typical indoor setting (without wind and solar radiation), the

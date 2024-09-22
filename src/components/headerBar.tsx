@@ -37,11 +37,7 @@ const DownIcon = ({ fill, size }: IconProps) => {
   );
 };
 
-export const HeaderBar = ({
-  LocationOptions,
-  name,
-  id,
-}: NavProps): JSX.Element => {
+export const HeaderBar = ({ LocationOptions, id }: NavProps): JSX.Element => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const selected_id = id ? new Set([id]) : new Set([]);
@@ -49,7 +45,7 @@ export const HeaderBar = ({
     <div className="grid-cols-1 grid gap-2 justify-items-center">
       <div>
         <h1 className="text-2xl font-extrabold dark:text-white">
-          Historical PET in USA (2000-2023)
+          PET in US cities from 2000-2023
         </h1>
       </div>
       <div>
@@ -74,12 +70,19 @@ export const HeaderBar = ({
         >
           <NavbarContent className="hidden sm:flex gap-4" justify="center">
             <NavbarItem isActive={pathname === "/"}>
-              <Link color="foreground" href="/">
+              <Link
+                color="foreground"
+                href={
+                  searchParams.toString() !== ""
+                    ? `/?${searchParams.toString()}`
+                    : `/`
+                }
+              >
                 Map
               </Link>
             </NavbarItem>
-            <Dropdown shouldBlockScroll={false}>
-              <NavbarItem>
+            <Dropdown>
+              <NavbarItem isActive={id! >= 0}>
                 <DropdownTrigger>
                   <Button
                     disableRipple
@@ -88,11 +91,15 @@ export const HeaderBar = ({
                     radius="sm"
                     variant="light"
                   >
-                    {name ? `PET details for ${name}` : "PET details for City"}
+                    {id! >= 0 ? `Change City` : "View data for City"}
                   </Button>
                 </DropdownTrigger>
               </NavbarItem>
-              <DropdownMenu defaultSelectedKeys={selected_id}>
+              <DropdownMenu
+                selectionMode="single"
+                selectedKeys={selected_id}
+                className="max-h-[50vh] overflow-y-auto"
+              >
                 {LocationOptions.map((section) => (
                   <DropdownSection
                     key={section.title}
@@ -126,7 +133,7 @@ export const HeaderBar = ({
                 color="foreground"
                 href="https://github.com/porteken/pet-app"
               >
-                Github Project
+                Github Repository
               </Link>
             </NavbarItem>
           </NavbarContent>

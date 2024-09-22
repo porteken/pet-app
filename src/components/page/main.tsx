@@ -1,14 +1,16 @@
 "use client";
-
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { FC } from "react";
 import { GenerateTrendGraph, GenerateReferenceGraph } from "../generateGraph";
 import { PageProps } from "./types";
 import { Select, SelectItem } from "@nextui-org/react";
 import { GraphOptions, YearOptions } from "../selectOptions";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FetchReferenceGraphData, FetchTrendGraphData } from "../fetchClient";
 import { HeaderBar } from "../headerBar";
+
+const DEFAULT_GRAPH_TYPE = "avg";
+const DEFAULT_REFERENCE_YEAR = "2000";
 
 const Main: FC<PageProps> = ({
   id,
@@ -20,19 +22,17 @@ const Main: FC<PageProps> = ({
   TrendlinePets,
   YearPets,
   Years,
-}: PageProps) => {
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const defaultGraphType = "avg";
-  const defaultReferenceYear = "2000";
-  const graphTypeFromParams = searchParams.get("type") || defaultGraphType;
+
+  const graphTypeFromParams = searchParams.get("type") || DEFAULT_GRAPH_TYPE;
 
   const [selectedGraphType, setSelectedGraphType] = useState(
     new Set([graphTypeFromParams]),
   );
   const [selectedReferenceYear, setSelectedReferenceYear] = useState(
-    new Set([defaultReferenceYear]),
+    new Set([DEFAULT_REFERENCE_YEAR]),
   );
   const [trendGraph, setTrendGraph] = useState<JSX.Element | null>(null);
   const [referenceGraph, setReferenceGraph] = useState<JSX.Element | null>(
@@ -40,54 +40,45 @@ const Main: FC<PageProps> = ({
   );
 
   const generatePetTrendGraph = useCallback(
-    (option: string = graphTypeFromParams) => {
-      if (option !== defaultGraphType) {
-        FetchTrendGraphData(option, id).then((data) => {
-          const { years, year_pets, trendline_pets } = data;
-          const graph = GenerateTrendGraph(
-            years,
-            option,
-            year_pets,
-            trendline_pets,
-            500,
-          );
-          setTrendGraph(graph);
-        });
-      } else {
-        const graph = GenerateTrendGraph(
-          Years,
-          option,
-          YearPets,
-          TrendlinePets,
-          500,
-        );
-        setTrendGraph(graph);
-      }
+    async (option: string = graphTypeFromParams) => {
+      const graphData =
+        option !== DEFAULT_GRAPH_TYPE
+          ? await FetchTrendGraphData(option, id)
+          : {
+              years: Years,
+              year_pets: YearPets,
+              trendline_pets: TrendlinePets,
+            };
+
+      const { years, year_pets, trendline_pets } = graphData;
+      const graph = GenerateTrendGraph(
+        years,
+        option,
+        year_pets,
+        trendline_pets,
+        500,
+      );
+      setTrendGraph(graph);
     },
-    [graphTypeFromParams],
+    [graphTypeFromParams, id, Years, YearPets, TrendlinePets],
   );
 
   const generatePetReferenceGraph = useCallback(
-    (year: string = defaultReferenceYear) => {
-      if (year != defaultReferenceYear) {
-        FetchReferenceGraphData(year, id).then((props) => {
-          GenerateReferenceGraph(
-            year,
-            CurrentDates,
-            CurrentPets,
-            props.pets,
-          ).then(setReferenceGraph);
-        });
-      } else {
-        GenerateReferenceGraph(
-          year,
-          CurrentDates,
-          CurrentPets,
-          ReferencePets,
-        ).then(setReferenceGraph);
-      }
+    async (year: string = DEFAULT_REFERENCE_YEAR) => {
+      const referenceData =
+        year !== DEFAULT_REFERENCE_YEAR
+          ? await FetchReferenceGraphData(year, id)
+          : { pets: ReferencePets };
+
+      const graph = await GenerateReferenceGraph(
+        year,
+        CurrentDates,
+        CurrentPets,
+        referenceData.pets,
+      );
+      setReferenceGraph(graph);
     },
-    [CurrentDates, CurrentPets],
+    [id, CurrentDates, CurrentPets, ReferencePets],
   );
 
   const createQueryString = useCallback(
@@ -101,23 +92,17 @@ const Main: FC<PageProps> = ({
 
   const handleGraphTypeChange = useCallback(
     (option: string) => {
-      if (option) {
-        setSelectedGraphType(new Set([option]));
-        option !== defaultGraphType
-          ? createQueryString("type", option)
-          : createQueryString("type", "");
-        generatePetTrendGraph(option);
-      }
+      setSelectedGraphType(new Set([option]));
+      createQueryString("type", option !== DEFAULT_GRAPH_TYPE ? option : "");
+      generatePetTrendGraph(option);
     },
-    [generatePetTrendGraph, createQueryString, defaultGraphType],
+    [createQueryString, generatePetTrendGraph],
   );
 
   const handleReferenceYearChange = useCallback(
     (year: string) => {
-      if (year) {
-        setSelectedReferenceYear(new Set([year]));
-        generatePetReferenceGraph(year);
-      }
+      setSelectedReferenceYear(new Set([year]));
+      generatePetReferenceGraph(year);
     },
     [generatePetReferenceGraph],
   );
@@ -129,11 +114,7 @@ const Main: FC<PageProps> = ({
 
   return (
     <>
-      <HeaderBar
-        LocationOptions={LocationOptions}
-        name={location.city}
-        id={id}
-      />
+      <HeaderBar LocationOptions={LocationOptions} id={id} />
       <div className="flex flex-col items-start min-h-screen">
         <div className="w-full">
           <Select

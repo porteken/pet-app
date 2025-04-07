@@ -73,8 +73,8 @@ const Main: FC<PageProps> = ({
       const graph = await GenerateReferenceGraph(
         year,
         CurrentDates,
-        CurrentPets,
         referenceData.pets,
+        CurrentPets,
       );
       setReferenceGraph(graph);
     },

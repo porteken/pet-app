@@ -45,7 +45,7 @@ export const HeaderBar = ({ LocationOptions, id }: NavProps): JSX.Element => {
     <div className="grid-cols-1 grid gap-2 justify-items-center">
       <div>
         <h1 className="text-2xl font-extrabold dark:text-white">
-          PET in US cities from 2000-2023
+          PET during summer in US cities from 2000-2023
         </h1>
       </div>
       <div>

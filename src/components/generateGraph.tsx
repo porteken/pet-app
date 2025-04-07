@@ -19,7 +19,7 @@ export const GenerateTrendGraph = (
   const layout: LayoutProps = {
     xaxis: { title: "Year" },
     yaxis: { title: "PET" },
-    title: `${graph_type} PET (2000-2023)`,
+    title: `${graph_type} PET in summer (2000-2023)`,
     ...(size && { width: size, height: size }), // Apply size if provided
   };
 
@@ -60,7 +60,7 @@ export const GenerateReferenceGraph = async (
   const layout: LayoutProps = {
     xaxis: { title: "Date", tickformat: "%b %-d" },
     yaxis: { title: "PET" },
-    title: `PET in Summer 2023 vs ${referenceYear}`,
+    title: `PET in summer 2023 vs ${referenceYear}`,
   };
 
   // Return the rendered Plot component

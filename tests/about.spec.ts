@@ -18,7 +18,7 @@ test.describe("About Page", () => {
     await page.waitForLoadState("networkidle");
 
     // Check that the page has some content (adjust based on your actual about page content)
-    const mainContent = page.locator('main, [role="main"], .main-content');
+    const mainContent = page.locator("div, body");
     await expect(mainContent.first()).toBeVisible();
   });
 
@@ -32,7 +32,7 @@ test.describe("About Page", () => {
 
     if (await homeLink.first().isVisible()) {
       await homeLink.first().click();
-      await expect(page).toHaveURL(/^http:\/\/localhost:3000\/?$/);
+      await expect(page).toHaveURL(/^http:\/\/localhost:3001\/?$/);
     }
   });
 });

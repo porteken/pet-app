@@ -8,7 +8,7 @@ test.describe("Home Page", () => {
     await page.waitForLoadState("networkidle");
 
     // Check that the page title is present
-    await expect(page).toHaveTitle(/Pet App/);
+    await expect(page).toHaveTitle(/Historical Pet USA/);
   });
 
   test("should display the map container", async ({ page }) => {

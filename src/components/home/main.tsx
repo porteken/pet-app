@@ -1,32 +1,33 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import Link from "next/link";
-import dynamic from "next/dynamic";
 import { Select, SelectItem } from "@nextui-org/react";
-import { MapProps } from "./types";
-import { FC } from "react";
-import { GraphOptions } from "../selectOptions";
-import { GenerateTrendGraph } from "../generateGraph";
+import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { FC } from "react";
+import { useCallback, useState } from "react";
+
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { FetchTrendGraphData } from "../fetchClient";
+import { GenerateTrendGraph } from "../generateGraph";
 import { HeaderBar } from "../headerBar";
+import { GraphOptions } from "../selectOptions";
+
+import { MapProps } from "./types";
 const MapContainer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false },
+  () => import("react-leaflet").then(mod => mod.MapContainer),
+  { ssr: false }
 );
 const TileLayer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.TileLayer),
-  { ssr: false },
+  () => import("react-leaflet").then(mod => mod.TileLayer),
+  { ssr: false }
 );
-const Marker = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Marker),
-  { ssr: false },
-);
-const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
+const Marker = dynamic(() => import("react-leaflet").then(mod => mod.Marker), {
+  ssr: false,
+});
+const Popup = dynamic(() => import("react-leaflet").then(mod => mod.Popup), {
   ssr: false,
 });
 
@@ -41,7 +42,7 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
   const [petGraph, setPetGraph] = useState<JSX.Element | null>(null);
   const [selectedGraphType, setSelectedGraphType] = useState(initialGraphType);
   const [selectedLocationId, setSelectedLocationId] = useState<number | null>(
-    null,
+    null
   );
 
   const createQueryString = useCallback(
@@ -50,25 +51,25 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
       value ? params.set(name, value) : params.delete(name);
       router.push(`?${params.toString()}`);
     },
-    [searchParams, router],
+    [searchParams, router]
   );
 
   const generateGraph = useCallback(
     async (locationId: number, option: string) => {
       const { years, year_pets, trendline_pets } = await FetchTrendGraphData(
         option,
-        locationId,
+        locationId
       );
       const graph = GenerateTrendGraph(
         years,
         option,
         year_pets,
         trendline_pets,
-        500,
+        500
       );
       setPetGraph(graph);
     },
-    [],
+    []
   );
 
   const handleSelectChange = useCallback(
@@ -79,7 +80,7 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
         await generateGraph(selectedLocationId, option);
       }
     },
-    [selectedLocationId, createQueryString, generateGraph],
+    [selectedLocationId, createQueryString, generateGraph]
   );
 
   const handleMarkerClick = useCallback(
@@ -87,7 +88,7 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
       setSelectedLocationId(locationId);
       await generateGraph(locationId, selectedGraphType);
     },
-    [generateGraph, selectedGraphType],
+    [generateGraph, selectedGraphType]
   );
 
   return (
@@ -98,7 +99,7 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {locations.map((loc) => (
+        {locations.map(loc => (
           <Marker
             position={[loc.lat, loc.lng]}
             key={loc.location_id}
@@ -114,15 +115,15 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
                     items={GraphOptions}
                     selectedKeys={new Set([selectedGraphType])}
                     className="w-1/3"
-                    onChange={(e) => handleSelectChange(e.target.value)}
+                    onChange={e => handleSelectChange(e.target.value)}
                   >
-                    {GraphOptions.map((option) => (
+                    {GraphOptions.map(option => (
                       <SelectItem key={option.key}>{option.label}</SelectItem>
                     ))}
                   </Select>
                 </div>
                 <div className="md:justify-center">
-                  <p className="text-lg text-center">
+                  <p className="text-center text-lg">
                     {loc.city}, {loc.state}
                   </p>
                   <div className="w-full max-w-4xl">{petGraph}</div>

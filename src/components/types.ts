@@ -19,6 +19,8 @@ export interface ReferenceGraphDataProps {
 interface AxisProps {
   title: string;
   tickformat?: string;
+  gridcolor?: string;
+  zeroline?: boolean;
 }
 export interface LayoutProps {
   xaxis: AxisProps;
@@ -26,10 +28,21 @@ export interface LayoutProps {
   width?: number;
   height?: number;
   title: string;
+  plot_bgcolor?: string;
+  paper_bgcolor?: string;
+  font?: {
+    color: string;
+  };
+  margin?: {
+    l: number;
+    r: number;
+    t: number;
+    b: number;
+  };
 }
 export interface SelectOptionProps {
-  key: any;
-  label: any;
+  key: string;
+  label: string;
 }
 export interface NavProps {
   name?: string;

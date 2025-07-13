@@ -1,5 +1,6 @@
-import { LocationProps } from "../types";
 import { DropdownItemProps, DropdownSectionProps } from "@nextui-org/react";
+
+import { LocationProps } from "../types";
 export * from "../types";
 export interface PageProps {
   id: number;

@@ -1,13 +1,15 @@
 "use client";
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { FC } from "react";
-import { GenerateTrendGraph, GenerateReferenceGraph } from "../generateGraph";
-import { PageProps } from "./types";
 import { Select, SelectItem } from "@nextui-org/react";
-import { GraphOptions, YearOptions } from "../selectOptions";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { FC } from "react";
+
 import { FetchReferenceGraphData, FetchTrendGraphData } from "../fetchClient";
+import { GenerateTrendGraph, GenerateReferenceGraph } from "../generateGraph";
 import { HeaderBar } from "../headerBar";
+import { GraphOptions, YearOptions } from "../selectOptions";
+
+import { PageProps } from "./types";
 
 const DEFAULT_GRAPH_TYPE = "avg";
 const DEFAULT_REFERENCE_YEAR = "2000";
@@ -29,14 +31,14 @@ const Main: FC<PageProps> = ({
   const graphTypeFromParams = searchParams.get("type") || DEFAULT_GRAPH_TYPE;
 
   const [selectedGraphType, setSelectedGraphType] = useState(
-    new Set([graphTypeFromParams]),
+    new Set([graphTypeFromParams])
   );
   const [selectedReferenceYear, setSelectedReferenceYear] = useState(
-    new Set([DEFAULT_REFERENCE_YEAR]),
+    new Set([DEFAULT_REFERENCE_YEAR])
   );
   const [trendGraph, setTrendGraph] = useState<JSX.Element | null>(null);
   const [referenceGraph, setReferenceGraph] = useState<JSX.Element | null>(
-    null,
+    null
   );
 
   const generatePetTrendGraph = useCallback(
@@ -56,11 +58,11 @@ const Main: FC<PageProps> = ({
         option,
         year_pets,
         trendline_pets,
-        500,
+        500
       );
       setTrendGraph(graph);
     },
-    [graphTypeFromParams, id, Years, YearPets, TrendlinePets],
+    [graphTypeFromParams, id, Years, YearPets, TrendlinePets]
   );
 
   const generatePetReferenceGraph = useCallback(
@@ -74,11 +76,11 @@ const Main: FC<PageProps> = ({
         year,
         CurrentDates,
         referenceData.pets,
-        CurrentPets,
+        CurrentPets
       );
       setReferenceGraph(graph);
     },
-    [id, CurrentDates, CurrentPets, ReferencePets],
+    [id, CurrentDates, CurrentPets, ReferencePets]
   );
 
   const createQueryString = useCallback(
@@ -87,7 +89,7 @@ const Main: FC<PageProps> = ({
       value ? params.set(name, value) : params.delete(name);
       router.push(`?${params.toString()}`);
     },
-    [searchParams, router],
+    [searchParams, router]
   );
 
   const handleGraphTypeChange = useCallback(
@@ -96,7 +98,7 @@ const Main: FC<PageProps> = ({
       createQueryString("type", option !== DEFAULT_GRAPH_TYPE ? option : "");
       generatePetTrendGraph(option);
     },
-    [createQueryString, generatePetTrendGraph],
+    [createQueryString, generatePetTrendGraph]
   );
 
   const handleReferenceYearChange = useCallback(
@@ -104,7 +106,7 @@ const Main: FC<PageProps> = ({
       setSelectedReferenceYear(new Set([year]));
       generatePetReferenceGraph(year);
     },
-    [generatePetReferenceGraph],
+    [generatePetReferenceGraph]
   );
 
   useEffect(() => {
@@ -115,22 +117,20 @@ const Main: FC<PageProps> = ({
   return (
     <>
       <HeaderBar LocationOptions={LocationOptions} id={id} />
-      <div className="flex flex-col items-start min-h-screen">
+      <div className="flex min-h-screen flex-col items-start">
         <div className="w-full">
           <Select
             label="Type"
             items={GraphOptions}
             selectedKeys={selectedGraphType}
             className="w-1/12"
-            onChange={(e) => handleGraphTypeChange(e.target.value)}
+            onChange={e => handleGraphTypeChange(e.target.value)}
           >
-            {(option) => (
-              <SelectItem key={option.key}>{option.label}</SelectItem>
-            )}
+            {option => <SelectItem key={option.key}>{option.label}</SelectItem>}
           </Select>
         </div>
         <div className="md:justify-center">
-          <p className="text-lg text-center">
+          <p className="text-center text-lg">
             {location.city}, {location.state}
           </p>
           <div className="w-full max-w-4xl">{trendGraph}</div>
@@ -141,11 +141,9 @@ const Main: FC<PageProps> = ({
             items={YearOptions()}
             selectedKeys={selectedReferenceYear}
             className="w-1/12"
-            onChange={(e) => handleReferenceYearChange(e.target.value)}
+            onChange={e => handleReferenceYearChange(e.target.value)}
           >
-            {(option) => (
-              <SelectItem key={option.key}>{option.label}</SelectItem>
-            )}
+            {option => <SelectItem key={option.key}>{option.label}</SelectItem>}
           </Select>
           <div className="w-full max-w-4xl">{referenceGraph}</div>
         </div>

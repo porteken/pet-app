@@ -1,15 +1,15 @@
 "use server";
+import { DropdownItemProps, DropdownSectionProps } from "@nextui-org/react";
+import { SimpleLinearRegression } from "ml-regression-simple-linear";
+import { cookies } from "next/headers";
+
+import { createClient } from "../utils/supabase/server";
+
 import {
-  LocationProps,
   TrendGraphDataProps,
   ReferenceGraphDataProps,
   FetchLocationProps,
 } from "./types";
-import { createClient } from "../utils/supabase/server";
-import { SimpleLinearRegression } from "ml-regression-simple-linear";
-
-import { cookies } from "next/headers";
-import { DropdownItemProps, DropdownSectionProps } from "@nextui-org/react";
 
 export async function FetchLocations(): Promise<FetchLocationProps> {
   const cookieStore = cookies();
@@ -27,10 +27,10 @@ export async function FetchLocations(): Promise<FetchLocationProps> {
       // Group locations by state for Select location dropdown
       const LocationOptions: Partial<
         DropdownSectionProps<DropdownItemProps>
-      >[] = states.map((state) => ({
+      >[] = states.map(state => ({
         title: state,
         items: locations
-          .filter((loc) => loc.state === state)
+          .filter(loc => loc.state === state)
           .map(({ location_id, city }) => ({
             key: location_id,
             title: city,
@@ -47,7 +47,7 @@ export async function FetchLocations(): Promise<FetchLocationProps> {
 // Fetch data for the reference graph
 export async function FetchReferenceGraphData(
   year: string,
-  locationId: number,
+  locationId: number
 ): Promise<ReferenceGraphDataProps> {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
@@ -76,11 +76,11 @@ export async function FetchReferenceGraphData(
 // Fetch data for the trend graph
 export async function FetchTrendGraphData(
   option: string,
-  locationId: number,
+  locationId: number
 ): Promise<TrendGraphDataProps> {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
-  const type = option === "avg" ? "Average" : "Max";
+
   try {
     const { data, error } = await supabase
       .from(`pet_year_${option}`)
@@ -97,7 +97,7 @@ export async function FetchTrendGraphData(
 
     const reg = new SimpleLinearRegression(years, year_pets);
     const trendline_pets = years.map(
-      (year: number) => Math.round(reg.predict(year) * 100) / 100,
+      (year: number) => Math.round(reg.predict(year) * 100) / 100
     );
 
     return { years, year_pets, trendline_pets };

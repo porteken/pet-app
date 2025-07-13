@@ -38,6 +38,7 @@
   width: 1600px;
   height: 1600px;
   -webkit-transform-origin: 0 0;
+  transform-origin: 0 0;
 }
 .leaflet-marker-icon,
 .leaflet-marker-shadow {
@@ -91,7 +92,9 @@
 }
 /* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
 .leaflet-overlay-pane svg {
+  -webkit-user-select: none;
   -moz-user-select: none;
+  user-select: none;
 }
 
 .leaflet-pane {
@@ -593,6 +596,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  user-select: none;
   user-select: none;
   pointer-events: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);

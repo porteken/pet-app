@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import React from "react";
-import { FetchLocations } from "../../components/fetchServer";
 
+import { FetchLocations } from "../../components/fetchServer";
 import {
   FetchReferenceGraphData,
   FetchTrendGraphData,
@@ -26,20 +26,18 @@ export default async function Page({ params }: PageProps) {
   // Fetch reference graph data for default reference year (2000) and selected location
   const { pets: reference_pets } = await FetchReferenceGraphData(
     "2000",
-    params.id,
+    params.id
   );
 
   // Fetch trend graph data with default graph type (average)
 
   const { years, year_pets, trendline_pets } = await FetchTrendGraphData(
     "avg",
-    params.id,
+    params.id
   );
 
   // Find the current location by id, with a fallback to null in case it's not found
-  const selectedLocation = locations.find(
-    (loc) => loc.location_id == params.id,
-  );
+  const selectedLocation = locations.find(loc => loc.location_id == params.id);
   if (!selectedLocation) {
     return <div>Location not found</div>;
   }

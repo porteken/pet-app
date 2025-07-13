@@ -1,7 +1,8 @@
 "use server";
-import { FetchLocations } from "../../components/fetchServer";
 import dynamic from "next/dynamic";
 import React from "react";
+
+import { FetchLocations } from "../../components/fetchServer";
 const About = dynamic(() => import("../../components/about/main"), {
   ssr: false,
 });

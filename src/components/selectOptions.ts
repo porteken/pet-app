@@ -1,13 +1,28 @@
+import { GRAPH_CONFIG } from "@/utils/constants";
+
 import { SelectOptionProps } from "./types";
 
 export const GraphOptions: SelectOptionProps[] = [
-  { key: "avg", label: "Average" },
-  { key: "max", label: "Max" },
+  { key: GRAPH_CONFIG.TREND_OPTIONS.AVG, label: "Average" },
+  { key: GRAPH_CONFIG.TREND_OPTIONS.MAX, label: "Max" },
 ];
 
 export const YearOptions = (): SelectOptionProps[] => {
-  return Array.from({ length: 2024 - 2000 }, (_, i) => {
-    const year = (2000 + i).toString();
+  const { START, END } = GRAPH_CONFIG.YEAR_RANGE;
+  return Array.from({ length: END - START }, (_, i) => {
+    const year = (START + i).toString();
     return { key: year, label: year };
   });
 };
+
+// Memoized version for better performance
+export const getYearOptions = (() => {
+  let cachedOptions: SelectOptionProps[] | null = null;
+
+  return (): SelectOptionProps[] => {
+    if (!cachedOptions) {
+      cachedOptions = YearOptions();
+    }
+    return cachedOptions;
+  };
+})();

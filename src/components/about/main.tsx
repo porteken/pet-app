@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { FC } from "react";
-import { AboutProps } from "./types";
+
 import { HeaderBar } from "../headerBar";
+
+import { AboutProps } from "./types";
 const About: FC<AboutProps> = ({ LocationOptions }: AboutProps) => {
   return (
     <>

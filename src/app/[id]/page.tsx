@@ -17,27 +17,33 @@ type PageProps = {
 };
 
 export default async function Page({ params }: PageProps) {
+  // Validate that the id parameter is a valid number
+  const locationId = Number(params.id);
+  if (isNaN(locationId) || locationId <= 0) {
+    return <div>Invalid location ID</div>;
+  }
+
   // Fetch location data
   const { locations, LocationOptions } = await FetchLocations();
 
   // Fetch reference graph data for the current year (2023) and selected location
-  const { pets, dates } = await FetchReferenceGraphData("2023", params.id);
+  const { pets, dates } = await FetchReferenceGraphData("2023", locationId);
 
   // Fetch reference graph data for default reference year (2000) and selected location
   const { pets: reference_pets } = await FetchReferenceGraphData(
     "2000",
-    params.id
+    locationId
   );
 
   // Fetch trend graph data with default graph type (average)
 
   const { years, year_pets, trendline_pets } = await FetchTrendGraphData(
     "avg",
-    params.id
+    locationId
   );
 
   // Find the current location by id, with a fallback to null in case it's not found
-  const selectedLocation = locations.find(loc => loc.location_id == params.id);
+  const selectedLocation = locations.find(loc => loc.location_id == locationId);
   if (!selectedLocation) {
     return <div>Location not found</div>;
   }
@@ -45,7 +51,7 @@ export default async function Page({ params }: PageProps) {
   return (
     <div>
       <Main
-        id={params.id}
+        id={locationId}
         location={selectedLocation}
         LocationOptions={LocationOptions}
         CurrentPets={pets}

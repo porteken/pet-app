@@ -21,10 +21,31 @@
       "resolveSourceMapLocations": ["${workspaceFolder}/", "!/node_modules/**"],
 
       "serverReadyAction": {
-        "pattern": "- Local:.+(https?://.+)",
+        "pattern": "- Local:.+(http?://.+)",
         "uriFormat": "%s",
         "action": "openExternally"
       }
+    },
+    {
+      "name": "Playwright: Run Tests",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run test",
+      "preLaunchTask": "Start Dev Server"
+    },
+    {
+      "name": "Playwright: Debug Tests",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run test:debug",
+      "preLaunchTask": "Start Dev Server"
+    },
+    {
+      "name": "Playwright: UI Mode",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run test:ui",
+      "preLaunchTask": "Start Dev Server"
     }
   ]
 }

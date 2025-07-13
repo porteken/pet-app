@@ -1,0 +1,10 @@
+{
+  "playwright.env": {
+    "NODE_ENV": "test"
+  },
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
+}

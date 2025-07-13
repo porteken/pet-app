@@ -33,3 +33,19 @@ Based on [this study](https://bjsm.bmj.com/content/55/15/825), PET may provide b
 - **Database**: Supabase (PostgreSQL)
 - **Deployment**: DigitalOcean App Platform
 - **Code Quality**: ESLint, Prettier, Husky
+- **Testing**: Playwright (E2E Testing)
+
+## 🧪 Testing
+
+This project uses Playwright for end-to-end testing. The tests are configured to automatically start the Next.js development server before running.
+
+### Test Coverage
+
+The tests cover:
+
+- Home page functionality and map display
+- About page content and navigation
+- Map page functionality
+- Map interactions (markers, popups, navigation)
+- Dynamic route pages for location-specific content
+- Error handling for invalid routes

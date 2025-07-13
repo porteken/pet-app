@@ -49,6 +49,12 @@ export async function FetchReferenceGraphData(
   year: string,
   locationId: number
 ): Promise<ReferenceGraphDataProps> {
+  // Validate inputs
+  if (!locationId || isNaN(locationId) || locationId <= 0) {
+    console.error("Invalid locationId:", locationId);
+    return { dates: [], pets: [] };
+  }
+
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
   try {
@@ -78,6 +84,12 @@ export async function FetchTrendGraphData(
   option: string,
   locationId: number
 ): Promise<TrendGraphDataProps> {
+  // Validate inputs
+  if (!locationId || isNaN(locationId) || locationId <= 0) {
+    console.error("Invalid locationId:", locationId);
+    return { years: [], year_pets: [], trendline_pets: [] };
+  }
+
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
 

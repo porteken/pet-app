@@ -1,6 +1,6 @@
 "use client";
 
-import { Select, SelectItem, Spinner } from "@heroui/react";
+import { Button, Select, SelectItem, Spinner } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FC } from "react";
 import { useCallback, useState } from "react";
@@ -137,6 +137,19 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
               petGraph
             )}
           </div>
+          {selectedLocation && (
+            <div className="flex justify-center">
+              <Button
+                color="primary"
+                variant="flat"
+                onPress={() => {
+                  window.location.href = `/${selectedLocation.location_id}`;
+                }}
+              >
+                View Full Details
+              </Button>
+            </div>
+          )}
         </div>
       </Modal>
     </div>

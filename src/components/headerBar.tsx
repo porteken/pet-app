@@ -87,6 +87,14 @@ export const HeaderBar = ({
                 )}
                 groupBy={option => option.state || ""}
                 getOptionLabel={option => option.title}
+                filterOptions={(options, { inputValue }) => {
+                  const searchTerm = inputValue.toLowerCase();
+                  return options.filter(
+                    option =>
+                      option.title.toLowerCase().includes(searchTerm) ||
+                      (option.state || "").toLowerCase().includes(searchTerm)
+                  );
+                }}
                 sx={{ width: 300, backgroundColor: "white", borderRadius: 1 }}
                 renderInput={params => (
                   <TextField

@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { Layout } from "plotly.js";
 import React, { useEffect, useState } from "react";
 
-// Dynamically import Plot component with no SSR
 const Plot = dynamic(() => import("react-plotly.js"), {
   ssr: false,
   loading: () => (
@@ -22,7 +21,6 @@ const GRAPH_COLORS = {
   grid: "#e5e7eb", // gray-200
 } as const;
 
-// Client-side only wrapper component
 const PlotWrapper: React.FC<{
   data: any[];
   layout: Partial<Layout>;
@@ -53,14 +51,12 @@ const PlotWrapper: React.FC<{
   );
 };
 
-// Generate trend graph based on selected option and location ID
 export const GenerateTrendGraph = (
   years: number[],
   option: string,
   year_pets: number[],
   trendline_pets: number[]
 ): React.ReactElement => {
-  // Validate inputs
   if (!years.length || !year_pets.length || !trendline_pets.length) {
     return (
       <div className="flex h-[600px] items-center justify-center text-gray-500">
@@ -69,10 +65,8 @@ export const GenerateTrendGraph = (
     );
   }
 
-  // Determine graph measure
   const graph_type = option === "avg" ? "Average" : "Max";
 
-  // Define layout with responsive sizing
   const layout: Partial<Layout> = {
     xaxis: {
       title: { text: "Year" },
@@ -138,18 +132,15 @@ export const GenerateTrendGraph = (
     responsive: true,
   };
 
-  // Return the wrapped Plot component
   return <PlotWrapper data={data} layout={layout} config={config} />;
 };
 
-// Generate reference graph comparing a specific year with the current year
 export const GenerateReferenceGraph = async (
   referenceYear: string,
   dates: Date[],
   referencePets: number[],
   currentPets: number[]
 ): Promise<React.ReactElement> => {
-  // Validate inputs
   if (!dates.length || !referencePets.length || !currentPets.length) {
     return (
       <div className="flex h-[600px] items-center justify-center text-gray-500">
@@ -158,7 +149,6 @@ export const GenerateReferenceGraph = async (
     );
   }
 
-  // Define layout
   const layout: Partial<Layout> = {
     xaxis: {
       title: { text: "Date" },
@@ -229,6 +219,5 @@ export const GenerateReferenceGraph = async (
     responsive: true,
   };
 
-  // Return the wrapped Plot component
   return <PlotWrapper data={data} layout={layout} config={config} />;
 };

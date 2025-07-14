@@ -13,6 +13,7 @@
     "isolatedModules": true,
     "noUnusedLocals": true,
     "jsx": "preserve",
+    "types": ["react"],
     "incremental": true,
     "plugins": [
       {

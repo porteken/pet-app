@@ -29,8 +29,10 @@ test.describe("Dynamic Route Pages", () => {
     // Wait for content to load
     await page.waitForLoadState("networkidle");
 
-    // Check that the page has some content
-    const mainContent = page.locator('main, [role="main"], .main-content, div');
+    // Check that the page has some content - look for the main container
+    const mainContent = page
+      .locator("div:not([hidden])")
+      .filter({ hasText: /Los Angeles|California|Type|Average|Max/ });
     await expect(mainContent.first()).toBeVisible();
   });
 });

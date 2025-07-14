@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import * as React from "react";
+
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Historical Pet USA",
-  description: "Historical Pet values from 2000-2013 of large US cities",
+  title: "Historical PET USA",
+  description: "Physiological Equivalent Temperature data for US cities",
 };
 
 export default function RootLayout({

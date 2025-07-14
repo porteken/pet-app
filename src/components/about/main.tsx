@@ -10,7 +10,7 @@ const About: FC<AboutProps> = ({ LocationOptions }: AboutProps) => {
   return (
     <>
       <HeaderBar LocationOptions={LocationOptions} />
-      <div className="grid flex-col gap-5">
+      <div className="mx-auto grid max-w-4xl flex-col gap-5 p-8">
         <div className="w-1/2">
           <h1 className="text-2xl font-extrabold dark:text-white">
             Purpose of the Application

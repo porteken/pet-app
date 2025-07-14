@@ -1,5 +1,4 @@
 import dynamic from "next/dynamic";
-import React from "react";
 
 import { FetchLocations } from "../../components/fetchServer";
 import {
@@ -7,18 +6,17 @@ import {
   FetchTrendGraphData,
 } from "../../components/fetchServer";
 
-// Dynamically load Main component without server-side rendering (SSR)
-const Main = dynamic(() => import("../../components/page/main"), {
-  ssr: false,
-});
+// Dynamically load Main component
+const Main = dynamic(() => import("../../components/page/main"));
 
-type PageProps = {
-  params: { id: number };
-};
-
-export default async function Page({ params }: PageProps) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   // Validate that the id parameter is a valid number
-  const locationId = Number(params.id);
+  const { id } = await params;
+  const locationId = Number(id);
   if (isNaN(locationId) || locationId <= 0) {
     return <div>Invalid location ID</div>;
   }
@@ -36,7 +34,6 @@ export default async function Page({ params }: PageProps) {
   );
 
   // Fetch trend graph data with default graph type (average)
-
   const { years, year_pets, trendline_pets } = await FetchTrendGraphData(
     "avg",
     locationId

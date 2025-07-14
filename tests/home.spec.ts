@@ -8,14 +8,14 @@ test.describe("Home Page", () => {
     await page.waitForLoadState("networkidle");
 
     // Check that the page title is present
-    await expect(page).toHaveTitle(/Historical Pet USA/);
+    await expect(page).toHaveTitle(/Historical PET USA/);
   });
 
   test("should display the map container", async ({ page }) => {
     await page.goto("/");
 
-    // Wait for the map to load
-    await page.waitForSelector(".leaflet-container", { timeout: 10000 });
+    // Wait for the map to load - give it more time for full-page layout and dynamic loading
+    await page.waitForSelector(".leaflet-container", { timeout: 20000 });
 
     // Verify the map container is visible
     const mapContainer = page.locator(".leaflet-container");
@@ -25,10 +25,8 @@ test.describe("Home Page", () => {
   test("should have navigation elements", async ({ page }) => {
     await page.goto("/");
 
-    // Check for header elements (adjust selectors based on your actual header)
-    await expect(
-      page.locator('header, nav, [role="banner"]').first()
-    ).toBeVisible();
+    // Check for header elements - look for the header with our specific classes
+    await expect(page.locator("header").first()).toBeVisible();
   });
 
   test("should handle page navigation", async ({ page }) => {

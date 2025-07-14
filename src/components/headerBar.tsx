@@ -1,16 +1,20 @@
+"use client";
+
 import {
   Navbar,
   NavbarContent,
   NavbarItem,
-  Link,
-  Button,
-  DropdownItem,
-  DropdownTrigger,
   Dropdown,
+  DropdownTrigger,
   DropdownMenu,
+  DropdownItem,
   DropdownSection,
-} from "@nextui-org/react";
+  Button,
+  MenuItemProps,
+} from "@heroui/react";
+import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import React from "react";
 
 import { APP_CONFIG } from "@/utils/constants";
 
@@ -43,7 +47,10 @@ const DownIcon = ({ fill, size }: IconProps) => {
   );
 };
 
-export const HeaderBar = ({ LocationOptions, id }: NavProps): JSX.Element => {
+export const HeaderBar = ({
+  LocationOptions,
+  id,
+}: NavProps): React.ReactElement => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const selected_id = id ? new Set([id]) : new Set([]);
@@ -59,7 +66,7 @@ export const HeaderBar = ({ LocationOptions, id }: NavProps): JSX.Element => {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <header className="w-full">
+    <header className="w-full border-b border-gray-200 bg-white/90 backdrop-blur-sm">
       <div className="grid grid-cols-1 justify-items-center gap-2">
         <div>
           <h1 className="text-center text-2xl font-extrabold dark:text-white">
@@ -68,7 +75,6 @@ export const HeaderBar = ({ LocationOptions, id }: NavProps): JSX.Element => {
         </div>
         <div className="w-full max-w-4xl">
           <Navbar
-            isBordered
             classNames={{
               item: [
                 "flex",
@@ -125,7 +131,7 @@ export const HeaderBar = ({ LocationOptions, id }: NavProps): JSX.Element => {
                       items={section.items}
                       title={section.title}
                     >
-                      {option => (
+                      {(option: MenuItemProps) => (
                         <DropdownItem
                           href={buildUrl(`/${option.key}`)}
                           key={option.key}

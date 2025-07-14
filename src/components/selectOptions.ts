@@ -14,15 +14,3 @@ export const YearOptions = (): SelectOptionProps[] => {
     return { key: year, label: year };
   });
 };
-
-// Memoized version for better performance
-export const getYearOptions = (() => {
-  let cachedOptions: SelectOptionProps[] | null = null;
-
-  return (): SelectOptionProps[] => {
-    if (!cachedOptions) {
-      cachedOptions = YearOptions();
-    }
-    return cachedOptions;
-  };
-})();

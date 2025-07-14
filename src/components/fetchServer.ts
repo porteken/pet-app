@@ -1,5 +1,5 @@
 "use server";
-import { DropdownItemProps, DropdownSectionProps } from "@nextui-org/react";
+import { DropdownItemProps, DropdownSectionProps } from "@heroui/react";
 import { SimpleLinearRegression } from "ml-regression-simple-linear";
 import { cookies } from "next/headers";
 
@@ -13,7 +13,7 @@ import {
 
 export async function FetchLocations(): Promise<FetchLocationProps> {
   const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = await createClient(cookieStore);
   try {
     const { data: locations, error } = await supabase
       .from("locations")
@@ -56,7 +56,7 @@ export async function FetchReferenceGraphData(
   }
 
   const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = await createClient(cookieStore);
   try {
     const { data, error } = await supabase
       .from("pet_year")
@@ -91,7 +91,7 @@ export async function FetchTrendGraphData(
   }
 
   const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = await createClient(cookieStore);
 
   try {
     const { data, error } = await supabase

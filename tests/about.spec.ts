@@ -17,22 +17,22 @@ test.describe("About Page", () => {
     // Wait for content to load
     await page.waitForLoadState("networkidle");
 
-    // Check that the page has some content (adjust based on your actual about page content)
-    const mainContent = page.locator("div, body");
+    // Check that the page has some content - look for the about page content
+    const mainContent = page
+      .locator("div:not([hidden])")
+      .filter({ hasText: /Purpose of the Application|What is PET/ });
     await expect(mainContent.first()).toBeVisible();
   });
 
   test("should have navigation back to home", async ({ page }) => {
     await page.goto("/about");
 
-    // Look for navigation elements that could take us back to home
-    const homeLink = page.locator(
-      'a[href="/"], a[href="/home"], [aria-label*="home"], [title*="home"]'
-    );
+    // Look for the Map link that navigates back to home
+    const mapLink = page.locator('a[href="/"]').filter({ hasText: "Map" });
 
-    if (await homeLink.first().isVisible()) {
-      await homeLink.first().click();
-      await expect(page).toHaveURL(/^http:\/\/localhost:3001\/?$/);
+    if (await mapLink.isVisible()) {
+      await mapLink.click();
+      await expect(page).toHaveURL(/^http:\/\/localhost:3000\/?$/);
     }
   });
 });

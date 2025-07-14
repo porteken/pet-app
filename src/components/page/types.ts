@@ -1,4 +1,4 @@
-import { DropdownItemProps, DropdownSectionProps } from "@nextui-org/react";
+import { DropdownItemProps, DropdownSectionProps } from "@heroui/react";
 
 import { LocationProps } from "../types";
 export * from "../types";

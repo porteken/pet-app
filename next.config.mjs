@@ -8,7 +8,7 @@ const withBundleAnalyzer =
 const nextConfig = {
   output: "standalone",
   experimental: {
-    optimizePackageImports: ["@nextui-org/react", "react-icons"],
+    optimizePackageImports: ["@heroui/react", "react-icons"],
   },
   images: {
     domains: ["tile.openstreetmap.org"],

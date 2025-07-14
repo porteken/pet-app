@@ -1,5 +1,5 @@
 "use client";
-import { Select, SelectItem } from "@nextui-org/react";
+import { Select, SelectItem } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { FC } from "react";
@@ -36,10 +36,9 @@ const Main: FC<PageProps> = ({
   const [selectedReferenceYear, setSelectedReferenceYear] = useState(
     new Set([DEFAULT_REFERENCE_YEAR])
   );
-  const [trendGraph, setTrendGraph] = useState<JSX.Element | null>(null);
-  const [referenceGraph, setReferenceGraph] = useState<JSX.Element | null>(
-    null
-  );
+  const [trendGraph, setTrendGraph] = useState<React.ReactElement | null>(null);
+  const [referenceGraph, setReferenceGraph] =
+    useState<React.ReactElement | null>(null);
 
   const generatePetTrendGraph = useCallback(
     async (option: string = graphTypeFromParams) => {
@@ -86,7 +85,11 @@ const Main: FC<PageProps> = ({
   const createQueryString = useCallback(
     (name: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      value ? params.set(name, value) : params.delete(name);
+      if (value) {
+        params.set(name, value);
+      } else {
+        params.delete(name);
+      }
       router.push(`?${params.toString()}`);
     },
     [searchParams, router]

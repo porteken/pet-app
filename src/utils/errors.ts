@@ -39,19 +39,6 @@ export class NotFoundError extends AppError {
   }
 }
 
-// Error handler utility
-export const handleError = (error: unknown): AppError => {
-  if (error instanceof AppError) {
-    return error;
-  }
-
-  if (error instanceof Error) {
-    return new AppError(error.message, "UNKNOWN_ERROR", 500, error);
-  }
-
-  return new AppError("An unknown error occurred", "UNKNOWN_ERROR", 500, error);
-};
-
 // Error logging utility
 export const logError = (
   error: AppError,
@@ -76,18 +63,4 @@ export const logError = (
     // In production, you might want to send this to a logging service
     console.error(`[${error.code}] ${error.message}`);
   }
-};
-
-// Error response utility for API routes
-export const createErrorResponse = (error: AppError) => {
-  return {
-    error: {
-      message: error.message,
-      code: error.code,
-      ...(process.env.NODE_ENV === "development" && {
-        stack: error.stack,
-        originalError: error.originalError,
-      }),
-    },
-  };
 };

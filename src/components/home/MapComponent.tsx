@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ComponentType } from "react";
 
 interface Location {
   location_id: number;
@@ -17,12 +16,14 @@ interface MapComponentProps {
 }
 
 const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
-  const [MapContainer, setMapContainer] = useState<ComponentType<any> | null>(
-    null
-  );
-  const [TileLayer, setTileLayer] = useState<ComponentType<any> | null>(null);
-  const [Marker, setMarker] = useState<ComponentType<any> | null>(null);
-  const [Popup, setPopup] = useState<ComponentType<any> | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [MapContainer, setMapContainer] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [TileLayer, setTileLayer] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [Marker, setMarker] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [Popup, setPopup] = useState<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {

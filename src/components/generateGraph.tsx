@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Layout } from "plotly.js";
+import type { Layout } from "plotly.js";
 import React, { useEffect, useState } from "react";
 
 const Plot = dynamic(() => import("react-plotly.js"), {
@@ -22,8 +22,10 @@ const GRAPH_COLORS = {
 } as const;
 
 const PlotWrapper: React.FC<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[];
   layout: Partial<Layout>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: any;
 }> = ({ data, layout, config }) => {
   const [isClient, setIsClient] = useState(false);

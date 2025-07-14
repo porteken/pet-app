@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { Layout } from "plotly.js";
+import type { PlotData, Layout, Config } from "plotly.js";
 import React, { useEffect, useState } from "react";
 
 const Plot = dynamic(() => import("react-plotly.js"), {
@@ -118,9 +118,9 @@ const PopupTrendGraph: React.FC<{
 
   return (
     <Plot
-      data={data as any}
-      layout={layout}
-      config={config as any}
+      data={data as Partial<PlotData>[]}
+      layout={layout as Partial<Layout>}
+      config={config as Partial<Config>}
       style={{ width: 400, height: 300 }}
     />
   );

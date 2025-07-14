@@ -31,6 +31,7 @@ export const HeaderBar = ({
   // Find the current city data if we're on a city page
   const currentCity = id
     ? LocationOptions.flatMap(section =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Array.from(section.items || []).map((item: any) => ({
           key: item.key,
           title: item.title,
@@ -79,6 +80,7 @@ export const HeaderBar = ({
             <NavbarItem isActive={id! >= 0}>
               <Autocomplete
                 options={LocationOptions.flatMap(section =>
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   Array.from(section.items || []).map((item: any) => ({
                     key: item.key,
                     title: item.title,

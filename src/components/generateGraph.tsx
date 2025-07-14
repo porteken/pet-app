@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
 const Plot = dynamic(() => import("react-plotly.js"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-64 items-center justify-center text-gray-500">
+    <div className="flex h-[600px] items-center justify-center text-gray-500">
       Loading chart...
     </div>
   ),
@@ -58,22 +58,21 @@ export const GenerateTrendGraph = (
   years: number[],
   option: string,
   year_pets: number[],
-  trendline_pets: number[],
-  size?: number
+  trendline_pets: number[]
 ): React.ReactElement => {
   // Validate inputs
   if (!years.length || !year_pets.length || !trendline_pets.length) {
     return (
-      <div className="flex h-64 items-center justify-center text-gray-500">
+      <div className="flex h-[600px] items-center justify-center text-gray-500">
         No data available for the selected parameters
       </div>
     );
   }
 
-  // Determine graph type
+  // Determine graph measure
   const graph_type = option === "avg" ? "Average" : "Max";
 
-  // Define layout with optional size adjustment
+  // Define layout with responsive sizing
   const layout: Partial<Layout> = {
     xaxis: {
       title: { text: "Year" },
@@ -92,12 +91,12 @@ export const GenerateTrendGraph = (
       color: "#374151", // gray-700
     },
     margin: {
-      l: 60,
-      r: 40,
-      t: 60,
-      b: 60,
+      l: 40,
+      r: 20,
+      t: 40,
+      b: 40,
     },
-    ...(size && { width: size, height: size }),
+    autosize: true,
   };
 
   const data = [
@@ -153,7 +152,7 @@ export const GenerateReferenceGraph = async (
   // Validate inputs
   if (!dates.length || !referencePets.length || !currentPets.length) {
     return (
-      <div className="flex h-64 items-center justify-center text-gray-500">
+      <div className="flex h-[600px] items-center justify-center text-gray-500">
         No data available for the selected parameters
       </div>
     );
@@ -179,11 +178,12 @@ export const GenerateReferenceGraph = async (
       color: "#374151", // gray-700
     },
     margin: {
-      l: 60,
-      r: 40,
-      t: 60,
-      b: 60,
+      l: 40,
+      r: 20,
+      t: 40,
+      b: 40,
     },
+    autosize: true,
   };
 
   const data = [

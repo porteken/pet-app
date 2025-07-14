@@ -1,4 +1,5 @@
 import dynamic from "next/dynamic";
+import React from "react";
 
 import { FetchLocations } from "../../components/fetchServer";
 import {
@@ -33,7 +34,7 @@ export default async function Page({
     locationId
   );
 
-  // Fetch trend graph data with default graph type (average)
+  // Fetch trend graph data with default graph measure (average)
   const { years, year_pets, trendline_pets } = await FetchTrendGraphData(
     "avg",
     locationId

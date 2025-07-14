@@ -65,7 +65,7 @@ body {
   color: rgb(var(--foreground-rgb));
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 html {
@@ -79,6 +79,18 @@ html {
     text-wrap: balance;
   }
 }
+
+/* Allow Leaflet popups to display large content and dropdowns without clipping */
 .leaflet-popup-content {
-  width: auto !important;
+  max-width: 95vw !important;
+  max-height: 90vh !important;
+  overflow: visible !important;
+  padding: 0 !important;
+}
+.leaflet-popup-content-wrapper {
+  overflow: visible !important;
+  border-radius: 12px;
+}
+.leaflet-popup-tip-container {
+  z-index: 9999;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Select, SelectItem } from "@heroui/react";
+import { Select, SelectItem, Spinner } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FC } from "react";
 import { useCallback, useState } from "react";
@@ -8,24 +8,31 @@ import { useCallback, useState } from "react";
 import { FetchTrendGraphData } from "../fetchClient";
 import { GenerateTrendGraph } from "../generateGraph";
 import { HeaderBar } from "../headerBar";
+import Modal from "../Modal";
 import { GraphOptions } from "../selectOptions";
+import { LocationProps } from "../types";
 
 import MapComponent from "./MapComponent";
 import { MapProps } from "./types";
 
-const defaultGraphType = "avg";
+const defaultGraphMeasure = "avg";
 
 const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const initialGraphType = searchParams.get("type") || defaultGraphType;
+  const initialGraphMeasure = searchParams.get("type") || defaultGraphMeasure;
 
   const [petGraph, setPetGraph] = useState<React.ReactElement | null>(null);
-  const [selectedGraphType, setSelectedGraphType] = useState(initialGraphType);
+  const [graphLoading, setGraphLoading] = useState(false);
+  const [selectedGraphMeasure, setSelectedGraphMeasure] =
+    useState(initialGraphMeasure);
   const [selectedLocationId, setSelectedLocationId] = useState<number | null>(
     null
   );
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] =
+    useState<LocationProps | null>(null);
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -42,6 +49,7 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
 
   const generateGraph = useCallback(
     async (locationId: number, option: string) => {
+      setGraphLoading(true);
       try {
         const { years, year_pets, trendline_pets } = await FetchTrendGraphData(
           option,
@@ -51,12 +59,17 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
           years,
           option,
           year_pets,
-          trendline_pets,
-          500
+          trendline_pets
         );
         setPetGraph(graph);
       } catch {
-        // Silently handle error
+        setPetGraph(
+          <div className="flex h-[300px] items-center justify-center text-gray-500">
+            Error loading graph
+          </div>
+        );
+      } finally {
+        setGraphLoading(false);
       }
     },
     []
@@ -65,8 +78,8 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
   const handleSelectChange = useCallback(
     async (option: string) => {
       if (selectedLocationId !== null) {
-        setSelectedGraphType(option);
-        createQueryString("type", option !== defaultGraphType ? option : "");
+        setSelectedGraphMeasure(option);
+        createQueryString("type", option !== defaultGraphMeasure ? option : "");
         await generateGraph(selectedLocationId, option);
       }
     },
@@ -76,30 +89,13 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
   const handleMarkerClick = useCallback(
     async (locationId: number) => {
       setSelectedLocationId(locationId);
-      await generateGraph(locationId, selectedGraphType);
+      const location =
+        locations.find(loc => loc.location_id === locationId) || null;
+      setSelectedLocation(location);
+      setModalOpen(true);
+      await generateGraph(locationId, selectedGraphMeasure);
     },
-    [generateGraph, selectedGraphType]
-  );
-
-  const renderPopupContent = () => (
-    <div className="flex flex-col items-start">
-      <div className="w-full">
-        <Select
-          label="Type"
-          items={GraphOptions}
-          selectedKeys={new Set([selectedGraphType])}
-          className="w-1/3"
-          onChange={e => handleSelectChange(e.target.value)}
-        >
-          {GraphOptions.map(option => (
-            <SelectItem key={option.key}>{option.label}</SelectItem>
-          ))}
-        </Select>
-      </div>
-      <div className="md:justify-center">
-        <div className="w-full max-w-4xl">{petGraph}</div>
-      </div>
-    </div>
+    [generateGraph, selectedGraphMeasure, locations]
   );
 
   return (
@@ -107,9 +103,42 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
       <div className="absolute left-0 right-0 top-0 z-50">
         <HeaderBar LocationOptions={LocationOptions} />
       </div>
-      <MapComponent locations={locations} onMarkerClick={handleMarkerClick}>
-        {renderPopupContent()}
-      </MapComponent>
+      <MapComponent locations={locations} onMarkerClick={handleMarkerClick} />
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={
+          selectedLocation
+            ? `${selectedLocation.city}, ${selectedLocation.state}`
+            : undefined
+        }
+      >
+        <div className="flex min-h-[340px] w-full min-w-[320px] max-w-[90vw] flex-col items-center space-y-4">
+          <div className="w-full max-w-md">
+            <Select
+              label="Measure"
+              items={GraphOptions}
+              selectedKeys={new Set([selectedGraphMeasure])}
+              className="w-full"
+              onChange={e => handleSelectChange(e.target.value)}
+            >
+              {GraphOptions.map(option => (
+                <SelectItem key={option.key}>{option.label}</SelectItem>
+              ))}
+            </Select>
+          </div>
+          <div className="flex min-h-[300px] w-full max-w-4xl items-center justify-center">
+            {graphLoading ? (
+              <div className="flex h-full w-full flex-col items-center justify-center">
+                <Spinner size="lg" />
+                <span className="mt-2 text-gray-500">Loading graph...</span>
+              </div>
+            ) : (
+              petGraph
+            )}
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

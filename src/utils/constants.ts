@@ -23,7 +23,7 @@ export const GRAPH_CONFIG = {
     AVG: "avg",
     MAX: "max",
   },
-  DEFAULT_GRAPH_TYPE: "avg",
+  DEFAULT_GRAPH_MEASURE: "avg",
   DEFAULT_REFERENCE_YEAR: "2000",
   YEAR_RANGE: {
     START: 2000,

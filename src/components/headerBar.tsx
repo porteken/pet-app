@@ -1,17 +1,8 @@
 "use client";
 
-import {
-  Navbar,
-  NavbarContent,
-  NavbarItem,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  DropdownSection,
-  Button,
-  MenuItemProps,
-} from "@heroui/react";
+import { Navbar, NavbarContent, NavbarItem } from "@heroui/react";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import React from "react";
@@ -20,40 +11,12 @@ import { APP_CONFIG } from "@/utils/constants";
 
 import { NavProps } from "./types";
 
-interface IconProps {
-  fill: string;
-  size: number;
-}
-
-const DownIcon = ({ fill, size }: IconProps) => {
-  return (
-    <svg
-      fill="none"
-      height={size}
-      viewBox="0 0 24 24"
-      width={size}
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="m19.92 8.95-6.52 6.52c-.77.77-2.03.77-2.8 0L4.08 8.95"
-        stroke={fill}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeMiterlimit={10}
-        strokeWidth={1.5}
-      />
-    </svg>
-  );
-};
-
 export const HeaderBar = ({
   LocationOptions,
   id,
 }: NavProps): React.ReactElement => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const selected_id = id ? new Set([id]) : new Set([]);
 
   const buildUrl = (path: string, includeSearchParams = true) => {
     const baseUrl = path;
@@ -65,110 +28,106 @@ export const HeaderBar = ({
 
   const isActive = (path: string) => pathname === path;
 
+  // Find the current city data if we're on a city page
+  const currentCity = id
+    ? LocationOptions.flatMap(section =>
+        Array.from(section.items || []).map((item: any) => ({
+          key: item.key,
+          title: item.title,
+          state: section.title,
+        }))
+      ).find(city => city.key === id)
+    : null;
+
   return (
     <header className="w-full border-b border-gray-200 bg-white/90 backdrop-blur-sm">
-      <div className="grid grid-cols-1 justify-items-center gap-2">
-        <div>
-          <h1 className="text-center text-2xl font-extrabold dark:text-white">
+      <div className="mx-auto max-w-4xl px-4">
+        <div className="py-2 text-center">
+          <h1 className="text-2xl font-extrabold dark:text-white">
             {APP_CONFIG.NAME}
           </h1>
         </div>
-        <div className="w-full max-w-4xl">
-          <Navbar
-            classNames={{
-              item: [
-                "flex",
-                "relative",
-                "h-full",
-                "items-center",
-                "data-[active=true]:after:content-['']",
-                "data-[active=true]:after:absolute",
-                "data-[active=true]:after:bottom-0",
-                "data-[active=true]:after:left-0",
-                "data-[active=true]:after:right-0",
-                "data-[active=true]:after:h-[2px]",
-                "data-[active=true]:after:rounded-[2px]",
-                "data-[active=true]:after:bg-primary",
-              ],
-            }}
-          >
-            <NavbarContent className="hidden gap-4 sm:flex" justify="center">
-              <NavbarItem isActive={isActive("/")}>
-                <Link
-                  color="foreground"
-                  href={buildUrl("/")}
-                  aria-label="Navigate to map view"
-                >
-                  Map
-                </Link>
-              </NavbarItem>
+        <Navbar
+          classNames={{
+            item: [
+              "flex",
+              "relative",
+              "h-full",
+              "items-center",
+              "data-[active=true]:after:content-['']",
+              "data-[active=true]:after:absolute",
+              "data-[active=true]:after:bottom-0",
+              "data-[active=true]:after:left-0",
+              "data-[active=true]:after:right-0",
+              "data-[active=true]:after:h-[2px]",
+              "data-[active=true]:after:rounded-[2px]",
+              "data-[active=true]:after:bg-primary",
+            ],
+          }}
+        >
+          <NavbarContent className="hidden gap-4 sm:flex" justify="center">
+            <NavbarItem isActive={isActive("/")}>
+              <Link
+                color="foreground"
+                href={buildUrl("/")}
+                aria-label="Navigate to map view"
+              >
+                Map
+              </Link>
+            </NavbarItem>
 
-              <Dropdown>
-                <NavbarItem isActive={id! >= 0}>
-                  <DropdownTrigger>
-                    <Button
-                      disableRipple
-                      className="bg-transparent p-0 data-[hover=true]:bg-transparent"
-                      endContent={<DownIcon fill="currentColor" size={16} />}
-                      radius="sm"
-                      variant="light"
-                      aria-label="Select city to view data"
-                    >
-                      {id! >= 0 ? "Change City" : "View data for City"}
-                    </Button>
-                  </DropdownTrigger>
-                </NavbarItem>
-                <DropdownMenu
-                  selectionMode="single"
-                  selectedKeys={selected_id}
-                  className="max-h-[50vh] overflow-y-auto"
-                  aria-label="City selection dropdown"
-                >
-                  {LocationOptions.map(section => (
-                    <DropdownSection
-                      key={section.title}
-                      showDivider
-                      items={section.items}
-                      title={section.title}
-                    >
-                      {(option: MenuItemProps) => (
-                        <DropdownItem
-                          href={buildUrl(`/${option.key}`)}
-                          key={option.key}
-                          aria-label={`View data for ${option.title}`}
-                        >
-                          {option.title}
-                        </DropdownItem>
-                      )}
-                    </DropdownSection>
-                  ))}
-                </DropdownMenu>
-              </Dropdown>
+            <NavbarItem isActive={id! >= 0}>
+              <Autocomplete
+                options={LocationOptions.flatMap(section =>
+                  Array.from(section.items || []).map((item: any) => ({
+                    key: item.key,
+                    title: item.title,
+                    state: section.title,
+                  }))
+                )}
+                groupBy={option => option.state || ""}
+                getOptionLabel={option => option.title}
+                sx={{ width: 300, backgroundColor: "white", borderRadius: 1 }}
+                renderInput={params => (
+                  <TextField
+                    {...params}
+                    label={id! >= 0 ? "Change City" : "Select City"}
+                    variant="outlined"
+                    size="small"
+                  />
+                )}
+                onChange={(_, value) => {
+                  if (value) {
+                    window.location.href = `/${value.key}`;
+                  }
+                }}
+                value={currentCity}
+              />
+            </NavbarItem>
 
-              <NavbarItem isActive={isActive("/about")}>
-                <Link
-                  color="foreground"
-                  href="/about"
-                  aria-label="Navigate to about page"
-                >
-                  About
-                </Link>
-              </NavbarItem>
+            <NavbarItem isActive={isActive("/about")}>
+              <Link
+                color="foreground"
+                href="/about"
+                aria-label="Navigate to about page"
+              >
+                About
+              </Link>
+            </NavbarItem>
 
-              <NavbarItem>
-                <Link
-                  color="foreground"
-                  href={APP_CONFIG.GITHUB_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="View source code on GitHub"
-                >
-                  Github Repository
-                </Link>
-              </NavbarItem>
-            </NavbarContent>
-          </Navbar>
-        </div>
+            <NavbarItem>
+              <Link
+                color="foreground"
+                href={APP_CONFIG.GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="View source code on GitHub"
+              >
+                Github Repository
+              </Link>
+            </NavbarItem>
+          </NavbarContent>
+        </Navbar>
       </div>
     </header>
   );

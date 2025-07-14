@@ -23,8 +23,12 @@
     "clean": "rm -rf .next out dist"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@headlessui/react": "^2.2.4",
     "@heroui/react": "^2.7.11",
     "@heroui/theme": "2.4.17",
+    "@mui/material": "^7.2.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.50.5",
     "@tailwindcss/forms": "^0.5.10",

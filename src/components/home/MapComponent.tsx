@@ -14,14 +14,9 @@ interface Location {
 interface MapComponentProps {
   locations: Location[];
   onMarkerClick: (locationId: number) => void;
-  children?: React.ReactNode;
 }
 
-const MapComponent = ({
-  locations,
-  onMarkerClick,
-  children,
-}: MapComponentProps) => {
+const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
   const [MapContainer, setMapContainer] = useState<ComponentType<any> | null>(
     null
   );
@@ -124,11 +119,10 @@ const MapComponent = ({
           }}
         >
           <Popup>
-            <div className="flex flex-col items-start">
-              <p className="text-center text-lg">
+            <div className="flex flex-col items-center">
+              <p className="text-center text-lg font-bold">
                 {loc.city}, {loc.state}
               </p>
-              {children}
             </div>
           </Popup>
         </Marker>

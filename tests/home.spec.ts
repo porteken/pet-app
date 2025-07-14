@@ -39,4 +39,24 @@ test.describe("Home Page", () => {
       await expect(page).toHaveURL(/.*about/);
     }
   });
+
+  test("should have searchable city dropdown", async ({ page }) => {
+    await page.goto("/");
+
+    // Look for the autocomplete input
+    const citySearch = page.locator(
+      'input[placeholder*="Search for a city"], input[placeholder*="Change City"]'
+    );
+    await expect(citySearch).toBeVisible();
+
+    // Test that the dropdown opens when clicking
+    await citySearch.click();
+
+    // Wait for dropdown to appear
+    await page.waitForSelector('[role="listbox"]', { timeout: 5000 });
+
+    // Verify dropdown is visible
+    const dropdown = page.locator('[role="listbox"]');
+    await expect(dropdown).toBeVisible();
+  });
 });

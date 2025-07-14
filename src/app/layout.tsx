@@ -1,3 +1,4 @@
+import CssBaseline from "@mui/material/CssBaseline";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import * as React from "react";
@@ -19,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning={true} className={inter.className}>
+        <CssBaseline />
         {children}
       </body>
     </html>

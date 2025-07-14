@@ -10,8 +10,8 @@ const About: FC<AboutProps> = ({ LocationOptions }: AboutProps) => {
   return (
     <>
       <HeaderBar LocationOptions={LocationOptions} />
-      <div className="mx-auto grid max-w-4xl flex-col gap-5 p-8">
-        <div className="w-1/2">
+      <div className="mx-auto flex flex-col gap-5 p-8 px-4">
+        <div className="w-full">
           <h1 className="text-2xl font-extrabold dark:text-white">
             Purpose of the Application
           </h1>
@@ -25,7 +25,7 @@ const About: FC<AboutProps> = ({ LocationOptions }: AboutProps) => {
           <h1 className="text-2xl font-extrabold dark:text-white">
             What is PET?
           </h1>
-          <p className="w-1/2">
+          <p className="w-full">
             The technical definition of the PET or Physiological Equivalent
             Temperature is a method to measure the air temperature at which, in
             a typical indoor setting (without wind and solar radiation), the

@@ -11,8 +11,9 @@ import { GraphOptions, YearOptions } from "../selectOptions";
 
 import { PageProps } from "./types";
 
-const DEFAULT_GRAPH_TYPE = "avg";
+const DEFAULT_GRAPH_MEASURE = "avg";
 const DEFAULT_REFERENCE_YEAR = "2000";
+const VALID_GRAPH_MEASURES = ["avg", "max"];
 
 const Main: FC<PageProps> = ({
   id,
@@ -28,10 +29,14 @@ const Main: FC<PageProps> = ({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const graphTypeFromParams = searchParams.get("type") || DEFAULT_GRAPH_TYPE;
+  // Validate the trend option from query params
+  const typeParam = searchParams.get("type") ?? "";
+  const graphMeasureFromParams = VALID_GRAPH_MEASURES.includes(typeParam)
+    ? typeParam
+    : DEFAULT_GRAPH_MEASURE;
 
-  const [selectedGraphType, setSelectedGraphType] = useState(
-    new Set([graphTypeFromParams])
+  const [selectedGraphMeasure, setSelectedGraphMeasure] = useState(
+    new Set<string>([graphMeasureFromParams])
   );
   const [selectedReferenceYear, setSelectedReferenceYear] = useState(
     new Set([DEFAULT_REFERENCE_YEAR])
@@ -41,9 +46,9 @@ const Main: FC<PageProps> = ({
     useState<React.ReactElement | null>(null);
 
   const generatePetTrendGraph = useCallback(
-    async (option: string = graphTypeFromParams) => {
+    async (option: string = graphMeasureFromParams) => {
       const graphData =
-        option !== DEFAULT_GRAPH_TYPE
+        option !== DEFAULT_GRAPH_MEASURE
           ? await FetchTrendGraphData(option, id)
           : {
               years: Years,
@@ -56,12 +61,11 @@ const Main: FC<PageProps> = ({
         years,
         option,
         year_pets,
-        trendline_pets,
-        500
+        trendline_pets
       );
       setTrendGraph(graph);
     },
-    [graphTypeFromParams, id, Years, YearPets, TrendlinePets]
+    [graphMeasureFromParams, id, Years, YearPets, TrendlinePets]
   );
 
   const generatePetReferenceGraph = useCallback(
@@ -95,10 +99,10 @@ const Main: FC<PageProps> = ({
     [searchParams, router]
   );
 
-  const handleGraphTypeChange = useCallback(
+  const handleGraphMeasureChange = useCallback(
     (option: string) => {
-      setSelectedGraphType(new Set([option]));
-      createQueryString("type", option !== DEFAULT_GRAPH_TYPE ? option : "");
+      setSelectedGraphMeasure(new Set([option]));
+      createQueryString("type", option !== DEFAULT_GRAPH_MEASURE ? option : "");
       generatePetTrendGraph(option);
     },
     [createQueryString, generatePetTrendGraph]
@@ -120,35 +124,43 @@ const Main: FC<PageProps> = ({
   return (
     <>
       <HeaderBar LocationOptions={LocationOptions} id={id} />
-      <div className="flex min-h-screen flex-col items-start">
-        <div className="w-full">
-          <Select
-            label="Type"
-            items={GraphOptions}
-            selectedKeys={selectedGraphType}
-            className="w-1/12"
-            onChange={e => handleGraphTypeChange(e.target.value)}
-          >
-            {option => <SelectItem key={option.key}>{option.label}</SelectItem>}
-          </Select>
-        </div>
-        <div className="md:justify-center">
-          <p className="text-center text-lg">
-            {location.city}, {location.state}
-          </p>
-          <div className="w-full max-w-4xl">{trendGraph}</div>
-        </div>
-        <div className="w-full">
-          <Select
-            label="Reference Year"
-            items={YearOptions()}
-            selectedKeys={selectedReferenceYear}
-            className="w-1/12"
-            onChange={e => handleReferenceYearChange(e.target.value)}
-          >
-            {option => <SelectItem key={option.key}>{option.label}</SelectItem>}
-          </Select>
-          <div className="w-full max-w-4xl">{referenceGraph}</div>
+      <div className="flex min-h-screen flex-col">
+        <p className="mb-4 mt-2 text-center text-lg">
+          {location.city}, {location.state}
+        </p>
+        <div className="flex w-full flex-col gap-4 px-4 lg:flex-row">
+          <div className="flex w-full flex-1 flex-col">
+            <div className="h-[500px] w-full">{trendGraph}</div>
+            <div className="mt-2 flex justify-center">
+              <Select
+                label="Measure"
+                items={GraphOptions}
+                selectedKeys={selectedGraphMeasure}
+                className="w-48"
+                onChange={e => handleGraphMeasureChange(e.target.value)}
+              >
+                {option => (
+                  <SelectItem key={option.key}>{option.label}</SelectItem>
+                )}
+              </Select>
+            </div>
+          </div>
+          <div className="flex w-full flex-1 flex-col">
+            <div className="h-[500px] w-full">{referenceGraph}</div>
+            <div className="mt-2 flex justify-center">
+              <Select
+                label="Reference Year"
+                items={YearOptions()}
+                selectedKeys={selectedReferenceYear}
+                className="w-48"
+                onChange={e => handleReferenceYearChange(e.target.value)}
+              >
+                {option => (
+                  <SelectItem key={option.key}>{option.label}</SelectItem>
+                )}
+              </Select>
+            </div>
+          </div>
         </div>
       </div>
     </>

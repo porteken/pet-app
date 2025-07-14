@@ -118,13 +118,7 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
             click: () => onMarkerClick(loc.location_id),
           }}
         >
-          <Popup>
-            <div className="flex flex-col items-center">
-              <p className="text-center text-lg font-bold">
-                {loc.city}, {loc.state}
-              </p>
-            </div>
-          </Popup>
+          {/* Removed Leaflet Popup */}
         </Marker>
       ))}
     </MapContainer>

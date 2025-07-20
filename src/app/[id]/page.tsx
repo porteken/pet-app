@@ -1,13 +1,13 @@
 import dynamic from "next/dynamic";
 import React from "react";
 
-import { FetchLocations } from "../../components/fetchServer";
+import { FetchLocations } from "../../lib/fetchServer";
 import {
   FetchReferenceGraphData,
   FetchTrendGraphData,
-} from "../../components/fetchServer";
+} from "../../lib/fetchServer";
 
-const Main = dynamic(() => import("../../components/page/main"));
+const Main = dynamic(() => import("../../components/page/page-main"));
 
 export default async function Page({
   params,
@@ -39,7 +39,9 @@ export default async function Page({
     locationId
   );
 
-  const selectedLocation = locations.find(loc => loc.location_id == locationId);
+  const selectedLocation = locations.find(
+    (loc: { location_id: number }) => loc.location_id == locationId
+  );
   if (!selectedLocation) {
     return <div>Location not found</div>;
   }

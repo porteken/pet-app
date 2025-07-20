@@ -2,9 +2,9 @@
 
 import dynamic from "next/dynamic";
 
-import { FetchLocations } from "../../components/fetchServer";
+import { FetchLocations } from "../../lib/fetchServer";
 
-const About = dynamic(() => import("../../components/about/main"));
+const About = dynamic(() => import("../../components/about/about-main"));
 const Page = async () => {
   const { LocationOptions } = await FetchLocations();
   return <About LocationOptions={LocationOptions} />;

@@ -1,10 +1,11 @@
 "use server";
 import dynamic from "next/dynamic";
+import React from "react";
 
-import { FetchLocations } from "../../components/fetchServer";
-const About = dynamic(() => import("../../components/about/main"));
+import { FetchLocations } from "../../lib/fetchServer";
+const Home = dynamic(() => import("../../components/home/home-main"));
 const Page = async () => {
-  const { LocationOptions } = await FetchLocations();
-  return <About LocationOptions={LocationOptions} />;
+  const { locations, LocationOptions } = await FetchLocations();
+  return <Home locations={locations} LocationOptions={LocationOptions} />;
 };
 export default Page;

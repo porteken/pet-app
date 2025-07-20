@@ -66,7 +66,11 @@ export default [
       import: importPlugin,
     },
     rules: {
-      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+      "import/no-unused-modules": "error",
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unused-expressions": "error",
       "no-unused-labels": "error",

@@ -1,7 +1,7 @@
 import { DropdownItemProps, DropdownSectionProps } from "@heroui/react";
 
-import { LocationProps } from "../types";
-export * from "../types";
+import { LocationProps } from "../../types/types";
+export * from "../../types/types";
 export interface PageProps {
   id: number;
   location: LocationProps;

@@ -55,12 +55,13 @@
     "typescript": "^5.8.3"
   },
   "devDependencies": {
+    "@eslint/js": "^9.31.0",
     "@next/bundle-analyzer": "^15.3.5",
     "@playwright/test": "^1.48.0",
     "@types/eslint": "^8.56.0",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
-    "eslint": "^8.57.0",
+    "eslint": "^9.31.0",
     "eslint-config-next": "^15.3.5",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",

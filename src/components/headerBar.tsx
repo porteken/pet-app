@@ -7,9 +7,15 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import React from "react";
 
+import { NavProps } from "./types";
+
 import { APP_CONFIG } from "@/utils/constants";
 
-import { NavProps } from "./types";
+interface LocationItem {
+  key: string;
+  title: string;
+  state: string;
+}
 
 export const HeaderBar = ({
   LocationOptions,
@@ -31,13 +37,15 @@ export const HeaderBar = ({
   // Find the current city data if we're on a city page
   const currentCity = id
     ? LocationOptions.flatMap(section =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Array.from(section.items || []).map((item: any) => ({
-          key: item.key,
-          title: item.title,
-          state: section.title,
-        }))
-      ).find(city => city.key === id)
+        Array.from(section.items || []).map(
+          item =>
+            ({
+              key: item.key,
+              title: item.title,
+              state: section.title,
+            }) as LocationItem
+        )
+      ).find(city => city.key === id.toString())
     : null;
 
   return (
@@ -78,14 +86,16 @@ export const HeaderBar = ({
             </NavbarItem>
 
             <NavbarItem isActive={id! >= 0}>
-              <Autocomplete
+              <Autocomplete<LocationItem>
                 options={LocationOptions.flatMap(section =>
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  Array.from(section.items || []).map((item: any) => ({
-                    key: item.key,
-                    title: item.title,
-                    state: section.title,
-                  }))
+                  Array.from(section.items || []).map(
+                    item =>
+                      ({
+                        key: item.key,
+                        title: item.title,
+                        state: section.title,
+                      }) as LocationItem
+                  )
                 )}
                 groupBy={option => option.state || ""}
                 getOptionLabel={option => option.title}

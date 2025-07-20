@@ -22,10 +22,8 @@ const GRAPH_COLORS = {
 } as const;
 
 const PlotWrapper: React.FC<{
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[];
   layout: Partial<Layout>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: any;
 }> = ({ data, layout, config }) => {
   const [isClient, setIsClient] = useState(false);

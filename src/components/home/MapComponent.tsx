@@ -16,14 +16,13 @@ interface MapComponentProps {
 }
 
 const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [MapContainer, setMapContainer] = useState<any>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [TileLayer, setTileLayer] = useState<any>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [Marker, setMarker] = useState<any>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [Popup, setPopup] = useState<any>(null);
+  const [MapContainer, setMapContainer] =
+    useState<React.ComponentType<any> | null>(null);
+  const [TileLayer, setTileLayer] = useState<React.ComponentType<any> | null>(
+    null
+  );
+  const [Marker, setMarker] = useState<React.ComponentType<any> | null>(null);
+  const [Popup, setPopup] = useState<React.ComponentType<any> | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {

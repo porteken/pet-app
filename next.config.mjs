@@ -1,14 +1,23 @@
 /** @type {import('next').NextConfig} */
 
-const withBundleAnalyzer =
-  process.env.ANALYZE === "true"
-    ? require("@next/bundle-analyzer")({ enabled: true })
-    : config => config;
+const withBundleAnalyzer = (config) => {
+  if (process.env.ANALYZE === "true") {
+    // Dynamic import for bundle analyzer
+    const bundleAnalyzer = require("@next/bundle-analyzer");
+    return bundleAnalyzer({ enabled: true })(config);
+  }
+  return config;
+};
 
 const nextConfig = {
   output: "standalone",
   experimental: {
     optimizePackageImports: ["@heroui/react", "react-icons"],
+  },
+  eslint: {
+    dirs: ['src', 'tests'],
+    ignoreDuringBuilds: false,
+    experimentalFlatConfig: true,
   },
   images: {
     domains: ["tile.openstreetmap.org"],

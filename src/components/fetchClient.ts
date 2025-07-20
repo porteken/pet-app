@@ -23,7 +23,7 @@ interface PetYearReferenceData {
 class FetchError extends Error {
   constructor(
     message: string,
-    public readonly originalError?: unknown
+    public readonly _originalError?: unknown
   ) {
     super(message);
     this.name = "FetchError";
@@ -118,7 +118,7 @@ export async function FetchTrendGraphData(
         ? error.message
         : `Unexpected error in FetchTrendGraphData: ${error}`;
 
-    console.error(errorMessage, error);
+    console.error(errorMessage);
     return { years: [], year_pets: [], trendline_pets: [] };
   }
 }

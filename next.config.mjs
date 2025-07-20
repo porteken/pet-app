@@ -17,7 +17,6 @@ const nextConfig = {
   eslint: {
     dirs: ["src", "tests"],
     ignoreDuringBuilds: false,
-    experimentalFlatConfig: true,
   },
   images: {
     domains: ["tile.openstreetmap.org"],

@@ -2,8 +2,7 @@
 
 import { Button, Select, SelectItem, Spinner } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FC } from "react";
-import { useCallback, useState } from "react";
+import { FC, useCallback, useState } from "react";
 
 import { FetchTrendGraphData } from "../../lib/fetchClient";
 import { GraphOptions } from "../../lib/selectOptions";

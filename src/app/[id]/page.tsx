@@ -1,7 +1,8 @@
 import dynamic from "next/dynamic";
+import React from "react";
 
-import { FetchLocations } from "../../lib/fetchServer";
 import {
+  FetchLocations,
   FetchReferenceGraphData,
   FetchTrendGraphData,
 } from "../../lib/fetchServer";

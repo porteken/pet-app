@@ -38,7 +38,7 @@ type PopupType = React.ComponentType<{
 
 interface MapComponentProps {
   locations: Location[];
-  onMarkerClick: (locationId: number) => void;
+  onMarkerClick: (_locationId: number) => void;
 }
 
 const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {

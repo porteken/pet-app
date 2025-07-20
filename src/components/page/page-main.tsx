@@ -1,8 +1,7 @@
 "use client";
 import { Select, SelectItem } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
-import { FC } from "react";
+import { useState, useEffect, useCallback, FC } from "react";
 
 import {
   FetchReferenceGraphData,

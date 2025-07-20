@@ -5,10 +5,10 @@ import { useEffect } from "react";
 export default function GlobalError({
   error,
   reset,
-}: {
+}: Readonly<{
   error: Error;
   reset: () => void;
-}) {
+}>) {
   useEffect(() => {
     // Optionally log error to an error reporting service
     // console.error(error);

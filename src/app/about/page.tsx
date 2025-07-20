@@ -1,6 +1,7 @@
 "use server";
 
 import dynamic from "next/dynamic";
+import React from "react";
 
 import { FetchLocations } from "../../lib/fetchServer";
 

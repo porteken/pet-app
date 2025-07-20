@@ -7,7 +7,6 @@ import {
   FetchTrendGraphData,
 } from "../../components/fetchServer";
 
-// Dynamically load Main component
 const Main = dynamic(() => import("../../components/page/main"));
 
 export default async function Page({
@@ -40,7 +39,6 @@ export default async function Page({
     locationId
   );
 
-  // Find the current location by id, with a fallback to null in case it's not found
   const selectedLocation = locations.find(loc => loc.location_id == locationId);
   if (!selectedLocation) {
     return <div>Location not found</div>;

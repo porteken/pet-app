@@ -12,7 +12,7 @@ import { NavProps } from "./types";
 import { APP_CONFIG } from "@/utils/constants";
 
 interface LocationItem {
-  key: string;
+  key: number;
   title: string;
   state: string;
 }
@@ -35,18 +35,18 @@ export const HeaderBar = ({
   const isActive = (path: string) => pathname === path;
 
   // Find the current city data if we're on a city page
-  const currentCity = id
-    ? LocationOptions.flatMap(section =>
-        Array.from(section.items || []).map(
-          item =>
-            ({
-              key: item.key,
-              title: item.title,
-              state: section.title,
-            }) as LocationItem
-        )
-      ).find(city => city.key === id.toString())
-    : null;
+  const allCities = LocationOptions.flatMap(section =>
+    Array.from(section.items || []).map(
+      item =>
+        ({
+          key: item.key,
+          title: item.title,
+          state: section.title,
+        }) as LocationItem
+    )
+  );
+
+  const currentCity = id ? allCities.find(city => city.key === id) : null;
 
   return (
     <header className="w-full border-b border-gray-200 bg-white/90 backdrop-blur-sm">
@@ -107,6 +107,7 @@ export const HeaderBar = ({
                       (option.state || "").toLowerCase().includes(searchTerm)
                   );
                 }}
+                clearIcon={null}
                 sx={{ width: 300, backgroundColor: "white", borderRadius: 1 }}
                 renderInput={params => (
                   <TextField

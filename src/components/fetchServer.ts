@@ -24,7 +24,6 @@ export async function FetchLocations(): Promise<FetchLocationProps> {
     } else {
       const states = [...new Set(locations.map(({ state }) => state))].sort();
 
-      // Group locations by state for Select location dropdown
       const LocationOptions: Partial<
         DropdownSectionProps<DropdownItemProps>
       >[] = states.map(state => ({

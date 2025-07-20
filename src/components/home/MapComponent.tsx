@@ -10,29 +10,51 @@ interface Location {
   lng: number;
 }
 
+type MapContainerType = React.ComponentType<{
+  center: [number, number];
+  zoom: number;
+  scrollWheelZoom: boolean;
+  style: React.CSSProperties;
+  children: React.ReactNode;
+}>;
+
+type TileLayerType = React.ComponentType<{
+  attribution: string;
+  url: string;
+}>;
+
+type MarkerType = React.ComponentType<{
+  position: [number, number];
+  key: number;
+  eventHandlers: {
+    click: () => void;
+  };
+  children?: React.ReactNode;
+}>;
+
+type PopupType = React.ComponentType<{
+  children?: React.ReactNode;
+}>;
+
 interface MapComponentProps {
   locations: Location[];
   onMarkerClick: (locationId: number) => void;
 }
 
 const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
-  const [MapContainer, setMapContainer] =
-    useState<React.ComponentType<any> | null>(null);
-  const [TileLayer, setTileLayer] = useState<React.ComponentType<any> | null>(
+  const [MapContainer, setMapContainer] = useState<MapContainerType | null>(
     null
   );
-  const [Marker, setMarker] = useState<React.ComponentType<any> | null>(null);
-  const [Popup, setPopup] = useState<React.ComponentType<any> | null>(null);
+  const [TileLayer, setTileLayer] = useState<TileLayerType | null>(null);
+  const [Marker, setMarker] = useState<MarkerType | null>(null);
+  const [Popup, setPopup] = useState<PopupType | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Only run on client side
     if (typeof window !== "undefined" && typeof document !== "undefined") {
       const loadMap = async () => {
         try {
-          // Check if Leaflet CSS is already loaded
           if (!document.querySelector('link[href*="leaflet.css"]')) {
-            // Load Leaflet CSS first
             const link = document.createElement("link");
             link.rel = "stylesheet";
             link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
@@ -42,13 +64,11 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
             document.head.appendChild(link);
           }
 
-          // Check if default icon compatibility CSS is already loaded
           if (
             !document.querySelector(
               'link[href*="leaflet-defaulticon-compatibility"]'
             )
           ) {
-            // Load default icon compatibility
             const iconLink = document.createElement("link");
             iconLink.rel = "stylesheet";
             iconLink.href =
@@ -56,7 +76,6 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
             document.head.appendChild(iconLink);
           }
 
-          // Check if default icon compatibility script is already loaded
           if (
             !document.querySelector(
               'script[src*="leaflet-defaulticon-compatibility"]'
@@ -74,7 +93,6 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
             });
           }
 
-          // Dynamically import React Leaflet components
           const reactLeaflet = await import("react-leaflet");
           setMapContainer(() => reactLeaflet.MapContainer);
           setTileLayer(() => reactLeaflet.TileLayer);
@@ -90,7 +108,6 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
     }
   }, []);
 
-  // Show loading state until everything is loaded
   if (!isLoaded || !MapContainer || !TileLayer || !Marker || !Popup) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-100">
@@ -117,9 +134,7 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
           eventHandlers={{
             click: () => onMarkerClick(loc.location_id),
           }}
-        >
-          {/* Removed Leaflet Popup */}
-        </Marker>
+        ></Marker>
       ))}
     </MapContainer>
   );

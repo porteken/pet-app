@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 
-const withBundleAnalyzer = (config) => {
+const withBundleAnalyzer = config => {
   if (process.env.ANALYZE === "true") {
     // Dynamic import for bundle analyzer
     const bundleAnalyzer = require("@next/bundle-analyzer");
@@ -15,7 +15,7 @@ const nextConfig = {
     optimizePackageImports: ["@heroui/react", "react-icons"],
   },
   eslint: {
-    dirs: ['src', 'tests'],
+    dirs: ["src", "tests"],
     ignoreDuringBuilds: false,
     experimentalFlatConfig: true,
   },

@@ -4,6 +4,31 @@ import dynamic from "next/dynamic";
 import type { Layout } from "plotly.js";
 import React, { useEffect, useState } from "react";
 
+interface PlotlyTrace {
+  x: number[] | Date[];
+  y: number[];
+  type: "scatter";
+  mode: "lines+markers" | "lines";
+  marker?: {
+    color: string;
+    size: number;
+  };
+  line: {
+    color: string;
+    width: number;
+    dash?: "dashdot";
+  };
+  name: string;
+  hovertemplate: string;
+}
+
+interface PlotlyConfig {
+  displayModeBar: boolean;
+  displaylogo: boolean;
+  modeBarButtonsToRemove: ("pan2d" | "lasso2d" | "select2d")[];
+  responsive: boolean;
+}
+
 const Plot = dynamic(() => import("react-plotly.js"), {
   ssr: false,
   loading: () => (
@@ -22,9 +47,9 @@ const GRAPH_COLORS = {
 } as const;
 
 const PlotWrapper: React.FC<{
-  data: any[];
+  data: PlotlyTrace[];
   layout: Partial<Layout>;
-  config: any;
+  config: PlotlyConfig;
 }> = ({ data, layout, config }) => {
   const [isClient, setIsClient] = useState(false);
 
@@ -93,7 +118,7 @@ export const GenerateTrendGraph = (
     autosize: true,
   };
 
-  const data = [
+  const data: PlotlyTrace[] = [
     {
       x: years,
       y: year_pets,
@@ -125,7 +150,7 @@ export const GenerateTrendGraph = (
     },
   ];
 
-  const config = {
+  const config: PlotlyConfig = {
     displayModeBar: true,
     displaylogo: false,
     modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],
@@ -176,7 +201,7 @@ export const GenerateReferenceGraph = async (
     autosize: true,
   };
 
-  const data = [
+  const data: PlotlyTrace[] = [
     {
       x: dates,
       y: currentPets,
@@ -212,7 +237,7 @@ export const GenerateReferenceGraph = async (
     },
   ];
 
-  const config = {
+  const config: PlotlyConfig = {
     displayModeBar: true,
     displaylogo: false,
     modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],

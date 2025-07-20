@@ -8,13 +8,10 @@ import importPlugin from "eslint-plugin-import";
 import prettierConfig from "eslint-config-prettier";
 
 export default [
-  // Base JavaScript recommended rules
   js.configs.recommended,
 
-  // Prettier config (must be last to override other formatting rules)
   prettierConfig,
 
-  // Ignore patterns
   {
     ignores: [
       "node_modules/**",
@@ -28,7 +25,6 @@ export default [
     ],
   },
 
-  // Global settings
   {
     languageOptions: {
       ecmaVersion: 2022,
@@ -50,7 +46,6 @@ export default [
     },
   },
 
-  // TypeScript files
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
@@ -71,19 +66,25 @@ export default [
       import: importPlugin,
     },
     rules: {
-      // TypeScript rules
-      "@typescript-eslint/no-unused-vars": "off",
-      "@typescript-eslint/no-explicit-any": "warn",
-
-      // React rules
+      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unused-expressions": "error",
+      "no-unused-labels": "error",
+      "@typescript-eslint/no-empty-function": "error",
+      "@typescript-eslint/no-inferrable-types": "error",
+      "@typescript-eslint/prefer-as-const": "error",
+      "@typescript-eslint/no-array-constructor": "error",
+      "@typescript-eslint/no-empty-interface": "error",
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-extra-non-null-assertion": "error",
+      "@typescript-eslint/no-misused-new": "error",
+      "@typescript-eslint/no-namespace": "error",
+      "@typescript-eslint/no-non-null-asserted-optional-chain": "error",
+      "@typescript-eslint/no-this-alias": "error",
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
-
-      // React Hooks rules
       "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "warn",
-
-      // Accessibility rules
+      "react-hooks/exhaustive-deps": "error",
       "jsx-a11y/alt-text": "error",
       "jsx-a11y/anchor-has-content": "error",
       "jsx-a11y/anchor-is-valid": "error",
@@ -93,9 +94,8 @@ export default [
       "jsx-a11y/role-has-required-aria-props": "error",
       "jsx-a11y/role-supports-aria-props": "error",
 
-      // Import rules
       "import/order": [
-        "warn",
+        "error",
         {
           groups: [
             "builtin",
@@ -113,8 +113,7 @@ export default [
         },
       ],
 
-      // General rules
-      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-console": ["error", { allow: ["warn", "error"] }],
       "prefer-const": "error",
       "no-var": "error",
     },
@@ -125,7 +124,6 @@ export default [
     },
   },
 
-  // JavaScript files
   {
     files: ["**/*.{js,jsx}"],
     plugins: {
@@ -135,15 +133,12 @@ export default [
       import: importPlugin,
     },
     rules: {
-      // React rules
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
 
-      // React Hooks rules
       "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/exhaustive-deps": "error",
 
-      // General rules
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "prefer-const": "error",
       "no-var": "error",
@@ -155,7 +150,6 @@ export default [
     },
   },
 
-  // Test files - relaxed rules
   {
     files: [
       "**/*.test.{js,jsx,ts,tsx}",
@@ -167,7 +161,6 @@ export default [
     },
   },
 
-  // Configuration files - relaxed rules
   {
     files: ["*.config.{js,ts,mjs}", "*.config.*.{js,ts,mjs}"],
     rules: {

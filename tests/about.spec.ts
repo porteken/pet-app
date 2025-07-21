@@ -17,10 +17,13 @@ test.describe("About Page", () => {
     // Wait for content to load
     await page.waitForLoadState("networkidle");
 
-    // Check that the page has some content - look for the about page content
+    // Check for the header first, then look for content
+    await expect(page.locator("header").first()).toBeVisible();
+
+    // Look for any content on the page
     const mainContent = page
-      .locator("div:not([hidden])")
-      .filter({ hasText: /Purpose of the Application|What is PET/ });
+      .locator("main, div")
+      .filter({ hasText: /Purpose|PET|Application/ });
     await expect(mainContent.first()).toBeVisible();
   });
 

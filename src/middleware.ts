@@ -15,7 +15,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check if the pathname matches the [id] pattern (should be a number)
   if (pathname.startsWith("/") && pathname.length > 1) {
     const idPart = pathname.slice(1); // Remove the leading slash
 

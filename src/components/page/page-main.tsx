@@ -1,16 +1,13 @@
 "use client";
-import { Select, SelectItem } from "@heroui/react";
+import { useCallback, useEffect, useState, FC } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useCallback, FC } from "react";
 
-import {
-  FetchReferenceGraphData,
-  FetchTrendGraphData,
-} from "../../lib/fetchClient";
-import { GraphOptions, YearOptions } from "../../lib/selectOptions";
-import { GenerateTrendGraph, GenerateReferenceGraph } from "../generate-graph";
 import { HeaderBar } from "../header-bar";
-
+import { GenerateTrendGraph, GenerateReferenceGraph } from "../generate-graph";
+import {
+  FetchTrendGraphData,
+  FetchReferenceGraphData,
+} from "../../lib/fetchClient";
 import { PageProps } from "./types";
 
 const DEFAULT_GRAPH_MEASURE = "avg";
@@ -24,39 +21,35 @@ const Main: FC<PageProps> = ({
   CurrentPets,
   ReferencePets,
   CurrentDates,
-  TrendlinePets,
   YearPets,
+  TrendlinePets,
   Years,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Validate the trend option from query params
   const typeParam = searchParams.get("type") ?? "";
   const graphMeasureFromParams = VALID_GRAPH_MEASURES.includes(typeParam)
     ? typeParam
     : DEFAULT_GRAPH_MEASURE;
 
   const [selectedGraphMeasure, setSelectedGraphMeasure] = useState(
-    new Set<string>([graphMeasureFromParams])
+    graphMeasureFromParams
   );
   const [selectedReferenceYear, setSelectedReferenceYear] = useState(
-    new Set([DEFAULT_REFERENCE_YEAR])
+    DEFAULT_REFERENCE_YEAR
   );
+
   const [trendGraph, setTrendGraph] = useState<React.ReactElement | null>(null);
   const [referenceGraph, setReferenceGraph] =
     useState<React.ReactElement | null>(null);
 
   const generatePetTrendGraph = useCallback(
-    async (option: string = graphMeasureFromParams) => {
+    async (option: string) => {
       const graphData =
-        option !== DEFAULT_GRAPH_MEASURE
-          ? await FetchTrendGraphData(option, id)
-          : {
-              years: Years,
-              year_pets: YearPets,
-              trendline_pets: TrendlinePets,
-            };
+        option === selectedGraphMeasure
+          ? { years: Years, year_pets: YearPets, trendline_pets: TrendlinePets }
+          : await FetchTrendGraphData(option, id);
 
       const { years, year_pets, trendline_pets } = graphData;
       const graph = GenerateTrendGraph(
@@ -67,105 +60,159 @@ const Main: FC<PageProps> = ({
       );
       setTrendGraph(graph);
     },
-    [graphMeasureFromParams, id, Years, YearPets, TrendlinePets]
+    [Years, YearPets, TrendlinePets, selectedGraphMeasure, id]
   );
 
   const generatePetReferenceGraph = useCallback(
-    async (year: string = DEFAULT_REFERENCE_YEAR) => {
+    async (year: string) => {
       const referenceData =
-        year !== DEFAULT_REFERENCE_YEAR
-          ? await FetchReferenceGraphData(year, id)
-          : { pets: ReferencePets };
+        year === DEFAULT_REFERENCE_YEAR
+          ? { pets: ReferencePets, dates: CurrentDates }
+          : await FetchReferenceGraphData(year, id);
 
+      const { pets, dates } = referenceData;
       const graph = await GenerateReferenceGraph(
         year,
-        CurrentDates,
-        referenceData.pets,
+        dates,
+        pets,
         CurrentPets
       );
       setReferenceGraph(graph);
     },
-    [id, CurrentDates, CurrentPets, ReferencePets]
+    [ReferencePets, CurrentDates, CurrentPets, id]
   );
 
   const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value) {
-        params.set(name, value);
-      } else {
-        params.delete(name);
-      }
-      router.push(`?${params.toString()}`);
+    (params: Record<string, string>) => {
+      const newParams = new URLSearchParams(searchParams.toString());
+      Object.entries(params).forEach(([key, value]) => {
+        if (value) {
+          newParams.set(key, value);
+        } else {
+          newParams.delete(key);
+        }
+      });
+      return newParams.toString();
     },
-    [searchParams, router]
+    [searchParams]
   );
 
   const handleGraphMeasureChange = useCallback(
     (option: string) => {
-      setSelectedGraphMeasure(new Set([option]));
-      createQueryString("type", option !== DEFAULT_GRAPH_MEASURE ? option : "");
+      setSelectedGraphMeasure(option);
+      const queryString = createQueryString({ type: option });
+      router.push(`/${id}?${queryString}`);
       generatePetTrendGraph(option);
     },
-    [createQueryString, generatePetTrendGraph]
+    [id, router, createQueryString, generatePetTrendGraph]
   );
 
   const handleReferenceYearChange = useCallback(
     (year: string) => {
-      setSelectedReferenceYear(new Set([year]));
+      setSelectedReferenceYear(year);
       generatePetReferenceGraph(year);
     },
     [generatePetReferenceGraph]
   );
 
   useEffect(() => {
-    generatePetTrendGraph();
-    generatePetReferenceGraph();
-  }, [generatePetTrendGraph, generatePetReferenceGraph]);
+    generatePetTrendGraph(selectedGraphMeasure);
+  }, [generatePetTrendGraph, selectedGraphMeasure]);
+
+  useEffect(() => {
+    generatePetReferenceGraph(selectedReferenceYear);
+  }, [generatePetReferenceGraph, selectedReferenceYear]);
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       <HeaderBar LocationOptions={LocationOptions} id={id} />
-      <div className="flex min-h-screen flex-col">
-        <p className="mb-4 mt-2 text-center text-lg">
-          {location.city}, {location.state}
-        </p>
-        <div className="flex w-full flex-col gap-4 px-4 lg:flex-row">
-          <div className="flex w-full flex-1 flex-col">
-            <div className="h-[500px] w-full">{trendGraph}</div>
-            <div className="mt-2 flex justify-center">
-              <Select
-                label="Measure"
-                items={GraphOptions}
-                selectedKeys={selectedGraphMeasure}
-                className="w-48"
-                onChange={e => handleGraphMeasureChange(e.target.value)}
-              >
-                {option => (
-                  <SelectItem key={option.key}>{option.label}</SelectItem>
-                )}
-              </Select>
+      <main className="mx-auto max-w-7xl px-4 py-8">
+        <div className="mb-8">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">
+            {location.city}, {location.state}
+          </h1>
+          <p className="text-gray-600">
+            Historical PET data analysis and trends
+          </p>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div className="space-y-6">
+            <div className="rounded-lg bg-white p-6 shadow-md">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900">
+                Trend Analysis
+              </h2>
+              <div className="mb-4">
+                <label
+                  htmlFor="graph-measure"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  Graph Measure
+                </label>
+                <select
+                  id="graph-measure"
+                  value={selectedGraphMeasure}
+                  onChange={e => handleGraphMeasureChange(e.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="avg">Average</option>
+                  <option value="max">Maximum</option>
+                </select>
+              </div>
+              <div className="h-96">{trendGraph}</div>
             </div>
           </div>
-          <div className="flex w-full flex-1 flex-col">
-            <div className="h-[500px] w-full">{referenceGraph}</div>
-            <div className="mt-2 flex justify-center">
-              <Select
-                label="Reference Year"
-                items={YearOptions()}
-                selectedKeys={selectedReferenceYear}
-                className="w-48"
-                onChange={e => handleReferenceYearChange(e.target.value)}
-              >
-                {option => (
-                  <SelectItem key={option.key}>{option.label}</SelectItem>
-                )}
-              </Select>
+
+          <div className="space-y-6">
+            <div className="rounded-lg bg-white p-6 shadow-md">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900">
+                Reference Data
+              </h2>
+              <div className="mb-4">
+                <label
+                  htmlFor="reference-year"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  Reference Year
+                </label>
+                <select
+                  id="reference-year"
+                  value={selectedReferenceYear}
+                  onChange={e => handleReferenceYearChange(e.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="2000">2000</option>
+                  <option value="2001">2001</option>
+                  <option value="2002">2002</option>
+                  <option value="2003">2003</option>
+                  <option value="2004">2004</option>
+                  <option value="2005">2005</option>
+                  <option value="2006">2006</option>
+                  <option value="2007">2007</option>
+                  <option value="2008">2008</option>
+                  <option value="2009">2009</option>
+                  <option value="2010">2010</option>
+                  <option value="2011">2011</option>
+                  <option value="2012">2012</option>
+                  <option value="2013">2013</option>
+                  <option value="2014">2014</option>
+                  <option value="2015">2015</option>
+                  <option value="2016">2016</option>
+                  <option value="2017">2017</option>
+                  <option value="2018">2018</option>
+                  <option value="2019">2019</option>
+                  <option value="2020">2020</option>
+                  <option value="2021">2021</option>
+                  <option value="2022">2022</option>
+                  <option value="2023">2023</option>
+                </select>
+              </div>
+              <div className="h-96">{referenceGraph}</div>
             </div>
           </div>
         </div>
-      </div>
-    </>
+      </main>
+    </div>
   );
 };
 

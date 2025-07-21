@@ -1,5 +1,3 @@
-// Custom error classes for better error handling
-
 export class AppError extends Error {
   constructor(
     message: string,
@@ -40,7 +38,6 @@ export class NotFoundError extends AppError {
   }
 }
 
-// Error logging utility
 export const logError = (
   error: AppError,
   context?: Record<string, unknown>
@@ -61,7 +58,6 @@ export const logError = (
   if (process.env.NODE_ENV === "development") {
     console.error("Error Details:", errorLog);
   } else {
-    // In production, you might want to send this to a logging service
     console.error(`[${error.code}] ${error.message}`);
   }
 };

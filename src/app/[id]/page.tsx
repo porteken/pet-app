@@ -14,36 +14,99 @@ export default async function Page({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Validate that the id parameter is a valid number
   const { id } = await params;
   const locationId = Number(id);
   if (isNaN(locationId) || locationId <= 0) {
-    return <div>Invalid location ID</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="mb-4 text-2xl font-bold text-gray-900">
+            Invalid location ID
+          </h1>
+          <p className="text-gray-600">
+            The provided location ID is not valid.
+          </p>
+        </div>
+      </div>
+    );
   }
 
-  // Fetch location data
-  const { locations, LocationOptions } = await FetchLocations();
+  let locations: any[] = [];
+  let LocationOptions: any[] = [];
 
-  // Fetch reference graph data for the current year (2023) and selected location
-  const { pets, dates } = await FetchReferenceGraphData("2023", locationId);
+  try {
+    const result = await FetchLocations();
+    locations = result.locations;
+    LocationOptions = result.LocationOptions;
+  } catch (error) {
+    console.error("Error fetching locations:", error);
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="mb-4 text-2xl font-bold text-gray-900">
+            Data temporarily unavailable
+          </h1>
+          <p className="text-gray-600">Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Fetch reference graph data for default reference year (2000) and selected location
-  const { pets: reference_pets } = await FetchReferenceGraphData(
-    "2000",
-    locationId
-  );
+  // Handle case where no locations are found
+  if (!locations || locations.length === 0) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="mb-4 text-2xl font-bold text-gray-900">
+            No data available
+          </h1>
+          <p className="text-gray-600">Location data could not be loaded.</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Fetch trend graph data with default graph measure (average)
-  const { years, year_pets, trendline_pets } = await FetchTrendGraphData(
-    "avg",
-    locationId
-  );
+  // Fetch data with error handling
+  let pets: number[] = [];
+  let dates: Date[] = [];
+  let reference_pets: number[] = [];
+  let years: number[] = [];
+  let year_pets: number[] = [];
+  let trendline_pets: number[] = [];
+
+  try {
+    const currentData = await FetchReferenceGraphData("2023", locationId);
+    pets = currentData.pets;
+    dates = currentData.dates;
+
+    const referenceData = await FetchReferenceGraphData("2000", locationId);
+    reference_pets = referenceData.pets;
+
+    const trendData = await FetchTrendGraphData("avg", locationId);
+    years = trendData.years;
+    year_pets = trendData.year_pets;
+    trendline_pets = trendData.trendline_pets;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    // Continue with empty data arrays
+  }
 
   const selectedLocation = locations.find(
     (loc: { location_id: number }) => loc.location_id == locationId
   );
   if (!selectedLocation) {
-    return <div>Location not found</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="mb-4 text-2xl font-bold text-gray-900">
+            Location not found
+          </h1>
+          <p className="text-gray-600">
+            The requested location could not be found.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -1,9 +1,6 @@
-import { SimpleLinearRegression } from "ml-regression-simple-linear";
-
-import { ReferenceGraphDataProps, TrendGraphDataProps } from "../types/types";
-import { ERROR_MESSAGES } from "../utils/constants";
-import { createClient } from "../utils/supabase/client";
-import { validateTrendOption, validateYear } from "../utils/validation";
+import { createClient } from "@supabase/supabase-js";
+import type { TrendGraphDataProps } from "../types/types";
+import { FetchReferenceGraphData } from "./referenceGraphData";
 
 interface PetYearAvgMaxData {
   year: number;
@@ -11,14 +8,6 @@ interface PetYearAvgMaxData {
   location_id: number;
 }
 
-interface PetYearReferenceData {
-  date: string;
-  pet: number;
-  location_id: number;
-  year: string;
-}
-
-// Error types for better error handling
 class FetchError extends Error {
   constructor(
     message: string,
@@ -29,81 +18,131 @@ class FetchError extends Error {
   }
 }
 
-// Utility functions
 const createSupabaseClient = () => {
-  try {
-    return createClient();
-  } catch (error) {
-    throw new FetchError("Failed to create Supabase client", error);
-  }
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  return createClient(supabaseUrl, supabaseKey);
 };
 
 const calculateTrendline = (years: number[], yearPets: number[]): number[] => {
-  if (years.length < 2 || yearPets.length < 2) {
-    return [];
-  }
+  const n = years.length;
+  const sumX = years.reduce((a, b) => a + b, 0);
+  const sumY = yearPets.reduce((a, b) => a + b, 0);
+  const sumXY = years.reduce((sum, x, i) => sum + x * yearPets[i], 0);
+  const sumXX = years.reduce((sum, x) => sum + x * x, 0);
 
-  try {
-    const regression = new SimpleLinearRegression(years, yearPets);
-    return years.map(year => Math.round(regression.predict(year) * 100) / 100);
-  } catch (error) {
-    console.error("Error calculating trendline:", error);
-    return [];
-  }
+  const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+  const intercept = (sumY - slope * sumX) / n;
+
+  return years.map(x => slope * x + intercept);
 };
 
-// Fetch data for the trend graph
+function logError(message: string): void {
+  if (process.env.NODE_ENV === "development") {
+    console.error(message);
+  }
+}
+
+function logWarning(message: string): void {
+  if (process.env.NODE_ENV === "development") {
+    console.warn(message);
+  }
+}
+
+function createEmptyTrendResult(): TrendGraphDataProps {
+  return { years: [], year_pets: [], trendline_pets: [] };
+}
+
+function validateYears(years: number[]): void {
+  if (
+    years.some(year => !Number.isInteger(year) || year < 1900 || year > 2100)
+  ) {
+    throw new FetchError("Invalid year data detected");
+  }
+}
+
+function validateYearPets(yearPets: number[]): void {
+  if (yearPets.some(pet => isNaN(pet) || pet < 0)) {
+    throw new FetchError("Invalid pet count data detected");
+  }
+}
+
+function processTrendData(data: PetYearAvgMaxData[]): {
+  years: number[];
+  yearPets: number[];
+} {
+  const years = data.map(({ year }) => year);
+  const yearPets = data.map(({ pet }) => Number(pet));
+
+  validateYears(years);
+  validateYearPets(yearPets);
+
+  return { years, yearPets };
+}
+
+async function fetchTrendData(
+  supabase: any,
+  tableName: string,
+  locationId: number
+): Promise<PetYearAvgMaxData[]> {
+  const { data, error } = await supabase
+    .from(tableName)
+    .select("year, pet, location_id")
+    .eq("location_id", locationId)
+    .order("year", { ascending: true });
+
+  if (error) {
+    throw new FetchError("Database error fetching trend data", error);
+  }
+
+  return data || [];
+}
+
+function handleValidationFailure(message: string): TrendGraphDataProps {
+  logError(message);
+  return createEmptyTrendResult();
+}
+
+function handleNoData(locationId: number): TrendGraphDataProps {
+  logWarning(`No data found for location ${locationId}`);
+  return createEmptyTrendResult();
+}
+
+function handleProcessingError(error: unknown): TrendGraphDataProps {
+  const message =
+    error instanceof FetchError
+      ? error.message
+      : `Unexpected error in FetchTrendGraphData: ${error}`;
+
+  logError(message);
+  return createEmptyTrendResult();
+}
+
 export async function FetchTrendGraphData(
   option: string,
   locationId: number
 ): Promise<TrendGraphDataProps> {
-  // Input validation
   if (!validateTrendOption(option)) {
-    console.error(ERROR_MESSAGES.INVALID_TREND_OPTION);
-    return { years: [], year_pets: [], trendline_pets: [] };
+    return handleValidationFailure(
+      "Invalid trend option. Must be 'avg' or 'max'"
+    );
   }
 
-  if (!Number.isInteger(locationId) || locationId <= 0) {
-    console.error(`Invalid location ID: ${locationId}`);
-    return { years: [], year_pets: [], trendline_pets: [] };
+  if (!validateLocationId(locationId)) {
+    return handleValidationFailure(`Invalid location ID: ${locationId}`);
   }
 
   const supabase = createSupabaseClient();
-  const tableName = `pet_year_${option}`;
+  const tableName = option === "avg" ? "pet_year_avg" : "pet_year_max";
 
   try {
-    const { data, error } = await supabase
-      .from(tableName)
-      .select("year, pet, location_id")
-      .eq("location_id", locationId)
-      .order("year", { ascending: true });
+    const data = await fetchTrendData(supabase, tableName, locationId);
 
-    if (error) {
-      throw new FetchError(`Database error fetching from ${tableName}`, error);
+    if (data.length === 0) {
+      return handleNoData(locationId);
     }
 
-    if (!data || data.length === 0) {
-      console.warn(`No data found for location ${locationId} in ${tableName}`);
-      return { years: [], year_pets: [], trendline_pets: [] };
-    }
-
-    // Type-safe data extraction
-    const typedData = data as PetYearAvgMaxData[];
-
-    const years = typedData.map(({ year }) => year);
-    const yearPets = typedData.map(({ pet }) => Number(pet));
-
-    // Validate data integrity
-    if (
-      years.some(year => !Number.isInteger(year) || year < 1900 || year > 2100)
-    ) {
-      throw new FetchError("Invalid year data detected");
-    }
-
-    if (yearPets.some(pet => isNaN(pet) || pet < 0)) {
-      throw new FetchError("Invalid pet count data detected");
-    }
-
+    const { years, yearPets } = processTrendData(data);
     const trendlinePets = calculateTrendline(years, yearPets);
 
     return {
@@ -112,92 +151,16 @@ export async function FetchTrendGraphData(
       trendline_pets: trendlinePets,
     };
   } catch (error) {
-    const errorMessage =
-      error instanceof FetchError
-        ? error.message
-        : `Unexpected error in FetchTrendGraphData: ${error}`;
-
-    console.error(errorMessage);
-    return { years: [], year_pets: [], trendline_pets: [] };
+    return handleProcessingError(error);
   }
 }
 
-// Fetch data for the reference graph
-export async function FetchReferenceGraphData(
-  year: string,
-  locationId: number
-): Promise<ReferenceGraphDataProps> {
-  // Input validation
-  if (!year || typeof year !== "string") {
-    console.error(ERROR_MESSAGES.INVALID_YEAR_FORMAT);
-    return { dates: [], pets: [] };
-  }
+export { FetchReferenceGraphData };
 
-  if (!Number.isInteger(locationId) || locationId <= 0) {
-    console.error(ERROR_MESSAGES.INVALID_LOCATION_ID);
-    return { dates: [], pets: [] };
-  }
+function validateTrendOption(option: string): boolean {
+  return option === "avg" || option === "max";
+}
 
-  // Validate year format
-  if (!validateYear(year)) {
-    console.error(ERROR_MESSAGES.INVALID_YEAR_FORMAT);
-    return { dates: [], pets: [] };
-  }
-
-  const supabase = createSupabaseClient();
-
-  try {
-    const { data, error } = await supabase
-      .from("pet_year")
-      .select("date, pet, location_id, year")
-      .eq("location_id", locationId)
-      .eq("year", year)
-      .order("date", { ascending: true });
-
-    if (error) {
-      throw new FetchError("Database error fetching from pet_year", error);
-    }
-
-    if (!data || data.length === 0) {
-      console.warn(`No data found for location ${locationId} and year ${year}`);
-      return { dates: [], pets: [] };
-    }
-
-    // Type-safe data extraction and validation
-    const typedData = data as PetYearReferenceData[];
-
-    const dates: Date[] = [];
-    const pets: number[] = [];
-
-    for (const item of typedData) {
-      const date = new Date(item.date);
-
-      // Validate date
-      if (isNaN(date.getTime())) {
-        console.warn(`Invalid date found: ${item.date}, skipping`);
-        continue;
-      }
-
-      const petCount = Number(item.pet);
-
-      // Validate pet count
-      if (isNaN(petCount) || petCount < 0) {
-        console.warn(`Invalid pet count found: ${item.pet}, skipping`);
-        continue;
-      }
-
-      dates.push(date);
-      pets.push(petCount);
-    }
-
-    return { dates, pets };
-  } catch (error) {
-    const errorMessage =
-      error instanceof FetchError
-        ? error.message
-        : `Unexpected error in FetchReferenceGraphData: ${error}`;
-
-    console.error(errorMessage, error);
-    return { dates: [], pets: [] };
-  }
+function validateLocationId(locationId: number): boolean {
+  return Number.isInteger(locationId) && locationId > 0;
 }

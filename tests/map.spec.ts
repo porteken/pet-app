@@ -17,8 +17,8 @@ test.describe("Map Page", () => {
     // Wait for content to load
     await page.waitForLoadState("networkidle");
 
-    // Check that the page has some content
-    const mainContent = page.locator("div, body");
-    await expect(mainContent.first()).toBeVisible();
+    // Check that the page has some content - look for the map container or header
+    const mainContent = page.locator("header").first();
+    await expect(mainContent).toBeVisible();
   });
 });

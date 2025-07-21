@@ -13,6 +13,7 @@ import { createClient } from "../utils/supabase/server";
 export async function FetchLocations(): Promise<FetchLocationProps> {
   const cookieStore = cookies();
   const supabase = await createClient(cookieStore);
+
   try {
     const { data: locations, error } = await supabase
       .from("locations")
@@ -42,12 +43,10 @@ export async function FetchLocations(): Promise<FetchLocationProps> {
   }
 }
 
-// Fetch data for the reference graph
 export async function FetchReferenceGraphData(
   year: string,
   locationId: number
 ): Promise<ReferenceGraphDataProps> {
-  // Validate inputs
   if (!locationId || isNaN(locationId) || locationId <= 0) {
     console.error("Invalid locationId:", locationId);
     return { dates: [], pets: [] };
@@ -77,12 +76,10 @@ export async function FetchReferenceGraphData(
   }
 }
 
-// Fetch data for the trend graph
 export async function FetchTrendGraphData(
   option: string,
   locationId: number
 ): Promise<TrendGraphDataProps> {
-  // Validate inputs
   if (!locationId || isNaN(locationId) || locationId <= 0) {
     console.error("Invalid locationId:", locationId);
     return { years: [], year_pets: [], trendline_pets: [] };

@@ -1,5 +1,3 @@
-/** @type {import('next').NextConfig} */
-
 const withBundleAnalyzer = config => {
   if (process.env.ANALYZE === "true") {
     // Dynamic import for bundle analyzer

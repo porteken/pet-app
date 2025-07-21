@@ -43,16 +43,17 @@ test.describe("Home Page", () => {
   test("should have searchable city dropdown", async ({ page }) => {
     await page.goto("/");
 
-    // Look for the autocomplete input
-    const citySearch = page.locator(
-      'input[placeholder*="Search for a city"], input[placeholder*="Change City"]'
-    );
+    // Wait for the page to load completely
+    await page.waitForLoadState("networkidle");
+
+    // Look for the Material-UI Autocomplete input - it uses a different structure
+    const citySearch = page.locator('input[role="combobox"]');
     await expect(citySearch).toBeVisible();
 
     // Test that the dropdown opens when clicking
     await citySearch.click();
 
-    // Wait for dropdown to appear
+    // Wait for dropdown to appear (Material-UI Autocomplete uses different selectors)
     await page.waitForSelector('[role="listbox"]', { timeout: 5000 });
 
     // Verify dropdown is visible

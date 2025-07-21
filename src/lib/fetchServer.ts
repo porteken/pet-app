@@ -26,7 +26,9 @@ export async function FetchLocations(): Promise<FetchLocationProps> {
         error
       );
     } else {
-      const states = [...new Set(locations.map(({ state }) => state))].sort();
+      const states = [...new Set(locations.map(({ state }) => state))].sort(
+        (a, b) => a.localeCompare(b)
+      );
 
       const LocationOptions: Partial<
         DropdownSectionProps<DropdownItemProps>
@@ -34,6 +36,7 @@ export async function FetchLocations(): Promise<FetchLocationProps> {
         title: state,
         items: locations
           .filter(loc => loc.state === state)
+          .sort((a, b) => a.city.localeCompare(b.city))
           .map(({ location_id, city }) => ({
             key: location_id,
             title: city,

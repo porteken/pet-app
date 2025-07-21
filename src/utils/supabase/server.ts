@@ -13,9 +13,8 @@ export const createClient = async (cookieStore: ReturnType<typeof cookies>) => {
           return resolvedCookieStore.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            resolvedCookieStore.set(name, value, options)
-          );
+          for (const { name, value, options } of cookiesToSet)
+            resolvedCookieStore.set(name, value, options);
         },
       },
     }

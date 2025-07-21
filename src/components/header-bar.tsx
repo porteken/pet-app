@@ -35,7 +35,7 @@ export const HeaderBar = ({
   const isActive = (path: string) => pathname === path;
 
   const allCities = LocationOptions.flatMap(section =>
-    Array.from(section.items || []).map(
+    [...(section.items || [])].map(
       item =>
         ({
           key: item.key,
@@ -45,7 +45,7 @@ export const HeaderBar = ({
     )
   );
 
-  const currentCity = id ? allCities.find(city => city.key === id) : null;
+  const currentCity = id ? allCities.find(city => city.key === id) : undefined;
 
   return (
     <header className="w-full border-b border-gray-200 bg-white/90 backdrop-blur-sm">
@@ -87,7 +87,7 @@ export const HeaderBar = ({
             <NavbarItem isActive={id! >= 0}>
               <Autocomplete<LocationItem>
                 options={LocationOptions.flatMap(section =>
-                  Array.from(section.items || []).map(
+                  [...(section.items || [])].map(
                     item =>
                       ({
                         key: item.key,
@@ -106,7 +106,7 @@ export const HeaderBar = ({
                       (option.state || "").toLowerCase().includes(searchTerm)
                   );
                 }}
-                clearIcon={null}
+                clearIcon={undefined}
                 sx={{ width: 300, backgroundColor: "white", borderRadius: 1 }}
                 renderInput={params => (
                   <TextField
@@ -118,7 +118,7 @@ export const HeaderBar = ({
                 )}
                 onChange={(_, value) => {
                   if (value) {
-                    window.location.href = `/${value.key}`;
+                    globalThis.location.href = `/${value.key}`;
                   }
                 }}
                 value={currentCity}

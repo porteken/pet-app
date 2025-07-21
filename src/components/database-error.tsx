@@ -18,7 +18,7 @@ export const DatabaseError: React.FC<DatabaseErrorProps> = ({
       <div className="mx-auto max-w-md p-6 text-center">
         <div className="mb-6">
           <svg
-            className="mx-auto h-12 w-12 text-red-500"
+            className="mx-auto size-12 text-red-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -52,7 +52,7 @@ export const DatabaseError: React.FC<DatabaseErrorProps> = ({
 
         <div className="mt-6">
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => globalThis.location.reload()}
             className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
           >
             Try Again

@@ -12,7 +12,7 @@ test.describe("Home Page", () => {
   test("should display the map container", async ({ page }) => {
     await page.goto("/");
 
-    await page.waitForSelector(".leaflet-container", { timeout: 20000 });
+    await page.waitForSelector(".leaflet-container", { timeout: 20_000 });
 
     const mapContainer = page.locator(".leaflet-container");
     await expect(mapContainer).toBeVisible();

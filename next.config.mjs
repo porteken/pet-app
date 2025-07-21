@@ -1,7 +1,7 @@
+import bundleAnalyzer from "@next/bundle-analyzer";
 const withBundleAnalyzer = config => {
   if (process.env.ANALYZE === "true") {
     // Dynamic import for bundle analyzer
-    const bundleAnalyzer = require("@next/bundle-analyzer");
     return bundleAnalyzer({ enabled: true })(config);
   }
   return config;

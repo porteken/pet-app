@@ -3,9 +3,9 @@
 import dynamic from "next/dynamic";
 import React from "react";
 
-import { FetchLocations } from "../../lib/fetchServer";
-import { ErrorBoundary } from "../../components/ErrorBoundary";
-import { DatabaseError } from "../../components/DatabaseError";
+import { FetchLocations } from "../../lib/fetch-server";
+import { ErrorBoundary } from "../../components/error-boundary";
+import { DatabaseError } from "../../components/database-error";
 
 const About = dynamic(() => import("../../components/about/about-main"));
 
@@ -17,8 +17,7 @@ const Page = async () => {
         <About LocationOptions={LocationOptions} />
       </ErrorBoundary>
     );
-  } catch (error) {
-    console.error("Error in about page:", error);
+  } catch {
     return (
       <DatabaseError
         title="Database Connection Error"

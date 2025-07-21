@@ -50,7 +50,7 @@ test.describe("Invalid Route Handling", () => {
     try {
       const response = await page.goto("/1", {
         waitUntil: "domcontentloaded",
-        timeout: 10000,
+        timeout: 10_000,
       });
       // Accept either 200 (success) or 404 (location not found in DB)
       expect([200, 404]).toContain(response?.status());

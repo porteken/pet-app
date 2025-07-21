@@ -81,7 +81,11 @@ export const GenerateTrendGraph = (
   year_pets: number[],
   trendline_pets: number[]
 ): React.ReactElement => {
-  if (!years.length || !year_pets.length || !trendline_pets.length) {
+  if (
+    years.length === 0 ||
+    year_pets.length === 0 ||
+    trendline_pets.length === 0
+  ) {
     return (
       <div className="flex h-[600px] items-center justify-center text-gray-500">
         No data available for the selected parameters
@@ -165,7 +169,11 @@ export const GenerateReferenceGraph = async (
   referencePets: number[],
   currentPets: number[]
 ): Promise<React.ReactElement> => {
-  if (!dates.length || !referencePets.length || !currentPets.length) {
+  if (
+    dates.length === 0 ||
+    referencePets.length === 0 ||
+    currentPets.length === 0
+  ) {
     return (
       <div className="flex h-[600px] items-center justify-center text-gray-500">
         No data available for the selected parameters

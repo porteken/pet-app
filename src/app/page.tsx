@@ -2,9 +2,9 @@
 
 import dynamic from "next/dynamic";
 
-import { FetchLocations } from "../lib/fetchServer";
-import { ErrorBoundary } from "../components/ErrorBoundary";
-import { DatabaseError } from "../components/DatabaseError";
+import { FetchLocations } from "../lib/fetch-server";
+import { ErrorBoundary } from "../components/error-boundary";
+import { DatabaseError } from "../components/database-error";
 
 const Home = dynamic(() => import("../components/home/home-main"));
 
@@ -26,8 +26,7 @@ const Page = async () => {
         <Home locations={locations} LocationOptions={LocationOptions} />
       </ErrorBoundary>
     );
-  } catch (error) {
-    console.error("Error in home page:", error);
+  } catch {
     return (
       <DatabaseError
         title="Database Connection Error"

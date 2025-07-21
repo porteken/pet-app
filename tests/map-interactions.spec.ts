@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Map Interactions", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
-    await page.waitForSelector(".leaflet-container", { timeout: 10000 });
+    await page.waitForSelector(".leaflet-container", { timeout: 10_000 });
   });
 
   test("should display map markers", async ({ page }) => {

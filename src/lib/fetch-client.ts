@@ -1,6 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import type { TrendGraphDataProps } from "../types/types";
-import { FetchReferenceGraphData } from "./referenceGraphData";
 
 interface PetYearAvgMaxData {
   year: number;
@@ -62,7 +61,7 @@ function validateYears(years: number[]): void {
 }
 
 function validateYearPets(yearPets: number[]): void {
-  if (yearPets.some(pet => isNaN(pet) || pet < 0)) {
+  if (yearPets.some(pet => Number.isNaN(pet) || pet < 0)) {
     throw new FetchError("Invalid pet count data detected");
   }
 }
@@ -81,7 +80,7 @@ function processTrendData(data: PetYearAvgMaxData[]): {
 }
 
 async function fetchTrendData(
-  supabase: any,
+  supabase: SupabaseClient,
   tableName: string,
   locationId: number
 ): Promise<PetYearAvgMaxData[]> {
@@ -155,8 +154,6 @@ export async function FetchTrendGraphData(
   }
 }
 
-export { FetchReferenceGraphData };
-
 function validateTrendOption(option: string): boolean {
   return option === "avg" || option === "max";
 }
@@ -164,3 +161,5 @@ function validateTrendOption(option: string): boolean {
 function validateLocationId(locationId: number): boolean {
   return Number.isInteger(locationId) && locationId > 0;
 }
+
+export { FetchReferenceGraphData } from "./reference-graph-data";

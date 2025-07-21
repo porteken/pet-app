@@ -2,14 +2,14 @@
 
 import { Button, Select, SelectItem, Spinner } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useState, ReactElement } from "react";
 
-import { FetchTrendGraphData } from "../../lib/fetchClient";
-import { GraphOptions } from "../../lib/selectOptions";
+import { FetchTrendGraphData } from "../../lib/fetch-client";
+import { GraphOptions } from "../../lib/select-options";
 import { LocationProps } from "../../types/types";
 import { GenerateTrendGraph } from "../generate-graph";
 import { HeaderBar } from "../header-bar";
-import Modal from "../Modal";
+import Modal from "../modal";
 
 import MapComponent from "./map-component";
 import { MapProps } from "./types";
@@ -22,16 +22,14 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
 
   const initialGraphMeasure = searchParams.get("type") || defaultGraphMeasure;
 
-  const [petGraph, setPetGraph] = useState<React.ReactElement | null>(null);
+  const [petGraph, setPetGraph] = useState<ReactElement | null>();
   const [graphLoading, setGraphLoading] = useState(false);
   const [selectedGraphMeasure, setSelectedGraphMeasure] =
     useState(initialGraphMeasure);
-  const [selectedLocationId, setSelectedLocationId] = useState<number | null>(
-    null
-  );
+  const [selectedLocationId, setSelectedLocationId] = useState<number | null>();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] =
-    useState<LocationProps | null>(null);
+    useState<LocationProps | null>();
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -39,6 +37,7 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
       if (value) {
         params.set(name, value);
       } else {
+        // eslint-disable-next-line drizzle/enforce-delete-with-where
         params.delete(name);
       }
       router.push(`?${params.toString()}`);
@@ -61,14 +60,13 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
           trendline_pets
         );
         setPetGraph(graph);
-      } catch (error) {
-        console.error("Error loading graph:", error);
+      } catch {
         setPetGraph(
           <div className="flex h-[300px] w-full flex-col items-center justify-center">
             <div className="text-center">
               <div className="mb-4 text-red-500">
                 <svg
-                  className="mx-auto h-8 w-8"
+                  className="mx-auto size-8"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -103,9 +101,9 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
 
   const handleSelectChange = useCallback(
     async (option: string) => {
-      if (selectedLocationId !== null) {
+      if (selectedLocationId != undefined) {
         setSelectedGraphMeasure(option);
-        createQueryString("type", option !== defaultGraphMeasure ? option : "");
+        createQueryString("type", option === defaultGraphMeasure ? "" : option);
         await generateGraph(selectedLocationId, option);
       }
     },
@@ -116,7 +114,7 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
     async (locationId: number) => {
       setSelectedLocationId(locationId);
       const location =
-        locations.find(loc => loc.location_id === locationId) || null;
+        locations.find(loc => loc.location_id === locationId) || undefined;
       setSelectedLocation(location);
       setModalOpen(true);
       await generateGraph(locationId, selectedGraphMeasure);
@@ -126,7 +124,7 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
 
   return (
     <div className="relative h-screen w-full">
-      <div className="absolute left-0 right-0 top-0 z-50">
+      <div className="absolute inset-x-0 top-0 z-50">
         <HeaderBar LocationOptions={LocationOptions} />
       </div>
       <MapComponent locations={locations} onMarkerClick={handleMarkerClick} />
@@ -155,7 +153,7 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
           </div>
           <div className="flex min-h-[300px] w-full max-w-4xl items-center justify-center">
             {graphLoading ? (
-              <div className="flex h-full w-full flex-col items-center justify-center">
+              <div className="flex size-full flex-col items-center justify-center">
                 <Spinner size="lg" />
                 <span className="mt-2 text-gray-500">Loading graph...</span>
               </div>
@@ -169,7 +167,7 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
                 color="primary"
                 variant="flat"
                 onPress={() => {
-                  window.location.href = `/${selectedLocation.location_id}`;
+                  globalThis.location.href = `/${selectedLocation.location_id}`;
                 }}
               >
                 View Full Details

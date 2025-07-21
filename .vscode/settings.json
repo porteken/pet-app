@@ -10,5 +10,6 @@
   "sonarlint.connectedMode.project": {
     "connectionId": "porteken",
     "projectKey": "porteken_pet-app"
-  }
+  },
+  "eslint.useFlatConfig": true
 }

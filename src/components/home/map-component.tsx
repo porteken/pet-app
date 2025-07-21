@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+  ComponentType,
+  ReactNode,
+  CSSProperties,
+} from "react";
 
 interface Location {
   location_id: number;
@@ -10,30 +16,30 @@ interface Location {
   lng: number;
 }
 
-type MapContainerType = React.ComponentType<{
+type MapContainerType = ComponentType<{
   center: [number, number];
   zoom: number;
   scrollWheelZoom: boolean;
-  style: React.CSSProperties;
-  children: React.ReactNode;
+  style: CSSProperties;
+  children: ReactNode;
 }>;
 
-type TileLayerType = React.ComponentType<{
+type TileLayerType = ComponentType<{
   attribution: string;
   url: string;
 }>;
 
-type MarkerType = React.ComponentType<{
+type MarkerType = ComponentType<{
   position: [number, number];
   key: number;
   eventHandlers: {
     click: () => void;
   };
-  children?: React.ReactNode;
+  children?: ReactNode;
 }>;
 
-type PopupType = React.ComponentType<{
-  children?: React.ReactNode;
+type PopupType = ComponentType<{
+  children?: ReactNode;
 }>;
 
 interface MapComponentProps {
@@ -42,66 +48,62 @@ interface MapComponentProps {
 }
 
 const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
-  const [MapContainer, setMapContainer] = useState<MapContainerType | null>(
-    null
-  );
-  const [TileLayer, setTileLayer] = useState<TileLayerType | null>(null);
-  const [Marker, setMarker] = useState<MarkerType | null>(null);
-  const [Popup, setPopup] = useState<PopupType | null>(null);
+  const [MapContainer, setMapContainer] = useState<
+    MapContainerType | undefined
+  >();
+  const [TileLayer, setTileLayer] = useState<TileLayerType | undefined>();
+  const [Marker, setMarker] = useState<MarkerType | undefined>();
+  const [Popup, setPopup] = useState<PopupType | undefined>();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && typeof document !== "undefined") {
+    if (globalThis.window !== undefined && typeof document !== "undefined") {
       const loadMap = async () => {
-        try {
-          if (!document.querySelector('link[href*="leaflet.css"]')) {
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-            link.integrity =
-              "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=";
-            link.crossOrigin = "";
-            document.head.appendChild(link);
-          }
-
-          if (
-            !document.querySelector(
-              'link[href*="leaflet-defaulticon-compatibility"]'
-            )
-          ) {
-            const iconLink = document.createElement("link");
-            iconLink.rel = "stylesheet";
-            iconLink.href =
-              "https://unpkg.com/leaflet-defaulticon-compatibility@0.1.2/dist/leaflet-defaulticon-compatibility.css";
-            document.head.appendChild(iconLink);
-          }
-
-          if (
-            !document.querySelector(
-              'script[src*="leaflet-defaulticon-compatibility"]'
-            )
-          ) {
-            const script = document.createElement("script");
-            script.src =
-              "https://unpkg.com/leaflet-defaulticon-compatibility@0.1.2/dist/leaflet-defaulticon-compatibility.js";
-            script.async = true;
-
-            await new Promise((resolve, reject) => {
-              script.onload = resolve;
-              script.onerror = reject;
-              document.head.appendChild(script);
-            });
-          }
-
-          const reactLeaflet = await import("react-leaflet");
-          setMapContainer(() => reactLeaflet.MapContainer);
-          setTileLayer(() => reactLeaflet.TileLayer);
-          setMarker(() => reactLeaflet.Marker);
-          setPopup(() => reactLeaflet.Popup);
-          setIsLoaded(true);
-        } catch (error) {
-          console.error("Failed to load React Leaflet:", error);
+        if (!document.querySelector('link[href*="leaflet.css"]')) {
+          const link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+          link.integrity =
+            "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=";
+          link.crossOrigin = "";
+          document.head.append(link);
         }
+
+        if (
+          !document.querySelector(
+            'link[href*="leaflet-defaulticon-compatibility"]'
+          )
+        ) {
+          const iconLink = document.createElement("link");
+          iconLink.rel = "stylesheet";
+          iconLink.href =
+            "https://unpkg.com/leaflet-defaulticon-compatibility@0.1.2/dist/leaflet-defaulticon-compatibility.css";
+          document.head.append(iconLink);
+        }
+
+        if (
+          !document.querySelector(
+            'script[src*="leaflet-defaulticon-compatibility"]'
+          )
+        ) {
+          const script = document.createElement("script");
+          script.src =
+            "https://unpkg.com/leaflet-defaulticon-compatibility@0.1.2/dist/leaflet-defaulticon-compatibility.js";
+          script.async = true;
+
+          await new Promise((resolve, reject) => {
+            script.addEventListener("load", resolve);
+            script.addEventListener("error", reject);
+            document.head.append(script);
+          });
+        }
+
+        const reactLeaflet = await import("react-leaflet");
+        setMapContainer(() => reactLeaflet.MapContainer);
+        setTileLayer(() => reactLeaflet.TileLayer);
+        setMarker(() => reactLeaflet.Marker);
+        setPopup(() => reactLeaflet.Popup);
+        setIsLoaded(true);
       };
 
       loadMap();
@@ -122,7 +124,7 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
         <div className="mx-auto max-w-md p-6 text-center">
           <div className="mb-6">
             <svg
-              className="mx-auto h-12 w-12 text-red-500"
+              className="mx-auto size-12 text-red-500"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

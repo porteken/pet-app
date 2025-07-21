@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
 
   const staticFiles = ["/robots.txt", "/sitemap.xml"];
   if (staticFiles.includes(pathname)) {
-    return new NextResponse(null, { status: 404 });
+    return new NextResponse(undefined, { status: 404 });
   }
 
   const knownRoutes = ["/about", "/map"];
@@ -17,12 +17,12 @@ export function middleware(request: NextRequest) {
     const idPart = pathname.slice(1);
 
     if (!/^\d+$/.test(idPart)) {
-      return new NextResponse(null, { status: 404 });
+      return new NextResponse(undefined, { status: 404 });
     }
 
-    const id = parseInt(idPart, 10);
+    const id = Number.parseInt(idPart, 10);
     if (id <= 0) {
-      return new NextResponse(null, { status: 404 });
+      return new NextResponse(undefined, { status: 404 });
     }
   }
 
@@ -30,14 +30,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

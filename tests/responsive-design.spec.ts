@@ -137,7 +137,7 @@ test.describe("Responsive Design", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    await page.waitForSelector(".leaflet-container", { timeout: 10000 });
+    await page.waitForSelector(".leaflet-container", { timeout: 10_000 });
 
     const markers = page.locator(".leaflet-marker-icon");
     const markerCount = await markers.count();
@@ -164,7 +164,7 @@ test.describe("Responsive Design", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    await page.waitForSelector(".leaflet-container", { timeout: 10000 });
+    await page.waitForSelector(".leaflet-container", { timeout: 10_000 });
 
     const markers = page.locator(".leaflet-marker-icon");
     const markerCount = await markers.count();

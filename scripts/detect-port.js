@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-const { createServer } = require("http");
-const { spawn } = require("child_process");
-const fs = require("fs");
-const path = require("path");
+import { createServer } from "node:http";
+import { spawn } from "node:child_process";
+import { readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
 
-function findAvailablePort(startPort = 3000) {
+export function findAvailablePort(startPort = 3000) {
   return new Promise((resolve, reject) => {
     const server = createServer();
 
@@ -26,25 +26,29 @@ function findAvailablePort(startPort = 3000) {
   });
 }
 
-function updatePlaywrightConfig(port) {
-  const configPath = path.join(__dirname, "..", "playwright.config.ts");
-  let config = fs.readFileSync(configPath, "utf8");
+export function updatePlaywrightConfig(port) {
+  const configPath = path.join(
+    import.meta.dirname,
+    "..",
+    "playwright.config.ts"
+  );
+  let config = readFileSync(configPath, "utf8");
 
-  config = config.replace(
+  config = config.replaceAll(
     /baseURL:\s*"http:\/\/localhost:\d+"/g,
     `baseURL: "http://localhost:${port}"`
   );
 
-  config = config.replace(
+  config = config.replaceAll(
     /url:\s*"http:\/\/localhost:\d+"/g,
     `url: "http://localhost:${port}"`
   );
 
-  fs.writeFileSync(configPath, config);
+  writeFileSync(configPath, config);
   console.log(`✅ Updated Playwright config to use port ${port}`);
 }
 
-async function main() {
+export async function main() {
   try {
     const port = await findAvailablePort(3000);
     console.log(`🔍 Found available port: ${port}`);
@@ -64,14 +68,15 @@ async function main() {
       console.log(`\n🏁 Development server exited with code ${code}`);
       process.exit(code);
     });
-  } catch (err) {
-    console.error("❌ Error:", err);
+  } catch (error) {
+    console.error("❌ Error:", error);
     process.exit(1);
   }
 }
 
-if (require.main === module) {
-  main();
+if (import.meta.url === `file://${process.argv[1]}`) {
+  await main();
 }
 
-module.exports = { findAvailablePort, updatePlaywrightConfig };
+const detectPort = { findAvailablePort, updatePlaywrightConfig };
+export default detectPort;

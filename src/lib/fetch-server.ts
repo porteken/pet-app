@@ -44,12 +44,12 @@ export async function FetchLocations(): Promise<FetchLocationProps> {
       }));
       return { locations: locations, LocationOptions: LocationOptions };
     }
-  } catch (err) {
-    console.error("Error in FetchLocations:", err);
-    if (err instanceof DatabaseError) {
-      throw err;
+  } catch (error) {
+    console.error("Error in FetchLocations:", error);
+    if (error instanceof DatabaseError) {
+      throw error;
     }
-    throw new DatabaseError("Database connection failed", err);
+    throw new DatabaseError("Database connection failed", error);
   }
 }
 
@@ -57,7 +57,7 @@ export async function FetchReferenceGraphData(
   year: string,
   locationId: number
 ): Promise<ReferenceGraphDataProps> {
-  if (!locationId || isNaN(locationId) || locationId <= 0) {
+  if (!locationId || Number.isNaN(locationId) || locationId <= 0) {
     console.error("Invalid locationId:", locationId);
     return { dates: [], pets: [] };
   }
@@ -83,14 +83,14 @@ export async function FetchReferenceGraphData(
     const pets = data.map(({ pet }: { pet: number }) => Number(pet));
 
     return { dates, pets };
-  } catch (err) {
-    console.error("Error in FetchReferenceGraphData server:", err);
-    if (err instanceof DatabaseError) {
-      throw err;
+  } catch (error) {
+    console.error("Error in FetchReferenceGraphData server:", error);
+    if (error instanceof DatabaseError) {
+      throw error;
     }
     throw new DatabaseError(
       "Database connection failed while fetching reference data",
-      err
+      error
     );
   }
 }
@@ -99,7 +99,7 @@ export async function FetchTrendGraphData(
   option: string,
   locationId: number
 ): Promise<TrendGraphDataProps> {
-  if (!locationId || isNaN(locationId) || locationId <= 0) {
+  if (!locationId || Number.isNaN(locationId) || locationId <= 0) {
     console.error("Invalid locationId:", locationId);
     return { years: [], year_pets: [], trendline_pets: [] };
   }
@@ -130,14 +130,14 @@ export async function FetchTrendGraphData(
     );
 
     return { years, year_pets, trendline_pets };
-  } catch (err) {
-    console.error("Error in FetchTrendGraphData server:", err);
-    if (err instanceof DatabaseError) {
-      throw err;
+  } catch (error) {
+    console.error("Error in FetchTrendGraphData server:", error);
+    if (error instanceof DatabaseError) {
+      throw error;
     }
     throw new DatabaseError(
       "Database connection failed while fetching trend data",
-      err
+      error
     );
   }
 }

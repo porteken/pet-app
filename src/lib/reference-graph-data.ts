@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import type { ReferenceGraphDataProps } from "../types/types";
 
 interface PetYearReferenceData {
@@ -64,13 +64,13 @@ function createEmptyResult(): ReferenceGraphDataProps {
 }
 
 function validateDates(dates: Date[]): void {
-  if (dates.some(date => isNaN(date.getTime()))) {
+  if (dates.some(date => Number.isNaN(date.getTime()))) {
     throw new FetchError("Invalid date data detected");
   }
 }
 
 function validatePets(pets: number[]): void {
-  if (pets.some(pet => isNaN(pet))) {
+  if (pets.some(pet => Number.isNaN(pet))) {
     throw new FetchError("Invalid pet count data detected");
   }
 }
@@ -86,7 +86,7 @@ function processData(data: PetYearReferenceData[]): ReferenceGraphDataProps {
 }
 
 async function fetchData(
-  supabase: any,
+  supabase: SupabaseClient,
   locationId: number,
   year: string
 ): Promise<PetYearReferenceData[]> {

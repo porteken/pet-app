@@ -19,7 +19,7 @@ export default function Modal({
     <Transition show={open} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         <div
-          className="fixed inset-0 bg-black bg-opacity-30 transition-opacity"
+          className="fixed inset-0 bg-black/30 transition-opacity"
           style={{
             animation: open ? "fadeIn 300ms ease-out" : "fadeOut 200ms ease-in",
           }}
@@ -27,7 +27,7 @@ export default function Modal({
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 py-8 text-center">
             <div
-              className="relative max-h-[90vh] w-full max-w-4xl transform overflow-y-auto rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+              className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
               style={{
                 animation: open
                   ? "slideIn 300ms ease-out"
@@ -49,7 +49,7 @@ export default function Modal({
                   viewBox="0 0 24 24"
                   strokeWidth={2}
                   stroke="currentColor"
-                  className="h-6 w-6"
+                  className="size-6"
                 >
                   <path
                     strokeLinecap="round"

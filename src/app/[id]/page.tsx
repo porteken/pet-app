@@ -5,9 +5,10 @@ import {
   FetchLocations,
   FetchReferenceGraphData,
   FetchTrendGraphData,
-} from "../../lib/fetchServer";
-import { DatabaseError } from "../../components/DatabaseError";
-
+} from "../../lib/fetch-server";
+import { DatabaseError } from "../../components/database-error";
+import { LocationProps } from "../../types/types";
+import { DropdownSectionProps, DropdownItemProps } from "@heroui/react";
 const Main = dynamic(() => import("../../components/page/page-main"));
 
 export default async function Page({
@@ -17,7 +18,7 @@ export default async function Page({
 }) {
   const { id } = await params;
   const locationId = Number(id);
-  if (isNaN(locationId) || locationId <= 0) {
+  if (Number.isNaN(locationId) || locationId <= 0) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -32,15 +33,30 @@ export default async function Page({
     );
   }
 
-  let locations: any[] = [];
-  let LocationOptions: any[] = [];
+  let locations: LocationProps[] = [];
+  let LocationOptions: Partial<DropdownSectionProps<DropdownItemProps>>[] = [];
 
   try {
     const result = await FetchLocations();
     locations = result.locations;
-    LocationOptions = result.LocationOptions;
-  } catch (error) {
-    console.error("Error fetching locations:", error);
+    LocationOptions = [
+      {
+        items: result.LocationOptions.filter(
+          opt =>
+            (opt as { value?: number; label?: string }).value !== undefined &&
+            (opt as { value?: number; label?: string }).label !== undefined
+        ).map(opt => {
+          const value = (opt as { value: number; label: string }).value;
+          const label = (opt as { value: number; label: string }).label;
+          return {
+            key: String(value), // key must be a string
+            value,
+            label,
+          };
+        }),
+      },
+    ];
+  } catch {
     return (
       <DatabaseError
         title="Database Connection Error"
@@ -65,21 +81,17 @@ export default async function Page({
   let year_pets: number[] = [];
   let trendline_pets: number[] = [];
 
-  try {
-    const currentData = await FetchReferenceGraphData("2023", locationId);
-    pets = currentData.pets;
-    dates = currentData.dates;
+  const currentData = await FetchReferenceGraphData("2023", locationId);
+  pets = currentData.pets;
+  dates = currentData.dates;
 
-    const referenceData = await FetchReferenceGraphData("2000", locationId);
-    reference_pets = referenceData.pets;
+  const referenceData = await FetchReferenceGraphData("2000", locationId);
+  reference_pets = referenceData.pets;
 
-    const trendData = await FetchTrendGraphData("avg", locationId);
-    years = trendData.years;
-    year_pets = trendData.year_pets;
-    trendline_pets = trendData.trendline_pets;
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  }
+  const trendData = await FetchTrendGraphData("avg", locationId);
+  years = trendData.years;
+  year_pets = trendData.year_pets;
+  trendline_pets = trendData.trendline_pets;
 
   const selectedLocation = locations.find(
     (loc: { location_id: number }) => loc.location_id == locationId

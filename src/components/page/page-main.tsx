@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState, FC } from "react";
+import { useCallback, useEffect, useState, FC, ReactElement } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { HeaderBar } from "../header-bar";
@@ -7,12 +7,12 @@ import { GenerateTrendGraph, GenerateReferenceGraph } from "../generate-graph";
 import {
   FetchTrendGraphData,
   FetchReferenceGraphData,
-} from "../../lib/fetchClient";
+} from "../../lib/fetch-client";
 import { PageProps } from "./types";
 
 const DEFAULT_GRAPH_MEASURE = "avg";
 const DEFAULT_REFERENCE_YEAR = "2000";
-const VALID_GRAPH_MEASURES = ["avg", "max"];
+const VALID_GRAPH_MEASURES = new Set(["avg", "max"]);
 
 const Main: FC<PageProps> = ({
   id,
@@ -29,7 +29,7 @@ const Main: FC<PageProps> = ({
   const searchParams = useSearchParams();
 
   const typeParam = searchParams.get("type") ?? "";
-  const graphMeasureFromParams = VALID_GRAPH_MEASURES.includes(typeParam)
+  const graphMeasureFromParams = VALID_GRAPH_MEASURES.has(typeParam)
     ? typeParam
     : DEFAULT_GRAPH_MEASURE;
 
@@ -40,9 +40,8 @@ const Main: FC<PageProps> = ({
     DEFAULT_REFERENCE_YEAR
   );
 
-  const [trendGraph, setTrendGraph] = useState<React.ReactElement | null>(null);
-  const [referenceGraph, setReferenceGraph] =
-    useState<React.ReactElement | null>(null);
+  const [trendGraph, setTrendGraph] = useState<ReactElement | null>();
+  const [referenceGraph, setReferenceGraph] = useState<ReactElement | null>();
 
   const generatePetTrendGraph = useCallback(
     async (option: string) => {
@@ -85,13 +84,14 @@ const Main: FC<PageProps> = ({
   const createQueryString = useCallback(
     (params: Record<string, string>) => {
       const newParams = new URLSearchParams(searchParams.toString());
-      Object.entries(params).forEach(([key, value]) => {
+      for (const [key, value] of Object.entries(params)) {
         if (value) {
           newParams.set(key, value);
         } else {
+          // eslint-disable-next-line drizzle/enforce-delete-with-where
           newParams.delete(key);
         }
-      });
+      }
       return newParams.toString();
     },
     [searchParams]

@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 
-const { spawn } = require("child_process");
-const {
-  findAvailablePort,
-  updatePlaywrightConfig,
-} = require("./detect-port.cjs");
+import { spawn } from "node:child_process";
+import { findAvailablePort, updatePlaywrightConfig } from "./detect-port.js";
 
 async function runTests() {
   try {
@@ -30,10 +27,10 @@ async function runTests() {
       console.error("❌ Error running tests:", err);
       process.exit(1);
     });
-  } catch (err) {
-    console.error("❌ Error:", err);
+  } catch (error) {
+    console.error("❌ Error:", error);
     process.exit(1);
   }
 }
 
-runTests();
+await runTests();

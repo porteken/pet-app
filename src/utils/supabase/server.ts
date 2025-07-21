@@ -13,13 +13,9 @@ export const createClient = async (cookieStore: ReturnType<typeof cookies>) => {
           return resolvedCookieStore.getAll();
         },
         setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              resolvedCookieStore.set(name, value, options)
-            );
-          } catch {
-            // Ignore setAll errors in Server Components
-          }
+          cookiesToSet.forEach(({ name, value, options }) =>
+            resolvedCookieStore.set(name, value, options)
+          );
         },
       },
     }

@@ -4,12 +4,23 @@ import React from "react";
 
 import { FetchLocations } from "../../lib/fetchServer";
 import { ErrorBoundary } from "../../components/ErrorBoundary";
+import { DatabaseError } from "../../components/DatabaseError";
 
 const Home = dynamic(() => import("../../components/home/home-main"));
 
 const Page = async () => {
   try {
     const { locations, LocationOptions } = await FetchLocations();
+
+    if (!locations || locations.length === 0) {
+      return (
+        <DatabaseError
+          title="No Map Data Available"
+          message="Unable to load location data for the map. The database may be temporarily unavailable."
+        />
+      );
+    }
+
     return (
       <ErrorBoundary>
         <Home locations={locations} LocationOptions={LocationOptions} />
@@ -18,16 +29,10 @@ const Page = async () => {
   } catch (error) {
     console.error("Error in map page:", error);
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h1 className="mb-4 text-2xl font-bold text-gray-900">
-            Historical PET USA Map
-          </h1>
-          <p className="text-gray-600">
-            Data temporarily unavailable. Please try again later.
-          </p>
-        </div>
-      </div>
+      <DatabaseError
+        title="Database Connection Error"
+        message="Unable to connect to the database. Please try again later."
+      />
     );
   }
 };

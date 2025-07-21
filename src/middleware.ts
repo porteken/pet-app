@@ -3,27 +3,23 @@ import { NextRequest, NextResponse } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Handle static files and known routes
   const staticFiles = ["/robots.txt", "/sitemap.xml"];
   if (staticFiles.includes(pathname)) {
     return new NextResponse(null, { status: 404 });
   }
 
-  // Handle known routes that should not be processed as [id]
   const knownRoutes = ["/about", "/map"];
   if (knownRoutes.includes(pathname)) {
     return NextResponse.next();
   }
 
   if (pathname.startsWith("/") && pathname.length > 1) {
-    const idPart = pathname.slice(1); // Remove the leading slash
+    const idPart = pathname.slice(1);
 
-    // If it's not a valid number, return 404
     if (!/^\d+$/.test(idPart)) {
       return new NextResponse(null, { status: 404 });
     }
 
-    // If it's 0 or negative, return 404
     const id = parseInt(idPart, 10);
     if (id <= 0) {
       return new NextResponse(null, { status: 404 });

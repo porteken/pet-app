@@ -6,6 +6,7 @@ import {
   FetchReferenceGraphData,
   FetchTrendGraphData,
 } from "../../lib/fetchServer";
+import { DatabaseError } from "../../components/DatabaseError";
 
 const Main = dynamic(() => import("../../components/page/page-main"));
 
@@ -41,32 +42,22 @@ export default async function Page({
   } catch (error) {
     console.error("Error fetching locations:", error);
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h1 className="mb-4 text-2xl font-bold text-gray-900">
-            Data temporarily unavailable
-          </h1>
-          <p className="text-gray-600">Please try again later.</p>
-        </div>
-      </div>
+      <DatabaseError
+        title="Database Connection Error"
+        message="Unable to connect to the database. Please try again later."
+      />
     );
   }
 
-  // Handle case where no locations are found
   if (!locations || locations.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h1 className="mb-4 text-2xl font-bold text-gray-900">
-            No data available
-          </h1>
-          <p className="text-gray-600">Location data could not be loaded.</p>
-        </div>
-      </div>
+      <DatabaseError
+        title="No Data Available"
+        message="Location data could not be loaded. The database may be temporarily unavailable."
+      />
     );
   }
 
-  // Fetch data with error handling
   let pets: number[] = [];
   let dates: Date[] = [];
   let reference_pets: number[] = [];
@@ -88,7 +79,6 @@ export default async function Page({
     trendline_pets = trendData.trendline_pets;
   } catch (error) {
     console.error("Error fetching data:", error);
-    // Continue with empty data arrays
   }
 
   const selectedLocation = locations.find(

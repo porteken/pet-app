@@ -34,7 +34,6 @@ export const HeaderBar = ({
 
   const isActive = (path: string) => pathname === path;
 
-  // Find the current city data if we're on a city page
   const allCities = LocationOptions.flatMap(section =>
     Array.from(section.items || []).map(
       item =>

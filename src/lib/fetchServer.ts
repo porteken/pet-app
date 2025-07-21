@@ -9,6 +9,7 @@ import {
   FetchLocationProps,
 } from "../types/types";
 import { createClient } from "../utils/supabase/server";
+import { DatabaseError } from "../utils/errors";
 
 export async function FetchLocations(): Promise<FetchLocationProps> {
   const cookieStore = cookies();
@@ -20,7 +21,10 @@ export async function FetchLocations(): Promise<FetchLocationProps> {
       .select();
     if (error || !locations) {
       console.error("Error fetching location data:", error);
-      return { locations: [], LocationOptions: [] };
+      throw new DatabaseError(
+        "Failed to fetch location data from database",
+        error
+      );
     } else {
       const states = [...new Set(locations.map(({ state }) => state))].sort();
 
@@ -39,7 +43,10 @@ export async function FetchLocations(): Promise<FetchLocationProps> {
     }
   } catch (err) {
     console.error("Error in FetchLocations:", err);
-    return { locations: [], LocationOptions: [] };
+    if (err instanceof DatabaseError) {
+      throw err;
+    }
+    throw new DatabaseError("Database connection failed", err);
   }
 }
 
@@ -63,7 +70,10 @@ export async function FetchReferenceGraphData(
 
     if (error || !data) {
       console.error("Error fetching reference graph data server:", error);
-      return { dates: [], pets: [] };
+      throw new DatabaseError(
+        "Failed to fetch reference graph data from database",
+        error
+      );
     }
 
     const dates = data.map(({ date }: { date: string }) => new Date(date));
@@ -72,7 +82,13 @@ export async function FetchReferenceGraphData(
     return { dates, pets };
   } catch (err) {
     console.error("Error in FetchReferenceGraphData server:", err);
-    return { dates: [], pets: [] };
+    if (err instanceof DatabaseError) {
+      throw err;
+    }
+    throw new DatabaseError(
+      "Database connection failed while fetching reference data",
+      err
+    );
   }
 }
 
@@ -96,7 +112,10 @@ export async function FetchTrendGraphData(
 
     if (error || !data) {
       console.error("Error fetching trend graph data server:", error);
-      return { years: [], year_pets: [], trendline_pets: [] };
+      throw new DatabaseError(
+        "Failed to fetch trend graph data from database",
+        error
+      );
     }
 
     const years = data.map(({ year }: { year: number }) => year);
@@ -110,6 +129,12 @@ export async function FetchTrendGraphData(
     return { years, year_pets, trendline_pets };
   } catch (err) {
     console.error("Error in FetchTrendGraphData server:", err);
-    return { years: [], year_pets: [], trendline_pets: [] };
+    if (err instanceof DatabaseError) {
+      throw err;
+    }
+    throw new DatabaseError(
+      "Database connection failed while fetching trend data",
+      err
+    );
   }
 }

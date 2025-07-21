@@ -1,4 +1,3 @@
-// Type definitions for validation
 export interface Location {
   location_id: number;
   lat: number;
@@ -24,8 +23,6 @@ export interface GraphOption {
 }
 
 export type TrendOption = "avg" | "max";
-
-// Validation functions
 
 export const validateTrendGraphData = (
   data: unknown

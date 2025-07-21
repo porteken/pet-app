@@ -38,12 +38,11 @@ const Plot = dynamic(() => import("react-plotly.js"), {
   ),
 });
 
-// Graph color scheme for better accessibility
 const GRAPH_COLORS = {
-  primary: "#ef4444", // red-500
-  secondary: "#000000", // black
-  background: "#ffffff", // white
-  grid: "#e5e7eb", // gray-200
+  primary: "#ef4444",
+  secondary: "#000000",
+  background: "#ffffff",
+  grid: "#e5e7eb",
 } as const;
 
 const PlotWrapper: React.FC<{
@@ -107,7 +106,7 @@ export const GenerateTrendGraph = (
     plot_bgcolor: GRAPH_COLORS.background,
     paper_bgcolor: GRAPH_COLORS.background,
     font: {
-      color: "#374151", // gray-700
+      color: "#374151",
     },
     margin: {
       l: 40,
@@ -190,7 +189,7 @@ export const GenerateReferenceGraph = async (
     plot_bgcolor: GRAPH_COLORS.background,
     paper_bgcolor: GRAPH_COLORS.background,
     font: {
-      color: "#374151", // gray-700
+      color: "#374151",
     },
     margin: {
       l: 40,

@@ -35,7 +35,7 @@ test.describe("About Page", () => {
 
     if (await mapLink.isVisible()) {
       await mapLink.click();
-      await expect(page).toHaveURL(/^http:\/\/localhost:3000\/?$/);
+      await expect(page).toHaveURL(/^http:\/\/localhost:\d+\/?$/);
     }
   });
 });

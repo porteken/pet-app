@@ -61,10 +61,37 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
           trendline_pets
         );
         setPetGraph(graph);
-      } catch {
+      } catch (error) {
+        console.error("Error loading graph:", error);
         setPetGraph(
-          <div className="flex h-[300px] items-center justify-center text-gray-500">
-            Error loading graph
+          <div className="flex h-[300px] w-full flex-col items-center justify-center">
+            <div className="text-center">
+              <div className="mb-4 text-red-500">
+                <svg
+                  className="mx-auto h-8 w-8"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              <p className="mb-2 text-gray-600">Unable to load graph data</p>
+              <p className="text-sm text-gray-500">
+                Contact Kenneth Porter at{" "}
+                <a
+                  href="mailto:porteken@gmail.com"
+                  className="text-blue-600 underline hover:text-blue-800"
+                >
+                  porteken@gmail.com
+                </a>
+              </p>
+            </div>
           </div>
         );
       } finally {

@@ -1,4 +1,3 @@
-// Application constants
 export const APP_CONFIG = {
   NAME: "Historical PET USA",
   DESCRIPTION: "Historical PET values from 2000-2023 of large US cities",
@@ -7,7 +6,6 @@ export const APP_CONFIG = {
   STUDY_URL: "https://bjsm.bmj.com/content/55/15/825",
 } as const;
 
-// Map constants
 export const MAP_CONFIG = {
   DEFAULT_CENTER: [39.5, -98.35] as [number, number],
   DEFAULT_ZOOM: 5,
@@ -16,7 +14,6 @@ export const MAP_CONFIG = {
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 } as const;
 
-// Graph constants
 export const GRAPH_CONFIG = {
   DEFAULT_SIZE: 500,
   TREND_OPTIONS: {
@@ -31,7 +28,6 @@ export const GRAPH_CONFIG = {
   },
 } as const;
 
-// Data validation constants
 export const VALIDATION_CONFIG = {
   YEAR_RANGE: {
     MIN: 1900,
@@ -49,7 +45,6 @@ export const VALIDATION_CONFIG = {
   },
 } as const;
 
-// Error messages
 export const ERROR_MESSAGES = {
   INVALID_LOCATION_ID: "Invalid location ID provided",
   INVALID_YEAR_FORMAT: "Year must be in YYYY format",
@@ -60,7 +55,6 @@ export const ERROR_MESSAGES = {
   VALIDATION_ERROR: "Data validation failed",
 } as const;
 
-// Success messages
 export const SUCCESS_MESSAGES = {
   DATA_LOADED: "Data loaded successfully",
   GRAPH_GENERATED: "Graph generated successfully",

@@ -116,6 +116,48 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
     );
   }
 
+  if (!locations || locations.length === 0) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="mx-auto max-w-md p-6 text-center">
+          <div className="mb-6">
+            <svg
+              className="mx-auto h-12 w-12 text-red-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+              />
+            </svg>
+          </div>
+          <h1 className="mb-4 text-2xl font-bold text-gray-900">
+            No Map Data Available
+          </h1>
+          <p className="mb-6 text-gray-600">
+            Unable to load location data for the map. The database may be
+            temporarily unavailable.
+          </p>
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <p className="text-sm text-blue-800">
+              <strong>Need help?</strong> Contact Kenneth Porter at{" "}
+              <a
+                href="mailto:porteken@gmail.com"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                porteken@gmail.com
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <MapContainer
       center={[39.5, -98.35]}

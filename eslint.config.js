@@ -12,9 +12,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+const compat = new FlatCompat({ baseDirectory: __dirname });
 
 /** @type {import('eslint').Linter.Config[]} */
 const config = [
@@ -28,15 +26,11 @@ const config = [
       "@typescript-eslint": tseslint.plugin,
     },
     languageOptions: {
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-      },
+      globals: { ...globals.browser, ...globals.node },
       parser: tseslint.parser,
       parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
+        ecmaFeatures: { jsx: true },
+        // project: "./tsconfig.json", // Uncomment for type-aware linting
       },
     },
     rules: {
@@ -57,7 +51,6 @@ const config = [
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    // Configuration for React files
     files: ["**/*.{jsx,tsx}"],
     ...pluginReact.configs.flat.recommended,
     rules: {
@@ -71,9 +64,7 @@ const config = [
   ...compat.config({
     extends: ["next/core-web-vitals"],
     settings: {
-      next: {
-        rootDir: ".",
-      },
+      next: { rootDir: "." },
     },
   }),
   ...compat.config({

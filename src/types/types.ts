@@ -1,30 +1,30 @@
 import { DropdownItemProps, DropdownSectionProps } from "@heroui/react";
 
-export interface LocationProps {
+export interface LocationProperties {
   location_id: number;
   lat: number;
   lng: number;
   city: string;
   state: string;
 }
-export interface TrendGraphDataProps {
+export interface TrendGraphDataProperties {
   years: number[];
   year_pets: number[];
   trendline_pets: number[];
 }
-export interface ReferenceGraphDataProps {
+export interface ReferenceGraphDataProperties {
   dates: Date[];
   pets: number[];
 }
-interface AxisProps {
+interface AxisProperties {
   title: string;
   tickformat?: string;
   gridcolor?: string;
   zeroline?: boolean;
 }
-export interface LayoutProps {
-  xaxis: AxisProps;
-  yaxis: AxisProps;
+export interface LayoutProperties {
+  xaxis: AxisProperties;
+  yaxis: AxisProperties;
   width?: number;
   height?: number;
   title: string;
@@ -40,17 +40,17 @@ export interface LayoutProps {
     b: number;
   };
 }
-export interface SelectOptionProps {
+export interface SelectOptionProperties {
   key: string;
   label: string;
 }
-export interface NavProps {
+export interface NavProperties {
   name?: string;
   LocationOptions: Partial<DropdownSectionProps<DropdownItemProps>>[];
   id?: number;
 }
 
-export interface FetchLocationProps {
-  locations: LocationProps[];
+export interface FetchLocationProperties {
+  locations: LocationProperties[];
   LocationOptions: Partial<DropdownSectionProps<DropdownItemProps>>[];
 }

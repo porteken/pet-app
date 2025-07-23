@@ -8,13 +8,13 @@ import {
   FetchTrendGraphData,
   FetchReferenceGraphData,
 } from "../../lib/fetch-client";
-import { PageProps } from "./types";
+import { PageProperties } from "./types";
 
 const DEFAULT_GRAPH_MEASURE = "avg";
 const DEFAULT_REFERENCE_YEAR = "2000";
 const VALID_GRAPH_MEASURES = new Set(["avg", "max"]);
 
-const Main: FC<PageProps> = ({
+const Main: FC<PageProperties> = ({
   id,
   location,
   LocationOptions,
@@ -26,15 +26,15 @@ const Main: FC<PageProps> = ({
   Years,
 }) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParameters = useSearchParams();
 
-  const typeParam = searchParams.get("type") ?? "";
-  const graphMeasureFromParams = VALID_GRAPH_MEASURES.has(typeParam)
-    ? typeParam
+  const typeParameter = searchParameters.get("type") ?? "";
+  const graphMeasureFromParameters = VALID_GRAPH_MEASURES.has(typeParameter)
+    ? typeParameter
     : DEFAULT_GRAPH_MEASURE;
 
   const [selectedGraphMeasure, setSelectedGraphMeasure] = useState(
-    graphMeasureFromParams
+    graphMeasureFromParameters
   );
   const [selectedReferenceYear, setSelectedReferenceYear] = useState(
     DEFAULT_REFERENCE_YEAR
@@ -82,19 +82,19 @@ const Main: FC<PageProps> = ({
   );
 
   const createQueryString = useCallback(
-    (params: Record<string, string>) => {
-      const newParams = new URLSearchParams(searchParams.toString());
-      for (const [key, value] of Object.entries(params)) {
+    (parameters: Record<string, string>) => {
+      const newParameters = new URLSearchParams(searchParameters.toString());
+      for (const [key, value] of Object.entries(parameters)) {
         if (value) {
-          newParams.set(key, value);
+          newParameters.set(key, value);
         } else {
-          newParams.delete(key);
+          newParameters.delete(key);
         }
       }
 
-      return newParams.toString();
+      return newParameters.toString();
     },
-    [searchParams]
+    [searchParameters]
   );
 
   const handleGraphMeasureChange = useCallback(
@@ -152,7 +152,9 @@ const Main: FC<PageProps> = ({
                 <select
                   id="graph-measure"
                   value={selectedGraphMeasure}
-                  onChange={e => handleGraphMeasureChange(e.target.value)}
+                  onChange={event =>
+                    handleGraphMeasureChange(event.target.value)
+                  }
                   className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="avg">Average</option>
@@ -178,7 +180,9 @@ const Main: FC<PageProps> = ({
                 <select
                   id="reference-year"
                   value={selectedReferenceYear}
-                  onChange={e => handleReferenceYearChange(e.target.value)}
+                  onChange={event =>
+                    handleReferenceYearChange(event.target.value)
+                  }
                   className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="2000">2000</option>

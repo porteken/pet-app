@@ -5,8 +5,8 @@ import { FC } from "react";
 
 import { HeaderBar } from "../header-bar";
 
-import { AboutProps } from "./types";
-const About: FC<AboutProps> = ({ LocationOptions }: AboutProps) => {
+import { AboutProperties } from "./types";
+const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => {
   return (
     <>
       <HeaderBar LocationOptions={LocationOptions} />

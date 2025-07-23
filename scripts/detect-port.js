@@ -14,18 +14,18 @@ export function findAvailablePort(startPort = 3000) {
       server.close(() => resolve(port));
     });
 
-    server.on("error", err => {
-      if (err.code === "EADDRINUSE") {
+    server.on("error", error => {
+      if (error.code === "EADDRINUSE") {
         (async () => {
           try {
             const port = await findAvailablePort(startPort + 1);
             resolve(port);
-          } catch (e) {
-            reject(e);
+          } catch (error_) {
+            reject(error_);
           }
         })();
       } else {
-        reject(err);
+        reject(error);
       }
     });
   });
@@ -64,12 +64,12 @@ export async function main() {
 
     console.log(`🚀 Starting development server on port ${port}...`);
 
-    const devServer = spawn("npm", ["run", "dev"], {
+    const developmentServer = spawn("npm", ["run", "dev"], {
       stdio: "inherit",
       env: { ...process.env, PORT: port.toString() },
     });
 
-    devServer.on("close", code => {
+    developmentServer.on("close", code => {
       console.log(`\n🏁 Development server exited with code ${code}`);
       process.exit(code);
     });

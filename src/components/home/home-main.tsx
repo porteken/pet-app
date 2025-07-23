@@ -6,21 +6,25 @@ import { FC, useCallback, useState, ReactElement } from "react";
 
 import { FetchTrendGraphData } from "../../lib/fetch-client";
 import { GraphOptions } from "../../lib/select-options";
-import { LocationProps } from "../../types/types";
+import { LocationProperties } from "../../types/types";
 import { GenerateTrendGraph } from "../generate-graph";
 import { HeaderBar } from "../header-bar";
 import Modal from "../modal";
 
 import MapComponent from "./map-component";
-import { MapProps } from "./types";
+import { MapProperties } from "./types";
 
 const defaultGraphMeasure = "avg";
 
-const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
+const Home: FC<MapProperties> = ({
+  LocationOptions,
+  locations,
+}: MapProperties) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParameters = useSearchParams();
 
-  const initialGraphMeasure = searchParams.get("type") || defaultGraphMeasure;
+  const initialGraphMeasure =
+    searchParameters.get("type") || defaultGraphMeasure;
 
   const [petGraph, setPetGraph] = useState<ReactElement | null>();
   const [graphLoading, setGraphLoading] = useState(false);
@@ -29,19 +33,19 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
   const [selectedLocationId, setSelectedLocationId] = useState<number | null>();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] =
-    useState<LocationProps | null>();
+    useState<LocationProperties | null>();
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const parameters = new URLSearchParams(searchParameters.toString());
       if (value) {
-        params.set(name, value);
+        parameters.set(name, value);
       } else {
-        params.delete(name);
+        parameters.delete(name);
       }
-      router.push(`?${params.toString()}`);
+      router.push(`?${parameters.toString()}`);
     },
-    [searchParams, router]
+    [searchParameters, router]
   );
 
   const generateGraph = useCallback(
@@ -143,7 +147,7 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
               items={GraphOptions}
               selectedKeys={new Set([selectedGraphMeasure])}
               className="w-full"
-              onChange={e => handleSelectChange(e.target.value)}
+              onChange={event => handleSelectChange(event.target.value)}
             >
               {GraphOptions.map(option => (
                 <SelectItem key={option.key}>{option.label}</SelectItem>

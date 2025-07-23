@@ -60,8 +60,8 @@ test.describe("Accessibility", () => {
     const links = page.locator("a");
     const linkCount = await links.count();
 
-    for (let i = 0; i < Math.min(linkCount, 5); i++) {
-      const link = links.nth(i);
+    for (let index = 0; index < Math.min(linkCount, 5); index++) {
+      const link = links.nth(index);
       const linkText = await link.textContent();
       expect(linkText).toBeTruthy();
       expect(linkText?.trim()).not.toBe("");
@@ -75,8 +75,8 @@ test.describe("Accessibility", () => {
     const buttons = page.locator("button");
     const buttonCount = await buttons.count();
 
-    for (let i = 0; i < Math.min(buttonCount, 5); i++) {
-      const button = buttons.nth(i);
+    for (let index = 0; index < Math.min(buttonCount, 5); index++) {
+      const button = buttons.nth(index);
       const buttonText = await button.textContent();
       if (buttonText) {
         expect(buttonText.trim()).not.toBe("");
@@ -92,8 +92,8 @@ test.describe("Accessibility", () => {
     const imageCount = await images.count();
 
     let hasValidAltText = false;
-    for (let i = 0; i < imageCount; i++) {
-      const image = images.nth(i);
+    for (let index = 0; index < imageCount; index++) {
+      const image = images.nth(index);
       const altText = await image.getAttribute("alt");
       if (altText !== null && altText.trim() !== "") {
         hasValidAltText = true;
@@ -110,8 +110,8 @@ test.describe("Accessibility", () => {
     const elementsWithAriaLabel = page.locator("[aria-label]");
     const ariaLabelCount = await elementsWithAriaLabel.count();
 
-    for (let i = 0; i < ariaLabelCount; i++) {
-      const element = elementsWithAriaLabel.nth(i);
+    for (let index = 0; index < ariaLabelCount; index++) {
+      const element = elementsWithAriaLabel.nth(index);
       const ariaLabel = await element.getAttribute("aria-label");
       expect(ariaLabel).toBeTruthy();
       expect(ariaLabel?.trim()).not.toBe("");

@@ -2,13 +2,13 @@
 
 import React from "react";
 
-interface DatabaseErrorProps {
+interface DatabaseErrorProperties {
   title?: string;
   message?: string;
   showContactInfo?: boolean;
 }
 
-export const DatabaseError: React.FC<DatabaseErrorProps> = ({
+export const DatabaseError: React.FC<DatabaseErrorProperties> = ({
   title = "Database Connection Error",
   message = "Unable to connect to the database. Please try again later.",
   showContactInfo = true,

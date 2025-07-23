@@ -7,7 +7,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import React from "react";
 
-import { NavProps } from "../types/types";
+import { NavProperties } from "../types/types";
 
 import { APP_CONFIG } from "@/utils/constants";
 
@@ -20,14 +20,14 @@ interface LocationItem {
 export const HeaderBar = ({
   LocationOptions,
   id,
-}: NavProps): React.ReactElement => {
-  const searchParams = useSearchParams();
+}: NavProperties): React.ReactElement => {
+  const searchParameters = useSearchParams();
   const pathname = usePathname();
 
-  const buildUrl = (path: string, includeSearchParams = true) => {
+  const buildUrl = (path: string, includeSearchParameters = true) => {
     const baseUrl = path;
-    if (includeSearchParams && searchParams.toString() !== "") {
-      return `${baseUrl}?${searchParams.toString()}`;
+    if (includeSearchParameters && searchParameters.toString() !== "") {
+      return `${baseUrl}?${searchParameters.toString()}`;
     }
 
     return baseUrl;
@@ -110,9 +110,9 @@ export const HeaderBar = ({
                 }}
                 clearIcon={undefined}
                 sx={{ width: 300, backgroundColor: "white", borderRadius: 1 }}
-                renderInput={params => (
+                renderInput={parameters => (
                   <TextField
-                    {...params}
+                    {...parameters}
                     label={id! >= 0 ? "Change City" : "Select City"}
                     variant="outlined"
                     size="small"

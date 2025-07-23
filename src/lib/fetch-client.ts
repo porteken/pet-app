@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import type { TrendGraphDataProps } from "../types/types";
+import type { TrendGraphDataProperties } from "../types/types";
 
 interface PetYearAvgMaxData {
   year: number;
@@ -28,7 +28,7 @@ const calculateTrendline = (years: number[], yearPets: number[]): number[] => {
   const n = years.length;
   const sumX = years.reduce((a, b) => a + b, 0);
   const sumY = yearPets.reduce((a, b) => a + b, 0);
-  const sumXY = years.reduce((sum, x, i) => sum + x * yearPets[i], 0);
+  const sumXY = years.reduce((sum, x, index) => sum + x * yearPets[index], 0);
   const sumXX = years.reduce((sum, x) => sum + x * x, 0);
 
   const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
@@ -49,7 +49,7 @@ function logWarning(message: string): void {
   }
 }
 
-function createEmptyTrendResult(): TrendGraphDataProps {
+function createEmptyTrendResult(): TrendGraphDataProperties {
   return { years: [], year_pets: [], trendline_pets: [] };
 }
 
@@ -98,19 +98,19 @@ async function fetchTrendData(
   return data || [];
 }
 
-function handleValidationFailure(message: string): TrendGraphDataProps {
+function handleValidationFailure(message: string): TrendGraphDataProperties {
   logError(message);
 
   return createEmptyTrendResult();
 }
 
-function handleNoData(locationId: number): TrendGraphDataProps {
+function handleNoData(locationId: number): TrendGraphDataProperties {
   logWarning(`No data found for location ${locationId}`);
 
   return createEmptyTrendResult();
 }
 
-function handleProcessingError(error: unknown): TrendGraphDataProps {
+function handleProcessingError(error: unknown): TrendGraphDataProperties {
   const message =
     error instanceof FetchError
       ? error.message
@@ -124,7 +124,7 @@ function handleProcessingError(error: unknown): TrendGraphDataProps {
 export async function FetchTrendGraphData(
   option: string,
   locationId: number
-): Promise<TrendGraphDataProps> {
+): Promise<TrendGraphDataProperties> {
   if (!validateTrendOption(option)) {
     return handleValidationFailure(
       "Invalid trend option. Must be 'avg' or 'max'"

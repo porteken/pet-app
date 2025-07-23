@@ -7,7 +7,7 @@ import {
   FetchTrendGraphData,
 } from "../../lib/fetch-server";
 import { DatabaseError } from "../../components/database-error";
-import { LocationProps } from "../../types/types";
+import { LocationProperties } from "../../types/types";
 import { DropdownSectionProps, DropdownItemProps } from "@heroui/react";
 const Main = dynamic(() => import("../../components/page/page-main"));
 
@@ -33,7 +33,7 @@ export default async function Page({
     );
   }
 
-  let locations: LocationProps[] = [];
+  let locations: LocationProperties[] = [];
   let LocationOptions: Partial<DropdownSectionProps<DropdownItemProps>>[] = [];
 
   try {

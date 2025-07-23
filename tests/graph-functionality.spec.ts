@@ -96,7 +96,7 @@ test.describe("Graph Functionality", () => {
     await expect(locationTitle).toBeVisible();
 
     const locationText = await locationTitle.textContent();
-    expect(locationText).toMatch(/[A-Za-z\s]+, [A-Za-z\s]+/);
+    expect(locationText).toMatch(/[\sA-Za-z]+, [\sA-Za-z]+/);
   });
 
   test("should handle graph loading states", async ({ page }) => {

@@ -2,7 +2,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, ReactNode } from "react";
 
-interface ModalProps {
+interface ModalProperties {
   open: boolean;
   onClose: () => void;
   title?: string;
@@ -14,7 +14,7 @@ export default function Modal({
   onClose,
   title,
   children,
-}: Readonly<ModalProps>) {
+}: Readonly<ModalProperties>) {
   return (
     <Transition show={open} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>

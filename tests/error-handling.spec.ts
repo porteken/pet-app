@@ -130,15 +130,15 @@ test.describe("Error Handling", () => {
   });
 
   test("should handle invalid query parameters", async ({ page }) => {
-    const invalidParams = [
+    const invalidParameters = [
       "/1?type=invalid",
       "/1?type=",
       "/1?type=null",
       "/1?type=undefined",
     ];
 
-    for (const param of invalidParams) {
-      await page.goto(param);
+    for (const parameter of invalidParameters) {
+      await page.goto(parameter);
       await page.waitForLoadState("networkidle");
 
       const measureSelector = page.locator('select[id="graph-measure"]');

@@ -4,14 +4,14 @@ import { SimpleLinearRegression } from "ml-regression-simple-linear";
 import { cookies } from "next/headers";
 
 import {
-  TrendGraphDataProps,
-  ReferenceGraphDataProps,
-  FetchLocationProps,
+  TrendGraphDataProperties,
+  ReferenceGraphDataProperties,
+  FetchLocationProperties,
 } from "../types/types";
 import { createClient } from "../utils/supabase/server";
 import { DatabaseError } from "../utils/errors";
 
-export async function FetchLocations(): Promise<FetchLocationProps> {
+export async function FetchLocations(): Promise<FetchLocationProperties> {
   const cookieStore = cookies();
   const supabase = await createClient(cookieStore);
 
@@ -57,7 +57,7 @@ export async function FetchLocations(): Promise<FetchLocationProps> {
 export async function FetchReferenceGraphData(
   year: string,
   locationId: number
-): Promise<ReferenceGraphDataProps> {
+): Promise<ReferenceGraphDataProperties> {
   if (!locationId || Number.isNaN(locationId) || locationId <= 0) {
     console.error("Invalid locationId:", locationId);
 
@@ -100,7 +100,7 @@ export async function FetchReferenceGraphData(
 export async function FetchTrendGraphData(
   option: string,
   locationId: number
-): Promise<TrendGraphDataProps> {
+): Promise<TrendGraphDataProperties> {
   if (!locationId || Number.isNaN(locationId) || locationId <= 0) {
     console.error("Invalid locationId:", locationId);
 

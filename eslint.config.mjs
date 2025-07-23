@@ -8,6 +8,7 @@ import pluginReact from "eslint-plugin-react";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import tailwind from "eslint-plugin-tailwindcss";
+import eslintPluginUnicorn from "eslint-plugin-unicorn";
 export default [
   {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
@@ -33,6 +34,7 @@ export default [
   pluginReact.configs.flat["jsx-runtime"], // ? https://github.com/jsx-eslint/eslint-plugin-react
   eslintConfigPrettier, // ? https://github.com/prettier/eslint-config-prettier
   ...tailwind.configs["flat/recommended"],
+  eslintPluginUnicorn.configs.recommended,
   {
     rules: {
       "no-unused-vars": "off",
@@ -55,13 +57,9 @@ export default [
       "tailwindcss/classnames-order": "off",
       "import/named": "off",
       "import/no-named-as-default-member": "off",
+      "unicorn/better-regex": "warn",
     },
   },
-  // ! ===================== DISCLAIMER =====================
-  // ! There is no official solution available for new ESLint 9 flat config structure for NextJS
-  // ! The solution is taken from the community and may not be the best practice, use it at your own risk
-  // ? Ref: https://github.com/vercel/next.js/discussions/49337?sort=top#discussioncomment-5998603
-  // ! ======================================================
   {
     plugins: {
       "@next/next": nextPlugin,
@@ -75,6 +73,6 @@ export default [
     },
   },
   {
-    ignores: [".next/*"],
+    ignores: [".next/*", "next-env.d.ts"],
   },
 ];

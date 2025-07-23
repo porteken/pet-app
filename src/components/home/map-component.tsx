@@ -42,12 +42,12 @@ type PopupType = ComponentType<{
   children?: ReactNode;
 }>;
 
-interface MapComponentProps {
+interface MapComponentProperties {
   locations: Location[];
   onMarkerClick: (_locationId: number) => void;
 }
 
-const MapComponent = ({ locations, onMarkerClick }: MapComponentProps) => {
+const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
   const [MapContainer, setMapContainer] = useState<
     MapContainerType | undefined
   >();

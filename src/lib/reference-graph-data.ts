@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import type { ReferenceGraphDataProps } from "../types/types";
+import type { ReferenceGraphDataProperties } from "../types/types";
 
 interface PetYearReferenceData {
   date: string;
@@ -59,7 +59,7 @@ function logMessage(message: string, level: "error" | "warn" = "error"): void {
   }
 }
 
-function createEmptyResult(): ReferenceGraphDataProps {
+function createEmptyResult(): ReferenceGraphDataProperties {
   return { dates: [], pets: [] };
 }
 
@@ -75,7 +75,9 @@ function validatePets(pets: number[]): void {
   }
 }
 
-function processData(data: PetYearReferenceData[]): ReferenceGraphDataProps {
+function processData(
+  data: PetYearReferenceData[]
+): ReferenceGraphDataProperties {
   const dates = data.map(({ date }) => new Date(date));
   const pets = data.map(({ pet }) => Number(pet));
 
@@ -117,7 +119,9 @@ async function fetchData(
   }
 }
 
-function handleValidationFailure(message: string): ReferenceGraphDataProps {
+function handleValidationFailure(
+  message: string
+): ReferenceGraphDataProperties {
   logValidationError(message);
 
   return createEmptyResult();
@@ -126,13 +130,13 @@ function handleValidationFailure(message: string): ReferenceGraphDataProps {
 function handleNoData(
   locationId: number,
   year: string
-): ReferenceGraphDataProps {
+): ReferenceGraphDataProperties {
   logNoDataWarning(locationId, year);
 
   return createEmptyResult();
 }
 
-function handleProcessingError(error: unknown): ReferenceGraphDataProps {
+function handleProcessingError(error: unknown): ReferenceGraphDataProperties {
   let message: string;
 
   if (error instanceof FetchError) {
@@ -151,7 +155,7 @@ function handleProcessingError(error: unknown): ReferenceGraphDataProps {
 export async function FetchReferenceGraphData(
   year: string,
   locationId: number
-): Promise<ReferenceGraphDataProps> {
+): Promise<ReferenceGraphDataProperties> {
   try {
     const supabase = createSupabaseClient();
 

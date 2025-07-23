@@ -1,10 +1,10 @@
 import { DropdownItemProps, DropdownSectionProps } from "@heroui/react";
 
-import { LocationProps } from "../../types/types";
+import { LocationProperties } from "../../types/types";
 export * from "../../types/types";
-export interface PageProps {
+export interface PageProperties {
   id: number;
-  location: LocationProps;
+  location: LocationProperties;
   LocationOptions: Partial<DropdownSectionProps<DropdownItemProps>>[];
   CurrentPets: number[];
   CurrentDates: Date[];
@@ -13,7 +13,7 @@ export interface PageProps {
   TrendlinePets: number[];
   Years: number[];
 }
-export interface PetTrendProps {
+export interface PetTrendProperties {
   year_option?: string;
   reference_option?: string;
 }

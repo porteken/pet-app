@@ -23,8 +23,8 @@ async function runTests() {
       process.exit(code);
     });
 
-    testProcess.on("error", err => {
-      console.error("❌ Error running tests:", err);
+    testProcess.on("error", error => {
+      console.error("❌ Error running tests:", error);
       process.exit(1);
     });
   } catch (error) {

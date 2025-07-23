@@ -9,11 +9,8 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "target": "es2022",
     "isolatedModules": true,
-    "noUnusedLocals": true,
     "jsx": "preserve",
-    "types": ["react"],
     "incremental": true,
     "plugins": [
       {
@@ -22,15 +19,9 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "target": "ES2023"
   },
-  "include": [
-    "next-env.d.ts",
-    "src/app/*.ts*",
-    "src/components/**/*.ts*",
-    "src/components/*.ts*",
-    ".next/types/**/*.ts",
-    "src/app/index.tsx"
-  ],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }

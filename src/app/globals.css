@@ -1,76 +1,77 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Leaflet map container styles */
-.leaflet-container {
-  height: 100vh !important;
-  width: 100% !important;
-  z-index: 1;
-}
-
-/* Prevent layout shifts during map loading */
-.map-loading {
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Error state styling */
-.map-error {
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 0.5rem;
-}
-
-/* Ensure proper z-index for popups */
-.leaflet-popup {
-  z-index: 1000;
-}
-
-/* Custom scrollbar for better UX */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-:root {
-  --foreground-rgb: 0, 0, 0;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+@layer theme, base, mui, components, utilities;
+@layer utilities {
+  /* Leaflet map container styles */
+  .leaflet-container {
+    height: 100vh !important;
+    width: 100% !important;
+    z-index: 1;
   }
-}
 
-body {
-  color: rgb(var(--foreground-rgb));
-  margin: 0;
-  padding: 0;
-}
+  /* Prevent layout shifts during map loading */
+  .map-loading {
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
+  /* Error state styling */
+  .map-error {
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.5rem;
+  }
+
+  /* Ensure proper z-index for popups */
+  .leaflet-popup {
+    z-index: 1000;
+  }
+
+  /* Custom scrollbar for better UX */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+  :root {
+    --foreground-rgb: 0, 0, 0;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --foreground-rgb: 255, 255, 255;
+    }
+  }
+
+  body {
+    color: rgb(var(--foreground-rgb));
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
 }
 
 @layer utilities {

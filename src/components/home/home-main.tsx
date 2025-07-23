@@ -2,7 +2,8 @@
 
 import { Button, Select, SelectItem, Spinner } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FC, useCallback, useState, ReactElement } from "react";
+// Import 'useEffect' from React
+import { FC, useCallback, useState, ReactElement, useEffect } from "react";
 
 import { FetchTrendGraphData } from "../../lib/fetch-client";
 import { GraphOptions } from "../../lib/select-options";
@@ -23,17 +24,25 @@ const Home: FC<MapProperties> = ({
   const router = useRouter();
   const searchParameters = useSearchParams();
 
-  const initialGraphMeasure =
-    searchParameters.get("type") || defaultGraphMeasure;
+  // State is now initialized with a consistent default value for SSR and initial client render.
+  const [selectedGraphMeasure, setSelectedGraphMeasure] =
+    useState(defaultGraphMeasure);
 
   const [petGraph, setPetGraph] = useState<ReactElement | null>();
   const [graphLoading, setGraphLoading] = useState(false);
-  const [selectedGraphMeasure, setSelectedGraphMeasure] =
-    useState(initialGraphMeasure);
   const [selectedLocationId, setSelectedLocationId] = useState<number | null>();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] =
     useState<LocationProperties | null>();
+
+  // This effect runs only on the client after hydration to sync state with URL parameters.
+  useEffect(() => {
+    const typeFromUrl = searchParameters.get("type");
+    if (typeFromUrl) {
+      setSelectedGraphMeasure(typeFromUrl);
+    }
+    // This effect should run when the search parameters change.
+  }, [searchParameters]);
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -120,6 +129,7 @@ const Home: FC<MapProperties> = ({
         locations.find(loc => loc.location_id === locationId) || undefined;
       setSelectedLocation(location);
       setModalOpen(true);
+      // At this point, selectedGraphMeasure will have been updated by useEffect if 'type' was in the URL
       await generateGraph(locationId, selectedGraphMeasure);
     },
     [generateGraph, selectedGraphMeasure, locations]
@@ -140,7 +150,7 @@ const Home: FC<MapProperties> = ({
             : undefined
         }
       >
-        <div className="flex min-h-[340px] w-full min-w-[320px] max-w-[90vw] flex-col items-center space-y-4">
+        <div className="flex min-h-[340px] w-full max-w-[90vw] min-w-[320px] flex-col items-center space-y-4">
           <div className="w-full max-w-md">
             <Select
               label="Measure"

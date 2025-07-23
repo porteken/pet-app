@@ -6,6 +6,9 @@
     "connectionId": "porteken",
     "projectKey": "porteken_pet-app"
   },
+  "tailwindCSS.experimental.classRegex": [
+    ["className\\s*:\\s*['\"]([^'\"]*)['\"]"]
+  ],
   // JS
   "javascript.updateImportsOnFileMove.enabled": "always",
   // TS

@@ -155,7 +155,7 @@ const Main: FC<PageProperties> = ({
                   onChange={event =>
                     handleGraphMeasureChange(event.target.value)
                   }
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                 >
                   <option value="avg">Average</option>
                   <option value="max">Maximum</option>
@@ -183,7 +183,7 @@ const Main: FC<PageProperties> = ({
                   onChange={event =>
                     handleReferenceYearChange(event.target.value)
                   }
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                 >
                   <option value="2000">2000</option>
                   <option value="2001">2001</option>
@@ -208,7 +208,6 @@ const Main: FC<PageProperties> = ({
                   <option value="2020">2020</option>
                   <option value="2021">2021</option>
                   <option value="2022">2022</option>
-                  <option value="2023">2023</option>
                 </select>
               </div>
               <div className="h-96">{referenceGraph}</div>

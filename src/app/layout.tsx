@@ -1,7 +1,7 @@
-import CssBaseline from "@mui/material/CssBaseline";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import * as React from "react";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 
 import "./globals.css";
 
@@ -19,9 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning={true} className={inter.className}>
-        <CssBaseline />
-        {children}
+      <body className={inter.className}>
+        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+          {children}
+        </AppRouterCacheProvider>
       </body>
     </html>
   );

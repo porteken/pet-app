@@ -16,9 +16,14 @@ export function findAvailablePort(startPort = 3000) {
 
     server.on("error", err => {
       if (err.code === "EADDRINUSE") {
-        findAvailablePort(startPort + 1)
-          .then(resolve)
-          .catch(reject);
+        (async () => {
+          try {
+            const port = await findAvailablePort(startPort + 1);
+            resolve(port);
+          } catch (e) {
+            reject(e);
+          }
+        })();
       } else {
         reject(err);
       }

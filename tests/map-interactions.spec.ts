@@ -27,6 +27,7 @@ test.describe("Map Interactions", () => {
 
     if (markerCount === 0) {
       console.log("No markers found, skipping modal test");
+
       return;
     }
 
@@ -49,6 +50,7 @@ test.describe("Map Interactions", () => {
 
     if (markerCount === 0) {
       console.log("No markers found, skipping dropdown test");
+
       return;
     }
 
@@ -73,6 +75,7 @@ test.describe("Map Interactions", () => {
 
     if (markerCount === 0) {
       console.log("No markers found, skipping link test");
+
       return;
     }
 

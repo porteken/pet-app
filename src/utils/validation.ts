@@ -61,6 +61,7 @@ export const validateReferenceGraphData = (
 
 export const validateYear = (data: unknown): data is string => {
   if (typeof data !== "string") return false;
+
   return /^\d{4}$/.test(data);
 };
 

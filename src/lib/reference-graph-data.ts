@@ -119,6 +119,7 @@ async function fetchData(
 
 function handleValidationFailure(message: string): ReferenceGraphDataProps {
   logValidationError(message);
+
   return createEmptyResult();
 }
 
@@ -127,6 +128,7 @@ function handleNoData(
   year: string
 ): ReferenceGraphDataProps {
   logNoDataWarning(locationId, year);
+
   return createEmptyResult();
 }
 
@@ -142,6 +144,7 @@ function handleProcessingError(error: unknown): ReferenceGraphDataProps {
   }
 
   logMessage(message);
+
   return createEmptyResult();
 }
 

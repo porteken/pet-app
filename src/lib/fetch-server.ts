@@ -42,6 +42,7 @@ export async function FetchLocations(): Promise<FetchLocationProps> {
             title: city,
           })),
       }));
+
       return { locations: locations, LocationOptions: LocationOptions };
     }
   } catch (error) {
@@ -59,6 +60,7 @@ export async function FetchReferenceGraphData(
 ): Promise<ReferenceGraphDataProps> {
   if (!locationId || Number.isNaN(locationId) || locationId <= 0) {
     console.error("Invalid locationId:", locationId);
+
     return { dates: [], pets: [] };
   }
 
@@ -101,6 +103,7 @@ export async function FetchTrendGraphData(
 ): Promise<TrendGraphDataProps> {
   if (!locationId || Number.isNaN(locationId) || locationId <= 0) {
     console.error("Invalid locationId:", locationId);
+
     return { years: [], year_pets: [], trendline_pets: [] };
   }
 

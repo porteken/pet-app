@@ -37,7 +37,6 @@ const Home: FC<MapProps> = ({ LocationOptions, locations }: MapProps) => {
       if (value) {
         params.set(name, value);
       } else {
-        // eslint-disable-next-line drizzle/enforce-delete-with-where
         params.delete(name);
       }
       router.push(`?${params.toString()}`);

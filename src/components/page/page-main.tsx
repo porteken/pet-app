@@ -88,10 +88,10 @@ const Main: FC<PageProps> = ({
         if (value) {
           newParams.set(key, value);
         } else {
-          // eslint-disable-next-line drizzle/enforce-delete-with-where
           newParams.delete(key);
         }
       }
+
       return newParams.toString();
     },
     [searchParams]

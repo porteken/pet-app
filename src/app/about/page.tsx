@@ -12,6 +12,7 @@ const About = dynamic(() => import("../../components/about/about-main"));
 const Page = async () => {
   try {
     const { LocationOptions } = await FetchLocations();
+
     return (
       <ErrorBoundary>
         <About LocationOptions={LocationOptions} />

@@ -29,6 +29,7 @@ export const HeaderBar = ({
     if (includeSearchParams && searchParams.toString() !== "") {
       return `${baseUrl}?${searchParams.toString()}`;
     }
+
     return baseUrl;
   };
 
@@ -100,6 +101,7 @@ export const HeaderBar = ({
                 getOptionLabel={option => option.title}
                 filterOptions={(options, { inputValue }) => {
                   const searchTerm = inputValue.toLowerCase();
+
                   return options.filter(
                     option =>
                       option.title.toLowerCase().includes(searchTerm) ||

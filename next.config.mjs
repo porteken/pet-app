@@ -4,6 +4,7 @@ const withBundleAnalyzer = config => {
     // Dynamic import for bundle analyzer
     return bundleAnalyzer({ enabled: true })(config);
   }
+
   return config;
 };
 

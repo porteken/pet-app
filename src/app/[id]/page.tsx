@@ -48,6 +48,7 @@ export default async function Page({
         ).map(opt => {
           const value = (opt as { value: number; label: string }).value;
           const label = (opt as { value: number; label: string }).label;
+
           return {
             key: String(value), // key must be a string
             value,

@@ -20,6 +20,7 @@ class FetchError extends Error {
 const createSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
   return createClient(supabaseUrl, supabaseKey);
 };
 
@@ -99,11 +100,13 @@ async function fetchTrendData(
 
 function handleValidationFailure(message: string): TrendGraphDataProps {
   logError(message);
+
   return createEmptyTrendResult();
 }
 
 function handleNoData(locationId: number): TrendGraphDataProps {
   logWarning(`No data found for location ${locationId}`);
+
   return createEmptyTrendResult();
 }
 
@@ -114,6 +117,7 @@ function handleProcessingError(error: unknown): TrendGraphDataProps {
       : `Unexpected error in FetchTrendGraphData: ${error}`;
 
   logError(message);
+
   return createEmptyTrendResult();
 }
 

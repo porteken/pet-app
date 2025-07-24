@@ -1,18 +1,24 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Map Page", () => {
-  test("should load the map page", async ({ page }) => {
+  test("should display the map and markers", async ({ page }) => {
     await page.goto("/map");
-
-    // Check that we're on the map page
-    await expect(page).toHaveURL(/.*map/);
+    await expect(page.getByText("Loading map...")).toBeHidden();
+    await expect(page.locator(".leaflet-container")).toBeVisible();
+    const marker = page.locator(".leaflet-marker-icon").first();
+    await expect(marker).toBeVisible();
   });
 
-  test("should display map content", async ({ page }) => {
+  test("should open modal with details when a marker is clicked", async ({
+    page,
+  }) => {
     await page.goto("/map");
-
-    // Check that the page has some content - look for the map container or header
-    const mainContent = page.locator("header").first();
-    await expect(mainContent).toBeVisible();
+    const marker = page.locator(".leaflet-marker-icon").first();
+    await expect(marker).toBeVisible();
+    // eslint-disable-next-line playwright/no-force-option
+    await marker.click({ force: true });
+    await expect(
+      page.getByRole("button", { name: "View Full Details" })
+    ).toBeVisible();
   });
 });

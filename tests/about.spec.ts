@@ -1,23 +1,22 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("About Page", () => {
-  test("should display about page content", async ({ page }) => {
+  test("should display about content", async ({ page }) => {
     await page.goto("/about");
-
-    // Look for any content on the page
-    const mainContent = page
-      .locator("main, div")
-      .filter({ hasText: /Purpose|PET|Application/ });
-    await expect(mainContent.first()).toBeVisible();
+    await expect(page.getByText("Purpose of the Application")).toBeVisible();
+    await expect(page.getByText("What is PET?")).toBeVisible();
+    // Use a more specific locator for the first occurrence
+    await expect(
+      page.locator("text=Physiological Equivalent Temperature").first()
+    ).toBeVisible();
   });
 
-  test("should have navigation back to home", async ({ page }) => {
+  test("should have a link to the PET study", async ({ page }) => {
     await page.goto("/about");
-
-    // Look for the Map link that navigates back to home
-    const mapButton = page.locator('a[href="/"], button:has-text("Map")');
-    await expect(mapButton).toBeVisible();
-    await mapButton.click();
-    await expect(page).toHaveURL(/^http:\/\/localhost:\d+\/?$/);
+    const link = page.getByRole("link", { name: "this" });
+    await expect(link).toHaveAttribute(
+      "href",
+      "https://bjsm.bmj.com/content/55/15/825"
+    );
   });
 });

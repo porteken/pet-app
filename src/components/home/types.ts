@@ -1,8 +1,7 @@
 export * from "../../types/types";
-import { DropdownItemProps, DropdownSectionProps } from "@heroui/react";
 
-import { LocationProperties } from "../../types/types";
+import { LocationOptionSection, LocationProperties } from "../../types/types";
 export interface MapProperties {
+  LocationOptions: LocationOptionSection[];
   locations: LocationProperties[];
-  LocationOptions: Partial<DropdownSectionProps<DropdownItemProps>>[];
 }

@@ -1,56 +1,63 @@
-import { DropdownItemProps, DropdownSectionProps } from "@heroui/react";
+export interface FetchLocationProperties {
+  LocationOptions: LocationOptionSection[];
+  locations: LocationProperties[];
+}
+export interface LayoutProperties {
+  font?: {
+    color: string;
+  };
+  height?: number;
+  margin?: {
+    b: number;
+    l: number;
+    r: number;
+    t: number;
+  };
+  paper_bgcolor?: string;
+  plot_bgcolor?: string;
+  title: string;
+  width?: number;
+  xaxis: AxisProperties;
+  yaxis: AxisProperties;
+}
 
+export interface LocationOptionItem {
+  key: number;
+  title: string;
+}
+export interface LocationOptionSection {
+  items: LocationOptionItem[];
+  title: string;
+}
 export interface LocationProperties {
-  location_id: number;
+  city: string;
   lat: number;
   lng: number;
-  city: string;
+  location_id: number;
   state: string;
 }
-export interface TrendGraphDataProperties {
-  years: number[];
-  year_pets: number[];
-  trendline_pets: number[];
+export interface NavProperties {
+  id?: number;
+  LocationOptions: LocationOptionSection[];
+  name?: string;
 }
 export interface ReferenceGraphDataProperties {
   dates: Date[];
   pets: number[];
 }
-interface AxisProperties {
-  title: string;
-  tickformat?: string;
-  gridcolor?: string;
-  zeroline?: boolean;
-}
-export interface LayoutProperties {
-  xaxis: AxisProperties;
-  yaxis: AxisProperties;
-  width?: number;
-  height?: number;
-  title: string;
-  plot_bgcolor?: string;
-  paper_bgcolor?: string;
-  font?: {
-    color: string;
-  };
-  margin?: {
-    l: number;
-    r: number;
-    t: number;
-    b: number;
-  };
-}
 export interface SelectOptionProperties {
   key: string;
   label: string;
 }
-export interface NavProperties {
-  name?: string;
-  LocationOptions: Partial<DropdownSectionProps<DropdownItemProps>>[];
-  id?: number;
+export interface TrendGraphDataProperties {
+  trendline_pets: number[];
+  year_pets: number[];
+  years: number[];
 }
 
-export interface FetchLocationProperties {
-  locations: LocationProperties[];
-  LocationOptions: Partial<DropdownSectionProps<DropdownItemProps>>[];
+interface AxisProperties {
+  gridcolor?: string;
+  tickformat?: string;
+  title: string;
+  zeroline?: boolean;
 }

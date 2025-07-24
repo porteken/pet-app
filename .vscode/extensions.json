@@ -22,6 +22,8 @@
     "yzhang.markdown-all-in-one",
     "bradlc.vscode-tailwindcss",
     "austenc.tailwind-docs",
-    "stivo.tailwind-fold"
+    "stivo.tailwind-fold",
+    "usernamehw.errorlens",
+    "bradlc.vscode-tailwindcss"
   ]
 }

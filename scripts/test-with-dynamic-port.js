@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { spawn } from "node:child_process";
+
 import { findAvailablePort, updatePlaywrightConfig } from "./detect-port.js";
 
 async function runTests() {
@@ -14,8 +15,8 @@ async function runTests() {
     console.log("🧪 Running Playwright tests...");
 
     const testProcess = spawn("npx", ["playwright", "test"], {
-      stdio: "inherit",
       env: { ...process.env, PORT: port.toString() },
+      stdio: "inherit",
     });
 
     testProcess.on("close", code => {

@@ -2,35 +2,35 @@
 
 import dynamic from "next/dynamic";
 
-import { FetchLocations } from "../lib/fetch-server";
-import { ErrorBoundary } from "../components/error-boundary";
 import { DatabaseError } from "../components/database-error";
+import { ErrorBoundary } from "../components/error-boundary";
+import { FetchLocations } from "../lib/fetch-server";
 
 const Home = dynamic(() => import("../components/home/home-main"));
 
 const Page = async () => {
   try {
-    const { locations, LocationOptions } = await FetchLocations();
+    const { LocationOptions, locations } = await FetchLocations();
 
     if (!locations || locations.length === 0) {
       return (
         <DatabaseError
-          title="No Data Available"
           message="Unable to load location data. The database may be temporarily unavailable."
+          title="No Data Available"
         />
       );
     }
 
     return (
       <ErrorBoundary>
-        <Home locations={locations} LocationOptions={LocationOptions} />
+        <Home LocationOptions={LocationOptions} locations={locations} />
       </ErrorBoundary>
     );
   } catch {
     return (
       <DatabaseError
-        title="Database Connection Error"
         message="Unable to connect to the database. Please try again later."
+        title="Database Connection Error"
       />
     );
   }

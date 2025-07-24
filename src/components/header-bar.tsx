@@ -1,28 +1,29 @@
 "use client";
 
-import { Navbar, NavbarContent, NavbarItem } from "@heroui/react";
+import AppBar from "@mui/material/AppBar";
 import Autocomplete from "@mui/material/Autocomplete";
+import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import Toolbar from "@mui/material/Toolbar";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import React from "react";
-
-import { NavProperties } from "../types/types";
 
 import { APP_CONFIG } from "@/utils/constants";
 
+import { NavProperties } from "../types/types";
+
 interface LocationItem {
   key: number;
-  title: string;
   state: string;
+  title: string;
 }
 
 export const HeaderBar = ({
-  LocationOptions,
   id,
+  LocationOptions,
 }: NavProperties): React.ReactElement => {
   const searchParameters = useSearchParams();
-  const pathname = usePathname();
 
   const buildUrl = (path: string, includeSearchParameters = true) => {
     const baseUrl = path;
@@ -33,15 +34,13 @@ export const HeaderBar = ({
     return baseUrl;
   };
 
-  const isActive = (path: string) => pathname === path;
-
   const allCities = LocationOptions.flatMap(section =>
     [...(section.items || [])].map(
       item =>
         ({
           key: item.key,
-          title: item.title,
           state: section.title,
+          title: item.title,
         }) as LocationItem
     )
   );
@@ -56,100 +55,85 @@ export const HeaderBar = ({
             {APP_CONFIG.NAME}
           </h1>
         </div>
-        <Navbar
-          classNames={{
-            item: [
-              "flex",
-              "relative",
-              "h-full",
-              "items-center",
-              "data-[active=true]:after:content-['']",
-              "data-[active=true]:after:absolute",
-              "data-[active=true]:after:bottom-0",
-              "data-[active=true]:after:left-0",
-              "data-[active=true]:after:right-0",
-              "data-[active=true]:after:h-[2px]",
-              "data-[active=true]:after:rounded-[2px]",
-              "data-[active=true]:after:bg-primary",
-            ],
-          }}
+        <AppBar
+          color="default"
+          position="static"
+          sx={{ backgroundColor: "white", boxShadow: "none" }}
         >
-          <NavbarContent className="hidden gap-4 sm:flex" justify="center">
-            <NavbarItem isActive={isActive("/")}>
-              <Link
-                color="foreground"
-                href={buildUrl("/")}
-                aria-label="Navigate to map view"
-              >
-                Map
-              </Link>
-            </NavbarItem>
+          <Toolbar
+            className="hidden gap-4 sm:flex"
+            sx={{ justifyContent: "center" }}
+          >
+            <Button
+              aria-label="Navigate to map view"
+              color="inherit"
+              component={Link}
+              href={buildUrl("/")}
+            >
+              Map
+            </Button>
 
-            <NavbarItem isActive={id! >= 0}>
-              <Autocomplete<LocationItem>
-                options={LocationOptions.flatMap(section =>
-                  [...(section.items || [])].map(
-                    item =>
-                      ({
-                        key: item.key,
-                        title: item.title,
-                        state: section.title,
-                      }) as LocationItem
-                  )
-                )}
-                groupBy={option => option.state || ""}
-                getOptionLabel={option => option.title}
-                filterOptions={(options, { inputValue }) => {
-                  const searchTerm = inputValue.toLowerCase();
+            <Autocomplete<LocationItem>
+              clearIcon={undefined}
+              filterOptions={(options, { inputValue }) => {
+                const searchTerm = inputValue.toLowerCase();
 
-                  return options.filter(
-                    option =>
-                      option.title.toLowerCase().includes(searchTerm) ||
-                      (option.state || "").toLowerCase().includes(searchTerm)
-                  );
-                }}
-                clearIcon={undefined}
-                sx={{ width: 300, backgroundColor: "white", borderRadius: 1 }}
-                renderInput={parameters => (
-                  <TextField
-                    {...parameters}
-                    label={id! >= 0 ? "Change City" : "Select City"}
-                    variant="outlined"
-                    size="small"
-                  />
-                )}
-                onChange={(_, value) => {
-                  if (value) {
-                    globalThis.location.href = `/${value.key}`;
-                  }
-                }}
-                value={currentCity}
-              />
-            </NavbarItem>
+                return options.filter(
+                  option =>
+                    option.title.toLowerCase().includes(searchTerm) ||
+                    (option.state || "").toLowerCase().includes(searchTerm)
+                );
+              }}
+              getOptionLabel={option => option.title}
+              groupBy={option => option.state || ""}
+              onChange={(_, value) => {
+                if (value) {
+                  globalThis.location.href = `/${value.key}`;
+                }
+              }}
+              options={LocationOptions.flatMap(section =>
+                [...(section.items || [])].map(
+                  item =>
+                    ({
+                      key: item.key,
+                      state: section.title,
+                      title: item.title,
+                    }) as LocationItem
+                )
+              )}
+              renderInput={parameters => (
+                <TextField
+                  {...parameters}
+                  label={id! >= 0 ? "Change City" : "Select City"}
+                  size="small"
+                  variant="outlined"
+                />
+              )}
+              sx={{ backgroundColor: "white", borderRadius: 1, width: 300 }}
+              value={currentCity}
+            />
 
-            <NavbarItem isActive={isActive("/about")}>
-              <Link
-                color="foreground"
-                href="/about"
-                aria-label="Navigate to about page"
-              >
-                About
-              </Link>
-            </NavbarItem>
+            <Button
+              aria-label="Navigate to about page"
+              color="inherit"
+              component={Link}
+              href="/about"
+            >
+              About
+            </Button>
 
-            <NavbarItem>
-              <Link
-                color="foreground"
-                href={APP_CONFIG.GITHUB_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="View source code on GitHub"
-              >
-                Github Repository
-              </Link>
-            </NavbarItem>
-          </NavbarContent>
-        </Navbar>
+            <Button
+              aria-label="View source code on GitHub"
+              color="inherit"
+              component="a"
+              href={APP_CONFIG.GITHUB_URL}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Github Repository
+            </Button>
+          </Toolbar>
+        </AppBar>
       </div>
     </header>
   );

@@ -1,10 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test.describe("Responsive Design", () => {
   test("should display correctly on mobile", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
+    await page.setViewportSize({ height: 667, width: 375 });
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
     const mapContainer = page.locator(".leaflet-container");
     await expect(mapContainer).toBeVisible();
@@ -14,9 +13,8 @@ test.describe("Responsive Design", () => {
   });
 
   test("should display correctly on tablet", async ({ page }) => {
-    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.setViewportSize({ height: 1024, width: 768 });
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
     const mapContainer = page.locator(".leaflet-container");
     await expect(mapContainer).toBeVisible();
@@ -26,9 +24,8 @@ test.describe("Responsive Design", () => {
   });
 
   test("should display correctly on desktop", async ({ page }) => {
-    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.setViewportSize({ height: 1080, width: 1920 });
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
     const mapContainer = page.locator(".leaflet-container");
     await expect(mapContainer).toBeVisible();
@@ -38,33 +35,32 @@ test.describe("Responsive Design", () => {
   });
 
   test("should handle mobile navigation", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
+    await page.setViewportSize({ height: 667, width: 375 });
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
-    const aboutLink = page.locator('a[href="/about"]');
-    if (await aboutLink.isVisible()) {
-      await aboutLink.click();
-      await expect(page).toHaveURL(/.*about/);
-    }
+    const aboutButton = page.locator(
+      'a[href="/about"], button:has-text("About")'
+    );
+    await expect(aboutButton).toBeVisible();
+    await aboutButton.click();
+    await expect(page).toHaveURL(/.*about/);
   });
 
   test("should handle tablet navigation", async ({ page }) => {
-    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.setViewportSize({ height: 1024, width: 768 });
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
-    const aboutLink = page.locator('a[href="/about"]');
-    if (await aboutLink.isVisible()) {
-      await aboutLink.click();
-      await expect(page).toHaveURL(/.*about/);
-    }
+    const aboutButton = page.locator(
+      'a[href="/about"], button:has-text("About")'
+    );
+    await expect(aboutButton).toBeVisible();
+    await aboutButton.click();
+    await expect(page).toHaveURL(/.*about/);
   });
 
   test("should display graphs correctly on mobile", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
+    await page.setViewportSize({ height: 667, width: 375 });
     await page.goto("/1");
-    await page.waitForLoadState("networkidle");
 
     const trendSection = page
       .locator("h2")
@@ -78,9 +74,8 @@ test.describe("Responsive Design", () => {
   });
 
   test("should display graphs correctly on tablet", async ({ page }) => {
-    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.setViewportSize({ height: 1024, width: 768 });
     await page.goto("/1");
-    await page.waitForLoadState("networkidle");
 
     const trendSection = page
       .locator("h2")
@@ -94,9 +89,8 @@ test.describe("Responsive Design", () => {
   });
 
   test("should display graphs correctly on desktop", async ({ page }) => {
-    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.setViewportSize({ height: 1080, width: 1920 });
     await page.goto("/1");
-    await page.waitForLoadState("networkidle");
 
     const trendSection = page
       .locator("h2")
@@ -110,9 +104,8 @@ test.describe("Responsive Design", () => {
   });
 
   test("should handle mobile form interactions", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
+    await page.setViewportSize({ height: 667, width: 375 });
     await page.goto("/1");
-    await page.waitForLoadState("networkidle");
 
     const measureSelector = page.locator('select[id="graph-measure"]');
     await expect(measureSelector).toBeVisible();
@@ -122,9 +115,8 @@ test.describe("Responsive Design", () => {
   });
 
   test("should handle tablet form interactions", async ({ page }) => {
-    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.setViewportSize({ height: 1024, width: 768 });
     await page.goto("/1");
-    await page.waitForLoadState("networkidle");
 
     const yearSelector = page.locator('select[id="reference-year"]');
     await expect(yearSelector).toBeVisible();
@@ -133,72 +125,53 @@ test.describe("Responsive Design", () => {
   });
 
   test("should handle mobile map interactions", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
+    await page.setViewportSize({ height: 667, width: 375 });
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
-    await page.waitForSelector(".leaflet-container", { timeout: 10_000 });
+    await expect(page.locator(".leaflet-container")).toBeVisible({
+      timeout: 10_000,
+    });
 
     const markers = page.locator(".leaflet-marker-icon");
-    const markerCount = await markers.count();
+    await expect(markers.first()).toBeVisible();
 
-    if (markerCount > 0) {
-      const firstMarker = markers.first();
-      await firstMarker.waitFor({ state: "visible", timeout: 5000 });
+    const firstMarker = markers.first();
+    await firstMarker.click();
 
-      await page.evaluate(() => {
-        const marker = document.querySelector(
-          ".leaflet-marker-icon"
-        ) as HTMLElement;
-        if (marker) marker.click();
-      });
-
-      await page.waitForTimeout(2000);
-      const modal = page.locator('[role="dialog"]');
-      await expect(modal).toHaveCount(1);
-    }
+    const modal = page.locator('[role="dialog"]');
+    await expect(modal).toHaveCount(1);
   });
 
   test("should handle tablet map interactions", async ({ page }) => {
-    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.setViewportSize({ height: 1024, width: 768 });
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
-    await page.waitForSelector(".leaflet-container", { timeout: 10_000 });
+    await expect(page.locator(".leaflet-container")).toBeVisible({
+      timeout: 10_000,
+    });
 
     const markers = page.locator(".leaflet-marker-icon");
-    const markerCount = await markers.count();
+    await expect(markers.first()).toBeVisible();
 
-    if (markerCount > 0) {
-      const firstMarker = markers.first();
-      await firstMarker.waitFor({ state: "visible", timeout: 5000 });
+    const firstMarker = markers.first();
+    await firstMarker.click();
 
-      await page.evaluate(() => {
-        const marker = document.querySelector(
-          ".leaflet-marker-icon"
-        ) as HTMLElement;
-        if (marker) marker.click();
-      });
-
-      await page.waitForTimeout(2000);
-      const modal = page.locator('[role="dialog"]');
-      await expect(modal).toHaveCount(1);
-    }
+    const modal = page.locator('[role="dialog"]');
+    await expect(modal).toHaveCount(1);
   });
 
   test("should maintain functionality across viewport sizes", async ({
     page,
   }) => {
     const viewports = [
-      { width: 375, height: 667 },
-      { width: 768, height: 1024 },
-      { width: 1920, height: 1080 },
+      { height: 667, width: 375 },
+      { height: 1024, width: 768 },
+      { height: 1080, width: 1920 },
     ];
 
     for (const viewport of viewports) {
       await page.setViewportSize(viewport);
       await page.goto("/1");
-      await page.waitForLoadState("networkidle");
 
       const locationTitle = page.locator("h1").nth(1);
       await expect(locationTitle).toBeVisible();

@@ -1,32 +1,32 @@
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "./tests",
-  fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 1,
-  workers: 4,
-  reporter: process.env.CI ? "html" : "line",
-  use: {
-    baseURL: "http://localhost:3000",
-
-    trace: "on-first-retry",
-
-    actionTimeout: 30_000,
-    navigationTimeout: 30_000,
-  },
-
+  fullyParallel: true,
   projects: [
     {
       name: "firefox",
       use: { ...devices["Desktop Firefox"] },
     },
   ],
+  reporter: process.env.CI ? "html" : "line",
+  retries: process.env.CI ? 2 : 1,
+  testDir: "./tests",
+  use: {
+    actionTimeout: 30_000,
+
+    baseURL: "http://localhost:3000",
+
+    navigationTimeout: 30_000,
+    trace: "on-first-retry",
+  },
 
   webServer: {
-    command: "npm run start",
-    url: "http://localhost:3000",
+    command: "npm run dev",
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    url: "http://localhost:3000",
   },
+
+  workers: 4,
 });

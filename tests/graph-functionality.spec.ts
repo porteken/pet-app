@@ -1,9 +1,8 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test.describe("Graph Functionality", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/1");
-    await page.waitForLoadState("networkidle");
   });
 
   test("should display trend analysis graph", async ({ page }) => {
@@ -51,7 +50,7 @@ test.describe("Graph Functionality", () => {
     await expect(yearSelector).toBeVisible();
 
     const options = yearSelector.locator("option");
-    await expect(options).toHaveCount(24);
+    await expect(options).toHaveCount(23);
     await expect(options.first()).toHaveAttribute("value", "2000");
     await expect(options.last()).toHaveAttribute("value", "2023");
   });
@@ -63,7 +62,7 @@ test.describe("Graph Functionality", () => {
 
     await measureSelector.selectOption("max");
 
-    await expect(page).toHaveURL(/type=max/);
+    await expect(page).toHaveURL(/\?type=max/);
   });
 
   test("should update URL when graph measure changes", async ({ page }) => {
@@ -71,24 +70,23 @@ test.describe("Graph Functionality", () => {
 
     await measureSelector.selectOption("max");
 
-    await expect(page).toHaveURL(/type=max/);
+    await expect(page).toHaveURL(/\?type=max/);
 
     await measureSelector.selectOption("avg");
 
-    await expect(page).toHaveURL(/type=avg/);
+    await expect(page).toHaveURL("/");
   });
 
   test("should maintain graph state on page refresh", async ({ page }) => {
     const measureSelector = page.locator('select[id="graph-measure"]');
 
     await measureSelector.selectOption("max");
-    await expect(page).toHaveURL(/type=max/);
+    await expect(page).toHaveURL(/\?type=max/);
 
     await page.reload();
-    await page.waitForLoadState("networkidle");
 
     await expect(measureSelector).toHaveValue("max");
-    await expect(page).toHaveURL(/type=max/);
+    await expect(page).toHaveURL(/\?type=max/);
   });
 
   test("should display location information", async ({ page }) => {

@@ -1,10 +1,11 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+
 import type { TrendGraphDataProperties } from "../types/types";
 
 interface PetYearAvgMaxData {
-  year: number;
-  pet: number;
   location_id: number;
+  pet: number;
+  year: number;
 }
 
 class FetchError extends Error {
@@ -37,90 +38,6 @@ const calculateTrendline = (years: number[], yearPets: number[]): number[] => {
   return years.map(x => slope * x + intercept);
 };
 
-function logError(message: string): void {
-  if (process.env.NODE_ENV === "development") {
-    console.error(message);
-  }
-}
-
-function logWarning(message: string): void {
-  if (process.env.NODE_ENV === "development") {
-    console.warn(message);
-  }
-}
-
-function createEmptyTrendResult(): TrendGraphDataProperties {
-  return { years: [], year_pets: [], trendline_pets: [] };
-}
-
-function validateYears(years: number[]): void {
-  if (
-    years.some(year => !Number.isInteger(year) || year < 1900 || year > 2100)
-  ) {
-    throw new FetchError("Invalid year data detected");
-  }
-}
-
-function validateYearPets(yearPets: number[]): void {
-  if (yearPets.some(pet => Number.isNaN(pet) || pet < 0)) {
-    throw new FetchError("Invalid pet count data detected");
-  }
-}
-
-function processTrendData(data: PetYearAvgMaxData[]): {
-  years: number[];
-  yearPets: number[];
-} {
-  const years = data.map(({ year }) => year);
-  const yearPets = data.map(({ pet }) => Number(pet));
-
-  validateYears(years);
-  validateYearPets(yearPets);
-
-  return { years, yearPets };
-}
-
-async function fetchTrendData(
-  supabase: SupabaseClient,
-  tableName: string,
-  locationId: number
-): Promise<PetYearAvgMaxData[]> {
-  const { data, error } = await supabase
-    .from(tableName)
-    .select("year, pet, location_id")
-    .eq("location_id", locationId)
-    .order("year", { ascending: true });
-
-  if (error) {
-    throw new FetchError("Database error fetching trend data", error);
-  }
-
-  return data || [];
-}
-
-function handleValidationFailure(message: string): TrendGraphDataProperties {
-  logError(message);
-
-  return createEmptyTrendResult();
-}
-
-function handleNoData(locationId: number): TrendGraphDataProperties {
-  logWarning(`No data found for location ${locationId}`);
-
-  return createEmptyTrendResult();
-}
-
-function handleProcessingError(error: unknown): TrendGraphDataProperties {
-  const message =
-    error instanceof FetchError
-      ? error.message
-      : `Unexpected error in FetchTrendGraphData: ${error}`;
-
-  logError(message);
-
-  return createEmptyTrendResult();
-}
-
 export async function FetchTrendGraphData(
   option: string,
   locationId: number
@@ -145,25 +62,109 @@ export async function FetchTrendGraphData(
       return handleNoData(locationId);
     }
 
-    const { years, yearPets } = processTrendData(data);
+    const { yearPets, years } = processTrendData(data);
     const trendlinePets = calculateTrendline(years, yearPets);
 
     return {
-      years,
-      year_pets: yearPets,
       trendline_pets: trendlinePets,
+      year_pets: yearPets,
+      years,
     };
   } catch (error) {
     return handleProcessingError(error);
   }
 }
 
-function validateTrendOption(option: string): boolean {
-  return option === "avg" || option === "max";
+function createEmptyTrendResult(): TrendGraphDataProperties {
+  return { trendline_pets: [], year_pets: [], years: [] };
+}
+
+async function fetchTrendData(
+  supabase: SupabaseClient,
+  tableName: string,
+  locationId: number
+): Promise<PetYearAvgMaxData[]> {
+  const { data, error } = await supabase
+    .from(tableName)
+    .select("year, pet, location_id")
+    .eq("location_id", locationId)
+    .order("year", { ascending: true });
+
+  if (error) {
+    throw new FetchError("Database error fetching trend data", error);
+  }
+
+  return data || [];
+}
+
+function handleNoData(locationId: number): TrendGraphDataProperties {
+  logWarning(`No data found for location ${locationId}`);
+
+  return createEmptyTrendResult();
+}
+
+function handleProcessingError(error: unknown): TrendGraphDataProperties {
+  const message =
+    error instanceof FetchError
+      ? error.message
+      : `Unexpected error in FetchTrendGraphData: ${error}`;
+
+  logError(message);
+
+  return createEmptyTrendResult();
+}
+
+function handleValidationFailure(message: string): TrendGraphDataProperties {
+  logError(message);
+
+  return createEmptyTrendResult();
+}
+
+function logError(message: string): void {
+  if (process.env.NODE_ENV === "development") {
+    console.error(message);
+  }
+}
+
+function logWarning(message: string): void {
+  if (process.env.NODE_ENV === "development") {
+    console.warn(message);
+  }
+}
+
+function processTrendData(data: PetYearAvgMaxData[]): {
+  yearPets: number[];
+  years: number[];
+} {
+  const years = data.map(({ year }) => year);
+  const yearPets = data.map(({ pet }) => Number(pet));
+
+  validateYears(years);
+  validateYearPets(yearPets);
+
+  return { yearPets, years };
 }
 
 function validateLocationId(locationId: number): boolean {
   return Number.isInteger(locationId) && locationId > 0;
+}
+
+function validateTrendOption(option: string): boolean {
+  return option === "avg" || option === "max";
+}
+
+function validateYearPets(yearPets: number[]): void {
+  if (yearPets.some(pet => Number.isNaN(pet) || pet < 0)) {
+    throw new FetchError("Invalid pet count data detected");
+  }
+}
+
+function validateYears(years: number[]): void {
+  if (
+    years.some(year => !Number.isInteger(year) || year < 1900 || year > 2100)
+  ) {
+    throw new FetchError("Invalid year data detected");
+  }
 }
 
 export { FetchReferenceGraphData } from "./reference-graph-data";

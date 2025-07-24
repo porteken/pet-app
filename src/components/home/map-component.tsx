@@ -1,51 +1,51 @@
 "use client";
 
 import {
+  ComponentType,
+  CSSProperties,
+  ReactNode,
   useEffect,
   useState,
-  ComponentType,
-  ReactNode,
-  CSSProperties,
 } from "react";
 
 interface Location {
-  location_id: number;
   city: string;
-  state: string;
   lat: number;
   lng: number;
+  location_id: number;
+  state: string;
+}
+
+interface MapComponentProperties {
+  locations: Location[];
+  onMarkerClick: (_locationId: number) => void;
 }
 
 type MapContainerType = ComponentType<{
   center: [number, number];
-  zoom: number;
+  children: ReactNode;
   scrollWheelZoom: boolean;
   style: CSSProperties;
-  children: ReactNode;
-}>;
-
-type TileLayerType = ComponentType<{
-  attribution: string;
-  url: string;
+  zoom: number;
 }>;
 
 type MarkerType = ComponentType<{
-  position: [number, number];
-  key: number;
+  children?: ReactNode;
   eventHandlers: {
     click: () => void;
   };
-  children?: ReactNode;
+  key: number;
+  position: [number, number];
 }>;
 
 type PopupType = ComponentType<{
   children?: ReactNode;
 }>;
 
-interface MapComponentProperties {
-  locations: Location[];
-  onMarkerClick: (_locationId: number) => void;
-}
+type TileLayerType = ComponentType<{
+  attribution: string;
+  url: string;
+}>;
 
 const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
   const [MapContainer, setMapContainer] = useState<
@@ -126,14 +126,14 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
             <svg
               className="mx-auto size-12 text-red-500"
               fill="none"
-              viewBox="0 0 24 24"
               stroke="currentColor"
+              viewBox="0 0 24 24"
             >
               <path
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
               />
             </svg>
           </div>
@@ -148,8 +148,8 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
             <p className="text-sm text-blue-800">
               <strong>Need help?</strong> Contact Kenneth Porter at{" "}
               <a
-                href="mailto:porteken@gmail.com"
                 className="text-blue-600 underline hover:text-blue-800"
+                href="mailto:porteken@gmail.com"
               >
                 porteken@gmail.com
               </a>
@@ -163,9 +163,9 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
   return (
     <MapContainer
       center={[39.5, -98.35]}
-      zoom={5}
       scrollWheelZoom={true}
       style={{ height: "100vh", width: "100%" }}
+      zoom={5}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -173,11 +173,11 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
       />
       {locations.map(loc => (
         <Marker
-          position={[loc.lat, loc.lng]}
-          key={loc.location_id}
           eventHandlers={{
             click: () => onMarkerClick(loc.location_id),
           }}
+          key={loc.location_id}
+          position={[loc.lat, loc.lng]}
         ></Marker>
       ))}
     </MapContainer>

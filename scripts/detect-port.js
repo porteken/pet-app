@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { createServer } from "node:http";
 import { spawn } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
+import { createServer } from "node:http";
 import path from "node:path";
 
 export function findAvailablePort(startPort = 3000) {
@@ -31,6 +31,32 @@ export function findAvailablePort(startPort = 3000) {
   });
 }
 
+export async function main() {
+  try {
+    const port = await findAvailablePort(3000);
+    console.log(`🔍 Found available port: ${port}`);
+
+    updatePlaywrightConfig(port);
+
+    process.env.PORT = port.toString();
+
+    console.log(`🚀 Starting development server on port ${port}...`);
+
+    const developmentServer = spawn("npm", ["run", "dev"], {
+      env: { ...process.env, PORT: port.toString() },
+      stdio: "inherit",
+    });
+
+    developmentServer.on("close", code => {
+      console.log(`\n🏁 Development server exited with code ${code}`);
+      process.exit(code);
+    });
+  } catch (error) {
+    console.error("❌ Error:", error);
+    process.exit(1);
+  }
+}
+
 export function updatePlaywrightConfig(port) {
   const configPath = path.join(
     import.meta.dirname,
@@ -51,32 +77,6 @@ export function updatePlaywrightConfig(port) {
 
   writeFileSync(configPath, config);
   console.log(`✅ Updated Playwright config to use port ${port}`);
-}
-
-export async function main() {
-  try {
-    const port = await findAvailablePort(3000);
-    console.log(`🔍 Found available port: ${port}`);
-
-    updatePlaywrightConfig(port);
-
-    process.env.PORT = port.toString();
-
-    console.log(`🚀 Starting development server on port ${port}...`);
-
-    const developmentServer = spawn("npm", ["run", "dev"], {
-      stdio: "inherit",
-      env: { ...process.env, PORT: port.toString() },
-    });
-
-    developmentServer.on("close", code => {
-      console.log(`\n🏁 Development server exited with code ${code}`);
-      process.exit(code);
-    });
-  } catch (error) {
-    console.error("❌ Error:", error);
-    process.exit(1);
-  }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

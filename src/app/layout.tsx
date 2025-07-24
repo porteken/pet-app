@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
+
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { Inter } from "next/font/google";
 import * as React from "react";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Historical PET USA",
   description: "Physiological Equivalent Temperature data for US cities",
+  title: "Historical PET USA",
 };
 
 export default function RootLayout({

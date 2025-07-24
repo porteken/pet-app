@@ -1,6 +1,4 @@
 @import "tailwindcss";
-@config "../../tailwind.config.ts";
-@layer theme, base, mui, components, utilities;
 @layer utilities {
   /* Leaflet map container styles */
   .leaflet-container {

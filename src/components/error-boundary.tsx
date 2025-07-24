@@ -8,8 +8,8 @@ interface ErrorBoundaryProperties {
 }
 
 interface ErrorBoundaryState {
-  hasError: boolean;
   error?: Error;
+  hasError: boolean;
 }
 
 export class ErrorBoundary extends React.Component<
@@ -22,7 +22,7 @@ export class ErrorBoundary extends React.Component<
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+    return { error, hasError: true };
   }
 
   render() {
@@ -42,8 +42,8 @@ export class ErrorBoundary extends React.Component<
                 <p className="text-sm text-blue-800">
                   <strong>Need help?</strong> Contact Kenneth Porter at{" "}
                   <a
-                    href="mailto:porteken@gmail.com"
                     className="text-blue-600 underline hover:text-blue-800"
+                    href="mailto:porteken@gmail.com"
                   >
                     porteken@gmail.com
                   </a>

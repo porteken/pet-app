@@ -4,7 +4,6 @@ import Link from "next/link";
 import { FC } from "react";
 
 import { HeaderBar } from "../header-bar";
-
 import { AboutProperties } from "./types";
 const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => {
   return (
@@ -35,8 +34,8 @@ const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => {
             temperature, humidity, wind speed, solar radiation, and clothing.
             Based on{" "}
             <Link
-              href={"https://bjsm.bmj.com/content/55/15/825"}
               className="text-blue-600"
+              href={"https://bjsm.bmj.com/content/55/15/825"}
             >
               this
             </Link>{" "}

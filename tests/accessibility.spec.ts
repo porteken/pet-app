@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test.describe("Accessibility", () => {
   test("should have proper page title", async ({ page }) => {
@@ -8,7 +8,6 @@ test.describe("Accessibility", () => {
 
   test("should have proper heading structure", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
     const h1Elements = page.locator("h1");
     await expect(h1Elements).toHaveCount(1);
@@ -17,7 +16,6 @@ test.describe("Accessibility", () => {
 
   test("should have proper form labels", async ({ page }) => {
     await page.goto("/1");
-    await page.waitForLoadState("networkidle");
 
     const graphMeasureLabel = page.locator('label[for="graph-measure"]');
     const referenceYearLabel = page.locator('label[for="reference-year"]');
@@ -32,7 +30,6 @@ test.describe("Accessibility", () => {
     page,
   }) => {
     await page.goto("/1");
-    await page.waitForLoadState("networkidle");
 
     const graphMeasureSelect = page.locator('select[id="graph-measure"]');
     const referenceYearSelect = page.locator('select[id="reference-year"]');
@@ -43,7 +40,6 @@ test.describe("Accessibility", () => {
 
   test("should support keyboard navigation", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
@@ -55,22 +51,19 @@ test.describe("Accessibility", () => {
 
   test("should have proper link text", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
     const links = page.locator("a");
     const linkCount = await links.count();
 
     for (let index = 0; index < Math.min(linkCount, 5); index++) {
       const link = links.nth(index);
-      const linkText = await link.textContent();
-      expect(linkText).toBeTruthy();
-      expect(linkText?.trim()).not.toBe("");
+      const text = await link.textContent();
+      expect(text?.trim()).not.toBe("");
     }
   });
 
   test("should have proper button text", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
     const buttons = page.locator("button");
     const buttonCount = await buttons.count();
@@ -78,49 +71,40 @@ test.describe("Accessibility", () => {
     for (let index = 0; index < Math.min(buttonCount, 5); index++) {
       const button = buttons.nth(index);
       const buttonText = await button.textContent();
-      if (buttonText) {
-        expect(buttonText.trim()).not.toBe("");
-      }
+      expect(buttonText?.trim()).not.toBe("");
     }
   });
 
   test("should have proper alt text for images", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
     const images = page.locator("img");
     const imageCount = await images.count();
 
-    let hasValidAltText = false;
     for (let index = 0; index < imageCount; index++) {
       const image = images.nth(index);
       const altText = await image.getAttribute("alt");
-      if (altText !== null && altText.trim() !== "") {
-        hasValidAltText = true;
-        break;
-      }
+      expect(altText?.trim()).not.toBe("");
     }
-    expect(hasValidAltText).toBe(true);
   });
 
   test("should have proper ARIA labels", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
     const elementsWithAriaLabel = page.locator("[aria-label]");
     const ariaLabelCount = await elementsWithAriaLabel.count();
 
     for (let index = 0; index < ariaLabelCount; index++) {
       const element = elementsWithAriaLabel.nth(index);
-      const ariaLabel = await element.getAttribute("aria-label");
-      expect(ariaLabel).toBeTruthy();
-      expect(ariaLabel?.trim()).not.toBe("");
+      const ariaLabel = element;
+      await expect(ariaLabel).toHaveAttribute("aria-label");
+      const label = await ariaLabel.getAttribute("aria-label");
+      expect(label?.trim()).not.toBe("");
     }
   });
 
   test("should have proper contrast ratios", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
     const textElements = page
       .locator("h1, h2, h3, p, span, div")
@@ -130,7 +114,6 @@ test.describe("Accessibility", () => {
 
   test("should be navigable with screen reader", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
 
     const header = page.locator("header").first();
     await expect(header).toBeVisible();

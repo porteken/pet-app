@@ -3,20 +3,20 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, ReactNode } from "react";
 
 interface ModalProperties {
-  open: boolean;
-  onClose: () => void;
-  title?: string;
   children: ReactNode;
+  onClose: () => void;
+  open: boolean;
+  title?: string;
 }
 
 export default function Modal({
-  open,
-  onClose,
-  title,
   children,
+  onClose,
+  open,
+  title,
 }: Readonly<ModalProperties>) {
   return (
-    <Transition show={open} as={Fragment}>
+    <Transition as={Fragment} show={open}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         <div
           className="fixed inset-0 bg-black/30 transition-opacity"
@@ -38,23 +38,23 @@ export default function Modal({
                 <h3 className="mb-6 text-center text-lg font-bold">{title}</h3>
               )}
               <button
-                type="button"
-                className="absolute right-4 top-4 text-gray-400 hover:text-gray-700 focus:outline-none"
-                onClick={onClose}
                 aria-label="Close"
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 focus:outline-none"
+                onClick={onClose}
+                type="button"
               >
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
                   className="size-6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
+                    d="M6 18L18 6M6 6l12 12"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
               </button>

@@ -1,6 +1,6 @@
 export default function NotFound() {
   return (
-    <div style={{ textAlign: "center", marginTop: "4rem" }}>
+    <div style={{ marginTop: "4rem", textAlign: "center" }}>
       <h1>404 - Not Found</h1>
       <p>The page you are looking for does not exist.</p>
     </div>

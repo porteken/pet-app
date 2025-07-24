@@ -1,14 +1,16 @@
+//ts-check
 import pluginJs from "@eslint/js";
 import nextPlugin from "@next/eslint-plugin-next";
-
 import eslintConfigPrettier from "eslint-config-prettier";
 import importPlugin from "eslint-plugin-import";
+import perfectionist from "eslint-plugin-perfectionist";
+import playwright from "eslint-plugin-playwright";
 import pluginPromise from "eslint-plugin-promise";
 import pluginReact from "eslint-plugin-react";
-import globals from "globals";
-import tseslint from "typescript-eslint";
 import tailwind from "eslint-plugin-tailwindcss";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
+import globals from "globals";
+import tseslint from "typescript-eslint";
 export default [
   {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
@@ -35,28 +37,11 @@ export default [
   eslintConfigPrettier, // ? https://github.com/prettier/eslint-config-prettier
   ...tailwind.configs["flat/recommended"],
   eslintPluginUnicorn.configs.recommended,
+  perfectionist.configs["recommended-natural"],
   {
     rules: {
-      "no-unused-vars": "off",
-      "react/react-in-jsx-scope": "off",
-      "react-hooks/exhaustive-deps": "off",
-      "react/display-name": "off",
-      "react/prop-types": "off",
-      "newline-before-return": "error",
-      "@typescript-eslint/no-unused-vars": "off",
-      "@typescript-eslint/no-unused-expressions": "off",
       "import/no-unresolved": "off",
-      "import/no-named-as-default": "off",
-      // ! TO COMPILE SHADCN EXAMPLES, PLEASE REMOVE AS NEEDED
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-empty-object-type": "off",
-      "@typescript-eslint/ban-ts-comment": "off",
-      "react/no-unescaped-entities": "off",
-      "react/no-unknown-property": "off",
-      "tailwindcss/no-unnecessary-arbitrary-value": "off",
-      "tailwindcss/classnames-order": "off",
-      "import/named": "off",
-      "import/no-named-as-default-member": "off",
+      "react/prop-types": "off",
       "unicorn/better-regex": "warn",
     },
   },
@@ -67,12 +52,13 @@ export default [
     rules: {
       ...nextPlugin.configs.recommended.rules,
       ...nextPlugin.configs["core-web-vitals"].rules,
-      "@next/next/no-img-element": "off",
-      // ! TO COMPILE SHADCN EXAMPLES, PLEASE REMOVE AS NEEDED
-      "@next/next/no-html-link-for-pages": "off",
     },
   },
   {
     ignores: [".next/*", "next-env.d.ts"],
+  },
+  {
+    ...playwright.configs["flat/recommended"],
+    files: ["tests/**"],
   },
 ];

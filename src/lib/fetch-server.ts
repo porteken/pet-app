@@ -1,15 +1,15 @@
 "use server";
-import { DropdownItemProps, DropdownSectionProps } from "@heroui/react";
 import { SimpleLinearRegression } from "ml-regression-simple-linear";
 import { cookies } from "next/headers";
 
 import {
-  TrendGraphDataProperties,
-  ReferenceGraphDataProperties,
   FetchLocationProperties,
+  LocationOptionSection,
+  ReferenceGraphDataProperties,
+  TrendGraphDataProperties,
 } from "../types/types";
-import { createClient } from "../utils/supabase/server";
 import { DatabaseError } from "../utils/errors";
+import { createClient } from "../utils/supabase/server";
 
 export async function FetchLocations(): Promise<FetchLocationProperties> {
   const cookieStore = cookies();
@@ -30,20 +30,18 @@ export async function FetchLocations(): Promise<FetchLocationProperties> {
         (a, b) => a.localeCompare(b)
       );
 
-      const LocationOptions: Partial<
-        DropdownSectionProps<DropdownItemProps>
-      >[] = states.map(state => ({
-        title: state,
+      const LocationOptions: LocationOptionSection[] = states.map(state => ({
         items: locations
           .filter(loc => loc.state === state)
           .sort((a, b) => a.city.localeCompare(b.city))
-          .map(({ location_id, city }) => ({
+          .map(({ city, location_id }) => ({
             key: location_id,
             title: city,
           })),
+        title: state,
       }));
 
-      return { locations: locations, LocationOptions: LocationOptions };
+      return { LocationOptions: LocationOptions, locations: locations };
     }
   } catch (error) {
     console.error("Error in FetchLocations:", error);
@@ -104,7 +102,7 @@ export async function FetchTrendGraphData(
   if (!locationId || Number.isNaN(locationId) || locationId <= 0) {
     console.error("Invalid locationId:", locationId);
 
-    return { years: [], year_pets: [], trendline_pets: [] };
+    return { trendline_pets: [], year_pets: [], years: [] };
   }
 
   const cookieStore = cookies();
@@ -132,7 +130,7 @@ export async function FetchTrendGraphData(
       (year: number) => Math.round(reg.predict(year) * 100) / 100
     );
 
-    return { years, year_pets, trendline_pets };
+    return { trendline_pets, year_pets, years };
   } catch (error) {
     console.error("Error in FetchTrendGraphData server:", error);
     if (error instanceof DatabaseError) {

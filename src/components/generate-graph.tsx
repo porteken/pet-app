@@ -1,55 +1,56 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import type { Layout } from "plotly.js";
+
+import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 
+interface PlotlyConfig {
+  displaylogo: boolean;
+  displayModeBar: boolean;
+  modeBarButtonsToRemove: ("lasso2d" | "pan2d" | "select2d")[];
+  responsive: boolean;
+}
+
 interface PlotlyTrace {
-  x: number[] | Date[];
-  y: number[];
-  type: "scatter";
-  mode: "lines+markers" | "lines";
+  hovertemplate: string;
+  line: {
+    color: string;
+    dash?: "dashdot";
+    width: number;
+  };
   marker?: {
     color: string;
     size: number;
   };
-  line: {
-    color: string;
-    width: number;
-    dash?: "dashdot";
-  };
+  mode: "lines" | "lines+markers";
   name: string;
-  hovertemplate: string;
-}
-
-interface PlotlyConfig {
-  displayModeBar: boolean;
-  displaylogo: boolean;
-  modeBarButtonsToRemove: ("pan2d" | "lasso2d" | "select2d")[];
-  responsive: boolean;
+  type: "scatter";
+  x: Date[] | number[];
+  y: number[];
 }
 
 const Plot = dynamic(() => import("react-plotly.js"), {
-  ssr: false,
   loading: () => (
     <div className="flex h-[600px] items-center justify-center text-gray-500">
       Loading chart...
     </div>
   ),
+  ssr: false,
 });
 
 const GRAPH_COLORS = {
-  primary: "#ef4444",
-  secondary: "#000000",
   background: "#ffffff",
   grid: "#e5e7eb",
+  primary: "#ef4444",
+  secondary: "#000000",
 } as const;
 
 const PlotWrapper: React.FC<{
+  config: PlotlyConfig;
   data: PlotlyTrace[];
   layout: Partial<Layout>;
-  config: PlotlyConfig;
-}> = ({ data, layout, config }) => {
+}> = ({ config, data, layout }) => {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -66,11 +67,16 @@ const PlotWrapper: React.FC<{
 
   return (
     <Plot
-      data={data}
-      layout={layout}
       config={config}
+      data={data}
+      layout={{
+        ...layout,
+        autosize: true,
+        height: undefined,
+        width: undefined,
+      }}
+      style={{ height: "100%", width: "100%" }}
       useResizeHandler={true}
-      style={{ width: "100%", height: "100%" }}
     />
   );
 };
@@ -96,71 +102,86 @@ export const GenerateTrendGraph = (
   const graph_type = option === "avg" ? "Average" : "Max";
 
   const layout: Partial<Layout> = {
-    xaxis: {
-      title: { text: "Year" },
-      gridcolor: GRAPH_COLORS.grid,
-      zeroline: false,
-    },
-    yaxis: {
-      title: { text: "PET" },
-      gridcolor: GRAPH_COLORS.grid,
-      zeroline: false,
-    },
-    title: { text: `${graph_type} PET in summer (2000-2023)` },
-    plot_bgcolor: GRAPH_COLORS.background,
-    paper_bgcolor: GRAPH_COLORS.background,
+    autosize: true,
     font: {
       color: "#374151",
     },
     margin: {
+      b: 40,
       l: 40,
       r: 20,
       t: 40,
-      b: 40,
     },
-    autosize: true,
+    paper_bgcolor: GRAPH_COLORS.background,
+    plot_bgcolor: GRAPH_COLORS.background,
+    title: { text: `${graph_type} PET in summer (2000-2023)` },
+    xaxis: {
+      gridcolor: GRAPH_COLORS.grid,
+      title: { text: "Year" },
+      zeroline: false,
+    },
+    yaxis: {
+      gridcolor: GRAPH_COLORS.grid,
+      title: { text: "PET" },
+      zeroline: false,
+    },
   };
 
   const data: PlotlyTrace[] = [
     {
-      x: years,
-      y: year_pets,
-      type: "scatter",
-      mode: "lines+markers",
+      hovertemplate: "Year: %{x}<br>PET: %{y:.2f}<extra></extra>",
+      line: {
+        color: GRAPH_COLORS.primary,
+        width: 2,
+      },
       marker: {
         color: GRAPH_COLORS.primary,
         size: 6,
       },
-      line: {
-        color: GRAPH_COLORS.primary,
-        width: 2,
-      },
+      mode: "lines+markers",
       name: "PET",
-      hovertemplate: "Year: %{x}<br>PET: %{y:.2f}<extra></extra>",
+      type: "scatter",
+      x: years,
+      y: year_pets,
     },
     {
-      x: years,
-      y: trendline_pets,
-      type: "scatter",
-      mode: "lines",
+      hovertemplate: "Year: %{x}<br>Trendline: %{y:.2f}<extra></extra>",
       line: {
-        dash: "dashdot",
         color: GRAPH_COLORS.secondary,
+        dash: "dashdot",
         width: 2,
       },
+      mode: "lines",
       name: "Trendline of PET",
-      hovertemplate: "Year: %{x}<br>Trendline: %{y:.2f}<extra></extra>",
+      type: "scatter",
+      x: years,
+      y: trendline_pets,
     },
   ];
 
   const config: PlotlyConfig = {
-    displayModeBar: true,
     displaylogo: false,
+    displayModeBar: true,
     modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],
     responsive: true,
   };
 
-  return <PlotWrapper data={data} layout={layout} config={config} />;
+  return (
+    <div
+      style={{ height: 600, margin: "0 auto", maxWidth: 900, width: "100%" }}
+    >
+      <PlotWrapper
+        config={config}
+        data={data}
+        layout={{
+          ...layout,
+          autosize: true,
+          height: undefined,
+          width: undefined,
+        }}
+      />
+    </div>
+  );
 };
 
 export const GenerateReferenceGraph = async (
@@ -182,74 +203,80 @@ export const GenerateReferenceGraph = async (
   }
 
   const layout: Partial<Layout> = {
-    xaxis: {
-      title: { text: "Date" },
-      tickformat: "%b %-d",
-      gridcolor: GRAPH_COLORS.grid,
-      zeroline: false,
-    },
-    yaxis: {
-      title: { text: "PET" },
-      gridcolor: GRAPH_COLORS.grid,
-      zeroline: false,
-    },
-    title: { text: `PET in summer 2023 vs ${referenceYear}` },
-    plot_bgcolor: GRAPH_COLORS.background,
-    paper_bgcolor: GRAPH_COLORS.background,
+    autosize: true,
     font: {
       color: "#374151",
     },
     margin: {
+      b: 40,
       l: 40,
       r: 20,
       t: 40,
-      b: 40,
     },
-    autosize: true,
+    paper_bgcolor: GRAPH_COLORS.background,
+    plot_bgcolor: GRAPH_COLORS.background,
+    title: { text: `PET in summer 2023 vs ${referenceYear}` },
+    xaxis: {
+      gridcolor: GRAPH_COLORS.grid,
+      tickformat: "%b %-d",
+      title: { text: "Date" },
+      zeroline: false,
+    },
+    yaxis: {
+      gridcolor: GRAPH_COLORS.grid,
+      title: { text: "PET" },
+      zeroline: false,
+    },
   };
 
   const data: PlotlyTrace[] = [
     {
+      hovertemplate: "Date: %{x|%b %-d}<br>PET: %{y:.2f}<extra></extra>",
+      line: {
+        color: GRAPH_COLORS.primary,
+        width: 2,
+      },
+      marker: {
+        color: GRAPH_COLORS.primary,
+        size: 6,
+      },
+      mode: "lines+markers",
+      name: "2023 PET",
+      type: "scatter",
       x: dates,
       y: currentPets,
-      type: "scatter",
-      mode: "lines+markers",
-      marker: {
-        color: GRAPH_COLORS.primary,
-        size: 6,
-      },
-      line: {
-        color: GRAPH_COLORS.primary,
-        width: 2,
-      },
-      hovertemplate: "Date: %{x|%b %-d}<br>PET: %{y:.2f}<extra></extra>",
-      name: "2023 PET",
     },
     {
-      x: dates,
-      y: referencePets,
-      type: "scatter",
-      mode: "lines+markers",
+      hovertemplate: "Date: %{x|%b %-d}<br>PET: %{y:.2f}<extra></extra>",
       line: {
-        dash: "dashdot",
         color: GRAPH_COLORS.secondary,
+        dash: "dashdot",
         width: 2,
       },
       marker: {
         color: GRAPH_COLORS.secondary,
         size: 6,
       },
-      hovertemplate: "Date: %{x|%b %-d}<br>PET: %{y:.2f}<extra></extra>",
+      mode: "lines+markers",
       name: `${referenceYear} PET`,
+      type: "scatter",
+      x: dates,
+      y: referencePets,
     },
   ];
 
   const config: PlotlyConfig = {
-    displayModeBar: true,
     displaylogo: false,
+    displayModeBar: true,
     modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],
     responsive: true,
   };
 
-  return <PlotWrapper data={data} layout={layout} config={config} />;
+  return (
+    <PlotWrapper
+      config={config}
+      data={data}
+      layout={{ ...layout, height: 600, width: 900 }}
+    />
+  );
 };

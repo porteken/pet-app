@@ -19,13 +19,13 @@ export default function GlobalError({
           <button
             onClick={() => reset()}
             style={{
-              padding: "8px 16px",
-              margin: "16px",
               backgroundColor: "#0070f3",
-              color: "white",
               border: "none",
               borderRadius: "4px",
+              color: "white",
               cursor: "pointer",
+              margin: "16px",
+              padding: "8px 16px",
             }}
           >
             Try again

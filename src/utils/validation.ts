@@ -1,15 +1,14 @@
-export interface Location {
-  location_id: number;
-  lat: number;
-  lng: number;
-  city: string;
-  state: string;
+export interface GraphOption {
+  key: string;
+  label: string;
 }
 
-export interface TrendGraphData {
-  years: number[];
-  year_pets: number[];
-  trendline_pets: number[];
+export interface Location {
+  city: string;
+  lat: number;
+  lng: number;
+  location_id: number;
+  state: string;
 }
 
 export interface ReferenceGraphData {
@@ -17,9 +16,10 @@ export interface ReferenceGraphData {
   pets: number[];
 }
 
-export interface GraphOption {
-  key: string;
-  label: string;
+export interface TrendGraphData {
+  trendline_pets: number[];
+  year_pets: number[];
+  years: number[];
 }
 
 export type TrendOption = "avg" | "max";

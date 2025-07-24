@@ -1,13 +1,13 @@
 "use client";
-import { useCallback, useEffect, useState, FC, ReactElement } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { FC, ReactElement, useCallback, useEffect, useState } from "react";
 
-import { HeaderBar } from "../header-bar";
-import { GenerateTrendGraph, GenerateReferenceGraph } from "../generate-graph";
 import {
-  FetchTrendGraphData,
   FetchReferenceGraphData,
+  FetchTrendGraphData,
 } from "../../lib/fetch-client";
+import { GenerateReferenceGraph, GenerateTrendGraph } from "../generate-graph";
+import { HeaderBar } from "../header-bar";
 import { PageProperties } from "./types";
 
 const DEFAULT_GRAPH_MEASURE = "avg";
@@ -15,14 +15,14 @@ const DEFAULT_REFERENCE_YEAR = "2000";
 const VALID_GRAPH_MEASURES = new Set(["avg", "max"]);
 
 const Main: FC<PageProperties> = ({
+  CurrentDates,
+  CurrentPets,
   id,
   location,
   LocationOptions,
-  CurrentPets,
   ReferencePets,
-  CurrentDates,
-  YearPets,
   TrendlinePets,
+  YearPets,
   Years,
 }) => {
   const router = useRouter();
@@ -40,17 +40,17 @@ const Main: FC<PageProperties> = ({
     DEFAULT_REFERENCE_YEAR
   );
 
-  const [trendGraph, setTrendGraph] = useState<ReactElement | null>();
-  const [referenceGraph, setReferenceGraph] = useState<ReactElement | null>();
+  const [trendGraph, setTrendGraph] = useState<null | ReactElement>();
+  const [referenceGraph, setReferenceGraph] = useState<null | ReactElement>();
 
   const generatePetTrendGraph = useCallback(
     async (option: string) => {
       const graphData =
         option === selectedGraphMeasure
-          ? { years: Years, year_pets: YearPets, trendline_pets: TrendlinePets }
+          ? { trendline_pets: TrendlinePets, year_pets: YearPets, years: Years }
           : await FetchTrendGraphData(option, id);
 
-      const { years, year_pets, trendline_pets } = graphData;
+      const { trendline_pets, year_pets, years } = graphData;
       const graph = GenerateTrendGraph(
         years,
         option,
@@ -66,10 +66,10 @@ const Main: FC<PageProperties> = ({
     async (year: string) => {
       const referenceData =
         year === DEFAULT_REFERENCE_YEAR
-          ? { pets: ReferencePets, dates: CurrentDates }
+          ? { dates: CurrentDates, pets: ReferencePets }
           : await FetchReferenceGraphData(year, id);
 
-      const { pets, dates } = referenceData;
+      const { dates, pets } = referenceData;
       const graph = await GenerateReferenceGraph(
         year,
         dates,
@@ -125,15 +125,12 @@ const Main: FC<PageProperties> = ({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeaderBar LocationOptions={LocationOptions} id={id} />
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <HeaderBar id={id} LocationOptions={LocationOptions} />
+      <main className="mx-auto max-w-full px-4 py-8">
         <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">
+          <h1 className="mb-2 text-center text-3xl font-bold text-gray-900">
             {location.city}, {location.state}
           </h1>
-          <p className="text-gray-600">
-            Historical PET data analysis and trends
-          </p>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2">
@@ -144,24 +141,24 @@ const Main: FC<PageProperties> = ({
               </h2>
               <div className="mb-4">
                 <label
-                  htmlFor="graph-measure"
                   className="mb-2 block text-sm font-medium text-gray-700"
+                  htmlFor="graph-measure"
                 >
                   Graph Measure
                 </label>
                 <select
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                   id="graph-measure"
-                  value={selectedGraphMeasure}
                   onChange={event =>
                     handleGraphMeasureChange(event.target.value)
                   }
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                  value={selectedGraphMeasure}
                 >
                   <option value="avg">Average</option>
                   <option value="max">Maximum</option>
                 </select>
               </div>
-              <div className="h-96">{trendGraph}</div>
+              <div className="h-[700px]">{trendGraph}</div>
             </div>
           </div>
 
@@ -172,18 +169,18 @@ const Main: FC<PageProperties> = ({
               </h2>
               <div className="mb-4">
                 <label
-                  htmlFor="reference-year"
                   className="mb-2 block text-sm font-medium text-gray-700"
+                  htmlFor="reference-year"
                 >
                   Reference Year
                 </label>
                 <select
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                   id="reference-year"
-                  value={selectedReferenceYear}
                   onChange={event =>
                     handleReferenceYearChange(event.target.value)
                   }
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                  value={selectedReferenceYear}
                 >
                   <option value="2000">2000</option>
                   <option value="2001">2001</option>
@@ -210,7 +207,7 @@ const Main: FC<PageProperties> = ({
                   <option value="2022">2022</option>
                 </select>
               </div>
-              <div className="h-96">{referenceGraph}</div>
+              <div className="h-[700px]">{referenceGraph}</div>
             </div>
           </div>
         </div>

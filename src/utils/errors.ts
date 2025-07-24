@@ -10,13 +10,6 @@ export class AppError extends Error {
   }
 }
 
-export class ValidationError extends AppError {
-  constructor(message: string, originalError?: unknown) {
-    super(message, "VALIDATION_ERROR", 400, originalError);
-    this.name = "ValidationError";
-  }
-}
-
 export class DatabaseError extends AppError {
   constructor(message: string, originalError?: unknown) {
     super(message, "DATABASE_ERROR", 500, originalError);
@@ -38,17 +31,24 @@ export class NotFoundError extends AppError {
   }
 }
 
+export class ValidationError extends AppError {
+  constructor(message: string, originalError?: unknown) {
+    super(message, "VALIDATION_ERROR", 400, originalError);
+    this.name = "ValidationError";
+  }
+}
+
 export const logError = (
   error: AppError,
   context?: Record<string, unknown>
 ) => {
   const errorLog: Record<string, unknown> = {
-    name: error.name,
-    message: error.message,
     code: error.code,
+    context,
+    message: error.message,
+    name: error.name,
     statusCode: error.statusCode,
     timestamp: new Date().toISOString(),
-    context,
   };
 
   if (error.originalError) {

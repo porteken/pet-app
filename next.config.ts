@@ -21,7 +21,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  output: "standalone",
   outputFileTracingIncludes: {
     "/*": ["./registry/**/*"],
   },

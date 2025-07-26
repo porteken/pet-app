@@ -1,4 +1,5 @@
 import dynamic from "next/dynamic";
+import { cookies } from "next/headers";
 
 import { DatabaseError } from "@/features/database-error";
 import {
@@ -6,6 +7,9 @@ import {
   FetchReferenceGraphData,
   FetchTrendGraphData,
 } from "@/lib/api/fetch-server";
+
+const graphMeasureCookieName = "graph-measure";
+const defaultGraphMeasure = "avg";
 import { FetchLocationProperties, LocationProperties } from "@/types/types";
 
 const Main = dynamic(() => import("@/features/page/page-main"));
@@ -15,6 +19,9 @@ export default async function Page({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const cookieStore = await cookies();
+  const initialGraphMeasure =
+    cookieStore.get(graphMeasureCookieName)?.value || defaultGraphMeasure;
   const { id } = await params;
   const locationId = Number(id);
   if (Number.isNaN(locationId) || locationId <= 0) {
@@ -99,6 +106,7 @@ export default async function Page({
       CurrentDates={dates}
       CurrentPets={pets}
       id={locationId}
+      initialGraphMeasure={initialGraphMeasure}
       location={selectedLocation}
       LocationOptions={LocationOptions}
       ReferencePets={reference_pets}

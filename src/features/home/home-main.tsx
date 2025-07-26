@@ -1,10 +1,10 @@
 "use client";
 
 import { Button, Loader, Select } from "@mantine/core";
-import { useRouter, useSearchParams } from "next/navigation";
 // Import 'useEffect' from React
 import { FC, ReactElement, useCallback, useEffect, useState } from "react";
 
+import { setGraphMeasure } from "@/app/actions";
 import { GenerateTrendGraph } from "@/features/generate-graph";
 import { HeaderBar } from "@/features/header-bar";
 import Modal from "@/features/modal";
@@ -15,17 +15,16 @@ import { LocationProperties } from "@/types/types";
 import MapComponent from "./map-component";
 import { MapProperties } from "./types";
 
-const defaultGraphMeasure = "avg";
-
 const Home: FC<MapProperties> = ({
+  initialGraphMeasure,
   LocationOptions,
   locations,
 }: MapProperties) => {
-  const router = useRouter();
-  const searchParameters = useSearchParams();
-
-  const [selectedGraphMeasure, setSelectedGraphMeasure] =
-    useState(defaultGraphMeasure);
+  const [selectedGraphMeasure, setSelectedGraphMeasure] = useState("avg"); // Start with default value to avoid hydration mismatch
+  // Set the actual value after hydration to avoid mismatch
+  useEffect(() => {
+    setSelectedGraphMeasure(initialGraphMeasure);
+  }, [initialGraphMeasure]);
 
   const [petGraph, setPetGraph] = useState<null | ReactElement>();
   const [graphLoading, setGraphLoading] = useState(false);
@@ -33,26 +32,6 @@ const Home: FC<MapProperties> = ({
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] =
     useState<LocationProperties | null>();
-
-  useEffect(() => {
-    const typeFromUrl = searchParameters.get("type");
-    if (typeFromUrl) {
-      setSelectedGraphMeasure(typeFromUrl);
-    }
-  }, [searchParameters]);
-
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const parameters = new URLSearchParams(searchParameters.toString());
-      if (value) {
-        parameters.set(name, value);
-      } else {
-        parameters.delete(name);
-      }
-      router.push(`?${parameters.toString()}`);
-    },
-    [searchParameters, router]
-  );
 
   const generateGraph = useCallback(
     async (locationId: number, option: string) => {
@@ -112,11 +91,11 @@ const Home: FC<MapProperties> = ({
     async (option: string) => {
       if (selectedLocationId !== undefined) {
         setSelectedGraphMeasure(option);
-        createQueryString("type", option === defaultGraphMeasure ? "" : option);
+        await setGraphMeasure(option);
         await generateGraph(selectedLocationId!, option);
       }
     },
-    [selectedLocationId, createQueryString, generateGraph]
+    [selectedLocationId, generateGraph]
   );
 
   const handleMarkerClick = useCallback(
@@ -126,7 +105,6 @@ const Home: FC<MapProperties> = ({
         locations.find(loc => loc.location_id === locationId) || undefined;
       setSelectedLocation(location);
       setModalOpen(true);
-      // At this point, selectedGraphMeasure will have been updated by useEffect if 'type' was in the URL
       await generateGraph(locationId, selectedGraphMeasure);
     },
     [generateGraph, selectedGraphMeasure, locations]
@@ -158,9 +136,7 @@ const Home: FC<MapProperties> = ({
                 value: option.key,
               }))}
               label="Measure"
-              onChange={value =>
-                handleSelectChange(value || defaultGraphMeasure)
-              }
+              onChange={value => handleSelectChange(value!)}
               size="sm"
               value={selectedGraphMeasure}
             />

@@ -1,11 +1,16 @@
 import dynamic from "next/dynamic";
-
+import { cookies } from "next/headers";
+const graphMeasureCookieName = "graph-measure";
+const defaultGraphMeasure = "avg";
 import { DatabaseError } from "@/features/database-error";
 import { FetchLocations } from "@/lib/api/fetch-server";
 
 const Home = dynamic(() => import("@/features/home/home-main"));
 
 const Page = async () => {
+  const cookieStore = await cookies();
+  const initialGraphMeasure =
+    cookieStore.get(graphMeasureCookieName)?.value || defaultGraphMeasure;
   try {
     const { LocationOptions, locations } = await FetchLocations();
 
@@ -18,7 +23,13 @@ const Page = async () => {
       );
     }
 
-    return <Home LocationOptions={LocationOptions} locations={locations} />;
+    return (
+      <Home
+        initialGraphMeasure={initialGraphMeasure}
+        LocationOptions={LocationOptions}
+        locations={locations}
+      />
+    );
   } catch {
     return (
       <DatabaseError

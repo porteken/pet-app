@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "leaflet";
 import {
   ComponentType,
   CSSProperties,
@@ -34,6 +35,7 @@ type MarkerType = ComponentType<{
   eventHandlers: {
     click: () => void;
   };
+  icon?: any;
   key: number;
   position: [number, number];
 }>;
@@ -55,6 +57,7 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
   const [Marker, setMarker] = useState<MarkerType | undefined>();
   const [Popup, setPopup] = useState<PopupType | undefined>();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [customIcon, setCustomIcon] = useState<Icon | null>();
 
   const loadMap = async () => {
     // Load Leaflet CSS if not already loaded
@@ -73,45 +76,43 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
       });
     }
 
-    // Load Leaflet default icon compatibility
-    if (
-      !document.querySelector('link[href*="leaflet-defaulticon-compatibility"]')
-    ) {
-      const iconLink = document.createElement("link");
-      iconLink.rel = "stylesheet";
-      iconLink.href =
-        "https://unpkg.com/leaflet-defaulticon-compatibility@0.1.2/dist/leaflet-defaulticon-compatibility.css";
-      document.head.append(iconLink);
-    }
-
-    if (
-      !document.querySelector(
-        'script[src*="leaflet-defaulticon-compatibility"]'
-      )
-    ) {
-      const script = document.createElement("script");
-      script.src =
-        "https://unpkg.com/leaflet-defaulticon-compatibility@0.1.2/dist/leaflet-defaulticon-compatibility.js";
-      script.async = true;
-
-      await new Promise((resolve, reject) => {
-        script.addEventListener("load", resolve);
-        script.addEventListener("error", () => {
-          reject(
-            new Error("Failed to load leaflet-defaulticon-compatibility script")
-          );
-        });
-        document.head.append(script);
-      });
-    }
-
     try {
+      // Load react-leaflet which will load Leaflet
       const reactLeaflet = await import("react-leaflet");
+
+      // Fix Leaflet default icon issue by setting it manually
+      const L = await import("leaflet");
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+        iconUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+        shadowUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+      });
+
+      // Create a custom icon to ensure markers are visible
+      const customIcon = new L.Icon({
+        iconAnchor: [12, 41],
+        iconRetinaUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+        iconSize: [25, 41],
+        iconUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+        shadowUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+      });
+
       setMapContainer(() => reactLeaflet.MapContainer);
       setTileLayer(() => reactLeaflet.TileLayer);
       setMarker(() => reactLeaflet.Marker);
       setPopup(() => reactLeaflet.Popup);
       setIsLoaded(true);
+
+      // Store the custom icon for use in markers
+      setCustomIcon(customIcon);
     } catch {
       setIsLoaded(false);
     }
@@ -127,6 +128,15 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-100">
         <p>Loading map...</p>
+      </div>
+    );
+  }
+
+  // Add a small delay to ensure map is fully rendered
+  if (!customIcon) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-100">
+        <p>Initializing markers...</p>
       </div>
     );
   }
@@ -189,6 +199,7 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
           eventHandlers={{
             click: () => onMarkerClick(loc.location_id),
           }}
+          icon={customIcon}
           key={loc.location_id}
           position={[loc.lat, loc.lng]}
         />

@@ -1,7 +1,7 @@
 "use client";
-import { useRouter, useSearchParams } from "next/navigation";
 import { FC, ReactElement, useCallback, useEffect, useState } from "react";
 
+import { setGraphMeasure } from "@/app/actions";
 import {
   GenerateReferenceGraph,
   GenerateTrendGraph,
@@ -13,15 +13,13 @@ import {
 } from "@/lib/api/fetch-client";
 
 import { PageProperties } from "./types";
-
-const DEFAULT_GRAPH_MEASURE = "avg";
 const DEFAULT_REFERENCE_YEAR = "2000";
-const VALID_GRAPH_MEASURES = new Set(["avg", "max"]);
 
 const Main: FC<PageProperties> = ({
   CurrentDates,
   CurrentPets,
   id,
+  initialGraphMeasure,
   location,
   LocationOptions,
   ReferencePets,
@@ -29,17 +27,12 @@ const Main: FC<PageProperties> = ({
   YearPets,
   Years,
 }) => {
-  const router = useRouter();
-  const searchParameters = useSearchParams();
+  const [selectedGraphMeasure, setSelectedGraphMeasure] = useState("avg"); // Start with default value to avoid hydration mismatch
 
-  const typeParameter = searchParameters.get("type") ?? "";
-  const graphMeasureFromParameters = VALID_GRAPH_MEASURES.has(typeParameter)
-    ? typeParameter
-    : DEFAULT_GRAPH_MEASURE;
-
-  const [selectedGraphMeasure, setSelectedGraphMeasure] = useState(
-    graphMeasureFromParameters
-  );
+  // Set the actual value after hydration to avoid mismatch
+  useEffect(() => {
+    setSelectedGraphMeasure(initialGraphMeasure);
+  }, [initialGraphMeasure]);
   const [selectedReferenceYear, setSelectedReferenceYear] = useState(
     DEFAULT_REFERENCE_YEAR
   );
@@ -85,30 +78,13 @@ const Main: FC<PageProperties> = ({
     [ReferencePets, CurrentDates, CurrentPets, id]
   );
 
-  const createQueryString = useCallback(
-    (parameters: Record<string, string>) => {
-      const newParameters = new URLSearchParams(searchParameters.toString());
-      for (const [key, value] of Object.entries(parameters)) {
-        if (value) {
-          newParameters.set(key, value);
-        } else {
-          newParameters.delete(key);
-        }
-      }
-
-      return newParameters.toString();
-    },
-    [searchParameters]
-  );
-
   const handleGraphMeasureChange = useCallback(
-    (option: string) => {
+    async (option: string) => {
       setSelectedGraphMeasure(option);
-      const queryString = createQueryString({ type: option });
-      router.push(`/${id}?${queryString}`);
+      await setGraphMeasure(option);
       generatePetTrendGraph(option);
     },
-    [id, router, createQueryString, generatePetTrendGraph]
+    [id, generatePetTrendGraph]
   );
 
   const handleReferenceYearChange = useCallback(

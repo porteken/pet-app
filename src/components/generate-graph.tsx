@@ -36,7 +36,6 @@ const Plot = dynamic(() => import("react-plotly.js"), {
       Loading chart...
     </div>
   ),
-  ssr: false,
 });
 
 const GRAPH_COLORS = {

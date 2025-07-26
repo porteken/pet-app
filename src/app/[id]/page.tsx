@@ -7,6 +7,7 @@ import {
   FetchTrendGraphData,
 } from "../../lib/fetch-server";
 import { FetchLocationProperties, LocationProperties } from "../../types/types";
+
 const Main = dynamic(() => import("../../components/page/page-main"));
 
 export default async function Page({
@@ -94,18 +95,16 @@ export default async function Page({
   }
 
   return (
-    <div>
-      <Main
-        CurrentDates={dates}
-        CurrentPets={pets}
-        id={locationId}
-        location={selectedLocation}
-        LocationOptions={LocationOptions}
-        ReferencePets={reference_pets}
-        TrendlinePets={trendline_pets}
-        YearPets={year_pets}
-        Years={years}
-      />
-    </div>
+    <Main
+      CurrentDates={dates}
+      CurrentPets={pets}
+      id={locationId}
+      location={selectedLocation}
+      LocationOptions={LocationOptions}
+      ReferencePets={reference_pets}
+      TrendlinePets={trendline_pets}
+      YearPets={year_pets}
+      Years={years}
+    />
   );
 }

@@ -56,56 +56,69 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
   const [Popup, setPopup] = useState<PopupType | undefined>();
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const loadMap = async () => {
+    // Load Leaflet CSS if not already loaded
+    if (!document.querySelector('link[href*="leaflet.css"]')) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      link.integrity = "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=";
+      link.crossOrigin = "";
+      document.head.append(link);
+
+      // Wait for CSS to load
+      await new Promise(resolve => {
+        link.addEventListener("load", resolve);
+        link.addEventListener("error", resolve); // Continue even if CSS fails
+      });
+    }
+
+    // Load Leaflet default icon compatibility
+    if (
+      !document.querySelector('link[href*="leaflet-defaulticon-compatibility"]')
+    ) {
+      const iconLink = document.createElement("link");
+      iconLink.rel = "stylesheet";
+      iconLink.href =
+        "https://unpkg.com/leaflet-defaulticon-compatibility@0.1.2/dist/leaflet-defaulticon-compatibility.css";
+      document.head.append(iconLink);
+    }
+
+    if (
+      !document.querySelector(
+        'script[src*="leaflet-defaulticon-compatibility"]'
+      )
+    ) {
+      const script = document.createElement("script");
+      script.src =
+        "https://unpkg.com/leaflet-defaulticon-compatibility@0.1.2/dist/leaflet-defaulticon-compatibility.js";
+      script.async = true;
+
+      await new Promise((resolve, reject) => {
+        script.addEventListener("load", resolve);
+        script.addEventListener("error", () => {
+          reject(
+            new Error("Failed to load leaflet-defaulticon-compatibility script")
+          );
+        });
+        document.head.append(script);
+      });
+    }
+
+    try {
+      const reactLeaflet = await import("react-leaflet");
+      setMapContainer(() => reactLeaflet.MapContainer);
+      setTileLayer(() => reactLeaflet.TileLayer);
+      setMarker(() => reactLeaflet.Marker);
+      setPopup(() => reactLeaflet.Popup);
+      setIsLoaded(true);
+    } catch {
+      setIsLoaded(false);
+    }
+  };
+
   useEffect(() => {
     if (globalThis.window !== undefined && typeof document !== "undefined") {
-      const loadMap = async () => {
-        if (!document.querySelector('link[href*="leaflet.css"]')) {
-          const link = document.createElement("link");
-          link.rel = "stylesheet";
-          link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-          link.integrity =
-            "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=";
-          link.crossOrigin = "";
-          document.head.append(link);
-        }
-
-        if (
-          !document.querySelector(
-            'link[href*="leaflet-defaulticon-compatibility"]'
-          )
-        ) {
-          const iconLink = document.createElement("link");
-          iconLink.rel = "stylesheet";
-          iconLink.href =
-            "https://unpkg.com/leaflet-defaulticon-compatibility@0.1.2/dist/leaflet-defaulticon-compatibility.css";
-          document.head.append(iconLink);
-        }
-
-        if (
-          !document.querySelector(
-            'script[src*="leaflet-defaulticon-compatibility"]'
-          )
-        ) {
-          const script = document.createElement("script");
-          script.src =
-            "https://unpkg.com/leaflet-defaulticon-compatibility@0.1.2/dist/leaflet-defaulticon-compatibility.js";
-          script.async = true;
-
-          await new Promise((resolve, reject) => {
-            script.addEventListener("load", resolve);
-            script.addEventListener("error", reject);
-            document.head.append(script);
-          });
-        }
-
-        const reactLeaflet = await import("react-leaflet");
-        setMapContainer(() => reactLeaflet.MapContainer);
-        setTileLayer(() => reactLeaflet.TileLayer);
-        setMarker(() => reactLeaflet.Marker);
-        setPopup(() => reactLeaflet.Popup);
-        setIsLoaded(true);
-      };
-
       loadMap();
     }
   }, []);
@@ -164,7 +177,7 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
     <MapContainer
       center={[39.5, -98.35]}
       scrollWheelZoom
-      style={{ height: "100vh", width: "100%" }}
+      style={{ height: "100vh", width: "100vw" }}
       zoom={5}
     >
       <TileLayer

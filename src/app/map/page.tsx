@@ -1,4 +1,3 @@
-"use server";
 import dynamic from "next/dynamic";
 
 import { DatabaseError } from "../../components/database-error";

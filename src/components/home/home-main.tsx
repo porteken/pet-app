@@ -136,7 +136,9 @@ const Home: FC<MapProperties> = ({
       <div className="absolute inset-x-0 top-0 z-50">
         <HeaderBar LocationOptions={LocationOptions} />
       </div>
-      <MapComponent locations={locations} onMarkerClick={handleMarkerClick} />
+      <div className="absolute inset-0 top-0">
+        <MapComponent locations={locations} onMarkerClick={handleMarkerClick} />
+      </div>
       <Modal
         onClose={() => setModalOpen(false)}
         open={modalOpen}

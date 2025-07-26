@@ -43,13 +43,11 @@ export async function FetchTrendGraphData(
   locationId: number
 ): Promise<TrendGraphDataProperties> {
   if (!validateTrendOption(option)) {
-    return handleValidationFailure(
-      "Invalid trend option. Must be 'avg' or 'max'"
-    );
+    throw new Error("Invalid trend option. Must be 'avg' or 'max'");
   }
 
   if (!validateLocationId(locationId)) {
-    return handleValidationFailure(`Invalid location ID: ${locationId}`);
+    throw new Error(`Invalid location ID: ${locationId}`);
   }
 
   const supabase = createSupabaseClient();
@@ -59,7 +57,7 @@ export async function FetchTrendGraphData(
     const data = await fetchTrendData(supabase, tableName, locationId);
 
     if (data.length === 0) {
-      return handleNoData(locationId);
+      throw new Error(`No data found for location ${locationId}`);
     }
 
     const { yearPets, years } = processTrendData(data);
@@ -71,12 +69,12 @@ export async function FetchTrendGraphData(
       years,
     };
   } catch (error) {
-    return handleProcessingError(error);
+    const message =
+      error instanceof FetchError
+        ? error.message
+        : `Unexpected error in FetchTrendGraphData: ${error}`;
+    throw new Error(message);
   }
-}
-
-function createEmptyTrendResult(): TrendGraphDataProperties {
-  return { trendline_pets: [], year_pets: [], years: [] };
 }
 
 async function fetchTrendData(
@@ -95,41 +93,6 @@ async function fetchTrendData(
   }
 
   return data || [];
-}
-
-function handleNoData(locationId: number): TrendGraphDataProperties {
-  logWarning(`No data found for location ${locationId}`);
-
-  return createEmptyTrendResult();
-}
-
-function handleProcessingError(error: unknown): TrendGraphDataProperties {
-  const message =
-    error instanceof FetchError
-      ? error.message
-      : `Unexpected error in FetchTrendGraphData: ${error}`;
-
-  logError(message);
-
-  return createEmptyTrendResult();
-}
-
-function handleValidationFailure(message: string): TrendGraphDataProperties {
-  logError(message);
-
-  return createEmptyTrendResult();
-}
-
-function logError(message: string): void {
-  if (process.env.NODE_ENV === "development") {
-    console.error(message);
-  }
-}
-
-function logWarning(message: string): void {
-  if (process.env.NODE_ENV === "development") {
-    console.warn(message);
-  }
 }
 
 function processTrendData(data: PetYearAvgMaxData[]): {

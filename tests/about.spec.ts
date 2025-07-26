@@ -5,7 +5,6 @@ test.describe("About Page", () => {
     await page.goto("/about");
     await expect(page.getByText("Purpose of the Application")).toBeVisible();
     await expect(page.getByText("What is PET?")).toBeVisible();
-    // Use a more specific locator for the first occurrence
     await expect(
       page.locator("text=Physiological Equivalent Temperature").first()
     ).toBeVisible();

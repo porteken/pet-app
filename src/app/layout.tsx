@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import { Inter } from "next/font/google";
+import "@mantine/core/styles.css";
+import {
+  ColorSchemeScript,
+  mantineHtmlProps,
+  MantineProvider,
+} from "@mantine/core";
 import * as React from "react";
 
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   description: "Physiological Equivalent Temperature data for US cities",
@@ -19,11 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          {children}
-        </AppRouterCacheProvider>
+    <html lang="en" {...mantineHtmlProps}>
+      <head>
+        <ColorSchemeScript />
+      </head>
+      <body>
+        <MantineProvider>{children}</MantineProvider>
       </body>
     </html>
   );

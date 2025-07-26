@@ -35,7 +35,7 @@ const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => {
             Based on{" "}
             <Link
               className="text-blue-600"
-              href={"https://bjsm.bmj.com/content/55/15/825"}
+              href="https://bjsm.bmj.com/content/55/15/825"
             >
               this
             </Link>{" "}

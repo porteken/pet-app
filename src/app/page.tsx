@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 
 import { DatabaseError } from "../components/database-error";
-import { ErrorBoundary } from "../components/error-boundary";
 import { FetchLocations } from "../lib/fetch-server";
 
 const Home = dynamic(() => import("../components/home/home-main"));
@@ -21,11 +20,7 @@ const Page = async () => {
       );
     }
 
-    return (
-      <ErrorBoundary>
-        <Home LocationOptions={LocationOptions} locations={locations} />
-      </ErrorBoundary>
-    );
+    return <Home LocationOptions={LocationOptions} locations={locations} />;
   } catch {
     return (
       <DatabaseError

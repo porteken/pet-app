@@ -76,7 +76,7 @@ export default async function Page({
   trendline_pets = trendData.trendline_pets;
 
   const selectedLocation = locations.find(
-    (loc: { location_id: number }) => loc.location_id == locationId
+    (loc: { location_id: number }) => loc.location_id === locationId
   );
   if (!selectedLocation) {
     return (

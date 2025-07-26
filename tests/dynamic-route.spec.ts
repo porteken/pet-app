@@ -8,7 +8,6 @@ test.describe("Dynamic Location Page", () => {
     await expect(page.getByText("Reference Data")).toBeVisible();
     await expect(page.locator("select#graph-measure")).toBeVisible();
     await expect(page.locator("select#reference-year")).toBeVisible();
-    // Check that two graphs are rendered
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
     await expect(page.locator(".js-plotly-plot").first()).toBeVisible();
   });

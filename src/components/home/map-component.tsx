@@ -163,7 +163,7 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
   return (
     <MapContainer
       center={[39.5, -98.35]}
-      scrollWheelZoom={true}
+      scrollWheelZoom
       style={{ height: "100vh", width: "100%" }}
       zoom={5}
     >
@@ -178,7 +178,7 @@ const MapComponent = ({ locations, onMarkerClick }: MapComponentProperties) => {
           }}
           key={loc.location_id}
           position={[loc.lat, loc.lng]}
-        ></Marker>
+        />
       ))}
     </MapContainer>
   );

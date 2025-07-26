@@ -6,31 +6,25 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start",
+    "start": "node .next/standalone/server.js",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "node scripts/test-with-dynamic-port.js"
+    "test": "npx playwright test"
   },
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0 || ^19.0.0",
     "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@axe-core/playwright": "^4.10.2",
-    "@emotion/cache": "^11.14.0",
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@headlessui/react": "^2.2.6",
-    "@mui/material": "^7.2.0",
-    "@mui/material-nextjs": "^7.2.0",
+    "@mantine/core": "^8.2.1",
+    "@mantine/hooks": "^8.2.1",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.52.1",
+    "eslint-config-mantine": "^4.0.3",
     "eslint-plugin-promise": "^7.2.1",
-    "framer-motion": "^12.23.9",
-    "ml-regression-simple-linear": "^3.0.1",
     "next": "^15.4.4",
     "react": "^17.0.0 || ^18.0.0 || ^19.0.0",
     "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0",
@@ -38,7 +32,9 @@
     "react-plotly.js": "^2.6.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.31.0",
+    "eslint-config-mantine": "^4.0.3",
+    "eslint-plugin-promise": "^7.2.1",
+    "@eslint/js": "^9.32.0",
     "@next/bundle-analyzer": "^15.4.4",
     "@next/eslint-plugin-next": "^15.4.4",
     "@playwright/test": "^1.54.1",
@@ -50,7 +46,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/react-plotly.js": "^2.6.3",
-    "eslint": "^9.31.0",
+    "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-perfectionist": "^4.15.0",

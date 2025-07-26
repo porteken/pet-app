@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
-
+import { Alert, Button, Container, Stack, Text, Title } from "@mantine/core";
 export default function GlobalError({
   error,
   reset,
@@ -9,28 +8,46 @@ export default function GlobalError({
   error: Error;
   reset: () => void;
 }>) {
-  useEffect(() => {}, [error]);
-
   return (
     <html lang="en">
       <body>
-        <div style={{ padding: 32, textAlign: "center" }}>
-          <h2>Something went wrong!</h2>
-          <button
-            onClick={() => reset()}
-            style={{
-              backgroundColor: "#0070f3",
-              border: "none",
-              borderRadius: "4px",
-              color: "white",
-              cursor: "pointer",
-              margin: "16px",
-              padding: "8px 16px",
-            }}
-          >
-            Try again
-          </button>
-        </div>
+        <Container py="xl" size="sm">
+          <Stack align="center" gap="lg" ta="center">
+            <Title c="red" order={1} size="h2">
+              Something went wrong!
+            </Title>
+            <Text c="dimmed" maw={400} size="md">
+              {error.message}
+            </Text>
+
+            <Stack gap="sm" maw={400} w="100%">
+              <Button
+                color="blue"
+                fullWidth
+                onClick={() => reset()}
+                size="md"
+                variant="filled"
+              >
+                Try again
+              </Button>
+
+              <Alert color="blue" title="Need help?" variant="light">
+                <Text size="sm">
+                  Contact Kenneth Porter at{" "}
+                  <a
+                    href="mailto:porteken@gmail.com"
+                    style={{
+                      color: "var(--mantine-color-blue-6)",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    porteken@gmail.com
+                  </a>
+                </Text>
+              </Alert>
+            </Stack>
+          </Stack>
+        </Container>
       </body>
     </html>
   );

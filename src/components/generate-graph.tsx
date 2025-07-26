@@ -76,7 +76,7 @@ const PlotWrapper: React.FC<{
         width: undefined,
       }}
       style={{ height: "100%", width: "100%" }}
-      useResizeHandler={true}
+      useResizeHandler
     />
   );
 };

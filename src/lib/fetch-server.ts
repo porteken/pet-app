@@ -1,5 +1,4 @@
 "use server";
-import { SimpleLinearRegression } from "ml-regression-simple-linear";
 import { cookies } from "next/headers";
 
 import {
@@ -10,6 +9,7 @@ import {
 } from "../types/types";
 import { DatabaseError } from "../utils/errors";
 import { createClient } from "../utils/supabase/server";
+import { SimpleLinearRegression } from "./simple-linear-regression";
 
 export async function FetchLocations(): Promise<FetchLocationProperties> {
   const cookieStore = cookies();
@@ -20,7 +20,6 @@ export async function FetchLocations(): Promise<FetchLocationProperties> {
       .from("locations")
       .select();
     if (error || !locations) {
-      console.error("Error fetching location data:", error);
       throw new DatabaseError(
         "Failed to fetch location data from database",
         error
@@ -41,10 +40,9 @@ export async function FetchLocations(): Promise<FetchLocationProperties> {
         title: state,
       }));
 
-      return { LocationOptions: LocationOptions, locations: locations };
+      return { LocationOptions, locations };
     }
   } catch (error) {
-    console.error("Error in FetchLocations:", error);
     if (error instanceof DatabaseError) {
       throw error;
     }
@@ -57,9 +55,14 @@ export async function FetchReferenceGraphData(
   locationId: number
 ): Promise<ReferenceGraphDataProperties> {
   if (!locationId || Number.isNaN(locationId) || locationId <= 0) {
-    console.error("Invalid locationId:", locationId);
+    throw new DatabaseError(`Invalid locationId: ${locationId}`);
+  }
 
-    return { dates: [], pets: [] };
+  // Validate year parameter
+  if (!year || !/^\d{4}$/.test(year)) {
+    throw new DatabaseError(
+      `Invalid year format: ${year}. Must be a 4-digit year.`
+    );
   }
 
   const cookieStore = cookies();
@@ -72,7 +75,6 @@ export async function FetchReferenceGraphData(
       .eq("year", year);
 
     if (error || !data) {
-      console.error("Error fetching reference graph data server:", error);
       throw new DatabaseError(
         "Failed to fetch reference graph data from database",
         error
@@ -84,7 +86,6 @@ export async function FetchReferenceGraphData(
 
     return { dates, pets };
   } catch (error) {
-    console.error("Error in FetchReferenceGraphData server:", error);
     if (error instanceof DatabaseError) {
       throw error;
     }
@@ -100,9 +101,14 @@ export async function FetchTrendGraphData(
   locationId: number
 ): Promise<TrendGraphDataProperties> {
   if (!locationId || Number.isNaN(locationId) || locationId <= 0) {
-    console.error("Invalid locationId:", locationId);
-
     return { trendline_pets: [], year_pets: [], years: [] };
+  }
+
+  // Validate option parameter
+  if (!option || !["avg", "max"].includes(option)) {
+    throw new DatabaseError(
+      `Invalid option: ${option}. Must be 'avg' or 'max'`
+    );
   }
 
   const cookieStore = cookies();
@@ -115,7 +121,6 @@ export async function FetchTrendGraphData(
       .eq("location_id", locationId);
 
     if (error || !data) {
-      console.error("Error fetching trend graph data server:", error);
       throw new DatabaseError(
         "Failed to fetch trend graph data from database",
         error
@@ -125,6 +130,11 @@ export async function FetchTrendGraphData(
     const years = data.map(({ year }: { year: number }) => year);
     const year_pets = data.map(({ pet }: { pet: number }) => Number(pet));
 
+    // Check if we have data before creating regression
+    if (years.length === 0 || year_pets.length === 0) {
+      return { trendline_pets: [], year_pets: [], years: [] };
+    }
+
     const reg = new SimpleLinearRegression(years, year_pets);
     const trendline_pets = years.map(
       (year: number) => Math.round(reg.predict(year) * 100) / 100
@@ -132,7 +142,6 @@ export async function FetchTrendGraphData(
 
     return { trendline_pets, year_pets, years };
   } catch (error) {
-    console.error("Error in FetchTrendGraphData server:", error);
     if (error instanceof DatabaseError) {
       throw error;
     }

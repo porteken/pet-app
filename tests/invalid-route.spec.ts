@@ -8,8 +8,6 @@ test.describe("Invalid Dynamic Routes", () => {
       timeout: 20_000,
       waitUntil: "domcontentloaded",
     });
-    // Debug: print the page content
-    console.log("NOT FOUND PAGE CONTENT:", await page.content());
     await expect(page.getByText("Location not found")).toBeVisible();
   });
 });

@@ -34,33 +34,23 @@ export async function FetchReferenceGraphData(
   year: string,
   locationId: number
 ): Promise<ReferenceGraphDataProperties> {
-  try {
-    const supabase = createSupabaseClient();
+  const supabase = createSupabaseClient();
 
-    if (!validateYear(year)) {
-      return handleValidationFailure(
-        "Invalid year format. Must be a 4-digit year."
-      );
-    }
-
-    if (!validateLocation(locationId)) {
-      return handleValidationFailure(`Invalid location ID: ${locationId}`);
-    }
-
-    const data = await fetchData(supabase, locationId, year);
-
-    if (data.length === 0) {
-      return handleNoData(locationId, year);
-    }
-
-    return processData(data);
-  } catch (error) {
-    return handleProcessingError(error);
+  if (!validateYear(year)) {
+    throw new Error("Invalid year format. Must be a 4-digit year.");
   }
-}
 
-function createEmptyResult(): ReferenceGraphDataProperties {
-  return { dates: [], pets: [] };
+  if (!validateLocation(locationId)) {
+    throw new Error(`Invalid location ID: ${locationId}`);
+  }
+
+  const data = await fetchData(supabase, locationId, year);
+
+  if (data.length === 0) {
+    throw new Error(`No data found for location ${locationId} in year ${year}`);
+  }
+
+  return processData(data);
 }
 
 async function fetchData(
@@ -93,61 +83,6 @@ async function fetchData(
       error
     );
   }
-}
-
-function handleNoData(
-  locationId: number,
-  year: string
-): ReferenceGraphDataProperties {
-  logNoDataWarning(locationId, year);
-
-  return createEmptyResult();
-}
-
-function handleProcessingError(error: unknown): ReferenceGraphDataProperties {
-  let message: string;
-
-  if (error instanceof FetchError) {
-    message = error.message;
-  } else if (error instanceof Error) {
-    message = `Unexpected error in FetchReferenceGraphData: ${error.message}`;
-  } else {
-    message = `Unexpected error in FetchReferenceGraphData: ${String(error)}`;
-  }
-
-  logMessage(message);
-
-  return createEmptyResult();
-}
-
-function handleValidationFailure(
-  message: string
-): ReferenceGraphDataProperties {
-  logValidationError(message);
-
-  return createEmptyResult();
-}
-
-function logMessage(message: string, level: "error" | "warn" = "error"): void {
-  if (process.env.NODE_ENV === "development") {
-    if (level === "error" && console.error) {
-      console.error(message);
-    } else if (level === "warn" && console.warn) {
-      console.warn(message);
-    } else {
-      console.log(`[${level.toUpperCase()}] ${message}`);
-    }
-  }
-}
-
-function logNoDataWarning(locationId: number, year: string): void {
-  if (process.env.NODE_ENV === "development") {
-    console.warn(`No data found for location ${locationId} in year ${year}`);
-  }
-}
-
-function logValidationError(message: string): void {
-  logMessage(message, "error");
 }
 
 function processData(

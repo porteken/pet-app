@@ -1,9 +1,6 @@
 "use client";
 
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
+import { Button, Loader, Select } from "@mantine/core";
 import { useRouter, useSearchParams } from "next/navigation";
 // Import 'useEffect' from React
 import { FC, ReactElement, useCallback, useEffect, useState } from "react";
@@ -112,10 +109,10 @@ const Home: FC<MapProperties> = ({
 
   const handleSelectChange = useCallback(
     async (option: string) => {
-      if (selectedLocationId != undefined) {
+      if (selectedLocationId !== undefined) {
         setSelectedGraphMeasure(option);
         createQueryString("type", option === defaultGraphMeasure ? "" : option);
-        await generateGraph(selectedLocationId, option);
+        await generateGraph(selectedLocationId!, option);
       }
     },
     [selectedLocationId, createQueryString, generateGraph]
@@ -153,23 +150,22 @@ const Home: FC<MapProperties> = ({
           <div className="w-full max-w-md">
             <Select
               className="w-full"
-              fullWidth
+              data={(GraphOptions || []).map(option => ({
+                label: option.label,
+                value: option.key,
+              }))}
               label="Measure"
-              onChange={event => handleSelectChange(event.target.value)}
-              size="small"
+              onChange={value =>
+                handleSelectChange(value || defaultGraphMeasure)
+              }
+              size="sm"
               value={selectedGraphMeasure}
-            >
-              {GraphOptions.map(option => (
-                <MenuItem key={option.key} value={option.key}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </Select>
+            />
           </div>
           <div className="flex min-h-[300px] w-full max-w-4xl items-center justify-center">
             {graphLoading ? (
               <div className="flex size-full flex-col items-center justify-center">
-                <CircularProgress size={40} />
+                <Loader size="md" />
                 <span className="mt-2 text-gray-500">Loading graph...</span>
               </div>
             ) : (
@@ -179,11 +175,10 @@ const Home: FC<MapProperties> = ({
           {selectedLocation && (
             <div className="flex justify-center">
               <Button
-                color="primary"
                 onClick={() => {
                   globalThis.location.href = `/${selectedLocation.location_id}`;
                 }}
-                variant="contained"
+                variant="filled"
               >
                 View Full Details
               </Button>

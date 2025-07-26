@@ -1,9 +1,9 @@
 import dynamic from "next/dynamic";
 
-import { DatabaseError } from "../../components/database-error";
-import { FetchLocations } from "../../lib/fetch-server";
+import { DatabaseError } from "@/features/database-error";
+import { FetchLocations } from "@/lib/api/fetch-server";
 
-const Home = dynamic(() => import("../../components/home/home-main"));
+const Home = dynamic(() => import("@/features/home/home-main"));
 
 const Page = async () => {
   try {

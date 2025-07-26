@@ -1,6 +1,5 @@
-import { GRAPH_CONFIG } from "@/utils/constants";
-
-import { SelectOptionProperties } from "../types/types";
+import { GRAPH_CONFIG } from "@/lib/utils/constants";
+import { SelectOptionProperties } from "@/types/types";
 
 export const GraphOptions: SelectOptionProperties[] = [
   { key: GRAPH_CONFIG.TREND_OPTIONS.AVG, label: "Average" },

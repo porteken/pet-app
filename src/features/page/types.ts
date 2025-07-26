@@ -1,4 +1,4 @@
-import { LocationOptionSection, LocationProperties } from "../../types/types";
+import { LocationOptionSection, LocationProperties } from "@/types/types";
 
 export interface PageProperties {
   CurrentDates: Date[];

@@ -1,15 +1,15 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
-import type { ReferenceGraphDataProperties } from "../types/types";
+import type { ReferenceGraphDataProperties } from "@/types/types";
 
-import { FetchError } from "../utils/errors";
-import { createClient } from "../utils/supabase/client";
+import { createClient } from "@/lib/config/supabase/client";
+import { FetchError } from "@/lib/utils/errors";
 import {
   validateDates,
   validateLocationId,
   validatePets,
   validateYear,
-} from "../utils/validation";
+} from "@/lib/utils/validation";
 
 interface PetYearReferenceData {
   date: string;

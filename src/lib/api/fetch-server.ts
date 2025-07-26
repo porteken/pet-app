@@ -1,15 +1,15 @@
 "use server";
 import { cookies } from "next/headers";
 
+import { createClient } from "@/lib/config/supabase/server";
+import { DatabaseError } from "@/lib/utils/errors";
+import { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
 import {
   FetchLocationProperties,
   LocationOptionSection,
   ReferenceGraphDataProperties,
   TrendGraphDataProperties,
-} from "../types/types";
-import { DatabaseError } from "../utils/errors";
-import { createClient } from "../utils/supabase/server";
-import { SimpleLinearRegression } from "./simple-linear-regression";
+} from "@/types/types";
 
 export async function FetchLocations(): Promise<FetchLocationProperties> {
   const cookieStore = cookies();

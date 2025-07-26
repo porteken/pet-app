@@ -5,9 +5,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import React, { useMemo } from "react";
 
-import { APP_CONFIG } from "@/utils/constants";
-
-import { NavProperties } from "../types/types";
+import { APP_CONFIG } from "@/lib/utils/constants";
+import { NavProperties } from "@/types/types";
 
 interface LocationItem {
   key: number;
@@ -58,10 +57,12 @@ export const HeaderBar = ({
     }
 
     // Sort states alphabetically and cities within each state
-    const sortedStates = Object.keys(grouped).sort();
+    const sortedStates = Object.keys(grouped).sort((a, b) =>
+      a.localeCompare(b)
+    );
     const sortedGrouped = sortedStates.map(state => ({
       group: state,
-      items: grouped[state].sort((a, b) => a.title.localeCompare(b.title)),
+      items: grouped[state].toSorted((a, b) => a.title.localeCompare(b.title)),
     }));
 
     return sortedGrouped;

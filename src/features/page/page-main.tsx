@@ -3,11 +3,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FC, ReactElement, useCallback, useEffect, useState } from "react";
 
 import {
+  GenerateReferenceGraph,
+  GenerateTrendGraph,
+} from "@/features/generate-graph";
+import { HeaderBar } from "@/features/header-bar";
+import {
   FetchReferenceGraphData,
   FetchTrendGraphData,
-} from "../../lib/fetch-client";
-import { GenerateReferenceGraph, GenerateTrendGraph } from "../generate-graph";
-import { HeaderBar } from "../header-bar";
+} from "@/lib/api/fetch-client";
+
 import { PageProperties } from "./types";
 
 const DEFAULT_GRAPH_MEASURE = "avg";

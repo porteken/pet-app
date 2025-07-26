@@ -2,10 +2,10 @@
 
 import dynamic from "next/dynamic";
 
-import { DatabaseError } from "../../components/database-error";
-import { FetchLocations } from "../../lib/fetch-server";
+import { DatabaseError } from "@/features/database-error";
+import { FetchLocations } from "@/lib/api/fetch-server";
 
-const About = dynamic(() => import("../../components/about/about-main"));
+const About = dynamic(() => import("@/features/about/about-main"));
 
 const Page = async () => {
   try {

@@ -1,14 +1,14 @@
 import dynamic from "next/dynamic";
 
-import { DatabaseError } from "../../components/database-error";
+import { DatabaseError } from "@/features/database-error";
 import {
   FetchLocations,
   FetchReferenceGraphData,
   FetchTrendGraphData,
-} from "../../lib/fetch-server";
-import { FetchLocationProperties, LocationProperties } from "../../types/types";
+} from "@/lib/api/fetch-server";
+import { FetchLocationProperties, LocationProperties } from "@/types/types";
 
-const Main = dynamic(() => import("../../components/page/page-main"));
+const Main = dynamic(() => import("@/features/page/page-main"));
 
 export default async function Page({
   params,

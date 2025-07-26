@@ -5,12 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 // Import 'useEffect' from React
 import { FC, ReactElement, useCallback, useEffect, useState } from "react";
 
-import { FetchTrendGraphData } from "../../lib/fetch-client";
-import { GraphOptions } from "../../lib/select-options";
-import { LocationProperties } from "../../types/types";
-import { GenerateTrendGraph } from "../generate-graph";
-import { HeaderBar } from "../header-bar";
-import Modal from "../modal";
+import { GenerateTrendGraph } from "@/features/generate-graph";
+import { HeaderBar } from "@/features/header-bar";
+import Modal from "@/features/modal";
+import { FetchTrendGraphData } from "@/lib/api/fetch-client";
+import { GraphOptions } from "@/lib/utils/select-options";
+import { LocationProperties } from "@/types/types";
+
 import MapComponent from "./map-component";
 import { MapProperties } from "./types";
 

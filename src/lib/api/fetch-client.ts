@@ -1,16 +1,16 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
-import type { TrendGraphDataProperties } from "../types/types";
+import type { TrendGraphDataProperties } from "@/types/types";
 
-import { FetchError } from "../utils/errors";
-import { createClient } from "../utils/supabase/client";
+import { createClient } from "@/lib/config/supabase/client";
+import { FetchError } from "@/lib/utils/errors";
+import { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
 import {
   validateLocationId,
   validateTrendOption,
   validateYearPets,
   validateYears,
-} from "../utils/validation";
-import { SimpleLinearRegression } from "./simple-linear-regression";
+} from "@/lib/utils/validation";
 
 interface PetYearAvgMaxData {
   location_id: number;

@@ -1,6 +1,15 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 import type { ReferenceGraphDataProperties } from "../types/types";
+
+import { FetchError } from "../utils/errors";
+import { createClient } from "../utils/supabase/client";
+import {
+  validateDates,
+  validateLocationId,
+  validatePets,
+  validateYear,
+} from "../utils/validation";
 
 interface PetYearReferenceData {
   date: string;
@@ -9,39 +18,18 @@ interface PetYearReferenceData {
   year: string;
 }
 
-class FetchError extends Error {
-  constructor(
-    message: string,
-    public readonly _originalError?: unknown
-  ) {
-    super(message);
-    this.name = "FetchError";
-  }
-}
-
-const createSupabaseClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error("Missing Supabase environment variables");
-  }
-
-  return createClient(supabaseUrl, supabaseKey);
-};
-
 export async function FetchReferenceGraphData(
   year: string,
   locationId: number
 ): Promise<ReferenceGraphDataProperties> {
-  const supabase = createSupabaseClient();
+  const supabase = createClient();
 
   if (!validateYear(year)) {
-    throw new Error("Invalid year format. Must be a 4-digit year.");
+    throw new FetchError("Invalid year format. Must be a 4-digit year.");
   }
 
-  if (!validateLocation(locationId)) {
-    throw new Error(`Invalid location ID: ${locationId}`);
+  if (!validateLocationId(locationId)) {
+    throw new FetchError(`Invalid location ID: ${locationId}`);
   }
 
   const data = await fetchData(supabase, locationId, year);
@@ -91,28 +79,14 @@ function processData(
   const dates = data.map(({ date }) => new Date(date));
   const pets = data.map(({ pet }) => Number(pet));
 
-  validateDates(dates);
-  validatePets(pets);
+  try {
+    validateDates(dates);
+    validatePets(pets);
+  } catch (error) {
+    throw new FetchError(
+      error instanceof Error ? error.message : "Validation error"
+    );
+  }
 
   return { dates, pets };
-}
-
-function validateDates(dates: Date[]): void {
-  if (dates.some(date => Number.isNaN(date.getTime()))) {
-    throw new FetchError("Invalid date data detected");
-  }
-}
-
-function validateLocation(locationId: number): boolean {
-  return Number.isInteger(locationId) && locationId > 0;
-}
-
-function validatePets(pets: number[]): void {
-  if (pets.some(pet => Number.isNaN(pet))) {
-    throw new FetchError("Invalid pet count data detected");
-  }
-}
-
-function validateYear(year: string): boolean {
-  return /^\d{4}$/.test(year);
 }

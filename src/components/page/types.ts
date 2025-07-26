@@ -1,5 +1,5 @@
 import { LocationOptionSection, LocationProperties } from "../../types/types";
-export * from "../../types/types";
+
 export interface PageProperties {
   CurrentDates: Date[];
   CurrentPets: number[];
@@ -11,6 +11,7 @@ export interface PageProperties {
   YearPets: number[];
   Years: number[];
 }
+
 export interface PetTrendProperties {
   reference_option?: string;
   year_option?: string;

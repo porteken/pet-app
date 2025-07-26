@@ -16,3 +16,13 @@ export class DatabaseError extends AppError {
     this.name = "DatabaseError";
   }
 }
+
+export class FetchError extends Error {
+  constructor(
+    message: string,
+    public readonly originalError?: unknown
+  ) {
+    super(message);
+    this.name = "FetchError";
+  }
+}

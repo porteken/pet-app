@@ -1,8 +1,3 @@
-/**
- * Cross-Browser Compatibility Tests
- * Following Bulletproof React guidelines for multi-browser testing
- */
-
 import { expect, test } from "@playwright/test";
 
 test.describe("Cross-Browser Compatibility", () => {

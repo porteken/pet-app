@@ -1,11 +1,5 @@
-/**
- * MSW Database - In-memory data store for testing
- * Following Bulletproof React pattern for mocked API data
- */
-
 import { drop, factory, primaryKey } from "@mswjs/data";
 
-// Counter for generating unique IDs
 let locationCounter = 1;
 let petDataCounter = 1;
 let trendDataCounter = 1;
@@ -35,9 +29,7 @@ export const database = factory({
   },
 });
 
-// Utility functions for test data management
 export const resetDatabase = () => {
-  // Reset counters to avoid duplicate IDs
   locationCounter = 1;
   petDataCounter = 1;
   trendDataCounter = 1;

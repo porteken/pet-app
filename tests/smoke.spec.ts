@@ -1,10 +1,3 @@
-/**
- * Smoke Tests - Critical User Journeys
- * Following Bulletproof React E2E testing patterns
- *
- * These tests cover the most important user flows that must always work
- */
-
 import { expect, test } from "@playwright/test";
 
 test.describe("Smoke Tests - Critical User Journeys", () => {

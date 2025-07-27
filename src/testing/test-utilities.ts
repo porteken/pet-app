@@ -10,9 +10,6 @@ import {
   setupSuccessfulValidations,
 } from "./mocks/validation";
 
-/**
- * Common setup for API tests that use Supabase client and validation
- */
 export const setupApiClientTest = async () => {
   const mockSupabaseClient = createMockSupabaseClient();
   const mockValidation = createMockValidation();
@@ -31,9 +28,6 @@ export const setupApiClientTest = async () => {
   return { mockSupabaseClient, mockValidation };
 };
 
-/**
- * Common setup for API tests that use Supabase server and cookies
- */
 export const setupApiServerTest = async () => {
   const mockCookieStore = createMockCookieStore();
   const mockSupabaseClient = createMockSupabaseClient();
@@ -58,22 +52,15 @@ export const setupApiServerTest = async () => {
   return { mockCookieStore, mockLinearRegression, mockSupabaseClient };
 };
 
-/**
- * Common setup for Next.js actions that use cookies
- */
 export const setupActionsTest = async () => {
   const mockCookieStore = createMockCookieStore();
 
-  // Mock cookies
   const { cookies } = await import("next/headers");
   vi.mocked(cookies).mockResolvedValue(mockCookieStore as any);
 
   return { mockCookieStore };
 };
 
-/**
- * Generic function to clear all mocks
- */
 export const clearAllMocks = () => {
   vi.clearAllMocks();
 };

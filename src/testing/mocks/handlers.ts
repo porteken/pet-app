@@ -1,8 +1,3 @@
-/**
- * MSW API Handlers - Mock API endpoints
- * Following Bulletproof React pattern for API mocking
- */
-
 import { http, HttpResponse } from "msw";
 
 import { database } from "./database";

@@ -1,8 +1,3 @@
-/**
- * Integration test for PageMain component
- * Following Bulletproof React testing patterns with MSW
- */
-
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";

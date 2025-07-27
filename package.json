@@ -8,14 +8,8 @@
     "build": "next build --turbopack",
     "start": "node .next/standalone/server.js",
     "lint": "next lint",
-    "lint:fix": "next lint --fix",
-    "type-check": "tsc --noEmit",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
     "test:e2e": "npx playwright test",
-    "test:unit": "vitest",
-    "test:unit:run": "vitest run",
-    "test:unit:ui": "vitest --ui",
+    "test:unit": "vitest run",
     "test:coverage": "vitest run --coverage"
   },
   "peerDependencies": {

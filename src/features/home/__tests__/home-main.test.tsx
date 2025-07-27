@@ -2,13 +2,6 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-/**
- * Comprehensive test file for HomeMain component
- * This file consolidates all test cases from:
- * - home-main.test.tsx
- * - home-main-simple.test.tsx
- */
-
 // Mock server actions
 vi.mock("@/app/actions", () => ({
   setGraphMeasure: vi.fn().mockResolvedValue({}),

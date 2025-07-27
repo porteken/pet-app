@@ -3,10 +3,6 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-/**
- * Consolidated test file for PageMain component
- */
-
 // Mock components
 vi.mock("@/features/generate-graph", () => ({
   GenerateReferenceGraph: vi

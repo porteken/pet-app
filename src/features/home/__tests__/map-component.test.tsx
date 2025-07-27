@@ -2,16 +2,6 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-/**
- * Comprehensive test file for MapComponent
- * This file consolidates all test cases from multiple test files:
- * - map-component-expanded-fixed.test.tsx
- * - map-component-simple-direct-mock.test.tsx
- * - map-component-fixed.test.tsx
- * - map-component-uncovered.test.tsx
- * - map-component-additional.test.tsx
- */
-
 // Mock leaflet module
 vi.mock("leaflet", () => {
   return {

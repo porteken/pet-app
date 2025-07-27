@@ -1,12 +1,11 @@
 "use client";
 
-import { Button, Loader, Select } from "@mantine/core";
-// Import 'useEffect' from React
 import React, {
   FC,
   ReactElement,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -18,6 +17,8 @@ import { FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { GraphOptions } from "@/lib/utils/select-options";
 import { LocationProperties } from "@/types/types";
 
+import { ErrorGraphDisplay } from "./components/error-graph-display";
+import { GraphSection } from "./components/graph-section";
 import MapComponent from "./map-component";
 import { MapProperties } from "./types";
 
@@ -26,18 +27,39 @@ const Home: FC<MapProperties> = ({
   LocationOptions,
   locations,
 }: MapProperties) => {
-  const [selectedGraphMeasure, setSelectedGraphMeasure] = useState("avg"); // Start with default value to avoid hydration mismatch
-  // Set the actual value after hydration to avoid mismatch
-  useEffect(() => {
-    setSelectedGraphMeasure(initialGraphMeasure);
-  }, [initialGraphMeasure]);
+  // Use lazy initial state to prevent unnecessary re-renders
+  const [selectedGraphMeasure, setSelectedGraphMeasure] = useState(
+    () => initialGraphMeasure || "avg"
+  );
 
-  const [petGraph, setPetGraph] = useState<null | ReactElement>();
+  // Separate states to prevent unnecessary re-renders
+  const [petGraph, setPetGraph] = useState<ReactElement | undefined>();
   const [graphLoading, setGraphLoading] = useState(false);
-  const [selectedLocationId, setSelectedLocationId] = useState<null | number>();
+  const [selectedLocationId, setSelectedLocationId] = useState<number>();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] =
-    useState<LocationProperties | null>();
+    useState<LocationProperties>();
+
+  // Sync with initial value only on mount - avoid hydration mismatch
+  useEffect(() => {
+    if (initialGraphMeasure && selectedGraphMeasure !== initialGraphMeasure) {
+      setSelectedGraphMeasure(initialGraphMeasure);
+    }
+  }, [initialGraphMeasure, selectedGraphMeasure]);
+
+  // Memoize expensive computations
+  const locationMap = useMemo(() => {
+    return new Map(locations.map(loc => [loc.location_id, loc]));
+  }, [locations]);
+
+  const selectOptions = useMemo(
+    () =>
+      (GraphOptions || []).map(option => ({
+        label: option.label,
+        value: option.key,
+      })),
+    [GraphOptions]
+  );
 
   const generateGraph = useCallback(
     async (locationId: number, option: string) => {
@@ -60,37 +82,7 @@ const Home: FC<MapProperties> = ({
         );
         setPetGraph(graph);
       } catch {
-        setPetGraph(
-          <div className="flex h-[300px] w-full flex-col items-center justify-center">
-            <div className="text-center">
-              <div className="mb-4 text-red-500">
-                <svg
-                  className="mx-auto size-8"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                  />
-                </svg>
-              </div>
-              <p className="mb-2 text-gray-600">Unable to load graph data</p>
-              <p className="text-sm text-gray-500">
-                Contact Kenneth Porter at{" "}
-                <a
-                  className="text-blue-600 underline hover:text-blue-800"
-                  href="mailto:porteken@gmail.com"
-                >
-                  porteken@gmail.com
-                </a>
-              </p>
-            </div>
-          </div>
-        );
+        setPetGraph(<ErrorGraphDisplay />);
       } finally {
         setGraphLoading(false);
       }
@@ -122,13 +114,12 @@ const Home: FC<MapProperties> = ({
       }
 
       setSelectedLocationId(locationId);
-      const location =
-        locations.find(loc => loc.location_id === locationId) || undefined;
+      const location = locationMap.get(locationId);
       setSelectedLocation(location);
       setModalOpen(true);
       await generateGraph(locationId, selectedGraphMeasure);
     },
-    [generateGraph, selectedGraphMeasure, locations]
+    [generateGraph, selectedGraphMeasure, locationMap]
   );
 
   return (
@@ -148,43 +139,14 @@ const Home: FC<MapProperties> = ({
             : undefined
         }
       >
-        <div className="flex min-h-[340px] w-full max-w-[90vw] min-w-[320px] flex-col items-center space-y-4">
-          <div className="w-full max-w-md">
-            <Select
-              className="w-full"
-              data={(GraphOptions || []).map(option => ({
-                label: option.label,
-                value: option.key,
-              }))}
-              label="Measure"
-              onChange={value => handleSelectChange(value!)}
-              size="sm"
-              value={selectedGraphMeasure}
-            />
-          </div>
-          <div className="flex min-h-[300px] w-full max-w-4xl items-center justify-center">
-            {graphLoading ? (
-              <div className="flex size-full flex-col items-center justify-center">
-                <Loader size="md" />
-                <span className="mt-2 text-gray-500">Loading graph...</span>
-              </div>
-            ) : (
-              petGraph
-            )}
-          </div>
-          {selectedLocation && (
-            <div className="flex justify-center">
-              <Button
-                onClick={() => {
-                  globalThis.location.href = `/${selectedLocation.location_id}`;
-                }}
-                variant="filled"
-              >
-                View Full Details
-              </Button>
-            </div>
-          )}
-        </div>
+        <GraphSection
+          graphLoading={graphLoading}
+          onSelectChange={handleSelectChange}
+          petGraph={petGraph}
+          selectedGraphMeasure={selectedGraphMeasure}
+          selectedLocation={selectedLocation}
+          selectOptions={selectOptions}
+        />
       </Modal>
     </div>
   );

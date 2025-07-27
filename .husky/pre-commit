@@ -2,7 +2,7 @@ echo "🔍 Running pre-commit checks..."
 
 # Run lint-staged
 npx lint-staged
-npm run test:unit:run
+npm run test:unit
 npm run test:e2e
 
 echo "✅ Pre-commit checks passed!"

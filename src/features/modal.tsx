@@ -1,6 +1,6 @@
 "use client";
 import { Modal as MantineModal } from "@mantine/core";
-import React, { type ReactNode } from "react";
+import React, { memo, type ReactNode } from "react";
 
 interface ModalProperties {
   children: ReactNode;
@@ -9,12 +9,7 @@ interface ModalProperties {
   title?: string;
 }
 
-export default function Modal({
-  children,
-  onClose,
-  open,
-  title,
-}: Readonly<ModalProperties>) {
+const Modal = memo<ModalProperties>(({ children, onClose, open, title }) => {
   return (
     <MantineModal
       centered
@@ -28,4 +23,8 @@ export default function Modal({
       <div className="mb-6">{children}</div>
     </MantineModal>
   );
-}
+});
+
+Modal.displayName = "Modal";
+
+export default Modal;

@@ -80,6 +80,8 @@ export default [
       ],
       "import/no-unresolved": "off",
       "react/jsx-uses-react": "error",
+      // Disable prop-types for TypeScript since TypeScript provides compile-time type checking
+      "react/prop-types": "off",
       "unicorn/better-regex": "warn",
     },
   },

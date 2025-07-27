@@ -1,34 +1,22 @@
-"use server";
-
 import dynamic from "next/dynamic";
-import { cookies } from "next/headers";
 
-import { DatabaseError } from "@/features/database-error";
-import { FetchLocations } from "@/lib/api/fetch-server";
+import { LocationErrorHandler } from "./components/error-handlers";
+import { PageLoader } from "./components/page-loader";
+import {
+  getGraphMeasureFromCookies,
+  getLocationData,
+} from "./utils/page-helpers";
 
-const graphMeasureCookieName = "graph-measure";
-const defaultGraphMeasure = "avg";
-
-const Home = dynamic(
-  () => import("@/features/home/home-main-with-error-boundary")
-);
+// Dynamic import for better performance - colocated near usage
+const Home = dynamic(() => import("@/features/home/home-main"), {
+  loading: PageLoader,
+});
 
 const Page = async () => {
-  const cookieStore = await cookies();
-  const initialGraphMeasure =
-    cookieStore.get(graphMeasureCookieName)?.value || defaultGraphMeasure;
+  const initialGraphMeasure = await getGraphMeasureFromCookies();
 
   try {
-    const { LocationOptions, locations } = await FetchLocations();
-
-    if (!locations || locations.length === 0) {
-      return (
-        <DatabaseError
-          message="Unable to load location data. The database may be temporarily unavailable."
-          title="No Data Available"
-        />
-      );
-    }
+    const { LocationOptions, locations } = await getLocationData();
 
     return (
       <Home
@@ -37,13 +25,9 @@ const Page = async () => {
         locations={locations}
       />
     );
-  } catch {
-    return (
-      <DatabaseError
-        message="Unable to connect to the database. Please try again later."
-        title="Database Connection Error"
-      />
-    );
+  } catch (error) {
+    // Handle different types of errors appropriately
+    return <LocationErrorHandler error={error as Error} />;
   }
 };
 

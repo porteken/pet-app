@@ -9,7 +9,9 @@ import { FetchLocations } from "@/lib/api/fetch-server";
 const graphMeasureCookieName = "graph-measure";
 const defaultGraphMeasure = "avg";
 
-const Home = dynamic(() => import("@/features/home/home-main"));
+const Home = dynamic(
+  () => import("@/features/home/home-main-with-error-boundary")
+);
 
 const Page = async () => {
   const cookieStore = await cookies();

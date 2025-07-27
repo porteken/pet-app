@@ -18,6 +18,8 @@ interface PetYearAvgMaxData {
   year: number;
 }
 
+import { apiRequest, hasError } from "./api-client";
+
 export async function FetchTrendGraphData(
   option: string,
   locationId: number
@@ -37,10 +39,10 @@ export async function FetchTrendGraphData(
     throw new FetchError(`Invalid location ID: ${locationId}`);
   }
 
-  const supabase = createClient();
-  const tableName = option === "avg" ? "pet_year_avg" : "pet_year_max";
+  const response = await apiRequest(async () => {
+    const supabase = createClient();
+    const tableName = option === "avg" ? "pet_year_avg" : "pet_year_max";
 
-  try {
     const data = await fetchTrendData(supabase, tableName, locationId);
 
     if (data.length === 0) {
@@ -56,13 +58,14 @@ export async function FetchTrendGraphData(
       year_pets: yearPets,
       years,
     };
-  } catch (error) {
-    const message =
-      error instanceof FetchError
-        ? error.message
-        : `Unexpected error in FetchTrendGraphData: ${error}`;
+  });
+
+  if (hasError(response)) {
+    const message = `Unexpected error in FetchTrendGraphData: Error: ${response.error.message}`;
     throw new Error(message);
   }
+
+  return response.data;
 }
 
 async function fetchTrendData(

@@ -82,9 +82,11 @@ export const HeaderBar = ({
     return groupedCities.map(group => ({
       group: group.group,
       items: group.items.map(city => ({
+        key: `city-${city.key}`, // Add key prop to resolve warning
         label: `${city.title}, ${city.state}`,
         value: city.key.toString(),
       })),
+      key: `group-${group.group}`, // Add key prop to group
     }));
   }, [groupedCities]);
 

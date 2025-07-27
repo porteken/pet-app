@@ -2,6 +2,13 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+/**
+ * Comprehensive test file for HomeMain component
+ * This file consolidates all test cases from:
+ * - home-main.test.tsx
+ * - home-main-simple.test.tsx
+ */
+
 // Mock server actions
 vi.mock("@/app/actions", () => ({
   setGraphMeasure: vi.fn().mockResolvedValue({}),
@@ -120,6 +127,7 @@ import { FetchTrendGraphData } from "@/lib/api/fetch-client";
 
 import Home from "../home-main";
 
+// Test data
 const mockLocationOptions = [
   {
     items: [
@@ -158,165 +166,189 @@ describe("Home", () => {
     vi.clearAllMocks();
   });
 
-  it("should render all main components", () => {
-    render(<Home {...defaultProps} />);
+  describe("Basic Properties", () => {
+    it("should be importable", () => {
+      expect(Home).toBeDefined();
+    });
 
-    expect(screen.getByTestId("header-bar")).toBeInTheDocument();
-    expect(screen.getByTestId("map-component")).toBeInTheDocument();
-    expect(screen.getByText("Map with 2 locations")).toBeInTheDocument();
-  });
+    it("should be a function component", () => {
+      expect(typeof Home).toBe("function");
+    });
 
-  it("should initialize with correct graph measure", () => {
-    render(<Home {...defaultProps} />);
-
-    // The component should start with default "avg" and then update to initialGraphMeasure
-    expect(screen.getByTestId("header-bar")).toBeInTheDocument();
-  });
-
-  it("should handle marker click and open modal", async () => {
-    render(<Home {...defaultProps} />);
-
-    const markerButton = screen.getByTestId("marker-click");
-    fireEvent.click(markerButton);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("modal")).toBeInTheDocument();
-      expect(screen.getByTestId("modal-title")).toHaveTextContent(
-        "New York, NY"
-      );
+    it("should have correct display name or be anonymous function", () => {
+      expect(Home.name === "Home" || Home.name === "").toBe(true);
     });
   });
 
-  it("should generate graph when marker is clicked", async () => {
-    render(<Home {...defaultProps} />);
+  describe("Component Rendering", () => {
+    it("should render all main components", () => {
+      render(<Home {...defaultProps} />);
 
-    const markerButton = screen.getByTestId("marker-click");
-    fireEvent.click(markerButton);
+      expect(screen.getByTestId("header-bar")).toBeInTheDocument();
+      expect(screen.getByTestId("map-component")).toBeInTheDocument();
+      expect(screen.getByText("Map with 2 locations")).toBeInTheDocument();
+    });
 
-    await waitFor(() => {
-      expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1);
-      expect(GenerateTrendGraph).toHaveBeenCalled();
+    it("should initialize with correct graph measure", () => {
+      render(<Home {...defaultProps} />);
+
+      // The component should start with default "avg" and then update to initialGraphMeasure
+      expect(screen.getByTestId("header-bar")).toBeInTheDocument();
+    });
+
+    it("should render without graph initially", () => {
+      render(<Home {...defaultProps} />);
+
+      expect(screen.queryByTestId("mock-trend-graph")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("modal")).not.toBeInTheDocument();
+    });
+
+    it("should handle empty locations array", () => {
+      render(<Home {...defaultProps} locations={[]} />);
+
+      expect(screen.getByText("Map with 0 locations")).toBeInTheDocument();
     });
   });
 
-  it("should show loading state during graph generation", async () => {
-    const slowFetch = vi
-      .fn()
-      .mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 100))
-      );
-    vi.mocked(FetchTrendGraphData).mockImplementation(slowFetch);
+  describe("Interaction Handling", () => {
+    it("should handle marker click and open modal", async () => {
+      render(<Home {...defaultProps} />);
 
-    render(<Home {...defaultProps} />);
+      const markerButton = screen.getByTestId("marker-click");
+      fireEvent.click(markerButton);
 
-    const markerButton = screen.getByTestId("marker-click");
-    fireEvent.click(markerButton);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("modal")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+        expect(screen.getByTestId("modal-title")).toHaveTextContent(
+          "New York, NY"
+        );
+      });
     });
 
-    expect(screen.getByTestId("mantine-loader")).toBeInTheDocument();
-    expect(screen.getByText("Loading graph...")).toBeInTheDocument();
-  });
+    it("should generate graph when marker is clicked", async () => {
+      render(<Home {...defaultProps} />);
 
-  it("should handle graph measure change", async () => {
-    render(<Home {...defaultProps} />);
+      const markerButton = screen.getByTestId("marker-click");
+      fireEvent.click(markerButton);
 
-    // Click marker to open modal
-    fireEvent.click(screen.getByTestId("marker-click"));
-
-    await waitFor(() => {
-      expect(screen.getByTestId("modal")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1);
+        expect(GenerateTrendGraph).toHaveBeenCalled();
+      });
     });
 
-    // Change the select value
-    const selectElement = screen.getByRole("combobox");
-    fireEvent.change(selectElement, { target: { value: "max" } });
+    it("should show loading state during graph generation", async () => {
+      const slowFetch = vi
+        .fn()
+        .mockImplementation(
+          () => new Promise(resolve => setTimeout(resolve, 100))
+        );
+      vi.mocked(FetchTrendGraphData).mockImplementation(slowFetch);
 
-    await waitFor(() => {
-      expect(setGraphMeasure).toHaveBeenCalledWith("max");
-      expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1);
-    });
-  });
+      render(<Home {...defaultProps} />);
 
-  it("should close modal when close button is clicked", async () => {
-    render(<Home {...defaultProps} />);
+      const markerButton = screen.getByTestId("marker-click");
+      fireEvent.click(markerButton);
 
-    // Open modal
-    fireEvent.click(screen.getByTestId("marker-click"));
+      await waitFor(() => {
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+      });
 
-    await waitFor(() => {
-      expect(screen.getByTestId("modal")).toBeInTheDocument();
-    });
-
-    // Close modal
-    fireEvent.click(screen.getByTestId("modal-close"));
-
-    expect(screen.queryByTestId("modal")).not.toBeInTheDocument();
-  });
-
-  it("should display 'View Full Details' button when location is selected", async () => {
-    render(<Home {...defaultProps} />);
-
-    fireEvent.click(screen.getByTestId("marker-click"));
-
-    await waitFor(() => {
-      expect(screen.getByTestId("modal")).toBeInTheDocument();
-      expect(screen.getByTestId("mantine-button")).toHaveTextContent(
-        "View Full Details"
-      );
-    });
-  });
-
-  it("should navigate to location page when 'View Full Details' is clicked", async () => {
-    // Mock global location
-    const mockLocation = { href: "" };
-    Object.defineProperty(globalThis, "location", {
-      value: mockLocation,
-      writable: true,
+      expect(screen.getByTestId("mantine-loader")).toBeInTheDocument();
+      expect(screen.getByText("Loading graph...")).toBeInTheDocument();
     });
 
-    render(<Home {...defaultProps} />);
+    it("should handle graph measure change", async () => {
+      render(<Home {...defaultProps} />);
 
-    fireEvent.click(screen.getByTestId("marker-click"));
+      // Click marker to open modal
+      fireEvent.click(screen.getByTestId("marker-click"));
 
-    await waitFor(() => {
-      expect(screen.getByTestId("modal")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+      });
+
+      // Change the select value
+      const selectElement = screen.getByRole("combobox");
+      fireEvent.change(selectElement, { target: { value: "max" } });
+
+      await waitFor(() => {
+        expect(setGraphMeasure).toHaveBeenCalledWith("max");
+        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1);
+      });
     });
 
-    fireEvent.click(screen.getByTestId("mantine-button"));
+    it("should close modal when close button is clicked", async () => {
+      render(<Home {...defaultProps} />);
 
-    expect(mockLocation.href).toBe("/1");
-  });
+      // Open modal
+      fireEvent.click(screen.getByTestId("marker-click"));
 
-  it("should handle API error gracefully", async () => {
-    const errorMessage = "API Error";
-    vi.mocked(FetchTrendGraphData).mockRejectedValue(new Error(errorMessage));
+      await waitFor(() => {
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+      });
 
-    render(<Home {...defaultProps} />);
+      // Close modal
+      fireEvent.click(screen.getByTestId("modal-close"));
 
-    fireEvent.click(screen.getByTestId("marker-click"));
-
-    await waitFor(() => {
-      expect(screen.getByText("Unable to load graph data")).toBeInTheDocument();
-      expect(screen.getByText(/contact kenneth porter/i)).toBeInTheDocument();
-      expect(
-        screen.getByRole("link", { name: /porteken@gmail.com/i })
-      ).toBeInTheDocument();
+      expect(screen.queryByTestId("modal")).not.toBeInTheDocument();
     });
   });
 
-  it("should render without graph initially", () => {
-    render(<Home {...defaultProps} />);
+  describe("Navigation and View Details", () => {
+    it("should display 'View Full Details' button when location is selected", async () => {
+      render(<Home {...defaultProps} />);
 
-    expect(screen.queryByTestId("mock-trend-graph")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("modal")).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId("marker-click"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+        expect(screen.getByTestId("mantine-button")).toHaveTextContent(
+          "View Full Details"
+        );
+      });
+    });
+
+    it("should navigate to location page when 'View Full Details' is clicked", async () => {
+      // Mock global location
+      const mockLocation = { href: "" };
+      Object.defineProperty(globalThis, "location", {
+        value: mockLocation,
+        writable: true,
+      });
+
+      render(<Home {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId("marker-click"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId("mantine-button"));
+
+      expect(mockLocation.href).toBe("/1");
+    });
   });
 
-  it("should handle empty locations array", () => {
-    render(<Home {...defaultProps} locations={[]} />);
+  describe("Error Handling", () => {
+    it("should handle API error gracefully", async () => {
+      const errorMessage = "API Error";
+      vi.mocked(FetchTrendGraphData).mockRejectedValue(new Error(errorMessage));
 
-    expect(screen.getByText("Map with 0 locations")).toBeInTheDocument();
+      render(<Home {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId("marker-click"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Unable to load graph data")
+        ).toBeInTheDocument();
+        expect(screen.getByText(/contact kenneth porter/i)).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: /porteken@gmail.com/i })
+        ).toBeInTheDocument();
+      });
+    });
   });
 });

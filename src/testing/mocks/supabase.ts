@@ -4,7 +4,10 @@ import { vi } from "vitest";
  * Mock Supabase client for testing
  */
 export const createMockSupabaseClient = () => ({
-  from: vi.fn(),
+  from: vi.fn().mockImplementation(_table => {
+    const query = createMockSupabaseQuery();
+    return query;
+  }),
 });
 
 /**

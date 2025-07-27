@@ -1,5 +1,11 @@
 "use client";
-import { FC, ReactElement, useCallback, useEffect, useState } from "react";
+import React, {
+  FC,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 import { setGraphMeasure } from "@/app/actions";
 import {
@@ -134,8 +140,12 @@ const Main: FC<PageProperties> = ({
                   }
                   value={selectedGraphMeasure}
                 >
-                  <option value="avg">Average</option>
-                  <option value="max">Maximum</option>
+                  <option key="measure-avg" value="avg">
+                    Average
+                  </option>
+                  <option key="measure-max" value="max">
+                    Maximum
+                  </option>
                 </select>
               </div>
               <div className="h-[700px]">{trendGraph}</div>
@@ -162,29 +172,75 @@ const Main: FC<PageProperties> = ({
                   }
                   value={selectedReferenceYear}
                 >
-                  <option value="2000">2000</option>
-                  <option value="2001">2001</option>
-                  <option value="2002">2002</option>
-                  <option value="2003">2003</option>
-                  <option value="2004">2004</option>
-                  <option value="2005">2005</option>
-                  <option value="2006">2006</option>
-                  <option value="2007">2007</option>
-                  <option value="2008">2008</option>
-                  <option value="2009">2009</option>
-                  <option value="2010">2010</option>
-                  <option value="2011">2011</option>
-                  <option value="2012">2012</option>
-                  <option value="2013">2013</option>
-                  <option value="2014">2014</option>
-                  <option value="2015">2015</option>
-                  <option value="2016">2016</option>
-                  <option value="2017">2017</option>
-                  <option value="2018">2018</option>
-                  <option value="2019">2019</option>
-                  <option value="2020">2020</option>
-                  <option value="2021">2021</option>
-                  <option value="2022">2022</option>
+                  <option key="year-2000" value="2000">
+                    2000
+                  </option>
+                  <option key="year-2001" value="2001">
+                    2001
+                  </option>
+                  <option key="year-2002" value="2002">
+                    2002
+                  </option>
+                  <option key="year-2003" value="2003">
+                    2003
+                  </option>
+                  <option key="year-2004" value="2004">
+                    2004
+                  </option>
+                  <option key="year-2005" value="2005">
+                    2005
+                  </option>
+                  <option key="year-2006" value="2006">
+                    2006
+                  </option>
+                  <option key="year-2007" value="2007">
+                    2007
+                  </option>
+                  <option key="year-2008" value="2008">
+                    2008
+                  </option>
+                  <option key="year-2009" value="2009">
+                    2009
+                  </option>
+                  <option key="year-2010" value="2010">
+                    2010
+                  </option>
+                  <option key="year-2011" value="2011">
+                    2011
+                  </option>
+                  <option key="year-2012" value="2012">
+                    2012
+                  </option>
+                  <option key="year-2013" value="2013">
+                    2013
+                  </option>
+                  <option key="year-2014" value="2014">
+                    2014
+                  </option>
+                  <option key="year-2015" value="2015">
+                    2015
+                  </option>
+                  <option key="year-2016" value="2016">
+                    2016
+                  </option>
+                  <option key="year-2017" value="2017">
+                    2017
+                  </option>
+                  <option key="year-2018" value="2018">
+                    2018
+                  </option>
+                  <option key="year-2019" value="2019">
+                    2019
+                  </option>
+                  <option key="year-2020" value="2020">
+                    2020
+                  </option>
+                  <option key="year-2021" value="2021">
+                    2021
+                  </option>
+                  <option key="year-2022" value="2022">
+                    2022
+                  </option>
                 </select>
               </div>
               <div className="h-[700px]">{referenceGraph}</div>
@@ -196,4 +252,6 @@ const Main: FC<PageProperties> = ({
   );
 };
 
+// Export as both Main (default) and PageMain (named export for tests)
+export { Main as PageMain };
 export default Main;

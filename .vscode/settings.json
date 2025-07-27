@@ -2,10 +2,7 @@
   "playwright.env": {
     "NODE_ENV": "test"
   },
-  "sonarlint.connectedMode.project": {
-    "connectionId": "porteken",
-    "projectKey": "porteken_pet-app"
-  },
+  "chat.tools.autoApprove": true,
   "tailwindCSS.experimental.classRegex": [
     ["className\\s*:\\s*['\"]([^'\"]*)['\"]"]
   ],

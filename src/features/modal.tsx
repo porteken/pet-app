@@ -1,6 +1,6 @@
 "use client";
 import { Modal as MantineModal } from "@mantine/core";
-import { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 
 interface ModalProperties {
   children: ReactNode;

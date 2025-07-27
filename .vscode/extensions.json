@@ -24,6 +24,7 @@
     "austenc.tailwind-docs",
     "stivo.tailwind-fold",
     "usernamehw.errorlens",
-    "bradlc.vscode-tailwindcss"
+    "bradlc.vscode-tailwindcss",
+    "vitest.explorer"
   ]
 }

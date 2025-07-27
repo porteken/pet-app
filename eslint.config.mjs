@@ -1,6 +1,7 @@
 //ts-check
 import pluginJs from "@eslint/js";
 import nextPlugin from "@next/eslint-plugin-next";
+import vitest from "@vitest/eslint-plugin";
 import mantine from "eslint-config-mantine";
 import eslintConfigPrettier from "eslint-config-prettier";
 import importPlugin from "eslint-plugin-import";
@@ -36,7 +37,15 @@ export default [
   pluginReact.configs.flat.recommended, // ? https://github.com/jsx-eslint/eslint-plugin-react
   pluginReact.configs.flat["jsx-runtime"], // ? https://github.com/jsx-eslint/eslint-plugin-react
   eslintConfigPrettier, // ? https://github.com/prettier/eslint-config-prettier
-  ...tailwind.configs["flat/recommended"],
+  {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    plugins: {
+      tailwindcss: tailwind,
+    },
+    rules: {
+      ...tailwind.configs["flat/recommended"][0].rules,
+    },
+  },
   eslintPluginUnicorn.configs.recommended,
   perfectionist.configs["recommended-natural"],
   ...mantine,
@@ -70,6 +79,7 @@ export default [
         },
       ],
       "import/no-unresolved": "off",
+      "react/jsx-uses-react": "error",
       "unicorn/better-regex": "warn",
     },
   },
@@ -83,7 +93,32 @@ export default [
     },
   },
   {
-    ignores: [".next/*", "next-env.d.ts"],
+    ignores: [
+      ".next/*",
+      "next-env.d.ts",
+      "src/__tests__/utils/*",
+      "coverage/*",
+    ],
+  },
+  {
+    files: ["src/__tests__/**/*.{ts,tsx}"],
+    rules: {
+      "import/no-restricted-paths": "off",
+    },
+  },
+  {
+    files: [
+      "**/__tests__/**/*.{ts,tsx}",
+      "**/*.test.{ts,tsx}",
+      "**/*.spec.{ts,tsx}",
+    ],
+    plugins: {
+      vitest,
+    },
+    rules: {
+      ...vitest.configs.recommended.rules,
+      "vitest/max-nested-describe": ["error", { max: 3 }],
+    },
   },
   {
     ...playwright.configs["flat/recommended"],

@@ -1,7 +1,7 @@
 "use client";
 
 import { Icon } from "leaflet";
-import {
+import React, {
   ComponentType,
   CSSProperties,
   ReactNode,

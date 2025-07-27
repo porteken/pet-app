@@ -2,7 +2,13 @@
 
 import { Button, Loader, Select } from "@mantine/core";
 // Import 'useEffect' from React
-import { FC, ReactElement, useCallback, useEffect, useState } from "react";
+import React, {
+  FC,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 import { setGraphMeasure } from "@/app/actions";
 import { GenerateTrendGraph } from "@/features/generate-graph";

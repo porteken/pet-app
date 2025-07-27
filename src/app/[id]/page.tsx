@@ -7,14 +7,19 @@ import {
   FetchReferenceGraphData,
   FetchTrendGraphData,
 } from "@/lib/api/fetch-server";
+import { FetchLocationProperties, LocationProperties } from "@/types/types";
 
 const graphMeasureCookieName = "graph-measure";
 const defaultGraphMeasure = "avg";
-import { FetchLocationProperties, LocationProperties } from "@/types/types";
 
-const Main = dynamic(() => import("@/features/page/page-main"));
+const Page = dynamic(() => import("@/features/page/page-main"));
 
-export default async function Page({
+interface InvalidLocationErrorProperties {
+  message: string;
+  title: string;
+}
+
+export default async function LocationPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -22,31 +27,21 @@ export default async function Page({
   const cookieStore = await cookies();
   const initialGraphMeasure =
     cookieStore.get(graphMeasureCookieName)?.value || defaultGraphMeasure;
+
   const { id } = await params;
-  const locationId = Number(id);
-  if (Number.isNaN(locationId) || locationId <= 0) {
+  const locationId = await validateLocationId(id);
+
+  if (!locationId) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h1 className="mb-4 text-2xl font-bold text-gray-900">
-            Invalid location ID
-          </h1>
-          <p className="text-gray-600">
-            The provided location ID is not valid.
-          </p>
-        </div>
-      </div>
+      <InvalidLocationError
+        message="The provided location ID is not valid."
+        title="Invalid location ID"
+      />
     );
   }
 
-  let locations: LocationProperties[] = [];
-  let LocationOptions: FetchLocationProperties["LocationOptions"] = [];
-
-  try {
-    const result = await FetchLocations();
-    locations = result.locations;
-    LocationOptions = result.LocationOptions;
-  } catch {
+  const locationData = await fetchLocationData();
+  if (!locationData) {
     return (
       <DatabaseError
         message="Unable to connect to the database. Please try again later."
@@ -55,6 +50,7 @@ export default async function Page({
     );
   }
 
+  const { LocationOptions, locations } = locationData;
   if (!locations || locations.length === 0) {
     return (
       <DatabaseError
@@ -64,55 +60,90 @@ export default async function Page({
     );
   }
 
-  let pets: number[] = [];
-  let dates: Date[] = [];
-  let reference_pets: number[] = [];
-  let years: number[] = [];
-  let year_pets: number[] = [];
-  let trendline_pets: number[] = [];
-
-  const currentData = await FetchReferenceGraphData("2023", locationId);
-  pets = currentData.pets;
-  dates = currentData.dates;
-
-  const referenceData = await FetchReferenceGraphData("2000", locationId);
-  reference_pets = referenceData.pets;
-
-  const trendData = await FetchTrendGraphData("avg", locationId);
-  years = trendData.years;
-  year_pets = trendData.year_pets;
-  trendline_pets = trendData.trendline_pets;
-
   const selectedLocation = locations.find(
     (loc: { location_id: number }) => loc.location_id === locationId
   );
+
   if (!selectedLocation) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h1 className="mb-4 text-2xl font-bold text-gray-900">
-            Location not found
-          </h1>
-          <p className="text-gray-600">
-            The requested location could not be found.
-          </p>
-        </div>
-      </div>
+      <InvalidLocationError
+        message="The requested location could not be found."
+        title="Location not found"
+      />
     );
   }
 
+  const graphData = await fetchGraphData(locationId);
+
   return (
-    <Main
-      CurrentDates={dates}
-      CurrentPets={pets}
+    <Page
+      CurrentDates={graphData.dates}
+      CurrentPets={graphData.pets}
       id={locationId}
       initialGraphMeasure={initialGraphMeasure}
       location={selectedLocation}
       LocationOptions={LocationOptions}
-      ReferencePets={reference_pets}
-      TrendlinePets={trendline_pets}
-      YearPets={year_pets}
-      Years={years}
+      ReferencePets={graphData.reference_pets}
+      TrendlinePets={graphData.trendline_pets}
+      YearPets={graphData.year_pets}
+      Years={graphData.years}
     />
   );
+}
+
+async function fetchGraphData(locationId: number) {
+  const [currentData, referenceData, trendData] = await Promise.all([
+    FetchReferenceGraphData("2023", locationId),
+    FetchReferenceGraphData("2000", locationId),
+    FetchTrendGraphData("avg", locationId),
+  ]);
+
+  return {
+    dates: currentData.dates,
+    pets: currentData.pets,
+    reference_pets: referenceData.pets,
+    trendline_pets: trendData.trendline_pets,
+    year_pets: trendData.year_pets,
+    years: trendData.years,
+  };
+}
+
+async function fetchLocationData(): Promise<
+  | undefined
+  | {
+      LocationOptions: FetchLocationProperties["LocationOptions"];
+      locations: LocationProperties[];
+    }
+> {
+  try {
+    const result = await FetchLocations();
+    return {
+      LocationOptions: result.LocationOptions,
+      locations: result.locations,
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+function InvalidLocationError({
+  message,
+  title,
+}: InvalidLocationErrorProperties) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <h1 className="mb-4 text-2xl font-bold text-gray-900">{title}</h1>
+        <p className="text-gray-600">{message}</p>
+      </div>
+    </div>
+  );
+}
+
+async function validateLocationId(id: string): Promise<number | undefined> {
+  const locationId = Number(id);
+  if (Number.isNaN(locationId) || locationId <= 0) {
+    return undefined;
+  }
+  return locationId;
 }

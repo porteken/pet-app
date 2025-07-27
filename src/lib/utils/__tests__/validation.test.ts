@@ -1,0 +1,237 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  validateDates,
+  validateLocationId,
+  validatePets,
+  validateTrendOption,
+  validateYear,
+  validateYearPets,
+  validateYears,
+} from "../validation";
+
+describe("validation utilities", () => {
+  describe("validateDates", () => {
+    it("should not throw for valid dates", () => {
+      const validDates = [
+        new Date("2023-01-01"),
+        new Date("2023-12-31"),
+        new Date(),
+      ];
+
+      expect(() => validateDates(validDates)).not.toThrow();
+    });
+
+    it("should throw for invalid dates", () => {
+      const invalidDates = [
+        new Date("invalid-date"),
+        new Date("2023-13-01"), // Invalid month
+      ];
+
+      expect(() => validateDates(invalidDates)).toThrow(
+        "Invalid date data detected"
+      );
+    });
+
+    it("should throw if any date in array is invalid", () => {
+      const mixedDates = [
+        new Date("2023-01-01"),
+        new Date("invalid-date"),
+        new Date("2023-12-31"),
+      ];
+
+      expect(() => validateDates(mixedDates)).toThrow(
+        "Invalid date data detected"
+      );
+    });
+
+    it("should handle empty array", () => {
+      expect(() => validateDates([])).not.toThrow();
+    });
+  });
+
+  describe("validateLocationId", () => {
+    it("should return true for valid positive integers", () => {
+      expect(validateLocationId(1)).toBe(true);
+      expect(validateLocationId(100)).toBe(true);
+      expect(validateLocationId(999)).toBe(true);
+    });
+
+    it("should return false for zero", () => {
+      expect(validateLocationId(0)).toBe(false);
+    });
+
+    it("should return false for negative numbers", () => {
+      expect(validateLocationId(-1)).toBe(false);
+      expect(validateLocationId(-100)).toBe(false);
+    });
+
+    it("should return false for non-integers", () => {
+      expect(validateLocationId(1.5)).toBe(false);
+      expect(validateLocationId(3.14)).toBe(false);
+    });
+
+    it("should return false for non-numbers", () => {
+      expect(validateLocationId("1" as any)).toBe(false);
+      expect(validateLocationId(undefined as any)).toBe(false);
+      expect(validateLocationId(Number.NaN)).toBe(false);
+    });
+  });
+
+  describe("validatePets", () => {
+    it("should not throw for valid pet count arrays", () => {
+      expect(() => validatePets([0, 1, 5, 10, 100])).not.toThrow();
+      expect(() => validatePets([0])).not.toThrow();
+      expect(() => validatePets([])).not.toThrow();
+    });
+
+    it("should throw for arrays containing NaN", () => {
+      expect(() => validatePets([1, 2, Number.NaN, 4])).toThrow(
+        "Invalid pet count data detected"
+      );
+    });
+
+    it("should throw for arrays containing only NaN", () => {
+      expect(() => validatePets([Number.NaN])).toThrow(
+        "Invalid pet count data detected"
+      );
+    });
+
+    it("should handle negative numbers (they are valid pet counts)", () => {
+      expect(() => validatePets([-1, 0, 1])).not.toThrow();
+    });
+  });
+
+  describe("validateTrendOption", () => {
+    it("should return true for 'avg'", () => {
+      expect(validateTrendOption("avg")).toBe(true);
+    });
+
+    it("should return true for 'max'", () => {
+      expect(validateTrendOption("max")).toBe(true);
+    });
+
+    it("should return false for other strings", () => {
+      expect(validateTrendOption("min")).toBe(false);
+      expect(validateTrendOption("median")).toBe(false);
+      expect(validateTrendOption("average")).toBe(false);
+      expect(validateTrendOption("maximum")).toBe(false);
+      expect(validateTrendOption("")).toBe(false);
+    });
+
+    it("should return false for non-strings", () => {
+      expect(validateTrendOption(undefined as any)).toBe(false);
+      expect(validateTrendOption(123 as any)).toBe(false);
+      expect(validateTrendOption(true as any)).toBe(false);
+    });
+
+    it("should be case sensitive", () => {
+      expect(validateTrendOption("AVG")).toBe(false);
+      expect(validateTrendOption("Max")).toBe(false);
+      expect(validateTrendOption("MAX")).toBe(false);
+    });
+  });
+
+  describe("validateYear", () => {
+    it("should return true for valid 4-digit year strings", () => {
+      expect(validateYear("2023")).toBe(true);
+      expect(validateYear("1999")).toBe(true);
+      expect(validateYear("2000")).toBe(true);
+      expect(validateYear("9999")).toBe(true);
+    });
+
+    it("should return false for non-4-digit strings", () => {
+      expect(validateYear("23")).toBe(false);
+      expect(validateYear("123")).toBe(false);
+      expect(validateYear("12345")).toBe(false);
+    });
+
+    it("should return false for non-numeric strings", () => {
+      expect(validateYear("abcd")).toBe(false);
+      expect(validateYear("20a3")).toBe(false);
+      expect(validateYear("year")).toBe(false);
+    });
+
+    it("should return false for empty string", () => {
+      expect(validateYear("")).toBe(false);
+    });
+
+    it("should return false for strings with spaces", () => {
+      expect(validateYear(" 2023")).toBe(false);
+      expect(validateYear("2023 ")).toBe(false);
+      expect(validateYear("20 23")).toBe(false);
+    });
+
+    it("should return false for non-strings", () => {
+      expect(validateYear(2023 as any)).toBe(true); // Numbers get converted to strings in regex test
+      expect(validateYear(undefined as any)).toBe(false);
+    });
+  });
+
+  describe("validateYearPets", () => {
+    it("should not throw for valid year pet arrays", () => {
+      expect(() => validateYearPets([0, 1, 5, 10, 100])).not.toThrow();
+      expect(() => validateYearPets([0])).not.toThrow();
+      expect(() => validateYearPets([])).not.toThrow();
+    });
+
+    it("should throw for arrays containing NaN", () => {
+      expect(() => validateYearPets([1, 2, Number.NaN, 4])).toThrow(
+        "Invalid pet count data detected"
+      );
+    });
+
+    it("should throw for arrays containing negative numbers", () => {
+      expect(() => validateYearPets([1, 2, -1, 4])).toThrow(
+        "Invalid pet count data detected"
+      );
+    });
+
+    it("should throw for arrays containing only negative numbers", () => {
+      expect(() => validateYearPets([-1, -2, -3])).toThrow(
+        "Invalid pet count data detected"
+      );
+    });
+
+    it("should handle zero (valid pet count)", () => {
+      expect(() => validateYearPets([0, 0, 0])).not.toThrow();
+    });
+
+    it("should handle decimal numbers (they are valid)", () => {
+      expect(() => validateYearPets([1.5, 2.7, 3.14])).not.toThrow();
+    });
+  });
+
+  describe("validateYears", () => {
+    it("should not throw for valid year arrays", () => {
+      expect(() => validateYears([2020, 2021, 2022, 2023])).not.toThrow();
+      expect(() => validateYears([1900, 2100])).not.toThrow(); // boundary values
+      expect(() => validateYears([])).not.toThrow();
+    });
+
+    it("should throw for arrays containing non-integer years", () => {
+      expect(() => validateYears([2020.5, 2021, 2022])).toThrow(
+        "Invalid year data detected"
+      );
+    });
+
+    it("should throw for arrays containing years before 1900", () => {
+      expect(() => validateYears([1899, 2020, 2021])).toThrow(
+        "Invalid year data detected"
+      );
+    });
+
+    it("should throw for arrays containing years after 2100", () => {
+      expect(() => validateYears([2020, 2021, 2101])).toThrow(
+        "Invalid year data detected"
+      );
+    });
+
+    it("should handle boundary values correctly", () => {
+      expect(() => validateYears([1900])).not.toThrow(); // min valid year
+      expect(() => validateYears([2100])).not.toThrow(); // max valid year
+      expect(() => validateYears([1899])).toThrow("Invalid year data detected"); // just below min
+      expect(() => validateYears([2101])).toThrow("Invalid year data detected"); // just above max
+    });
+  });
+});

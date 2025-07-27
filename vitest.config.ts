@@ -15,10 +15,10 @@ export default defineConfig({
         ".next/**",
         "tests/**",
         "src/utils/__tests__/test-utilities.ts",
-        "src/config/supabase/**", // Exclude Supabase config (official code)
-        "src/middleware.ts", // Exclude middleware
-        "**/*types.ts", // Exclude type definition files
-        "**/constants.ts", // Exclude constants files
+        "src/config/supabase/**",
+        "src/middleware.ts",
+        "**/*types.ts",
+        "**/constants.ts",
       ],
       include: [
         "src/features/**/*.{ts,tsx}",
@@ -35,13 +35,13 @@ export default defineConfig({
       ".next/**",
       "tests/**",
       "src/utils/__tests__/test-utilities.ts",
-      "src/app/**", // Exclude app directory tests
+      "src/app/**",
     ],
     globals: true,
     include: [
       "src/**/__tests__/**/*.test.{js,jsx,ts,tsx}",
       "src/**/*.test.{js,jsx,ts,tsx}",
-      "!src/app/**", // Explicitly exclude app directory from test discovery
+      "!src/app/**",
     ],
     setupFiles: ["./vitest.setup.ts"],
   },

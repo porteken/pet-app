@@ -55,17 +55,10 @@ export default [
         "error",
         {
           zones: [
-            // Prevent cross-feature imports to ensure features remain independent
-            // Each feature should be self-contained and not depend on other features
-            
-            // enforce unidirectional codebase:
-            // e.g. src/app can import from src/features but not the other way around
             {
               from: "./src/app",
               target: "./src/features",
             },
-
-            // e.g src/features and src/app can import from these shared modules but not the other way around
             {
               from: ["./src/features", "./src/app"],
               target: [
@@ -78,8 +71,6 @@ export default [
                 "./src/stores",
               ],
             },
-
-            // Prevent shared modules from importing from each other to maintain clear boundaries
             {
               from: ["./src/components", "./src/hooks", "./src/utils"],
               target: ["./src/features", "./src/app"],
@@ -89,7 +80,6 @@ export default [
       ],
       "import/no-unresolved": "off",
       "react/jsx-uses-react": "error",
-      // Disable prop-types for TypeScript since TypeScript provides compile-time type checking
       "react/prop-types": "off",
       "unicorn/better-regex": "warn",
     },

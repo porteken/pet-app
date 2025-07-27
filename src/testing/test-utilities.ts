@@ -18,7 +18,7 @@ export const setupApiClientTest = async () => {
   const mockValidation = createMockValidation();
 
   // Mock createClient
-  const { createClient } = await import("@/lib/config/supabase/client");
+  const { createClient } = await import("@/config/supabase/client");
   vi.mocked(createClient).mockReturnValue(mockSupabaseClient as any);
 
   // Mock validation functions
@@ -44,7 +44,7 @@ export const setupApiServerTest = async () => {
   vi.mocked(cookies).mockResolvedValue(mockCookieStore as any);
 
   // Mock createClient
-  const { createClient } = await import("@/lib/config/supabase/server");
+  const { createClient } = await import("@/config/supabase/server");
   vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
 
   // Mock SimpleLinearRegression

@@ -15,7 +15,7 @@ export default defineConfig({
         ".next/**",
         "tests/**",
         "src/utils/__tests__/test-utilities.ts",
-        "src/lib/config/supabase/**", // Exclude Supabase config (official code)
+        "src/config/supabase/**", // Exclude Supabase config (official code)
         "src/middleware.ts", // Exclude middleware
         "**/*types.ts", // Exclude type definition files
         "**/constants.ts", // Exclude constants files

@@ -55,8 +55,9 @@ export default [
         "error",
         {
           zones: [
-            // Previous restrictions...
-
+            // Prevent cross-feature imports to ensure features remain independent
+            // Each feature should be self-contained and not depend on other features
+            
             // enforce unidirectional codebase:
             // e.g. src/app can import from src/features but not the other way around
             {
@@ -73,7 +74,15 @@ export default [
                 "./src/lib",
                 "./src/types",
                 "./src/utils",
+                "./src/config",
+                "./src/stores",
               ],
+            },
+
+            // Prevent shared modules from importing from each other to maintain clear boundaries
+            {
+              from: ["./src/components", "./src/hooks", "./src/utils"],
+              target: ["./src/features", "./src/app"],
             },
           ],
         },

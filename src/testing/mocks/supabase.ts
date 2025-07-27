@@ -91,7 +91,7 @@ export const createMockServerQueryWithRejection = (error: Error) => {
  * Setup mock for Supabase client module
  */
 export const mockSupabaseClient = () => {
-  vi.mock("@/lib/config/supabase/client", () => ({
+  vi.mock("@/config/supabase/client", () => ({
     createClient: vi.fn(),
   }));
 };
@@ -100,7 +100,7 @@ export const mockSupabaseClient = () => {
  * Setup mock for Supabase server module
  */
 export const mockSupabaseServer = () => {
-  vi.mock("@/lib/config/supabase/server", () => ({
+  vi.mock("@/config/supabase/server", () => ({
     createClient: vi.fn(),
   }));
 };

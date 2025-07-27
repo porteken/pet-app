@@ -24,7 +24,7 @@ vi.mock("@/features/header-bar", () => ({
 }));
 
 // Mock Supabase
-vi.mock("@/lib/config/supabase/client", () => ({
+vi.mock("@/config/supabase/client", () => ({
   default: {},
 }));
 

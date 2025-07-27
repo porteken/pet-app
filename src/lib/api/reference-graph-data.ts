@@ -2,7 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 import type { ReferenceGraphDataProperties } from "@/types/types";
 
-import { createClient } from "@/lib/config/supabase/client";
+import { createClient } from "@/config/supabase/client";
 import { FetchError } from "@/lib/utils/errors";
 import {
   validateDates,

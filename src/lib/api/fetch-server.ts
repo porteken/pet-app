@@ -1,7 +1,7 @@
 "use server";
 import { cookies } from "next/headers";
 
-import { createClient } from "@/lib/config/supabase/server";
+import { createClient } from "@/config/supabase/server";
 import { DatabaseError } from "@/lib/utils/errors";
 import { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
 import {

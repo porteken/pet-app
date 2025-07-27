@@ -2,7 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 import type { TrendGraphDataProperties } from "@/types/types";
 
-import { createClient } from "@/lib/config/supabase/client";
+import { createClient } from "@/config/supabase/client";
 import { FetchError } from "@/lib/utils/errors";
 import { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
 import {

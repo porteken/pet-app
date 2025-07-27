@@ -1,12 +1,13 @@
 "use client";
 
-import { Button, Group, Paper, Select } from "@mantine/core";
-import Link from "next/link";
+import { Group, Paper, Select } from "@mantine/core";
 import { useSearchParams } from "next/navigation";
 import React, { useMemo } from "react";
 
 import { APP_CONFIG } from "@/lib/utils/constants";
 import { NavProperties } from "@/types/types";
+
+import { NavButtons } from "./header-bar/components";
 
 interface LocationItem {
   key: number;
@@ -100,15 +101,6 @@ export const HeaderBar = ({
         </div>
         <Paper className="bg-white shadow-none" p="md">
           <Group className="hidden justify-center gap-4 sm:flex">
-            <Button
-              aria-label="Navigate to map view"
-              component={Link}
-              href={buildUrl("/")}
-              variant="subtle"
-            >
-              Map
-            </Button>
-
             <Select
               data={selectData}
               onChange={value => {
@@ -128,25 +120,7 @@ export const HeaderBar = ({
               w={300}
             />
 
-            <Button
-              aria-label="Navigate to about page"
-              component={Link}
-              href="/about"
-              variant="subtle"
-            >
-              About
-            </Button>
-
-            <Button
-              aria-label="View source code on GitHub"
-              component="a"
-              href={APP_CONFIG.GITHUB_URL}
-              rel="noopener noreferrer"
-              target="_blank"
-              variant="subtle"
-            >
-              Github Repository
-            </Button>
+            <NavButtons buildUrl={buildUrl} />
           </Group>
         </Paper>
       </div>

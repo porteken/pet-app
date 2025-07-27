@@ -41,6 +41,11 @@ const Home: FC<MapProperties> = ({
 
   const generateGraph = useCallback(
     async (locationId: number, option: string) => {
+      // Check if we're in a browser environment before accessing window-dependent code
+      if (globalThis.window === undefined) {
+        return; // Return early if we're in server-side rendering
+      }
+
       setGraphLoading(true);
       try {
         const { trendline_pets, year_pets, years } = await FetchTrendGraphData(
@@ -95,6 +100,11 @@ const Home: FC<MapProperties> = ({
 
   const handleSelectChange = useCallback(
     async (option: string) => {
+      // Check if we're in a browser environment
+      if (globalThis.window === undefined) {
+        return; // Return early if we're in server-side rendering
+      }
+
       if (selectedLocationId !== undefined) {
         setSelectedGraphMeasure(option);
         await setGraphMeasure(option);
@@ -106,6 +116,11 @@ const Home: FC<MapProperties> = ({
 
   const handleMarkerClick = useCallback(
     async (locationId: number) => {
+      // Check if we're in a browser environment
+      if (globalThis.window === undefined) {
+        return; // Return early if we're in server-side rendering
+      }
+
       setSelectedLocationId(locationId);
       const location =
         locations.find(loc => loc.location_id === locationId) || undefined;

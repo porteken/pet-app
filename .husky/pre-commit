@@ -5,6 +5,6 @@ npx lint-staged
 npm run lint
 npm run build
 npm run test:unit:run
-npm run test
+npm run test:e2e
 
 echo "✅ Pre-commit checks passed!"

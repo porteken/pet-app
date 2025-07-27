@@ -27,7 +27,7 @@
   "editor.formatOnSave": true,
   // Extension: ESLint
   "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit",
+    "source.fixAll": "always",
     "source.organizeImports": "never"
   },
   "eslint.validate": [

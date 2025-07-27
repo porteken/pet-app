@@ -8,9 +8,14 @@
     "build": "next build --turbopack",
     "start": "node .next/standalone/server.js",
     "lint": "next lint",
+    "test": "vitest run",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:e2e": "npx playwright test",
-    "test:unit": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:unit": "vitest run --exclude='**/*.integration.test.*'",
+    "test:integration": "vitest run --config=vitest.integration.config.ts",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
   },
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0 || ^19.0.0",

@@ -1,8 +1,12 @@
 echo "🔍 Running pre-commit checks..."
 
-# Run lint-staged
+# Run lint-staged first (fastest)
 npx lint-staged
+
+# Run unit tests (fast feedback)
 npm run test:unit
-npm run test:e2e
+
+# Run integration tests
+npm run test:integration
 
 echo "✅ Pre-commit checks passed!"

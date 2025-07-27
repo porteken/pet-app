@@ -1,0 +1,10 @@
+echo "🚀 Running pre-push checks..."
+
+# Run full test suite including E2E tests
+npm run test
+npm run test:e2e
+
+# Run build to ensure everything compiles
+npm run build
+
+echo "✅ Pre-push checks passed!"

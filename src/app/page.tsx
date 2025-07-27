@@ -1,11 +1,11 @@
 import dynamic from "next/dynamic";
 
-import { LocationErrorHandler } from "./components/error-handlers";
-import { PageLoader } from "./components/page-loader";
+import { LocationErrorHandler } from "@/components/app/error-handlers";
+import { PageLoader } from "@/components/app/page-loader";
 import {
   getGraphMeasureFromCookies,
   getLocationData,
-} from "./utils/page-helpers";
+} from "@/lib/utils/app/page-helpers";
 
 // Dynamic import for better performance - colocated near usage
 const Home = dynamic(() => import("@/features/home/home-main"), {

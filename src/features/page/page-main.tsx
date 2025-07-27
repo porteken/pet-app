@@ -1,8 +1,8 @@
 "use client";
 import React, { FC } from "react";
 
-import { setGraphMeasure } from "@/app/actions";
 import { HeaderBar } from "@/features/header-bar";
+import { setGraphMeasure } from "@/lib/actions/actions";
 
 import { PageHeader } from "./components/page-header";
 import { ReferenceData } from "./components/reference-data";

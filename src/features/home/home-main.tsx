@@ -9,10 +9,10 @@ import React, {
   useState,
 } from "react";
 
-import { setGraphMeasure } from "@/app/actions";
 import { GenerateTrendGraph } from "@/features/generate-graph";
 import { HeaderBar } from "@/features/header-bar";
 import Modal from "@/features/modal";
+import { setGraphMeasure } from "@/lib/actions/actions";
 import { FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { GraphOptions } from "@/lib/utils/select-options";
 import { LocationProperties } from "@/types/types";

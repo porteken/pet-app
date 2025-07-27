@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { AppError, DatabaseError, FetchError } from "../errors";
+import { AppError, DatabaseError, FetchError, NetworkError } from "../errors";
 
 describe("Error Classes", () => {
   describe("AppError", () => {
@@ -100,9 +100,11 @@ describe("Error Classes", () => {
       expect(error).toBeInstanceOf(FetchError);
     });
 
-    it("should not be an instance of AppError", () => {
+    it("should be an instance of AppError and NetworkError", () => {
       const error = new FetchError("Test");
-      expect(error).not.toBeInstanceOf(AppError);
+      expect(error).toBeInstanceOf(AppError);
+      expect(error).toBeInstanceOf(NetworkError);
+      expect(error).toBeInstanceOf(FetchError);
     });
   });
 });

@@ -3,7 +3,7 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock server actions
-vi.mock("@/app/actions", () => ({
+vi.mock("@/lib/actions/actions", () => ({
   setGraphMeasure: vi.fn().mockResolvedValue({}),
 }));
 
@@ -114,8 +114,8 @@ vi.mock("@/lib/utils/select-options", () => ({
   ],
 }));
 
-import { setGraphMeasure } from "@/app/actions";
 import { GenerateTrendGraph } from "@/features/generate-graph";
+import { setGraphMeasure } from "@/lib/actions/actions";
 import { FetchTrendGraphData } from "@/lib/api/fetch-client";
 
 import Home from "../home-main";

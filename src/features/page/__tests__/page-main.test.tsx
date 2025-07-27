@@ -42,7 +42,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 // Mock actions
-vi.mock("@/app/actions", () => ({
+vi.mock("@/lib/actions/actions", () => ({
   setGraphMeasure: vi.fn().mockResolvedValue("avg"),
 }));
 
@@ -59,11 +59,11 @@ vi.mock("@/lib/api/fetch-client", () => ({
   }),
 }));
 
-import { setGraphMeasure } from "@/app/actions";
 import {
   GenerateReferenceGraph,
   GenerateTrendGraph,
 } from "@/features/generate-graph";
+import { setGraphMeasure } from "@/lib/actions/actions";
 import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
 
 import { PageMain } from "../page-main";

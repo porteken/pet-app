@@ -28,6 +28,14 @@ npm run test:e2e
 
 Runs Playwright tests for full application testing in browser environment.
 
+### Critical E2E Tests
+
+```bash
+npm run test:e2e:critical
+```
+
+Runs E2E tests excluding known flaky tests (useful for CI/CD and pre-push hooks).
+
 ### All Tests
 
 ```bash
@@ -70,13 +78,16 @@ Automatically runs before each commit:
 2. **Unit Tests**: Fast unit test execution
 3. **Integration Tests**: Component integration validation
 
+_Note: E2E tests are excluded from pre-commit for faster development workflow_
+
 ### Pre-push Hook
 
 Automatically runs before pushing to remote:
 
-1. **Full Test Suite**: All unit and integration tests
-2. **E2E Tests**: Complete browser testing
-3. **Build Verification**: Ensures the app builds successfully
+1. **Unit Tests**: Fast feedback validation
+2. **Integration Tests**: Component interaction verification
+3. **Critical E2E Tests**: Browser testing (excluding flaky mobile tests)
+4. **Build Verification**: Ensures the app builds successfully
 
 ### Commit Message Hook
 

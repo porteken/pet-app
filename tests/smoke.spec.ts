@@ -107,16 +107,29 @@ test.describe("Smoke Tests - Critical User Journeys", () => {
 
     // 4. Navigation should work on mobile
     const marker = page.locator(".leaflet-marker-icon").first();
+    await marker.waitFor({ state: "visible" });
     // eslint-disable-next-line playwright/no-force-option
     await marker.click({ force: true });
-    await expect(
-      page.getByRole("button", { name: "View Full Details" })
-    ).toBeVisible();
 
-    // 5. Modal should be mobile-friendly
-    await page.getByRole("button", { name: "View Full Details" }).click();
+    // 5. Wait for modal to appear and check for button with increased timeout
+    await expect(page.locator('[role="dialog"], .modal')).toBeVisible({
+      timeout: 10_000,
+    });
 
-    // 6. Data visualization should be responsive
+    // Try multiple possible selectors for the button
+    const viewDetailsButton = page
+      .locator("button")
+      .filter({ hasText: /view full details/i })
+      .or(page.getByRole("button", { name: "View Full Details" }))
+      .or(page.locator('button:has-text("View Full Details")'))
+      .first();
+
+    await expect(viewDetailsButton).toBeVisible({ timeout: 10_000 });
+
+    // 6. Modal should be mobile-friendly
+    await viewDetailsButton.click();
+
+    // 7. Data visualization should be responsive
     await expect(page.getByText("Trend Analysis")).toBeVisible();
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
   });

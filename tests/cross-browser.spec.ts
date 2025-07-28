@@ -102,23 +102,26 @@ test.describe("Cross-Browser Compatibility", () => {
   test("form interactions behave consistently", async ({ page }) => {
     await page.goto("/1");
 
+    // Wait for the page to load completely
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+
     // 1. Select elements should work the same way
     const graphMeasure = page.locator("select#graph-measure");
     const referenceYear = page.locator("select#reference-year");
 
-    // 2. Get initial values
-    const initialGraphValue = await graphMeasure.inputValue();
-    const initialYearValue = await referenceYear.inputValue();
+    // Ensure selects are ready
+    await expect(graphMeasure).toBeVisible();
+    await expect(referenceYear).toBeVisible();
 
-    // 3. Change values
+    // 2. Change values with explicit waiting
     await graphMeasure.selectOption("max");
     await referenceYear.selectOption("2010");
 
-    // 4. Verify changes persisted
-    await expect(graphMeasure).not.toHaveValue(initialGraphValue);
-    await expect(referenceYear).not.toHaveValue(initialYearValue);
+    // 3. Verify changes persisted with explicit value checks
+    await expect(graphMeasure).toHaveValue("max");
+    await expect(referenceYear).toHaveValue("2010");
 
-    // 5. UI should update accordingly
+    // 4. UI should update accordingly
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
   });
 

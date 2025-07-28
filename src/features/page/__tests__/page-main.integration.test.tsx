@@ -4,7 +4,7 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { setGraphMeasure } from "@/lib/actions/actions";
-import { database } from "@/testing/mocks/database";
+import { database, resetDatabase } from "@/testing/mocks/database";
 
 import type { PageProperties } from "../types";
 
@@ -89,11 +89,12 @@ describe("PageMain Integration Tests", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetDatabase();
 
     // Create test data using MSW database with unique IDs for each test
     const location = database.location.create({
       city: "San Francisco",
-      location_id: Math.floor(Math.random() * 10_000) + 1, // Random ID to avoid collisions
+      location_id: 433,
       state: "California",
     });
 

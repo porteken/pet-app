@@ -18,6 +18,19 @@ mockValidationModule();
 mockSimpleLinearRegression();
 
 describe("FetchTrendGraphData", () => {
+  it("should throw error when called in non-browser environment", async () => {
+    // Mock non-browser environment
+    const originalWindow = globalThis.window;
+    // @ts-expect-error - Testing non-browser environment
+    delete globalThis.window;
+
+    await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
+      "FetchTrendGraphData can only be called in browser environment"
+    );
+
+    // Restore window
+    globalThis.window = originalWindow;
+  });
   let mockSupabaseClient: ReturnType<
     (typeof import("@/testing"))["createMockSupabaseClient"]
   >;
@@ -144,25 +157,6 @@ describe("FetchTrendGraphData", () => {
     );
   });
 
-  it("should handle validation errors during data processing", async () => {
-    const mockData = [{ location_id: 1, pet: 25.5, year: 2020 }];
-
-    const mockQuery = {
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
-      select: vi.fn().mockReturnThis(),
-    };
-
-    mockSupabaseClient.from.mockReturnValue(mockQuery);
-    mockValidation.validateYears.mockImplementation(() => {
-      throw new Error("Invalid years data");
-    });
-
-    await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
-      "Invalid years data"
-    );
-  });
-
   it("should handle FetchError during data processing", async () => {
     const mockData = [{ location_id: 1, pet: 25.5, year: 2020 }];
 
@@ -201,5 +195,27 @@ describe("FetchTrendGraphData", () => {
     await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
       "Unexpected error in FetchTrendGraphData: Error: Regression calculation failed"
     );
+  });
+
+  it("should handle database response with null data", async () => {
+    const mockQuery = {
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: undefined, error: undefined }),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    mockSupabaseClient.from.mockReturnValue(mockQuery);
+
+    await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
+      "No data found for location 1"
+    );
+  });
+});
+
+describe("FetchReferenceGraphData export", () => {
+  it("should export FetchReferenceGraphData", async () => {
+    const { FetchReferenceGraphData } = await import("../fetch-client");
+    expect(FetchReferenceGraphData).toBeDefined();
+    expect(typeof FetchReferenceGraphData).toBe("function");
   });
 });

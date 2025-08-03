@@ -1,6 +1,5 @@
 import { createError, NetworkError } from "@/lib/utils/errors";
 
-// API response interceptor for handling errors
 export const handleApiResponse = async <T>(
   response: Response,
   context?: Record<string, any>
@@ -32,7 +31,6 @@ export const handleApiResponse = async <T>(
   }
 };
 
-// Extract error message from response
 const extractErrorMessage = async (response: Response): Promise<string> => {
   try {
     const errorData = await response.json();
@@ -57,7 +55,6 @@ const extractErrorMessage = async (response: Response): Promise<string> => {
   }
 };
 
-// Get default error message based on status code
 const getDefaultErrorMessage = (statusCode: number): string => {
   switch (statusCode) {
     case 400: {
@@ -93,7 +90,6 @@ const getDefaultErrorMessage = (statusCode: number): string => {
   }
 };
 
-// Fetch wrapper with error handling
 export const apiRequest = async <T>(
   url: string,
   options: RequestInit = {},
@@ -113,7 +109,6 @@ export const apiRequest = async <T>(
       method: options.method || "GET",
     });
   } catch (error) {
-    // Handle network errors (fetch failures)
     if (error instanceof TypeError && error.message.includes("fetch")) {
       const networkError = new NetworkError(
         "Network connection failed",
@@ -122,16 +117,13 @@ export const apiRequest = async <T>(
         context
       );
 
-      // Network error occurred, throw it directly
       throw networkError;
     }
 
-    // Re-throw if it's already one of our custom errors
     throw error;
   }
 };
 
-// Retry mechanism for failed requests
 export const apiRequestWithRetry = async <T>(
   url: string,
   options: RequestInit = {},
@@ -146,7 +138,6 @@ export const apiRequestWithRetry = async <T>(
     } catch (error) {
       lastError = error as Error;
 
-      // Don't retry client errors (4xx) except for 429 (rate limiting)
       if (
         error instanceof NetworkError &&
         error.statusCode >= 400 &&
@@ -156,17 +147,14 @@ export const apiRequestWithRetry = async <T>(
         throw error;
       }
 
-      // Don't retry on the last attempt
       if (attempt === retries) {
         throw error;
       }
 
-      // Exponential backoff
       const delay = Math.min(1000 * 2 ** (attempt - 1), 5000);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
 
-  // This should never be reached due to the logic above, but TypeScript needs this
   throw lastError || new Error("Unknown error occurred");
 };

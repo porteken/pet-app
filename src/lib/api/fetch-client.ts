@@ -24,7 +24,6 @@ export async function FetchTrendGraphData(
   option: string,
   locationId: number
 ): Promise<TrendGraphDataProperties> {
-  // Check if we're in a browser environment before creating the Supabase client
   if (globalThis.window === undefined) {
     throw new Error(
       "FetchTrendGraphData can only be called in browser environment"

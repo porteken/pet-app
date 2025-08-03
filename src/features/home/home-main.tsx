@@ -27,12 +27,10 @@ const Home: FC<MapProperties> = ({
   LocationOptions,
   locations,
 }: MapProperties) => {
-  // Use lazy initial state to prevent unnecessary re-renders
   const [selectedGraphMeasure, setSelectedGraphMeasure] = useState(
     () => initialGraphMeasure || "avg"
   );
 
-  // Separate states to prevent unnecessary re-renders
   const [petGraph, setPetGraph] = useState<ReactElement | undefined>();
   const [graphLoading, setGraphLoading] = useState(false);
   const [selectedLocationId, setSelectedLocationId] = useState<number>();
@@ -40,14 +38,12 @@ const Home: FC<MapProperties> = ({
   const [selectedLocation, setSelectedLocation] =
     useState<LocationProperties>();
 
-  // Sync with initial value only on mount - avoid hydration mismatch
   useEffect(() => {
     if (initialGraphMeasure && selectedGraphMeasure !== initialGraphMeasure) {
       setSelectedGraphMeasure(initialGraphMeasure);
     }
   }, [initialGraphMeasure, selectedGraphMeasure]);
 
-  // Memoize expensive computations
   const locationMap = useMemo(() => {
     return new Map(locations.map(loc => [loc.location_id, loc]));
   }, [locations]);
@@ -63,9 +59,8 @@ const Home: FC<MapProperties> = ({
 
   const generateGraph = useCallback(
     async (locationId: number, option: string) => {
-      // Check if we're in a browser environment before accessing window-dependent code
       if (globalThis.window === undefined) {
-        return; // Return early if we're in server-side rendering
+        return;
       }
 
       setGraphLoading(true);
@@ -92,9 +87,8 @@ const Home: FC<MapProperties> = ({
 
   const handleSelectChange = useCallback(
     async (option: string) => {
-      // Check if we're in a browser environment
       if (globalThis.window === undefined) {
-        return; // Return early if we're in server-side rendering
+        return;
       }
 
       if (selectedLocationId !== undefined) {
@@ -108,9 +102,8 @@ const Home: FC<MapProperties> = ({
 
   const handleMarkerClick = useCallback(
     async (locationId: number) => {
-      // Check if we're in a browser environment
       if (globalThis.window === undefined) {
-        return; // Return early if we're in server-side rendering
+        return;
       }
 
       setSelectedLocationId(locationId);

@@ -4,7 +4,6 @@ let locationCounter = 1;
 let petDataCounter = 1;
 let trendDataCounter = 1;
 
-// Mock data factories following your app's data structure
 export const database = factory({
   location: {
     city: () => "Test City",
@@ -38,7 +37,6 @@ export const resetDatabase = () => {
 };
 
 export const seedDatabase = () => {
-  // Seed with default test data
   const location = database.location.create({
     city: "Test City",
     lat: 40.7128,
@@ -47,7 +45,6 @@ export const seedDatabase = () => {
     state: "Test State",
   });
 
-  // Create some reference data
   database.petData.create({
     date: new Date("2023-01-01"),
     location_id: 1,
@@ -62,7 +59,6 @@ export const seedDatabase = () => {
     pet_count: 25,
   });
 
-  // Create some trend data
   database.trendData.create({
     location_id: 1,
     measure_type: "avg",
@@ -87,7 +83,6 @@ export const seedDatabase = () => {
   return { location };
 };
 
-// Export types for use in tests
 export type Location = ReturnType<typeof database.location.create>;
 export type PetData = ReturnType<typeof database.petData.create>;
 export type TrendData = ReturnType<typeof database.trendData.create>;

@@ -104,7 +104,6 @@ export async function FetchTrendGraphData(
     return { trendline_pets: [], year_pets: [], years: [] };
   }
 
-  // Validate option parameter
   if (!option || !["avg", "max"].includes(option)) {
     throw new DatabaseError(
       `Invalid option: ${option}. Must be 'avg' or 'max'`
@@ -130,7 +129,6 @@ export async function FetchTrendGraphData(
     const years = data.map(({ year }: { year: number }) => year);
     const year_pets = data.map(({ pet }: { pet: number }) => Number(pet));
 
-    // Check if we have data before creating regression
     if (years.length === 0 || year_pets.length === 0) {
       return { trendline_pets: [], year_pets: [], years: [] };
     }

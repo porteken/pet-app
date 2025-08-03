@@ -5,14 +5,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GenerateReferenceGraph, GenerateTrendGraph } from "../generate-graph";
 
-/**
- * Consolidated test file for graph generation components
- * This file combines test cases from:
- * - generate-graph.test.tsx (for trend graph)
- * - generate-reference-graph.test.tsx (for reference graph)
- */
-
-// Mock for react-plotly.js used for trend graph tests
 const MockPlot = ({ config, data, layout }: any) => (
   <div data-testid="plotly-graph">
     <div data-testid="graph-title">{layout?.title?.text}</div>
@@ -22,7 +14,6 @@ const MockPlot = ({ config, data, layout }: any) => (
   </div>
 );
 
-// Setup mocks
 vi.mock("react-plotly.js", () => ({
   __esModule: true,
   default: MockPlot,
@@ -31,9 +22,7 @@ vi.mock("react-plotly.js", () => ({
 vi.mock("next/dynamic", () => ({
   __esModule: true,
   default: (_importFunction: () => Promise<any>, _options: any) => {
-    // Return a component that immediately renders the Plot component
     const DynamicComponent = (properties: any) => {
-      // Simulate the client-side state immediately being true
       return <MockPlot {...properties} />;
     };
 
@@ -46,7 +35,6 @@ describe("Graph Components", () => {
     vi.clearAllMocks();
   });
 
-  // Trend Graph Tests
   describe("GenerateTrendGraph", () => {
     const mockYears = [2020, 2021, 2022, 2023];
     const mockYearPets = [25.5, 26.2, 27.1, 28];
@@ -63,7 +51,6 @@ describe("Graph Components", () => {
 
         render(result);
 
-        // Now that we've mocked the dynamic loading, verify the graph renders
         expect(screen.getByTestId("plotly-graph")).toBeInTheDocument();
         expect(screen.getByTestId("graph-title")).toHaveTextContent(
           "Average PET in summer (2000-2023)"
@@ -153,7 +140,7 @@ describe("Graph Components", () => {
         const graphData = screen.getByTestId("graph-data");
         const data = JSON.parse(graphData.textContent || "[]");
 
-        expect(data).toHaveLength(2); // PET data and trendline data
+        expect(data).toHaveLength(2);
         expect(data[0]).toMatchObject({
           mode: "lines+markers",
           name: "PET",
@@ -217,8 +204,6 @@ describe("Graph Components", () => {
           mockTrendlinePets
         );
 
-        // Since we're mocking the dynamic import, we won't see the loading state
-        // but we can verify the component renders correctly
         render(result);
         expect(screen.getByTestId("plotly-graph")).toBeInTheDocument();
       });
@@ -249,7 +234,6 @@ describe("Graph Components", () => {
       });
 
       it("should show loading state when Plot component is loading", () => {
-        // Test the loading component directly as defined in the source
         const { container } = render(
           <div className="flex h-[600px] items-center justify-center text-gray-500">
             Loading chart...
@@ -261,7 +245,6 @@ describe("Graph Components", () => {
           "text-gray-500"
         );
 
-        // Check the container div classes
         const loadingDiv = container.firstChild as HTMLElement;
         expect(loadingDiv).toHaveClass("flex");
         expect(loadingDiv).toHaveClass("h-[600px]");
@@ -271,7 +254,6 @@ describe("Graph Components", () => {
     });
   });
 
-  // Reference Graph Tests
   describe("GenerateReferenceGraph", () => {
     const mockDates = [
       new Date("2023-06-01"),
@@ -302,7 +284,6 @@ describe("Graph Components", () => {
           mockCurrentPets
         );
 
-        // Since the component returns JSX, we test by rendering and checking structure
         const { container } = render(result);
         expect(container.firstChild).toBeTruthy();
       });
@@ -368,7 +349,6 @@ describe("Graph Components", () => {
           mockCurrentPets
         );
 
-        // Both should render successfully
         const { container: container2000 } = render(result2000);
         const { container: container2010 } = render(result2010);
 
@@ -424,7 +404,6 @@ describe("Graph Components", () => {
     });
   });
 
-  // PlotWrapper Component Tests
   describe("PlotWrapper Component", () => {
     const mockConfig = {
       displaylogo: false,
@@ -453,7 +432,6 @@ describe("Graph Components", () => {
     };
 
     it("should render server-side loading state initially", () => {
-      // Test the server-side rendering behavior directly
       const { container } = render(
         <div className="flex h-64 items-center justify-center text-gray-500">
           Loading chart...
@@ -473,7 +451,6 @@ describe("Graph Components", () => {
     });
 
     it("should handle PlotWrapper props correctly", () => {
-      // Create a simple component that mimics PlotWrapper behavior
       const TestPlotWrapper = ({ config, data, layout }: any) => (
         <div data-testid="plot-wrapper">
           <div data-testid="config">{JSON.stringify(config)}</div>
@@ -503,7 +480,6 @@ describe("Graph Components", () => {
     });
   });
 
-  // Graph Configuration Tests
   describe("Graph Configuration", () => {
     it("should use correct colors for trend graph", () => {
       const result = GenerateTrendGraph(
@@ -518,11 +494,9 @@ describe("Graph Components", () => {
       const graphData = screen.getByTestId("graph-data");
       const data = JSON.parse(graphData.textContent || "[]");
 
-      // Check primary data trace colors
       expect(data[0].line.color).toBe("#ef4444");
       expect(data[0].marker.color).toBe("#ef4444");
 
-      // Check trendline trace colors
       expect(data[1].line.color).toBe("#000000");
       expect(data[1].line.dash).toBe("dashdot");
     });
@@ -592,7 +566,6 @@ describe("Graph Components", () => {
     });
   });
 
-  // Reference Graph Configuration Tests
   describe("Reference Graph Configuration", () => {
     const mockDates = [new Date("2023-06-01"), new Date("2023-06-02")];
     const mockReferencePets = [25.5, 26];
@@ -622,7 +595,6 @@ describe("Graph Components", () => {
         mockCurrentPets
       );
 
-      // Since we're using a mock Plot component, we can verify the structure
       const { container } = render(result);
       expect(container.firstChild).toBeTruthy();
     });
@@ -646,7 +618,6 @@ describe("Graph Components", () => {
     });
   });
 
-  // Comprehensive Edge Cases
   describe("Comprehensive Edge Cases", () => {
     it("should handle very large datasets", () => {
       const largeYears = Array.from(
@@ -691,12 +662,11 @@ describe("Graph Components", () => {
     });
 
     it("should handle mismatched array lengths gracefully", () => {
-      // This should still render since we only check for empty arrays
       const result = GenerateTrendGraph(
-        [2020, 2021, 2022], // 3 elements
+        [2020, 2021, 2022],
         "avg",
-        [25, 26], // 2 elements
-        [25.1] // 1 element
+        [25, 26],
+        [25.1]
       );
 
       render(result);
@@ -713,7 +683,6 @@ describe("Graph Components", () => {
 
       render(unknownResult);
 
-      // Should default to "Max" for unknown options
       expect(screen.getByTestId("graph-title")).toHaveTextContent(
         "Max PET in summer (2000-2023)"
       );

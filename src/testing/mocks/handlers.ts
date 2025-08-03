@@ -6,7 +6,6 @@ const BASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost:54321";
 
 export const apiHandlers = [
-  // Mock location data endpoint
   http.get(`${BASE_URL}/rest/v1/locations`, ({ request }) => {
     const url = new URL(request.url);
     const locationId = url.searchParams.get("location_id");
@@ -22,7 +21,6 @@ export const apiHandlers = [
     return HttpResponse.json(locations);
   }),
 
-  // Mock pet data endpoint (for reference graphs)
   http.get(`${BASE_URL}/rest/v1/pet_data`, ({ request }) => {
     const url = new URL(request.url);
     const locationId = url.searchParams.get("location_id");
@@ -40,7 +38,6 @@ export const apiHandlers = [
       where: query,
     });
 
-    // Transform data to match your expected format
     const transformedData = petData.map(item => ({
       date: item.date,
       pet_count: item.pet_count,
@@ -49,7 +46,6 @@ export const apiHandlers = [
     return HttpResponse.json(transformedData);
   }),
 
-  // Mock trend data endpoint
   http.get(`${BASE_URL}/rest/v1/trend_data`, ({ request }) => {
     const url = new URL(request.url);
     const locationId = url.searchParams.get("location_id");
@@ -67,7 +63,6 @@ export const apiHandlers = [
       where: query,
     });
 
-    // Transform data to match your expected format
     const transformedData = trendData.map(item => ({
       pet_count: item.pet_count,
       year: item.year,
@@ -76,7 +71,6 @@ export const apiHandlers = [
     return HttpResponse.json(transformedData);
   }),
 
-  // Mock authentication endpoints
   http.post(`${BASE_URL}/auth/v1/token`, () => {
     return HttpResponse.json({
       access_token: "mock-access-token",
@@ -89,7 +83,6 @@ export const apiHandlers = [
     });
   }),
 
-  // Mock error scenarios
   http.get(`${BASE_URL}/rest/v1/error`, () => {
     return HttpResponse.json(
       { error: "Mock API Error", message: "This is a test error" },
@@ -108,5 +101,4 @@ export const authHandlers = [
   }),
 ];
 
-// Export all handlers
 export const handlers = [...apiHandlers, ...authHandlers];

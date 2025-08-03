@@ -1,5 +1,3 @@
-// Types related to page components and their properties
-
 export interface GraphMeasureConfig {
   cookieName: string;
   defaultValue: string;
@@ -7,8 +5,8 @@ export interface GraphMeasureConfig {
 }
 
 export interface LocationData {
-  LocationOptions: unknown; // Update with actual type from your codebase
-  locations: unknown[]; // Update with actual type from your codebase
+  LocationOptions: unknown;
+  locations: unknown[];
 }
 
 export interface PageError extends Error {

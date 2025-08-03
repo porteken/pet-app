@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import Page from "../page";
 
-// Mock the dynamic import and Home component
 const mockHome = vi.fn(() => (
   <div data-testid="home-component">Home Component</div>
 ));
@@ -11,7 +10,6 @@ vi.mock("@/features/home/home-main", () => ({
   default: mockHome,
 }));
 
-// Mock the page helpers
 const mockGetGraphMeasureFromCookies = vi.fn();
 const mockGetLocationData = vi.fn();
 vi.mock("@/lib/utils/app/page-helpers", () => ({
@@ -19,7 +17,6 @@ vi.mock("@/lib/utils/app/page-helpers", () => ({
   getLocationData: mockGetLocationData,
 }));
 
-// Mock the error handler
 const mockLocationErrorHandler = vi.fn(() => (
   <div data-testid="error-handler">Error Handler</div>
 ));
@@ -27,7 +24,6 @@ vi.mock("@/components/app/error-handlers", () => ({
   LocationErrorHandler: mockLocationErrorHandler,
 }));
 
-// Mock the page loader
 const mockPageLoader = vi.fn(() => (
   <div data-testid="page-loader">Loading...</div>
 ));
@@ -35,14 +31,10 @@ vi.mock("@/components/app/page-loader", () => ({
   PageLoader: mockPageLoader,
 }));
 
-// Mock next/dynamic
 vi.mock("next/dynamic", () => ({
   default: vi.fn((_importFunction, options) => {
-    // Return a component that mimics dynamic behavior
     const DynamicComponent = (_properties: any) => {
-      // If loading component is specified, we can test loading state
       if (options?.loading) {
-        // For testing purposes, we'll render the actual component
         return mockHome();
       }
       return mockHome();
@@ -209,7 +201,6 @@ describe("Page Component", () => {
   });
 
   it("handles concurrent execution of helper functions", async () => {
-    // Test that both functions are called, even if one is slower
     let resolveGraphMeasure: (value: string) => void;
     let resolveLocationData: (value: any) => void;
 
@@ -225,7 +216,6 @@ describe("Page Component", () => {
 
     const pagePromise = Page();
 
-    // Resolve in reverse order to test concurrent handling
     resolveLocationData!({
       LocationOptions: [{ label: "Location 1", value: "1" }],
       locations: [{ id: 1, lat: 0, lng: 0, name: "Location 1" }],
@@ -243,7 +233,6 @@ describe("Page Component", () => {
   });
 
   it("renders with large datasets", async () => {
-    // Test with a large number of locations
     const manyLocations = Array.from({ length: 100 }, (_, index) => ({
       id: index + 1,
       lat: Math.random() * 180 - 90,
@@ -286,10 +275,8 @@ describe("Page Component", () => {
     const result = await Page();
     render(result);
 
-    // Verify the component renders correctly
     expect(screen.getByTestId("home-component")).toBeInTheDocument();
 
-    // Verify dynamic import was configured correctly (mocked behavior)
     expect(mockHome).toHaveBeenCalledTimes(1);
   });
 });
@@ -306,7 +293,6 @@ describe("Page Component TypeScript Types", () => {
 
     const result = await Page();
 
-    // Should be a valid React element
     expect(result).toBeDefined();
     expect(typeof result).toBe("object");
   });
@@ -320,7 +306,6 @@ describe("Page Component TypeScript Types", () => {
     mockGetGraphMeasureFromCookies.mockResolvedValue("temperature");
     mockGetLocationData.mockResolvedValue(mockLocationData);
 
-    // Should return a Promise that resolves to JSX.Element
     const pagePromise = Page();
     expect(pagePromise).toBeInstanceOf(Promise);
 

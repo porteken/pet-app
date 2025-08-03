@@ -26,7 +26,6 @@ class ErrorBoundary extends Component<
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    // Update state so the next render will show the fallback UI
     return {
       error,
       hasError: true,
@@ -34,7 +33,6 @@ class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    // Log the error to Sentry
     Sentry.captureException(error, {
       contexts: {
         react: {
@@ -45,13 +43,10 @@ class ErrorBoundary extends Component<
         errorSource: "ErrorBoundary",
       },
     });
-
-    // Errors are logged to Sentry - console logging removed for production
   }
 
   render(): ReactNode {
     if (this.state.hasError) {
-      // You can render any custom fallback UI
       return (
         this.props.fallback || (
           <div className="flex flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50 p-8">

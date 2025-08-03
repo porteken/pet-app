@@ -1,8 +1,6 @@
-// Cookie-related constants
 export const GRAPH_MEASURE_COOKIE_NAME = "graph-measure" as const;
 export const DEFAULT_GRAPH_MEASURE = "avg" as const;
 
-// Error messages
 export const ERROR_MESSAGES = {
   DATABASE_CONNECTION:
     "Unable to connect to the database. Please try again later.",

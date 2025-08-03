@@ -1,8 +1,5 @@
 import { vi } from "vitest";
 
-/**
- * Mock validation functions for testing
- */
 export const createMockValidation = () => ({
   validateDates: vi.fn(),
   validateLocationId: vi.fn(),
@@ -13,9 +10,6 @@ export const createMockValidation = () => ({
   validateYears: vi.fn(),
 });
 
-/**
- * Setup default successful validations
- */
 export const setupSuccessfulValidations = (
   mockValidation: ReturnType<typeof createMockValidation>
 ) => {
@@ -28,9 +22,6 @@ export const setupSuccessfulValidations = (
   mockValidation.validateYears.mockReturnValue(true);
 };
 
-/**
- * Setup mock for validation module
- */
 export const mockValidationModule = () => {
   vi.mock("@/lib/utils/validation", () => ({
     validateDates: vi.fn(),

@@ -6,7 +6,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { HeaderBar } from "../header-bar";
 
-// Mock window.matchMedia for Mantine
 Object.defineProperty(globalThis, "matchMedia", {
   value: vi.fn().mockImplementation(query => ({
     addEventListener: vi.fn(),
@@ -21,12 +20,10 @@ Object.defineProperty(globalThis, "matchMedia", {
   writable: true,
 });
 
-// Define mocks at module level
 const mockUseSearchParameters = vi.fn();
 const mockGet = vi.fn();
 const mockToString = vi.fn().mockReturnValue("");
 
-// Mock next/navigation
 vi.mock("next/navigation", () => ({
   usePathname: () => "/",
   useRouter: () => ({
@@ -102,14 +99,12 @@ describe("HeaderBar", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Reset mock behavior
     mockUseSearchParameters.mockReset();
     mockUseSearchParameters.mockReturnValue({
       get: mockGet,
       toString: mockToString,
     });
 
-    // Mock location
     Object.defineProperty(globalThis, "location", {
       value: { href: "" },
       writable: true,
@@ -151,13 +146,11 @@ describe("HeaderBar", () => {
     });
 
     it("should handle non-array LocationOptions gracefully", () => {
-      // Test when LocationOptions is not an array (edge case)
       renderWithProvider(<HeaderBar LocationOptions={undefined as any} />);
       expect(screen.getByTestId("city-selector")).toBeInTheDocument();
     });
 
     it("should sort cities within states alphabetically", () => {
-      // Create LocationOptions with multiple cities in unsorted order
       const mockLocationOptions = [
         {
           items: [
@@ -180,7 +173,6 @@ describe("HeaderBar", () => {
         <HeaderBar id={1} LocationOptions={mockLocationOptions} />
       );
 
-      // Verify the cities are available in the selector
       const selector = screen.getByTestId("city-selector");
       expect(selector).toBeInTheDocument();
     });
@@ -204,10 +196,9 @@ describe("HeaderBar", () => {
     });
 
     it("should handle section with empty items array", () => {
-      // Create LocationOptions with a section that has an empty items array
       const mockLocationOptions = [
         {
-          items: [], // Empty items array
+          items: [],
           title: "State With No Items",
         },
         {
@@ -220,7 +211,6 @@ describe("HeaderBar", () => {
         <HeaderBar id={1} LocationOptions={mockLocationOptions} />
       );
 
-      // Verify component renders without errors
       const selector = screen.getByTestId("city-selector");
       expect(selector).toBeInTheDocument();
     });
@@ -228,7 +218,6 @@ describe("HeaderBar", () => {
 
   describe("Edge Cases", () => {
     it("should handle section with items set to undefined", () => {
-      // Create a location options array with empty items to trigger the fallback
       const mockLocationOptions = [
         {
           items: [] as any,
@@ -236,21 +225,18 @@ describe("HeaderBar", () => {
         },
       ];
 
-      // Modify the items array after creation to trigger the branch condition
       delete mockLocationOptions[0].items;
 
       renderWithProvider(
         <HeaderBar LocationOptions={mockLocationOptions as any} />
       );
 
-      // If it renders without errors, the fallback worked
       expect(document.body).toBeInTheDocument();
     });
 
     it("should handle case with no id provided and process current city correctly", () => {
       renderWithProvider(<HeaderBar LocationOptions={mockLocationOptions} />);
 
-      // Without an ID, the placeholder should be "Select City"
       const selector = screen.getByTestId("city-selector");
       expect(selector).toHaveAttribute("placeholder", "Select City");
     });
@@ -258,13 +244,10 @@ describe("HeaderBar", () => {
     it("should handle the onChange event for city selector", () => {
       renderWithProvider(<HeaderBar LocationOptions={mockLocationOptions} />);
 
-      // Get the select element and simulate change
       const selector = screen.getByTestId("city-selector");
 
-      // Set the value property first
       Object.defineProperty(selector, "value", { value: "1" });
 
-      // Then dispatch the change event
       selector.dispatchEvent(
         new Event("change", {
           bubbles: true,
@@ -272,18 +255,15 @@ describe("HeaderBar", () => {
         })
       );
 
-      // Check that location.href was updated
       expect(globalThis.location.href).toBe("/1");
     });
 
     it("should have proper placeholder text based on ID", () => {
-      // Test with valid ID
       renderWithProvider(
         <HeaderBar id={1} LocationOptions={mockLocationOptions} />
       );
       expect(screen.getByTestId("city-selector")).toBeInTheDocument();
 
-      // Test with no ID - this should show "Select City" placeholder
       renderWithProvider(
         <HeaderBar id={-1} LocationOptions={mockLocationOptions} />
       );
@@ -316,10 +296,9 @@ describe("HeaderBar", () => {
     it("should build URL with search parameters", () => {
       mockToString.mockReturnValue("param=value");
       renderWithProvider(<HeaderBar LocationOptions={mockLocationOptions} />);
-      // The component should render without error when search params exist
+
       expect(screen.getByTestId("city-selector")).toBeInTheDocument();
 
-      // Verify Links that use search params are rendered
       const mapButton = screen.getByLabelText("Navigate to map view");
       expect(mapButton).toHaveAttribute("href", "/?param=value");
     });

@@ -53,6 +53,5 @@ const Main: FC<PageProperties> = ({
   );
 };
 
-// Export as both Main (default) and PageMain (named export for tests)
 export { Main as PageMain };
 export default Main;

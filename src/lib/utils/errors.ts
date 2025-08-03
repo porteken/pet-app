@@ -69,7 +69,6 @@ export class NetworkError extends AppError {
   }
 }
 
-// Legacy error for backward compatibility
 export class FetchError extends NetworkError {
   constructor(message: string, originalError?: unknown) {
     super(message, 500, originalError);
@@ -91,7 +90,6 @@ export class ValidationError extends AppError {
   }
 }
 
-// Error factory function for creating appropriate error types
 export const createError = (
   message: string,
   statusCode: number = 500,
@@ -121,7 +119,6 @@ export const createError = (
   }
 };
 
-// Error handler for async operations
 export const handleAsyncError = (
   error: unknown,
   context?: Record<string, any>
@@ -131,7 +128,6 @@ export const handleAsyncError = (
   }
 
   if (error instanceof Error) {
-    // Try to determine error type from error message or other properties
     if (error.message.includes("network") || error.message.includes("fetch")) {
       return new NetworkError(error.message, 500, error, context);
     }
@@ -146,7 +142,6 @@ export const handleAsyncError = (
     return new AppError(error.message, "UNKNOWN_ERROR", 500, error, context);
   }
 
-  // Handle non-Error objects
   const message =
     typeof error === "string" ? error : "An unknown error occurred";
   return new AppError(message, "UNKNOWN_ERROR", 500, error, context);

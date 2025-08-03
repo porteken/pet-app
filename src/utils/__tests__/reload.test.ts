@@ -4,7 +4,6 @@ import { reloadPage } from "../reload";
 
 describe("Reload Utility", () => {
   beforeEach(() => {
-    // Mock globalThis.location.reload
     Object.defineProperty(globalThis, "location", {
       value: {
         reload: vi.fn(),

@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { setGraphMeasure } from "../actions";
 
-// Mock Next.js cookies
 vi.mock("next/headers", () => ({
   cookies: vi.fn().mockResolvedValue({
     set: vi.fn(),
@@ -15,7 +14,6 @@ describe("setGraphMeasure", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
 
-    // Get access to the mocked cookies function
     const { cookies } = await import("next/headers");
     const cookiesResult = await cookies();
     mockSet = vi.mocked(cookiesResult.set);
@@ -58,12 +56,10 @@ describe("setGraphMeasure", () => {
     const expirationDate = cookieOptions.expires;
     const afterCall = Date.now();
 
-    // Check that expiration is approximately 1 year from now
-    const oneYearMs = 365 * 24 * 60 * 60 * 1000;
+    const oneYearMs = 365 * 24 * 60 * 1 * 1000;
     const expectedExpiration = beforeCall + oneYearMs;
     const actualExpiration = expirationDate.getTime();
 
-    // Allow for small timing differences (within 1 second)
     expect(actualExpiration).toBeGreaterThanOrEqual(expectedExpiration - 1000);
     expect(actualExpiration).toBeLessThanOrEqual(afterCall + oneYearMs + 1000);
   });
@@ -185,7 +181,6 @@ describe("setGraphMeasure", () => {
     const { cookies } = await import("next/headers");
     const cookiesSpy = vi.mocked(cookies);
 
-    // Clear previous calls from beforeEach
     cookiesSpy.mockClear();
 
     await setGraphMeasure("temperature");

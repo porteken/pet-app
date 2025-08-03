@@ -61,9 +61,7 @@ const MapComponent = memo<MapComponentProperties>(
     const [isLoaded, setIsLoaded] = useState(false);
     const [customIcon, setCustomIcon] = useState<Icon>();
 
-    // Memoize the loadMap function to prevent unnecessary recreations
     const loadMap = useCallback(async () => {
-      // Load Leaflet CSS if not already loaded
       if (!document.querySelector('link[href*="leaflet.css"]')) {
         const link = document.createElement("link");
         link.rel = "stylesheet";
@@ -72,7 +70,6 @@ const MapComponent = memo<MapComponentProperties>(
         link.crossOrigin = "";
         document.head.append(link);
 
-        // Wait for CSS to load
         await new Promise(resolve => {
           link.addEventListener("load", resolve);
           link.addEventListener("error", resolve); // Continue even if CSS fails
@@ -80,10 +77,8 @@ const MapComponent = memo<MapComponentProperties>(
       }
 
       try {
-        // Load react-leaflet which will load Leaflet
         const reactLeaflet = await import("react-leaflet");
 
-        // Fix Leaflet default icon issue by setting it manually
         const L = await import("leaflet");
         L.Icon.Default.mergeOptions({
           iconRetinaUrl:
@@ -94,7 +89,6 @@ const MapComponent = memo<MapComponentProperties>(
             "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
         });
 
-        // Create a custom icon to ensure markers are visible
         const customIcon = new L.Icon({
           iconAnchor: [12, 41],
           iconRetinaUrl:
@@ -114,7 +108,6 @@ const MapComponent = memo<MapComponentProperties>(
         setPopup(() => reactLeaflet.Popup);
         setIsLoaded(true);
 
-        // Store the custom icon for use in markers
         setCustomIcon(customIcon);
       } catch {
         setIsLoaded(false);
@@ -127,7 +120,6 @@ const MapComponent = memo<MapComponentProperties>(
       }
     }, [loadMap]);
 
-    // Memoize markers to prevent unnecessary re-renders
     const markers = useMemo(() => {
       if (!locations || !customIcon || !Marker) {
         return;

@@ -30,12 +30,10 @@ export const HeaderBar = ({
     return baseUrl;
   };
 
-  // Ensure LocationOptions is an array and has the expected structure
   const safeLocationOptions = Array.isArray(LocationOptions)
     ? LocationOptions
     : [];
 
-  // Create grouped and sorted data for the select
   const groupedCities = useMemo(() => {
     const allCities = safeLocationOptions.flatMap(section =>
       [...(section.items || [])].map(
@@ -48,7 +46,6 @@ export const HeaderBar = ({
       )
     );
 
-    // Group cities by state and sort alphabetically
     const grouped: Record<string, LocationItem[]> = {};
     for (const city of allCities) {
       if (!grouped[city.state]) {
@@ -57,7 +54,6 @@ export const HeaderBar = ({
       grouped[city.state].push(city);
     }
 
-    // Sort states alphabetically and cities within each state
     const sortedStates = Object.keys(grouped).sort((a, b) =>
       a.localeCompare(b)
     );
@@ -78,16 +74,15 @@ export const HeaderBar = ({
       .find(city => city.key === id);
   }, [id, groupedCities]);
 
-  // Create data for Select with grouping
   const selectData = useMemo(() => {
     return groupedCities.map(group => ({
       group: group.group,
       items: group.items.map(city => ({
-        key: `city-${city.key}`, // Add key prop to resolve warning
+        key: `city-${city.key}`,
         label: `${city.title}, ${city.state}`,
         value: city.key.toString(),
       })),
-      key: `group-${group.group}`, // Add key prop to group
+      key: `group-${group.group}`,
     }));
   }, [groupedCities]);
 

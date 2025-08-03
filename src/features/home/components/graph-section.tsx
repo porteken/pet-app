@@ -14,7 +14,6 @@ interface GraphSectionProperties {
   selectOptions: Array<{ label: string; value: string }>;
 }
 
-// Memoized component to prevent unnecessary re-renders
 export const GraphSection = memo<GraphSectionProperties>(
   ({
     graphLoading,
@@ -24,7 +23,6 @@ export const GraphSection = memo<GraphSectionProperties>(
     selectedLocation,
     selectOptions,
   }) => {
-    // Memoize the loading state UI to prevent recreation on every render
     const loadingUI = useMemo(
       () => (
         <div className="flex size-full flex-col items-center justify-center">
@@ -35,7 +33,6 @@ export const GraphSection = memo<GraphSectionProperties>(
       []
     );
 
-    // Memoize the button component to prevent recreation when location doesn't change
     const detailsButton = useMemo(() => {
       if (!selectedLocation) {
         return;
@@ -55,7 +52,6 @@ export const GraphSection = memo<GraphSectionProperties>(
       );
     }, [selectedLocation]);
 
-    // Memoize the graph content area to prevent unnecessary re-renders
     const graphContent = useMemo(
       () => (
         <div className="flex min-h-[300px] w-full max-w-4xl items-center justify-center">

@@ -7,7 +7,6 @@ import {
   getLocationData,
 } from "@/lib/utils/app/page-helpers";
 
-// Dynamic import for better performance - colocated near usage
 const Home = dynamic(() => import("@/features/home/home-main"), {
   loading: PageLoader,
 });
@@ -26,7 +25,6 @@ const Page = async () => {
       />
     );
   } catch (error) {
-    // Handle different types of errors appropriately
     return <LocationErrorHandler error={error as Error} />;
   }
 };

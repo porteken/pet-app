@@ -58,7 +58,6 @@ export async function FetchReferenceGraphData(
     throw new DatabaseError(`Invalid locationId: ${locationId}`);
   }
 
-  // Validate year parameter
   if (!year || !/^\d{4}$/.test(year)) {
     throw new DatabaseError(
       `Invalid year format: ${year}. Must be a 4-digit year.`

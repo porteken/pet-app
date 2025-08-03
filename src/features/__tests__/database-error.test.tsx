@@ -12,7 +12,6 @@ import { DatabaseError } from "../database-error";
 
 describe("DatabaseError", () => {
   beforeEach(() => {
-    // Clear the mock before each test
     vi.clearAllMocks();
   });
 

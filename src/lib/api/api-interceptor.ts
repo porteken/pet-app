@@ -35,7 +35,6 @@ const extractErrorMessage = async (response: Response): Promise<string> => {
   try {
     const errorData = await response.json();
 
-    // Common error message patterns
     if (errorData.message) {
       return errorData.message;
     }

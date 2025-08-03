@@ -20,7 +20,6 @@ export const OptimizedMarker = memo<OptimizedMarkerProperties>(
     position,
     selectedGraphMeasure,
   }) => {
-    // Prefetch data on hover for better UX
     const handleMouseEnter = useCallback(() => {
       prefetchTrendGraphData(locationId, selectedGraphMeasure);
     }, [locationId, selectedGraphMeasure]);

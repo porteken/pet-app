@@ -9,7 +9,6 @@ interface ErrorHandlerProperties {
 
 export const LocationErrorHandler = memo<ErrorHandlerProperties>(
   ({ error }) => {
-    // Memoize the error type check to avoid unnecessary recalculations
     const errorConfig = useMemo(() => {
       const isNoDataError = error.message === ERROR_MESSAGES.NO_DATA;
 

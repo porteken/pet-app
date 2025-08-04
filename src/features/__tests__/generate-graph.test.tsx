@@ -22,11 +22,9 @@ vi.mock("react-plotly.js", () => ({
 vi.mock("next/dynamic", () => ({
   __esModule: true,
   default: (_importFunction: () => Promise<any>, _options: any) => {
-    const DynamicComponent = (properties: any) => {
+    return (properties: any) => {
       return <MockPlot {...properties} />;
     };
-
-    return DynamicComponent;
   },
 }));
 

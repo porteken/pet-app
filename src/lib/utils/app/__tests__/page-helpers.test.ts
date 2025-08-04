@@ -376,7 +376,6 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(mockLocationData);
 
-      // The current implementation doesn't validate array type, only checks truthiness and length
       const result = await getLocationData();
       expect(result).toEqual(mockLocationData);
       expect(mockFetchLocations).toHaveBeenCalled();

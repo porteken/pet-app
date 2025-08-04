@@ -25,7 +25,6 @@ const mockGet = vi.fn();
 const mockToString = vi.fn().mockReturnValue("");
 
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/",
   useRouter: () => ({
     back: vi.fn(),
     forward: vi.fn(),
@@ -40,9 +39,6 @@ vi.mock("@mantine/core", async () => {
   const actual = await vi.importActual("@mantine/core");
   return {
     ...actual,
-    Anchor: ({ children, ...properties }: any) => (
-      <a {...properties}>{children}</a>
-    ),
     Group: ({ children, ...properties }: any) => (
       <div data-testid="mantine-group" {...properties}>
         {children}
@@ -74,9 +70,6 @@ vi.mock("@mantine/core", async () => {
             )) || []
         )}
       </select>
-    ),
-    Text: ({ children, ...properties }: any) => (
-      <div {...properties}>{children}</div>
     ),
   };
 });

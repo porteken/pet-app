@@ -51,12 +51,11 @@ describe("setGraphMeasure", () => {
       })
     );
 
-    const callArguments = mockSet.mock.calls[0];
-    const cookieOptions = callArguments[2];
+    const cookieOptions = mockSet.mock.calls[0][2];
     const expirationDate = cookieOptions.expires;
     const afterCall = Date.now();
 
-    const oneYearMs = 365 * 24 * 60 * 1 * 1000;
+    const oneYearMs = 365 * 24 * 60 * 1000;
     const expectedExpiration = beforeCall + oneYearMs;
     const actualExpiration = expirationDate.getTime();
 
@@ -120,8 +119,7 @@ describe("setGraphMeasure", () => {
 
     await setGraphMeasure(measure);
 
-    const callArguments = mockSet.mock.calls[0];
-    const cookieOptions = callArguments[2];
+    const cookieOptions = mockSet.mock.calls[0][2];
 
     expect(cookieOptions.httpOnly).toBe(true);
   });
@@ -131,8 +129,7 @@ describe("setGraphMeasure", () => {
 
     await setGraphMeasure(measure);
 
-    const callArguments = mockSet.mock.calls[0];
-    const cookieOptions = callArguments[2];
+    const cookieOptions = mockSet.mock.calls[0][2];
 
     expect(cookieOptions.path).toBe("/");
   });
@@ -142,8 +139,7 @@ describe("setGraphMeasure", () => {
 
     await setGraphMeasure(measure);
 
-    const callArguments = mockSet.mock.calls[0];
-    const cookieName = callArguments[0];
+    const cookieName = mockSet.mock.calls[0][0];
 
     expect(cookieName).toBe("graph-measure");
   });

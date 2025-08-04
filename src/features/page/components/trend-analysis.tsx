@@ -52,14 +52,16 @@ export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
       const option = event.target.value;
       setSelectedGraphMeasure(option);
       await onMeasureChange(option);
-      generatePetTrendGraph(option);
+      await generatePetTrendGraph(option);
     },
     [generatePetTrendGraph, onMeasureChange]
   );
 
   // Generate graph on initial render or when measure changes
   React.useEffect(() => {
-    generatePetTrendGraph(selectedGraphMeasure);
+    generatePetTrendGraph(selectedGraphMeasure).catch(error => {
+      throw error;
+    });
   }, [generatePetTrendGraph, selectedGraphMeasure]);
 
   return (

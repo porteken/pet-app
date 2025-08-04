@@ -23,22 +23,6 @@ test.describe("City Selection", () => {
     await expect(citySelect).toBeVisible();
   });
 
-  test("should show cities in dropdown when clicked", async ({ page }) => {
-    await page.goto("/");
-
-    await page.waitForLoadState("domcontentloaded");
-
-    const citySelect = page.locator("[placeholder*='City']").first();
-    await expect(citySelect).toBeVisible();
-
-    await citySelect.click();
-
-    const options = page.locator("[role='option']");
-    await options.first().waitFor({ timeout: 5000 });
-    const optionCount = await options.count();
-    expect(optionCount).toBeGreaterThan(0);
-  });
-
   test("should navigate to selected city page", async ({ page }) => {
     await page.goto("/");
 
@@ -51,6 +35,9 @@ test.describe("City Selection", () => {
 
     const options = page.locator("[role='option']");
     await options.first().waitFor({ timeout: 5000 });
+
+    const optionCount = await options.count();
+    expect(optionCount).toBeGreaterThan(0);
 
     const firstOption = page.locator("[role='option']").first();
     await firstOption.click();

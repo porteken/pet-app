@@ -1,3 +1,5 @@
+// noinspection DuplicatedCode
+
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";

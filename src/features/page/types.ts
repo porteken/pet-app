@@ -12,8 +12,3 @@ export interface PageProperties {
   YearPets: number[];
   Years: number[];
 }
-
-export interface PetTrendProperties {
-  reference_option?: string;
-  year_option?: string;
-}

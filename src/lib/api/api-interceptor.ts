@@ -6,28 +6,21 @@ export const handleApiResponse = async <T>(
 ): Promise<T> => {
   if (!response.ok) {
     const errorMessage = await extractErrorMessage(response);
-    const error = createError(
-      errorMessage,
-      response.status,
-      undefined,
-      undefined,
-      { ...context, url: response.url }
-    );
-
-    throw error;
+    throw createError(errorMessage, response.status, undefined, undefined, {
+      ...context,
+      url: response.url,
+    });
   }
 
   try {
     return await response.json();
   } catch (parseError) {
-    const error = new NetworkError(
+    throw new NetworkError(
       "Failed to parse server response",
       500,
       parseError,
       context
     );
-
-    throw error;
   }
 };
 
@@ -109,14 +102,7 @@ export const apiRequest = async <T>(
     });
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
-      const networkError = new NetworkError(
-        "Network connection failed",
-        0,
-        error,
-        context
-      );
-
-      throw networkError;
+      throw new NetworkError("Network connection failed", 0, error, context);
     }
 
     throw error;

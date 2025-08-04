@@ -116,7 +116,9 @@ const MapComponent = memo<MapComponentProperties>(
 
     useEffect(() => {
       if (globalThis.window !== undefined && typeof document !== "undefined") {
-        loadMap();
+        loadMap().catch(error => {
+          throw error;
+        });
       }
     }, [loadMap]);
 

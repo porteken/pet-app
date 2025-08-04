@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { reloadPage } from "../utils/reload";
+import { reloadPage } from "@/utils/reload";
 
 interface DatabaseErrorProperties {
   message?: string;

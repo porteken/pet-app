@@ -7,7 +7,7 @@ export async function setGraphMeasure(measure: string) {
   const cookieStore = await cookies();
 
   cookieStore.set(graphMeasureCookieName, measure, {
-    expires: new Date(Date.now() + 365 * 24 * 60 * 1 * 1000),
+    expires: new Date(Date.now() + 365 * 24 * 60 * 1000),
     httpOnly: true,
     path: "/",
   });

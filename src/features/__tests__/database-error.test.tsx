@@ -7,7 +7,8 @@ vi.mock("../../utils/reload", () => ({
   reloadPage: vi.fn(),
 }));
 
-import { reloadPage } from "../../utils/reload";
+import { reloadPage } from "@/utils/reload";
+
 import { DatabaseError } from "../database-error";
 
 describe("DatabaseError", () => {

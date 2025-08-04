@@ -1,6 +1,8 @@
+// noinspection DuplicatedCode
+
 import { http, HttpResponse } from "msw";
 
-import { database } from "./database";
+import { database } from "@/testing";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost:54321";

@@ -38,14 +38,12 @@ test.describe("Cross-Browser Compatibility", () => {
     await page.goto("/1");
 
     const jsFeatureCheck = await page.evaluate(() => {
-      const features = {
+      return {
         arrow_functions: (() => true)(),
         async_await: typeof Promise !== "undefined",
         const_let: true,
         template_literals: `test${1}` === "test1",
       };
-
-      return features;
     });
 
     expect(jsFeatureCheck.arrow_functions).toBeTruthy();
@@ -123,9 +121,16 @@ test.describe("Cross-Browser Compatibility", () => {
 
     const metrics = await page.evaluate(() => {
       const performance = globalThis.performance;
+      let navigationType = 0;
+      if (typeof performance.getEntriesByType === "function") {
+        const navEntries = performance.getEntriesByType("navigation");
+        if (navEntries && navEntries.length > 0 && "type" in navEntries[0]) {
+          navigationType = (navEntries[0] as any).type || 0;
+        }
+      }
       return {
         memory: (performance as any).memory?.usedJSHeapSize || 0,
-        navigation: performance.navigation?.type || 0,
+        navigation: navigationType,
       };
     });
 

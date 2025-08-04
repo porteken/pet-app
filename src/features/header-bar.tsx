@@ -57,12 +57,10 @@ export const HeaderBar = ({
     const sortedStates = Object.keys(grouped).sort((a, b) =>
       a.localeCompare(b)
     );
-    const sortedGrouped = sortedStates.map(state => ({
+    return sortedStates.map(state => ({
       group: state,
       items: grouped[state].toSorted((a, b) => a.title.localeCompare(b.title)),
     }));
-
-    return sortedGrouped;
   }, [safeLocationOptions]);
 
   const currentCity = useMemo(() => {

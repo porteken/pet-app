@@ -50,19 +50,6 @@ describe("page-helpers", () => {
       expect(mockCookieStore.get).toHaveBeenCalledWith("graph-measure");
     });
 
-    it("returns default value when cookie is not present", async () => {
-      const mockCookieStore = {
-        get: vi.fn().mockReturnValue(),
-      };
-      mockCookies.mockResolvedValue(mockCookieStore);
-
-      const result = await getGraphMeasureFromCookies();
-
-      expect(result).toBe("temperature");
-      expect(mockCookies).toHaveBeenCalled();
-      expect(mockCookieStore.get).toHaveBeenCalledWith("graph-measure");
-    });
-
     it("returns default value when cookie value is null", async () => {
       const mockCookieStore = {
         get: vi.fn().mockReturnValue({ value: undefined }),

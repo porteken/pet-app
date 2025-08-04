@@ -121,20 +121,28 @@ test.describe("Cross-Browser Compatibility", () => {
 
     const metrics = await page.evaluate(() => {
       const performance = globalThis.performance;
-      let navigationType = 0;
-      if (typeof performance.getEntriesByType === "function") {
-        const navEntries = performance.getEntriesByType("navigation");
-        if (navEntries && navEntries.length > 0 && "type" in navEntries[0]) {
-          navigationType = (navEntries[0] as any).type || 0;
+
+      // Modern Navigation Timing API Level 2
+      let navigationType = "navigate"; // default
+
+      if (performance.getEntriesByType) {
+        const navigationEntries = performance.getEntriesByType(
+          "navigation"
+        ) as PerformanceNavigationTiming[];
+        if (navigationEntries.length > 0) {
+          navigationType = navigationEntries[0].type;
         }
       }
+
       return {
         memory: (performance as any).memory?.usedJSHeapSize || 0,
-        navigation: navigationType,
+        navigationType, // 'navigate', 'reload', 'back_forward', or 'prerender'
       };
     });
 
     expect(typeof metrics.memory).toBe("number");
-    expect(metrics.navigation).toBeGreaterThanOrEqual(0);
+    expect(["navigate", "reload", "back_forward", "prerender"]).toContain(
+      metrics.navigationType
+    );
   });
 });

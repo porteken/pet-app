@@ -19,29 +19,30 @@ export async function FetchLocations(): Promise<FetchLocationProperties> {
     const { data: locations, error } = await supabase
       .from("locations")
       .select();
+
     if (error || !locations) {
       throw new DatabaseError(
         "Failed to fetch location data from database",
         error
       );
-    } else {
-      const states = [...new Set(locations.map(({ state }) => state))].sort(
-        (a, b) => a.localeCompare(b)
-      );
-
-      const LocationOptions: LocationOptionSection[] = states.map(state => ({
-        items: locations
-          .filter(loc => loc.state === state)
-          .sort((a, b) => a.city.localeCompare(b.city))
-          .map(({ city, location_id }) => ({
-            key: location_id,
-            title: city,
-          })),
-        title: state,
-      }));
-
-      return { LocationOptions, locations };
     }
+
+    const states = [...new Set(locations.map(({ state }) => state))].sort(
+      (a, b) => a.localeCompare(b)
+    );
+
+    const LocationOptions: LocationOptionSection[] = states.map(state => ({
+      items: locations
+        .filter(loc => loc.state === state)
+        .sort((a, b) => a.city.localeCompare(b.city))
+        .map(({ city, location_id }) => ({
+          key: location_id,
+          title: city,
+        })),
+      title: state,
+    }));
+
+    return { LocationOptions, locations };
   } catch (error) {
     if (error instanceof DatabaseError) {
       throw error;
@@ -66,6 +67,7 @@ export async function FetchReferenceGraphData(
 
   const cookieStore = cookies();
   const supabase = await createClient(cookieStore);
+
   try {
     const { data, error } = await supabase
       .from("pet_year")

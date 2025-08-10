@@ -46,31 +46,21 @@ async function fetchData(
   locationId: number,
   year: string
 ): Promise<PetYearReferenceData[]> {
-  try {
-    const { data, error } = await supabase
-      .from("pet_year")
-      .select()
-      .eq("location_id", locationId)
-      .eq("year", year)
-      .order("date", { ascending: true });
+  const { data, error } = await supabase
+    .from("pet_year")
+    .select()
+    .eq("location_id", locationId)
+    .eq("year", year)
+    .order("date", { ascending: true });
 
-    if (error) {
-      throw new FetchError(
-        `Database error fetching reference data for location ${locationId}, year ${year}: ${error.message}`,
-        error
-      );
-    }
-
-    return data || [];
-  } catch (error) {
-    if (error instanceof FetchError) {
-      throw error;
-    }
+  if (error) {
     throw new FetchError(
-      `Unexpected error fetching reference data for location ${locationId}, year ${year}: ${error}`,
+      `Database error fetching reference data for location ${locationId}, year ${year}: ${error.message}`,
       error
     );
   }
+
+  return data || [];
 }
 
 function processData(

@@ -141,10 +141,7 @@ describe("reference-graph-data", () => {
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
       await expect(FetchReferenceGraphData("2023", 1)).rejects.toThrow(
-        new FetchError(
-          "Unexpected error fetching reference data for location 1, year 2023: Error: Network error",
-          expect.any(Error)
-        )
+        new Error("Network error")
       );
     });
 

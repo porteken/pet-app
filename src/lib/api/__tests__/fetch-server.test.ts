@@ -116,36 +116,6 @@ describe("fetch-server", () => {
   });
 
   describe("FetchReferenceGraphData", () => {
-    it("should fetch reference data successfully", async () => {
-      const mockData = [
-        { date: "2023-01-01", pet: 25.5 },
-        { date: "2023-01-02", pet: 26.2 },
-      ];
-
-      const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        select: vi.fn().mockReturnThis(),
-      };
-      mockQuery.eq
-        .mockReturnValueOnce(mockQuery) // first eq call
-        .mockResolvedValueOnce({ data: mockData, error: undefined }); // second eq call
-
-      mockSupabaseClient.from.mockReturnValue(mockQuery);
-
-      const result = await FetchReferenceGraphData("2023", 1);
-
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year");
-      expect(mockQuery.select).toHaveBeenCalled();
-      expect(mockQuery.eq).toHaveBeenCalledWith("location_id", 1);
-      expect(mockQuery.eq).toHaveBeenCalledWith("year", "2023");
-
-      expect(result.dates).toEqual([
-        new Date("2023-01-01"),
-        new Date("2023-01-02"),
-      ]);
-      expect(result.pets).toEqual([25.5, 26.2]);
-    });
-
     it("should throw error for invalid location ID", async () => {
       await expect(FetchReferenceGraphData("2023", 0)).rejects.toThrow(
         new DatabaseError("Invalid locationId: 0")

@@ -21,7 +21,7 @@ export const OptimizedMarker = memo<OptimizedMarkerProperties>(
     selectedGraphMeasure,
   }) => {
     const handleMouseEnter = useCallback(() => {
-      prefetchTrendGraphData(locationId, selectedGraphMeasure);
+      return prefetchTrendGraphData(locationId, selectedGraphMeasure);
     }, [locationId, selectedGraphMeasure]);
 
     const handleClick = useCallback(() => {

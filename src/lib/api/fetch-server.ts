@@ -12,43 +12,34 @@ import {
 } from "@/types/types";
 
 export async function FetchLocations(): Promise<FetchLocationProperties> {
-  try {
-    const cookieStore = cookies();
-    const supabase = await createClient(cookieStore);
+  const cookieStore = cookies();
+  const supabase = await createClient(cookieStore);
 
-    const { data: locations, error } = await supabase
-      .from("locations")
-      .select();
+  const { data: locations, error } = await supabase.from("locations").select();
 
-    if (error || !locations) {
-      throw new DatabaseError(
-        "Failed to fetch location data from database",
-        error
-      );
-    }
-
-    const states = [...new Set(locations.map(({ state }) => state))].sort(
-      (a, b) => a.localeCompare(b)
+  if (error || !locations) {
+    throw new DatabaseError(
+      "Failed to fetch location data from database",
+      error
     );
-
-    const LocationOptions: LocationOptionSection[] = states.map(state => ({
-      items: locations
-        .filter(loc => loc.state === state)
-        .sort((a, b) => a.city.localeCompare(b.city))
-        .map(({ city, location_id }) => ({
-          key: location_id,
-          title: city,
-        })),
-      title: state,
-    }));
-
-    return { LocationOptions, locations };
-  } catch (error) {
-    if (error instanceof DatabaseError) {
-      throw error;
-    }
-    throw new DatabaseError("Database connection failed", error);
   }
+
+  const states = [...new Set(locations.map(({ state }) => state))].sort(
+    (a, b) => a.localeCompare(b)
+  );
+
+  const LocationOptions: LocationOptionSection[] = states.map(state => ({
+    items: locations
+      .filter(loc => loc.state === state)
+      .sort((a, b) => a.city.localeCompare(b.city))
+      .map(({ city, location_id }) => ({
+        key: location_id,
+        title: city,
+      })),
+    title: state,
+  }));
+
+  return { LocationOptions, locations };
 }
 
 export async function FetchReferenceGraphData(

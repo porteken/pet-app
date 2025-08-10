@@ -78,7 +78,9 @@ describe("fetch-server", () => {
     });
 
     it("should handle database errors", async () => {
-      const mockError = new Error("Database connection failed");
+      const mockError = new Error(
+        "Failed to fetch location data from database"
+      );
       const mockQuery = {
         select: vi
           .fn()

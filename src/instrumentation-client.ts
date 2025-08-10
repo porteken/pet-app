@@ -1,5 +1,4 @@
 /* eslint-disable import/namespace */
-// noinspection JSUnusedGlobalSymbols
 
 import * as Sentry from "@sentry/nextjs";
 

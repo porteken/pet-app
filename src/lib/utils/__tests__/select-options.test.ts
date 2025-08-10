@@ -29,7 +29,7 @@ describe("Select Options", () => {
     it("should return year options from 2000 to 2022", () => {
       const yearOptions = YearOptions();
 
-      expect(yearOptions).toHaveLength(23); // 2000-2022 = 23 years
+      expect(yearOptions).toHaveLength(23);
       expect(yearOptions[0]).toEqual({ key: "2000", label: "2000" });
       expect(yearOptions[22]).toEqual({ key: "2022", label: "2022" });
     });
@@ -54,7 +54,6 @@ describe("Select Options", () => {
         expect(typeof option.label).toBe("string");
         expect(option.key).toBe(option.label);
 
-        // Verify it's a valid year
         const year = Number.parseInt(option.key, 10);
         expect(year).toBeGreaterThanOrEqual(2000);
         expect(year).toBeLessThan(2023);
@@ -66,7 +65,7 @@ describe("Select Options", () => {
       const options2 = YearOptions();
 
       expect(options1).toEqual(options2);
-      expect(options1).not.toBe(options2); // Different array instances
+      expect(options1).not.toBe(options2);
     });
 
     it("should handle year range configuration", () => {

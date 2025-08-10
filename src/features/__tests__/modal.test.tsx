@@ -12,7 +12,6 @@ interface MockModalProperties {
   title?: string;
 }
 
-// Mock the Mantine Modal component
 vi.mock("@mantine/core", () => ({
   Modal: ({ children, onClose, opened, title }: MockModalProperties) => {
     if (!opened) {

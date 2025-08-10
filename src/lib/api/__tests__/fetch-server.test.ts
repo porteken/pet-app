@@ -15,7 +15,6 @@ import {
   FetchTrendGraphData,
 } from "../fetch-server";
 
-// Mock dependencies
 mockNextHeaders();
 mockSupabaseServer();
 mockSimpleLinearRegression();
@@ -151,8 +150,8 @@ describe("fetch-server", () => {
         select: vi.fn().mockReturnThis(),
       };
       mockQuery.eq
-        .mockReturnValueOnce(mockQuery) // first eq call
-        .mockResolvedValueOnce({ data: undefined, error: mockError }); // second eq call
+        .mockReturnValueOnce(mockQuery)
+        .mockResolvedValueOnce({ data: undefined, error: mockError });
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 

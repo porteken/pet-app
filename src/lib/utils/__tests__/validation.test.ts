@@ -23,10 +23,7 @@ describe("validation utilities", () => {
     });
 
     it("should throw for invalid dates", () => {
-      const invalidDates = [
-        new Date("invalid-date"),
-        new Date("2023-13-01"), // Invalid month
-      ];
+      const invalidDates = [new Date("invalid-date"), new Date("2023-13-01")];
 
       expect(() => validateDates(invalidDates)).toThrow(
         "Invalid date data detected"
@@ -163,7 +160,7 @@ describe("validation utilities", () => {
     });
 
     it("should return false for non-strings", () => {
-      expect(validateYear(2023 as any)).toBe(true); // Numbers get converted to strings in regex test
+      expect(validateYear(2023 as any)).toBe(true);
       expect(validateYear(undefined as any)).toBe(false);
     });
   });
@@ -205,7 +202,7 @@ describe("validation utilities", () => {
   describe("validateYears", () => {
     it("should not throw for valid year arrays", () => {
       expect(() => validateYears([2020, 2021, 2022, 2023])).not.toThrow();
-      expect(() => validateYears([1900, 2100])).not.toThrow(); // boundary values
+      expect(() => validateYears([1900, 2100])).not.toThrow();
       expect(() => validateYears([])).not.toThrow();
     });
 
@@ -228,10 +225,10 @@ describe("validation utilities", () => {
     });
 
     it("should handle boundary values correctly", () => {
-      expect(() => validateYears([1900])).not.toThrow(); // min valid year
-      expect(() => validateYears([2100])).not.toThrow(); // max valid year
-      expect(() => validateYears([1899])).toThrow("Invalid year data detected"); // just below min
-      expect(() => validateYears([2101])).toThrow("Invalid year data detected"); // just above max
+      expect(() => validateYears([1900])).not.toThrow();
+      expect(() => validateYears([2100])).not.toThrow();
+      expect(() => validateYears([1899])).toThrow("Invalid year data detected");
+      expect(() => validateYears([2101])).toThrow("Invalid year data detected");
     });
   });
 });

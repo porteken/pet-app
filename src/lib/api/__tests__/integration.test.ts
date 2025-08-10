@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FetchTrendGraphData } from "../fetch-client";
 import { FetchReferenceGraphData } from "../reference-graph-data";
 
-// Mock the client functions completely since they don't call server functions
 vi.mock("../fetch-client");
 vi.mock("../reference-graph-data");
 
@@ -52,10 +51,8 @@ describe("API Integration Tests", () => {
     });
 
     it("should validate data consistency between client and server", async () => {
-      // Test that both client and server handle the same validation rules
       const invalidLocationId = -1;
 
-      // Mock implementation that validates location ID
       vi.mocked(FetchTrendGraphData).mockImplementation(
         (_option, locationId) => {
           if (locationId <= 0) {
@@ -69,7 +66,6 @@ describe("API Integration Tests", () => {
         }
       );
 
-      // Client should also reject it
       await expect(
         FetchTrendGraphData("avg", invalidLocationId)
       ).rejects.toThrow("Invalid location ID");

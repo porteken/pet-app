@@ -72,7 +72,7 @@ const MapComponent = memo<MapComponentProperties>(
 
         await new Promise(resolve => {
           link.addEventListener("load", resolve);
-          link.addEventListener("error", resolve); // Continue even if CSS fails
+          link.addEventListener("error", resolve);
         });
       }
 
@@ -147,7 +147,6 @@ const MapComponent = memo<MapComponentProperties>(
       );
     }
 
-    // Add a small delay to ensure map is fully rendered
     if (!customIcon) {
       return (
         <div className="flex h-screen items-center justify-center bg-gray-100">

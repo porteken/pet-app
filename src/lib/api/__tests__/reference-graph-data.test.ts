@@ -10,7 +10,6 @@ import {
 
 import { FetchReferenceGraphData } from "../reference-graph-data";
 
-// Mock dependencies
 mockSupabaseClient();
 mockValidationModule();
 

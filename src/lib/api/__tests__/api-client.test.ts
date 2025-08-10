@@ -4,12 +4,10 @@ import { FetchError } from "@/lib/utils/errors";
 
 import { apiRequest, type ApiResponse, hasError } from "../api-client";
 
-// Mock Sentry
 vi.mock("@sentry/nextjs", () => ({
   captureException: vi.fn(),
 }));
 
-// Mock FetchError
 vi.mock("@/lib/utils/errors", () => ({
   FetchError: class FetchError extends Error {
     constructor(message: string) {
@@ -128,7 +126,6 @@ describe("api-client", () => {
       const result = await apiRequest(mockRequestFunction);
 
       expect(result.error).toBeDefined();
-      // No error handler provided, so no assertions needed for handler calls
     });
 
     it("should handle successful request with different data types", async () => {

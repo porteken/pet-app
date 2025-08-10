@@ -1,6 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
 
-// Enhanced error types for better error categorization
 export class AppError extends Error {
   constructor(
     message: string,
@@ -12,7 +11,6 @@ export class AppError extends Error {
     super(message);
     this.name = "AppError";
 
-    // Report to Sentry with context
     Sentry.captureException(this, {
       contexts: {
         error: {

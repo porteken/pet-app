@@ -19,7 +19,6 @@ vi.mock("@/lib/utils/errors", () => ({
     }),
 }));
 
-// Mock fetch
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch;
 
@@ -103,7 +102,6 @@ describe("handleApiResponse", () => {
 
     await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
 
-    // Verify NetworkError was called with correct parameters
     expect(MockedNetworkError).toHaveBeenCalledWith(
       "Failed to parse server response",
       500,
@@ -344,7 +342,6 @@ describe("apiRequest", () => {
 
     await expect(apiRequest("https://api.example.com/test")).rejects.toThrow();
 
-    // Verify NetworkError was called with correct parameters
     expect(MockedNetworkError).toHaveBeenCalledWith(
       "Network connection failed",
       0,
@@ -421,7 +418,6 @@ describe("apiRequestWithRetry", () => {
 
     const promise = apiRequestWithRetry("https://api.example.com/test", {}, 3);
 
-    // Fast forward through the delays
     await vi.runAllTimersAsync();
 
     const result = await promise;
@@ -440,14 +436,12 @@ describe("apiRequestWithRetry", () => {
 
     mockFetch.mockResolvedValue(errorResponse);
 
-    // Create a mock error that passes instanceof NetworkError check
     const mockError = Object.create(MockedNetworkError.prototype);
     (mockError as any).message = "Bad request";
     (mockError as any).statusCode = 400;
     (mockError as any).name = "NetworkError";
     mockCreateError.mockReturnValue(mockError);
 
-    // For client errors, the function should throw immediately without retries
     await expect(
       apiRequestWithRetry("https://api.example.com/test")
     ).rejects.toThrow();

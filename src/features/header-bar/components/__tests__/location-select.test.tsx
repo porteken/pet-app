@@ -1,5 +1,3 @@
-// noinspection DuplicatedCode
-
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
@@ -8,7 +6,6 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LocationSelect } from "../location-select";
 
-// Mock window.matchMedia and ResizeObserver for Mantine
 beforeAll(() => {
   Object.defineProperty(globalThis, "matchMedia", {
     value: vi.fn().mockImplementation(query => ({
@@ -31,7 +28,6 @@ beforeAll(() => {
   }));
 });
 
-// Mock next/navigation
 const mockRouterPush = vi.fn();
 
 vi.mock("next/navigation", () => ({
@@ -66,7 +62,6 @@ describe("LocationSelect", () => {
     vi.clearAllMocks();
     const { useSearchParams } = await import("next/navigation");
     mockSearchParameters = vi.mocked(useSearchParams);
-    // Reset mock implementation for each test
     mockSearchParameters.mockReturnValue({
       toString: () => "existing=params",
     });
@@ -89,7 +84,6 @@ describe("LocationSelect", () => {
 
     renderWithProvider(<TestComponent />);
 
-    // Simulate state change by directly calling the handler we expect
     const parameters = new URLSearchParams("existing=params");
     parameters.set("state", "NY");
     parameters.delete("city");
@@ -115,7 +109,6 @@ describe("LocationSelect", () => {
 
     renderWithProvider(<TestComponent />);
 
-    // Simulate city change by directly calling the handler we expect
     const parameters = new URLSearchParams("existing=params");
     parameters.set("city", "ny");
     mockRouterPush(`?${parameters.toString()}`);
@@ -126,7 +119,6 @@ describe("LocationSelect", () => {
   it("should handle state change with null value", () => {
     const mockComponent = vi.fn();
 
-    // Mock the component to access the handler directly
     vi.doMock("../location-select", () => ({
       LocationSelect: mockComponent,
     }));
@@ -141,11 +133,9 @@ describe("LocationSelect", () => {
       />
     );
 
-    // Simulate state change with null value
     const stateSelect = screen.getByTestId("state-select");
     fireEvent.change(stateSelect, { target: { value: undefined } });
 
-    // The component should handle null gracefully
     expect(stateSelect).toBeInTheDocument();
   });
 
@@ -160,11 +150,9 @@ describe("LocationSelect", () => {
       />
     );
 
-    // Simulate city change with null value
     const citySelect = screen.getByTestId("city-select");
     fireEvent.change(citySelect, { target: { value: undefined } });
 
-    // The component should handle null gracefully
     expect(citySelect).toBeInTheDocument();
   });
 
@@ -179,10 +167,9 @@ describe("LocationSelect", () => {
       />
     );
 
-    // Simulate state change that should reset city
     const parameters = new URLSearchParams("city=ny&existing=params");
     parameters.set("state", "CA");
-    parameters.delete("city"); // This simulates the city reset behavior
+    parameters.delete("city");
     mockRouterPush(`?${parameters.toString()}`);
 
     expect(mockRouterPush).toHaveBeenCalledWith(
@@ -208,7 +195,6 @@ describe("LocationSelect", () => {
       />
     );
 
-    // Simulate state change preserving existing parameters
     const parameters = new URLSearchParams("existing=params&other=value");
     parameters.set("state", "NY");
     parameters.delete("city");
@@ -237,7 +223,6 @@ describe("LocationSelect", () => {
       />
     );
 
-    // Simulate city change preserving existing parameters
     const parameters = new URLSearchParams("existing=params&other=value");
     parameters.set("city", "ny");
     mockRouterPush(`?${parameters.toString()}`);
@@ -297,7 +282,6 @@ describe("LocationSelect", () => {
     const stateSelect = screen.getByTestId("state-select");
     const citySelect = screen.getByTestId("city-select");
 
-    // Check that allowDeselect is false (this affects Mantine Select behavior)
     expect(stateSelect).toBeInTheDocument();
     expect(citySelect).toBeInTheDocument();
   });
@@ -331,7 +315,6 @@ describe("LocationSelect", () => {
     const stateSelect = screen.getByTestId("state-select");
     const citySelect = screen.getByTestId("city-select");
 
-    // Verify that the components render with the selected values
     expect(stateSelect).toBeInTheDocument();
     expect(citySelect).toBeInTheDocument();
   });

@@ -122,8 +122,7 @@ test.describe("Cross-Browser Compatibility", () => {
     const metrics = await page.evaluate(() => {
       const performance = globalThis.performance;
 
-      // Modern Navigation Timing API Level 2
-      let navigationType = "navigate"; // default
+      let navigationType = "navigate";
 
       if (performance.getEntriesByType) {
         const navigationEntries = performance.getEntriesByType(
@@ -136,7 +135,7 @@ test.describe("Cross-Browser Compatibility", () => {
 
       return {
         memory: (performance as any).memory?.usedJSHeapSize || 0,
-        navigationType, // 'navigate', 'reload', 'back_forward', or 'prerender'
+        navigationType,
       };
     });
 

@@ -2,23 +2,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getGraphMeasureFromCookies, getLocationData } from "../page-helpers";
 
-// Mock Next.js cookies
 vi.mock("next/headers", () => ({
   cookies: vi.fn(),
 }));
 
-// Mock fetch server
 vi.mock("@/lib/api/fetch-server", () => ({
   FetchLocations: vi.fn(),
 }));
 
-// Helper function to get the mocked function
 async function getMockFetchLocations() {
   const fetchServer = await import("@/lib/api/fetch-server");
   return vi.mocked(fetchServer.FetchLocations);
 }
 
-// Mock constants
 vi.mock("@/lib/constants/constants", () => ({
   DEFAULT_GRAPH_MEASURE: "temperature",
   ERROR_MESSAGES: {
@@ -300,7 +296,6 @@ describe("page-helpers", () => {
     });
 
     it("validates locations length correctly", async () => {
-      // Test edge case with exactly one location
       const mockLocationData = {
         LocationOptions: [
           {
@@ -329,7 +324,6 @@ describe("page-helpers", () => {
     });
 
     it("handles malformed response structure", async () => {
-      // Test when FetchLocations returns unexpected structure
       const malformedData = {
         LocationOptions: [
           {
@@ -337,7 +331,6 @@ describe("page-helpers", () => {
             title: "Location Group 1",
           },
         ],
-        // Missing locations property
       } as any;
 
       const mockFetchLocations = await getMockFetchLocations();
@@ -371,13 +364,11 @@ describe("page-helpers", () => {
 
   describe("Integration scenarios", () => {
     it("both functions can be called independently", async () => {
-      // Setup for getGraphMeasureFromCookies
       const mockCookieStore = {
         get: vi.fn().mockReturnValue({ value: "pressure" }),
       };
       mockCookies.mockResolvedValue(mockCookieStore);
 
-      // Setup for getLocationData
       const mockLocationData = {
         LocationOptions: [
           {
@@ -392,7 +383,6 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(mockLocationData);
 
-      // Call both functions
       const [graphMeasure, locationData] = await Promise.all([
         getGraphMeasureFromCookies(),
         getLocationData(),
@@ -405,7 +395,6 @@ describe("page-helpers", () => {
     });
 
     it("handles concurrent failures gracefully", async () => {
-      // Both functions fail
       const mockFetchLocations = await getMockFetchLocations();
       mockCookies.mockRejectedValue(new Error("Cookie error"));
       mockFetchLocations.mockRejectedValue(new Error("Fetch error"));

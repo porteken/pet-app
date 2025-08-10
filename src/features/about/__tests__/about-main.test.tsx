@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
-// Mock Next.js Link component
 vi.mock("next/link", () => ({
   default: ({ children, href, ...linkProperties }: any) => (
     <a href={href} {...linkProperties}>
@@ -11,7 +10,6 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-// Mock HeaderBar component
 vi.mock("@/features/header-bar", () => ({
   HeaderBar: vi.fn(({ LocationOptions }) => (
     <div data-testid="header-bar">

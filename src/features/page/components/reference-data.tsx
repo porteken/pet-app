@@ -56,14 +56,12 @@ export const ReferenceData: React.FC<ReferenceDataProperties> = ({
     [generatePetReferenceGraph]
   );
 
-  // Generate reference graph on initial render or year change
   React.useEffect(() => {
     generatePetReferenceGraph(selectedReferenceYear).catch(error => {
       throw error;
     });
   }, [generatePetReferenceGraph, selectedReferenceYear]);
 
-  // Years from 2000 to 2022
   const years = Array.from({ length: 23 }, (_, index) => 2000 + index);
 
   return (

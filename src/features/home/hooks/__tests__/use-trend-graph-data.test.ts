@@ -5,12 +5,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useTrendGraphData } from "../use-trend-graph-data";
 
-// Mock the fetch client
 vi.mock("@/lib/api/fetch-client", () => ({
   FetchTrendGraphData: vi.fn(),
 }));
 
-// Mock query keys
 vi.mock("@/lib/api/query-client", () => ({
   queryKeys: {
     trendGraph: (locationId: number, option: string) => [
@@ -143,7 +141,6 @@ describe("useTrendGraphData", () => {
 
     expect(result.current.data).toEqual(mockData1);
 
-    // Change locationId
     rerender({ locationId: 456 });
 
     await waitFor(() => {
@@ -175,7 +172,6 @@ describe("useTrendGraphData", () => {
 
     expect(result.current.data).toEqual(mockData1);
 
-    // Change option
     rerender({ option: "humidity" });
 
     await waitFor(() => {
@@ -191,7 +187,6 @@ describe("useTrendGraphData", () => {
       wrapper: createWrapper(),
     });
 
-    // Query should have the stale time set to 5 minutes (300000ms)
     expect(result.current.dataUpdatedAt).toBeDefined();
   });
 
@@ -207,11 +202,9 @@ describe("useTrendGraphData", () => {
       }
     );
 
-    // Should not fetch when disabled
     expect(result.current.isFetching).toBe(false);
     expect(mockFetchTrendGraphData).not.toHaveBeenCalled();
 
-    // Enable fetching
     rerender({ enabled: true });
 
     await waitFor(() => {
@@ -243,7 +236,6 @@ describe("useTrendGraphData", () => {
       wrapper: createWrapper(),
     });
 
-    // The query key should follow the expected format
     expect(result.current).toBeDefined();
   });
 });

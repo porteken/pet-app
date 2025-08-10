@@ -7,10 +7,6 @@ import {
   GRAPH_MEASURE_COOKIE_NAME,
 } from "@/lib/constants/constants";
 
-/**
- * Retrieves the graph measure preference from cookies
- * @returns The graph measure value or default if not found
- */
 export const getGraphMeasureFromCookies = async (): Promise<string> => {
   const cookieStore = await cookies();
   return (
@@ -18,11 +14,6 @@ export const getGraphMeasureFromCookies = async (): Promise<string> => {
   );
 };
 
-/**
- * Fetches and validates location data
- * @returns Location data and options
- * @throws Error if no location data is available
- */
 export const getLocationData = async () => {
   const { LocationOptions, locations } = await FetchLocations();
 

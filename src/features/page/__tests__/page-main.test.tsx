@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock components
 vi.mock("@/features/generate-graph", () => ({
   GenerateReferenceGraph: vi
     .fn()
@@ -23,12 +22,10 @@ vi.mock("@/features/header-bar", () => ({
   )),
 }));
 
-// Mock Supabase
 vi.mock("@/config/supabase/client", () => ({
   default: {},
 }));
 
-// Mock router
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     back: vi.fn(),
@@ -41,12 +38,10 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-// Mock actions
 vi.mock("@/lib/actions/actions", () => ({
   setGraphMeasure: vi.fn().mockResolvedValue("avg"),
 }));
 
-// Mock API functions
 vi.mock("@/lib/api/fetch-client", () => ({
   FetchReferenceGraphData: vi.fn().mockResolvedValue({
     dates: [new Date("2023-01-01"), new Date("2023-02-01")],
@@ -190,11 +185,9 @@ describe("PageMain", () => {
         render(<PageMain {...defaultProps} />);
       });
 
-      // Find the select element and change its value
       const selectElement = screen.getByLabelText("Graph Measure");
       await user.selectOptions(selectElement, "max");
 
-      // Verify that the API functions were called with the correct parameters
       await waitFor(() => {
         expect(setGraphMeasure).toHaveBeenCalledWith("max");
         expect(GenerateTrendGraph).toHaveBeenCalled();
@@ -207,11 +200,9 @@ describe("PageMain", () => {
         render(<PageMain {...defaultProps} />);
       });
 
-      // Find the select element and change its value
       const selectElement = screen.getByLabelText("Reference Year");
       await user.selectOptions(selectElement, "2001");
 
-      // Verify that the API functions were called with the correct parameters
       await waitFor(() => {
         expect(FetchReferenceGraphData).toHaveBeenCalledWith("2001", 1);
         expect(GenerateReferenceGraph).toHaveBeenCalled();

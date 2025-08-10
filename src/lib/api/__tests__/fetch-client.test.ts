@@ -12,14 +12,12 @@ import {
 
 import { FetchTrendGraphData } from "../fetch-client";
 
-// Mock dependencies
 mockSupabaseClient();
 mockValidationModule();
 mockSimpleLinearRegression();
 
 describe("FetchTrendGraphData", () => {
   it("should throw error when called in non-browser environment", async () => {
-    // Mock non-browser environment
     const originalWindow = globalThis.window;
     // @ts-expect-error - Testing non-browser environment
     delete globalThis.window;
@@ -28,7 +26,6 @@ describe("FetchTrendGraphData", () => {
       "FetchTrendGraphData can only be called in browser environment"
     );
 
-    // Restore window
     globalThis.window = originalWindow;
   });
   let mockSupabaseClient: ReturnType<
@@ -46,7 +43,6 @@ describe("FetchTrendGraphData", () => {
     mockSupabaseClient = setup.mockSupabaseClient;
     mockValidation = setup.mockValidation;
 
-    // Mock SimpleLinearRegression
     mockLinearRegression = createMockLinearRegression();
     const { SimpleLinearRegression } = await import(
       "@/lib/utils/simple-linear-regression"
@@ -187,7 +183,6 @@ describe("FetchTrendGraphData", () => {
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
 
-    // Mock SimpleLinearRegression to throw
     vi.mocked(mockLinearRegression.predict).mockImplementation(() => {
       throw new Error("Regression calculation failed");
     });

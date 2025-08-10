@@ -5,12 +5,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { OptimizedMarker } from "../optimized-marker";
 
-// Mock the prefetch function
 vi.mock("@/lib/api/query-client", () => ({
   prefetchTrendGraphData: vi.fn(),
 }));
 
-// Mock marker component
 const MockMarkerComponent = vi.fn(({ eventHandlers, icon, position }) => (
   <div
     data-icon={JSON.stringify(icon)}
@@ -88,15 +86,12 @@ describe("OptimizedMarker", () => {
 
     const marker = screen.getByTestId("marker");
 
-    // Hover multiple times - each should trigger prefetch
     await user.hover(marker);
     await user.unhover(marker);
     await user.hover(marker);
     await user.unhover(marker);
     await user.hover(marker);
 
-    // Since useCallback dependencies don't change, the same function is used
-    // but each hover event should still trigger the prefetch
     expect(mockPrefetchTrendGraphData).toHaveBeenCalledTimes(3);
     expect(mockPrefetchTrendGraphData).toHaveBeenCalledWith(
       mockProperties.locationId,
@@ -107,28 +102,22 @@ describe("OptimizedMarker", () => {
   it("creates new component instance when selectedGraphMeasure changes", () => {
     const { rerender } = render(<OptimizedMarker {...mockProperties} />);
 
-    // Component renders initially
     expect(MockMarkerComponent).toHaveBeenCalledTimes(1);
 
-    // Rerender with different selectedGraphMeasure - should trigger re-render due to dependency change
     rerender(
       <OptimizedMarker {...mockProperties} selectedGraphMeasure="humidity" />
     );
 
-    // Component should re-render because selectedGraphMeasure is a useCallback dependency
     expect(MockMarkerComponent).toHaveBeenCalledTimes(2);
   });
 
   it("creates new component instance when locationId changes", () => {
     const { rerender } = render(<OptimizedMarker {...mockProperties} />);
 
-    // Component renders initially
     expect(MockMarkerComponent).toHaveBeenCalledTimes(1);
 
-    // Rerender with different locationId - should trigger re-render due to dependency change
     rerender(<OptimizedMarker {...mockProperties} locationId={456} />);
 
-    // Component should re-render because locationId is a useCallback dependency
     expect(MockMarkerComponent).toHaveBeenCalledTimes(2);
   });
 
@@ -137,7 +126,6 @@ describe("OptimizedMarker", () => {
 
     expect(MockMarkerComponent).toHaveBeenCalledTimes(1);
 
-    // Rerender with same props - should be memoized
     rerender(<OptimizedMarker {...mockProperties} />);
 
     expect(MockMarkerComponent).toHaveBeenCalledTimes(1);
@@ -148,7 +136,6 @@ describe("OptimizedMarker", () => {
 
     expect(MockMarkerComponent).toHaveBeenCalledTimes(1);
 
-    // Rerender with different props - should re-render
     rerender(<OptimizedMarker {...mockProperties} locationId={456} />);
 
     expect(MockMarkerComponent).toHaveBeenCalledTimes(2);
@@ -157,7 +144,6 @@ describe("OptimizedMarker", () => {
   it("passes all event handlers to marker component", () => {
     render(<OptimizedMarker {...mockProperties} />);
 
-    // Check that the mock was called with the expected arguments
     expect(MockMarkerComponent).toHaveBeenCalledWith(
       expect.objectContaining({
         eventHandlers: expect.objectContaining({
@@ -167,7 +153,7 @@ describe("OptimizedMarker", () => {
         icon: mockProperties.icon,
         position: mockProperties.position,
       }),
-      undefined // React ref/context is undefined in this case
+      undefined
     );
   });
 
@@ -185,7 +171,6 @@ describe("OptimizedMarker", () => {
     );
     expect(newOnClick).not.toHaveBeenCalled();
 
-    // Change onClick prop
     rerender(<OptimizedMarker {...mockProperties} onClick={newOnClick} />);
 
     await user.click(marker);

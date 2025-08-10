@@ -31,7 +31,6 @@ export const LocationSelect: React.FC<LocationSelectProperties> = ({
     const parameters = new URLSearchParams(searchParameters.toString());
     parameters.set("state", value || "");
 
-    // Reset city when state changes
     parameters.delete("city");
 
     router.push(`?${parameters.toString()}`);

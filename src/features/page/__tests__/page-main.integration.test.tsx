@@ -10,7 +10,6 @@ import type { PageProperties } from "../types";
 
 import { PageMain } from "../page-main";
 
-// Mock components that we don't need to test in integration
 vi.mock("@/features/generate-graph", () => ({
   GenerateReferenceGraph: vi
     .fn()
@@ -34,7 +33,6 @@ vi.mock("@/features/header-bar", () => ({
   )),
 }));
 
-// Mock the problematic components that make API calls
 vi.mock("@/features/page/components/trend-analysis", () => ({
   TrendAnalysis: vi.fn(({ initialGraphMeasure }) => (
     <div data-testid="trend-analysis">
@@ -66,7 +64,6 @@ vi.mock("@/features/page/components/reference-data", () => ({
   )),
 }));
 
-// Mock router for integration testing
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     back: vi.fn(),
@@ -79,7 +76,6 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-// Mock actions - use vi.fn() directly in the factory
 vi.mock("@/lib/actions/actions", () => ({
   setGraphMeasure: vi.fn().mockResolvedValue("max"),
 }));
@@ -91,7 +87,6 @@ describe("PageMain Integration Tests", () => {
     vi.clearAllMocks();
     resetDatabase();
 
-    // Create test data using MSW database with unique IDs for each test
     const location = database.location.create({
       city: "San Francisco",
       location_id: 433,
@@ -121,7 +116,6 @@ describe("PageMain Integration Tests", () => {
     it("should render with all main sections", async () => {
       render(<PageMain {...defaultProps} />);
 
-      // Test that all main sections are present
       expect(screen.getByTestId("header-bar")).toBeInTheDocument();
       expect(screen.getByText("San Francisco, California")).toBeInTheDocument();
       expect(screen.getByText("Trend Analysis")).toBeInTheDocument();
@@ -134,7 +128,6 @@ describe("PageMain Integration Tests", () => {
       const headerBar = screen.getByTestId("header-bar");
       expect(headerBar).toHaveAttribute("data-id");
 
-      // Verify the ID is a number (from our MSW database)
       const dataId = headerBar.dataset.id;
       expect(Number(dataId)).toBeGreaterThan(0);
 
@@ -146,22 +139,17 @@ describe("PageMain Integration Tests", () => {
       const user = userEvent.setup();
       render(<PageMain {...defaultProps} />);
 
-      // Find and interact with the measure selector
       const measureSelect = screen.getByLabelText("Graph Measure");
       expect(measureSelect).toHaveValue("avg");
 
-      // Change the measure - this is a mocked component, so we test the UI change
       await user.selectOptions(measureSelect, "max");
       expect(measureSelect).toHaveValue("max");
-
-      // Since we're mocking the component, we can't test the actual server action call
-      // This test verifies the UI behavior and integration with the mocked component
     });
 
     it("should display location information correctly", async () => {
       const customLocation = database.location.create({
         city: "Austin",
-        location_id: Math.floor(Math.random() * 10_000) + 20_000, // Different range to avoid collision
+        location_id: Math.floor(Math.random() * 10_000) + 20_000,
         state: "Texas",
       });
 
@@ -183,10 +171,8 @@ describe("PageMain Integration Tests", () => {
       const yearSelect = screen.getByLabelText("Reference Year");
       expect(yearSelect).toBeInTheDocument();
 
-      // Should have the default year (2000) selected
       expect(screen.getByDisplayValue("2000")).toBeInTheDocument();
 
-      // Change year selection
       await user.selectOptions(yearSelect, "2021");
       expect(yearSelect).toHaveValue("2021");
     });
@@ -203,7 +189,6 @@ describe("PageMain Integration Tests", () => {
     it("should pass correct data to reference data component", async () => {
       render(<PageMain {...defaultProps} />);
 
-      // Wait for the reference graph to be generated after initial render
       await waitFor(() => {
         const referenceGraph = screen.getByTestId("reference-graph");
         expect(referenceGraph).toBeInTheDocument();
@@ -223,7 +208,6 @@ describe("PageMain Integration Tests", () => {
 
       render(<PageMain {...emptyDataProperties} />);
 
-      // Component should still render without errors
       expect(screen.getByTestId("header-bar")).toBeInTheDocument();
       expect(screen.getByText("San Francisco, California")).toBeInTheDocument();
     });
@@ -234,17 +218,13 @@ describe("PageMain Integration Tests", () => {
       const user = userEvent.setup();
       render(<PageMain {...defaultProps} />);
 
-      // 1. User sees initial state
       const measureSelect = screen.getByLabelText("Graph Measure");
       expect(measureSelect).toHaveValue("avg");
 
-      // 2. User changes measure to max
       await user.selectOptions(measureSelect, "max");
 
-      // 3. UI shows updated selection (mocked component behavior)
       expect(measureSelect).toHaveValue("max");
 
-      // 4. Verify the component structure is maintained
       expect(screen.getByTestId("trend-analysis")).toBeInTheDocument();
       expect(screen.getByTestId("trend-graph")).toBeInTheDocument();
     });
@@ -252,11 +232,9 @@ describe("PageMain Integration Tests", () => {
     it("should handle accessibility requirements", async () => {
       render(<PageMain {...defaultProps} />);
 
-      // Check for proper ARIA labels
       expect(screen.getByLabelText("Graph Measure")).toBeInTheDocument();
       expect(screen.getByLabelText("Reference Year")).toBeInTheDocument();
 
-      // Check for semantic structure
       expect(screen.getByRole("main")).toBeInTheDocument();
     });
   });
@@ -265,7 +243,6 @@ describe("PageMain Integration Tests", () => {
     it("should handle server action errors gracefully", async () => {
       const user = userEvent.setup();
 
-      // Mock server action to fail
       vi.mocked(setGraphMeasure).mockRejectedValueOnce(
         new Error("Server error")
       );
@@ -274,11 +251,9 @@ describe("PageMain Integration Tests", () => {
 
       const measureSelect = screen.getByLabelText("Graph Measure");
 
-      // Change measure - with mocked components, this tests UI resilience
       await user.selectOptions(measureSelect, "max");
       expect(measureSelect).toHaveValue("max");
 
-      // App should still be functional even if server action fails
       expect(screen.getByTestId("header-bar")).toBeInTheDocument();
       expect(screen.getByTestId("trend-analysis")).toBeInTheDocument();
       expect(screen.getByTestId("reference-data")).toBeInTheDocument();

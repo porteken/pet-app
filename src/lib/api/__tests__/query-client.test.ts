@@ -8,12 +8,10 @@ import {
   queryKeys,
 } from "../query-client";
 
-// Mock the fetch client
 vi.mock("../fetch-client", () => ({
   FetchTrendGraphData: vi.fn(),
 }));
 
-// Helper function to get the mocked function
 async function getMockFetchTrendGraphData() {
   const fetchClient = await import("../fetch-client");
   return vi.mocked(fetchClient.FetchTrendGraphData);
@@ -23,14 +21,14 @@ describe("queryClient", () => {
   it("is properly configured", () => {
     expect(queryClient).toBeDefined();
     expect(queryClient.getDefaultOptions().queries?.retry).toBe(1);
-    expect(queryClient.getDefaultOptions().queries?.staleTime).toBe(300_000); // 5 minutes
+    expect(queryClient.getDefaultOptions().queries?.staleTime).toBe(300_000);
   });
 
   it("has correct default options", () => {
     const defaultOptions = queryClient.getDefaultOptions();
 
     expect(defaultOptions.queries?.retry).toBe(1);
-    expect(defaultOptions.queries?.staleTime).toBe(1000 * 60 * 5); // 5 minutes
+    expect(defaultOptions.queries?.staleTime).toBe(1000 * 60 * 5);
   });
 });
 
@@ -148,7 +146,7 @@ describe("getTrendGraphQueryOptions", () => {
 describe("prefetchTrendGraphData", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Clear any existing queries
+
     queryClient.clear();
   });
 
@@ -250,7 +248,6 @@ describe("invalidateTrendGraphData", () => {
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue();
 
-    // Add some queries to the cache first
     queryClient.setQueryData(queryKeys.trendGraph(123, "temperature"), {
       data: "test1",
     });
@@ -298,19 +295,15 @@ describe("Integration tests", () => {
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue();
 
-    // Prefetch data
     await prefetchTrendGraphData(123, "temperature");
 
-    // Verify prefetch was called
     expect(prefetchSpy).toHaveBeenCalledWith({
       queryFn: expect.any(Function),
       queryKey: ["trend-graph", 123, "temperature"],
     });
 
-    // Invalidate data
     await invalidateTrendGraphData();
 
-    // Verify invalidate was called
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: ["trend-graph"],
     });
@@ -330,7 +323,6 @@ describe("Integration tests", () => {
 
     const queryOptions = getTrendGraphQueryOptions(locationId, option);
 
-    // Use the query options with the actual query client
     const result = await queryClient.fetchQuery(queryOptions);
 
     expect(result).toEqual(mockData);

@@ -38,7 +38,6 @@ describe("SimpleLinearRegression", () => {
 
   describe("predict", () => {
     it("should predict correctly for perfect linear relationship", () => {
-      // y = 2x relationship
       const x = [1, 2, 3, 4, 5];
       const y = [2, 4, 6, 8, 10];
       const regression = new SimpleLinearRegression(x, y);
@@ -49,7 +48,6 @@ describe("SimpleLinearRegression", () => {
     });
 
     it("should predict correctly for linear relationship with intercept", () => {
-      // y = 2x + 1 relationship
       const x = [1, 2, 3, 4, 5];
       const y = [3, 5, 7, 9, 11];
       const regression = new SimpleLinearRegression(x, y);
@@ -72,8 +70,6 @@ describe("SimpleLinearRegression", () => {
       const y = [10];
       const regression = new SimpleLinearRegression(x, y);
 
-      // With single point, math results in division by zero, so predictions will be NaN
-      // This is expected mathematical behavior
       expect(Number.isNaN(regression.predict(5))).toBe(true);
       expect(Number.isNaN(regression.predict(0))).toBe(true);
       expect(Number.isNaN(regression.predict(100))).toBe(true);
@@ -131,7 +127,6 @@ describe("SimpleLinearRegression", () => {
       const y = [10, 4, 0, -6, -14];
       const regression = new SimpleLinearRegression(x, y);
 
-      // Should predict reasonably for this inverse relationship
       const prediction = regression.predict(1);
       expect(typeof prediction).toBe("number");
       expect(Number.isFinite(prediction)).toBe(true);

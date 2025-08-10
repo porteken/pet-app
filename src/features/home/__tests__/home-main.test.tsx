@@ -2,19 +2,16 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock server actions
 vi.mock("@/lib/actions/actions", () => ({
   setGraphMeasure: vi.fn().mockResolvedValue({}),
 }));
 
-// Mock graph generation
 vi.mock("@/features/generate-graph", () => ({
   GenerateTrendGraph: vi
     .fn()
     .mockReturnValue(<div data-testid="mock-trend-graph">Trend Graph</div>),
 }));
 
-// Mock API functions
 vi.mock("@/lib/api/fetch-client", () => ({
   FetchTrendGraphData: vi.fn().mockResolvedValue({
     trendline_pets: [20, 22, 24],
@@ -23,14 +20,12 @@ vi.mock("@/lib/api/fetch-client", () => ({
   }),
 }));
 
-// Mock Next.js router
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
   }),
 }));
 
-// Mock HeaderBar component
 vi.mock("@/features/header-bar", () => ({
   HeaderBar: vi.fn(({ LocationOptions }) => (
     <div data-testid="header-bar">
@@ -39,7 +34,6 @@ vi.mock("@/features/header-bar", () => ({
   )),
 }));
 
-// Mock Modal component
 vi.mock("@/features/modal", () => ({
   default: vi.fn(({ children, onClose, open, title }) =>
     open ? (
@@ -54,7 +48,6 @@ vi.mock("@/features/modal", () => ({
   ),
 }));
 
-// Mock MapComponent
 vi.mock("../map-component", () => ({
   default: vi.fn(({ locations, onMarkerClick }) => (
     <div data-testid="map-component">
@@ -70,7 +63,6 @@ vi.mock("../map-component", () => ({
   )),
 }));
 
-// Mock Mantine components with more realistic behavior
 vi.mock("@mantine/core", () => ({
   Button: vi.fn(({ children, onClick, variant }) => (
     <button
@@ -105,7 +97,6 @@ vi.mock("@mantine/core", () => ({
   )),
 }));
 
-// Mock select options
 vi.mock("@/lib/utils/select-options", () => ({
   GraphOptions: [
     { key: "avg", label: "Average" },
@@ -120,7 +111,6 @@ import { FetchTrendGraphData } from "@/lib/api/fetch-client";
 
 import Home from "../home-main";
 
-// Test data
 const mockLocationOptions = [
   {
     items: [
@@ -185,7 +175,6 @@ describe("Home", () => {
     it("should initialize with correct graph measure", () => {
       render(<Home {...defaultProps} />);
 
-      // The component should start with default "avg" and then update to initialGraphMeasure
       expect(screen.getByTestId("header-bar")).toBeInTheDocument();
     });
 
@@ -254,14 +243,12 @@ describe("Home", () => {
     it("should handle graph measure change", async () => {
       render(<Home {...defaultProps} />);
 
-      // Click marker to open modal
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
       });
 
-      // Change the select value
       const selectElement = screen.getByRole("combobox");
       fireEvent.change(selectElement, { target: { value: "max" } });
 
@@ -274,14 +261,12 @@ describe("Home", () => {
     it("should close modal when close button is clicked", async () => {
       render(<Home {...defaultProps} />);
 
-      // Open modal
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
       });
 
-      // Close modal
       fireEvent.click(screen.getByTestId("modal-close"));
 
       expect(screen.queryByTestId("modal")).not.toBeInTheDocument();
@@ -303,7 +288,6 @@ describe("Home", () => {
     });
 
     it("should navigate to location page when 'View Full Details' is clicked", async () => {
-      // Mock global location
       const mockLocation = { href: "" };
       Object.defineProperty(globalThis, "location", {
         value: mockLocation,

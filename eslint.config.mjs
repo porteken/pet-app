@@ -30,13 +30,13 @@ export default [
       },
     },
   },
-  pluginJs.configs.recommended, // ? https://github.com/eslint/eslint
-  importPlugin.flatConfigs.recommended, // ? https://github.com/import-js/eslint-plugin-import
-  ...tseslint.configs.recommended, // ? https://github.com/typescript-eslint/typescript-eslint
-  pluginPromise.configs["flat/recommended"], // ? https://github.com/eslint-community/eslint-plugin-promise
-  pluginReact.configs.flat.recommended, // ? https://github.com/jsx-eslint/eslint-plugin-react
-  pluginReact.configs.flat["jsx-runtime"], // ? https://github.com/jsx-eslint/eslint-plugin-react
-  eslintConfigPrettier, // ? https://github.com/prettier/eslint-config-prettier
+  pluginJs.configs.recommended,
+  importPlugin.flatConfigs.recommended,
+  ...tseslint.configs.recommended,
+  pluginPromise.configs["flat/recommended"],
+  pluginReact.configs.flat.recommended,
+  pluginReact.configs.flat["jsx-runtime"],
+  eslintConfigPrettier,
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
     plugins: {

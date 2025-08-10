@@ -1,5 +1,3 @@
-// noinspection DuplicatedCode
-
 import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
@@ -8,7 +6,6 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { NavButtons } from "../nav-buttons";
 
-// Mock window.matchMedia and ResizeObserver for Mantine
 beforeAll(() => {
   Object.defineProperty(globalThis, "matchMedia", {
     value: vi.fn().mockImplementation(query => ({
@@ -31,7 +28,6 @@ beforeAll(() => {
   }));
 });
 
-// Mock next/link
 vi.mock("next/link", () => ({
   __esModule: true,
   default: ({ children, href, ...rest }: any) => (

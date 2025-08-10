@@ -13,7 +13,6 @@ import {
   ValidationError,
 } from "../errors";
 
-// Mock Sentry
 vi.mock("@sentry/nextjs", () => ({
   captureException: vi.fn(),
 }));
@@ -381,15 +380,15 @@ describe("Error Classes", () => {
         const error = createError("Service unavailable", 503);
 
         expect(error).toBeInstanceOf(DatabaseError);
-        expect(error.statusCode).toBe(500); // DatabaseError constructor overrides to 500
+        expect(error.statusCode).toBe(500);
       });
 
       it("should create a DatabaseError for status codes >= 500 (like 502)", () => {
         const error = createError("Bad gateway", 502);
 
-        expect(error).toBeInstanceOf(DatabaseError); // 502 >= 500, so creates DatabaseError
+        expect(error).toBeInstanceOf(DatabaseError);
         expect(error.message).toBe("Bad gateway");
-        expect(error.statusCode).toBe(500); // DatabaseError constructor overrides to 500
+        expect(error.statusCode).toBe(500);
         expect(error.code).toBe("DATABASE_ERROR");
       });
 

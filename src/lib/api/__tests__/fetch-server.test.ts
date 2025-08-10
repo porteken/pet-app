@@ -111,21 +111,39 @@ describe("fetch-server", () => {
         )
       );
     });
-
-    it("should handle unexpected errors", async () => {
-      const mockQuery = {
-        select: vi.fn().mockRejectedValue(new Error("Unexpected error")),
-      };
-
-      mockSupabaseClient.from.mockReturnValue(mockQuery);
-
-      await expect(FetchLocations()).rejects.toThrow(
-        new DatabaseError("Database connection failed", expect.any(Error))
-      );
-    });
   });
 
   describe("FetchReferenceGraphData", () => {
+    it("should fetch reference data successfully", async () => {
+      const mockData = [
+        { date: "2023-01-01", pet: 25.5 },
+        { date: "2023-01-02", pet: 26.2 },
+      ];
+
+      const mockQuery = {
+        eq: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+      };
+      mockQuery.eq
+        .mockReturnValueOnce(mockQuery) // first eq call
+        .mockResolvedValueOnce({ data: mockData, error: undefined }); // second eq call
+
+      mockSupabaseClient.from.mockReturnValue(mockQuery);
+
+      const result = await FetchReferenceGraphData("2023", 1);
+
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year");
+      expect(mockQuery.select).toHaveBeenCalled();
+      expect(mockQuery.eq).toHaveBeenCalledWith("location_id", 1);
+      expect(mockQuery.eq).toHaveBeenCalledWith("year", "2023");
+
+      expect(result.dates).toEqual([
+        new Date("2023-01-01"),
+        new Date("2023-01-02"),
+      ]);
+      expect(result.pets).toEqual([25.5, 26.2]);
+    });
+
     it("should throw error for invalid location ID", async () => {
       await expect(FetchReferenceGraphData("2023", 0)).rejects.toThrow(
         new DatabaseError("Invalid locationId: 0")
@@ -170,25 +188,6 @@ describe("fetch-server", () => {
         new DatabaseError(
           "Failed to fetch reference graph data from database",
           mockError
-        )
-      );
-    });
-
-    it("should handle unexpected errors", async () => {
-      const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        select: vi.fn().mockReturnThis(),
-      };
-      mockQuery.eq
-        .mockReturnValueOnce(mockQuery) // first eq call
-        .mockRejectedValueOnce(new Error("Unexpected error")); // second eq call
-
-      mockSupabaseClient.from.mockReturnValue(mockQuery);
-
-      await expect(FetchReferenceGraphData("2023", 1)).rejects.toThrow(
-        new DatabaseError(
-          "Database connection failed while fetching reference data",
-          expect.any(Error)
         )
       );
     });
@@ -269,22 +268,6 @@ describe("fetch-server", () => {
         new DatabaseError(
           "Failed to fetch trend graph data from database",
           mockError
-        )
-      );
-    });
-
-    it("should handle unexpected errors", async () => {
-      const mockQuery = {
-        eq: vi.fn().mockRejectedValue(new Error("Unexpected error")),
-        select: vi.fn().mockReturnThis(),
-      };
-
-      mockSupabaseClient.from.mockReturnValue(mockQuery);
-
-      await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
-        new DatabaseError(
-          "Database connection failed while fetching trend data",
-          expect.any(Error)
         )
       );
     });

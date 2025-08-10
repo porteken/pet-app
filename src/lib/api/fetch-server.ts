@@ -12,10 +12,10 @@ import {
 } from "@/types/types";
 
 export async function FetchLocations(): Promise<FetchLocationProperties> {
-  const cookieStore = cookies();
-  const supabase = await createClient(cookieStore);
-
   try {
+    const cookieStore = cookies();
+    const supabase = await createClient(cookieStore);
+
     const { data: locations, error } = await supabase
       .from("locations")
       .select();
@@ -65,10 +65,10 @@ export async function FetchReferenceGraphData(
     );
   }
 
-  const cookieStore = cookies();
-  const supabase = await createClient(cookieStore);
-
   try {
+    const cookieStore = cookies();
+    const supabase = await createClient(cookieStore);
+
     const { data, error } = await supabase
       .from("pet_year")
       .select()
@@ -111,10 +111,10 @@ export async function FetchTrendGraphData(
     );
   }
 
-  const cookieStore = cookies();
-  const supabase = await createClient(cookieStore);
-
   try {
+    const cookieStore = cookies();
+    const supabase = await createClient(cookieStore);
+
     const { data, error } = await supabase
       .from(`pet_year_${option}`)
       .select()

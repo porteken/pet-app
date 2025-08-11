@@ -30,7 +30,7 @@ interface PlotlyTrace {
   y: number[];
 }
 
-const Plot = dynamic(() => import("react-plotly.js"), {
+export const Plot = dynamic(() => import("react-plotly.js"), {
   loading: () => (
     <div className="flex h-[600px] items-center justify-center text-gray-500">
       Loading chart...

@@ -28,7 +28,7 @@ const Home: FC<MapProperties> = ({
   locations,
 }: MapProperties) => {
   const [selectedGraphMeasure, setSelectedGraphMeasure] = useState(
-    () => initialGraphMeasure || "avg"
+    () => initialGraphMeasure
   );
 
   const [petGraph, setPetGraph] = useState<ReactElement | undefined>();
@@ -50,7 +50,7 @@ const Home: FC<MapProperties> = ({
 
   const selectOptions = useMemo(
     () =>
-      (GraphOptions || []).map(option => ({
+      GraphOptions.map(option => ({
         label: option.label,
         value: option.key,
       })),
@@ -59,10 +59,6 @@ const Home: FC<MapProperties> = ({
 
   const generateGraph = useCallback(
     async (locationId: number, option: string) => {
-      if (globalThis.window === undefined) {
-        return;
-      }
-
       setGraphLoading(true);
       try {
         const { trendline_pets, year_pets, years } = await FetchTrendGraphData(
@@ -87,10 +83,6 @@ const Home: FC<MapProperties> = ({
 
   const handleSelectChange = useCallback(
     async (option: string) => {
-      if (globalThis.window === undefined) {
-        return;
-      }
-
       if (selectedLocationId !== undefined) {
         setSelectedGraphMeasure(option);
         await setGraphMeasure(option);
@@ -102,10 +94,6 @@ const Home: FC<MapProperties> = ({
 
   const handleMarkerClick = useCallback(
     async (locationId: number) => {
-      if (globalThis.window === undefined) {
-        return;
-      }
-
       setSelectedLocationId(locationId);
       const location = locationMap.get(locationId);
       setSelectedLocation(location);

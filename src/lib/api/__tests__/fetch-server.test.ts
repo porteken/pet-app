@@ -142,6 +142,36 @@ describe("fetch-server", () => {
         new DatabaseError("Invalid year format: . Must be a 4-digit year.")
       );
     });
+    it("should fetch trend data successfully", async () => {
+      const mockData = [
+        { date: "2020-01-01", pet: 25.5 },
+        { date: "2021-01-01", pet: 26.2 },
+      ];
+
+      const mockQuery = {
+        eq: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+      };
+      mockQuery.eq
+        .mockImplementationOnce(() => mockQuery)
+        .mockImplementationOnce(() =>
+          Promise.resolve({ data: mockData, error: undefined })
+        );
+
+      mockSupabaseClient.from.mockReturnValue(mockQuery);
+
+      const result = await FetchReferenceGraphData("2023", 5);
+
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year");
+      expect(mockQuery.select).toHaveBeenCalled();
+      expect(mockQuery.eq).toHaveBeenCalledWith("location_id", 5);
+
+      expect(result.pets).toEqual([25.5, 26.2]);
+      expect(result.dates).toEqual([
+        new Date("2020-01-01"),
+        new Date("2021-01-01"),
+      ]);
+    });
 
     it("should handle database errors", async () => {
       const mockError = new Error("Database connection failed");

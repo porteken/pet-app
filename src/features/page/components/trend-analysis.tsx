@@ -58,9 +58,7 @@ export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
   );
 
   React.useEffect(() => {
-    generatePetTrendGraph(selectedGraphMeasure).catch(error => {
-      throw error;
-    });
+    generatePetTrendGraph(selectedGraphMeasure);
   }, [generatePetTrendGraph, selectedGraphMeasure]);
 
   return (

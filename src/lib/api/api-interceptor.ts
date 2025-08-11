@@ -132,14 +132,10 @@ export const apiRequestWithRetry = async <T>(
         throw error;
       }
 
-      if (attempt === retries) {
-        throw error;
-      }
-
       const delay = Math.min(1000 * 2 ** (attempt - 1), 5000);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
 
-  throw lastError || new Error("Unknown error occurred");
+  throw lastError;
 };

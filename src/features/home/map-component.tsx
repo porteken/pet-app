@@ -52,7 +52,7 @@ type TileLayerType = ComponentType<{
   url: string;
 }>;
 
-const MapComponent = memo<MapComponentProperties>(
+export const MapComponent = memo<MapComponentProperties>(
   ({ locations, onMarkerClick }) => {
     const [MapContainer, setMapContainer] = useState<MapContainerType>();
     const [TileLayer, setTileLayer] = useState<TileLayerType>();
@@ -76,49 +76,43 @@ const MapComponent = memo<MapComponentProperties>(
         });
       }
 
-      try {
-        const reactLeaflet = await import("react-leaflet");
+      const reactLeaflet = await import("react-leaflet");
 
-        const L = await import("leaflet");
-        L.Icon.Default.mergeOptions({
-          iconRetinaUrl:
-            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-          iconUrl:
-            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-          shadowUrl:
-            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-        });
+      const L = await import("leaflet");
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+        iconUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+        shadowUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+      });
 
-        const customIcon = new L.Icon({
-          iconAnchor: [12, 41],
-          iconRetinaUrl:
-            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-          iconSize: [25, 41],
-          iconUrl:
-            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-          popupAnchor: [1, -34],
-          shadowSize: [41, 41],
-          shadowUrl:
-            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-        });
+      const customIcon = new L.Icon({
+        iconAnchor: [12, 41],
+        iconRetinaUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+        iconSize: [25, 41],
+        iconUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+        shadowUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+      });
 
-        setMapContainer(() => reactLeaflet.MapContainer);
-        setTileLayer(() => reactLeaflet.TileLayer);
-        setMarker(() => reactLeaflet.Marker);
-        setPopup(() => reactLeaflet.Popup);
-        setIsLoaded(true);
+      setMapContainer(() => reactLeaflet.MapContainer);
+      setTileLayer(() => reactLeaflet.TileLayer);
+      setMarker(() => reactLeaflet.Marker);
+      setPopup(() => reactLeaflet.Popup);
+      setIsLoaded(true);
 
-        setCustomIcon(customIcon);
-      } catch {
-        setIsLoaded(false);
-      }
+      setCustomIcon(customIcon);
     }, []);
 
     useEffect(() => {
       if (globalThis.window !== undefined && typeof document !== "undefined") {
-        loadMap().catch(error => {
-          throw error;
-        });
+        loadMap();
       }
     }, [loadMap]);
 
@@ -143,14 +137,6 @@ const MapComponent = memo<MapComponentProperties>(
       return (
         <div className="flex h-screen items-center justify-center bg-gray-100">
           <p>Loading map...</p>
-        </div>
-      );
-    }
-
-    if (!customIcon) {
-      return (
-        <div className="flex h-screen items-center justify-center bg-gray-100">
-          <p>Initializing markers...</p>
         </div>
       );
     }

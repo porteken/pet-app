@@ -79,15 +79,14 @@ vi.mock("@mantine/core", () => ({
       Loading...
     </div>
   )),
-  Select: vi.fn(({ data, label, onChange, size, value }) => (
-    <div data-testid="mantine-select">
-      <label>{label}</label>
+  Select: vi.fn(({ data, onChange, value }) => (
+    <div>
       <select
-        data-size={size}
+        data-testid="graph-measure-select"
         onChange={event => onChange?.(event.target.value)}
         value={value}
       >
-        {data?.map((option: any) => (
+        {data.map((option: any) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
@@ -240,18 +239,21 @@ describe("Home", () => {
       expect(screen.getByText("Loading graph...")).toBeInTheDocument();
     });
 
-    it("should handle graph measure change", async () => {
+    it("should handle graph measure change when a location is selected", async () => {
       render(<Home {...defaultProps} />);
 
+      // First, select a location to ensure selectedLocationId is not undefined
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
       });
 
-      const selectElement = screen.getByRole("combobox");
+      // Change the select value, which triggers handleSelectChange
+      const selectElement = screen.getByTestId("graph-measure-select");
       fireEvent.change(selectElement, { target: { value: "max" } });
 
+      // Assert that the functions within the if block are called
       await waitFor(() => {
         expect(setGraphMeasure).toHaveBeenCalledWith("max");
         expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1);

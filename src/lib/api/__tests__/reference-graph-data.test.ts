@@ -161,7 +161,7 @@ describe("reference-graph-data", () => {
       });
 
       await expect(FetchReferenceGraphData("2023", 1)).rejects.toThrow(
-        new FetchError("Invalid dates")
+        new Error("Invalid dates")
       );
     });
 

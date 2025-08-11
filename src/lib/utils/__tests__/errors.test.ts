@@ -398,6 +398,12 @@ describe("Error Classes", () => {
         expect(error).toBeInstanceOf(DatabaseError);
         expect(error.statusCode).toBe(500);
       });
+      it("should use default when error is not in switch", () => {
+        const error = createError("Default error", 305);
+
+        expect(error).toBeInstanceOf(NetworkError);
+        expect(error.statusCode).toBe(305);
+      });
 
       it("should pass original error to created error", () => {
         const originalError = new Error("Original");
@@ -426,6 +432,15 @@ describe("Error Classes", () => {
         const result = handleAsyncError(appError);
 
         expect(result).toBe(appError);
+      });
+      it("should handle network error", () => {
+        const error = new Error("network request failed");
+        const result = handleAsyncError(error);
+
+        expect(result).toBeInstanceOf(NetworkError);
+        expect(result.message).toBe("network request failed");
+        expect(result.statusCode).toBe(500);
+        expect(result.originalError).toBe(error);
       });
 
       it("should convert Error with network message to DatabaseError", () => {

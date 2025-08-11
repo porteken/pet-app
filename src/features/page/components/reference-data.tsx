@@ -49,17 +49,13 @@ export const ReferenceData: React.FC<ReferenceDataProperties> = ({
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       const year = event.target.value;
       setSelectedReferenceYear(year);
-      generatePetReferenceGraph(year).catch(error => {
-        throw error;
-      });
+      generatePetReferenceGraph(year);
     },
     [generatePetReferenceGraph]
   );
 
   React.useEffect(() => {
-    generatePetReferenceGraph(selectedReferenceYear).catch(error => {
-      throw error;
-    });
+    generatePetReferenceGraph(selectedReferenceYear);
   }, [generatePetReferenceGraph, selectedReferenceYear]);
 
   const years = Array.from({ length: 23 }, (_, index) => 2000 + index);

@@ -95,23 +95,23 @@ export const createError = (
   originalError?: unknown,
   context?: Record<string, any>
 ): AppError => {
-  switch (statusCode) {
-    case 400: {
+  switch (true) {
+    case statusCode === 400: {
       return new ValidationError(message, context?.field, originalError);
     }
-    case 401: {
+    case statusCode === 401: {
       return new AuthenticationError(message, originalError);
     }
-    case 403: {
+    case statusCode === 403: {
       return new AuthorizationError(message, originalError);
     }
-    case 404: {
+    case statusCode === 404: {
       return new NotFoundError(message, context?.resource, originalError);
     }
+    case statusCode >= 500: {
+      return new DatabaseError(message, originalError, context);
+    }
     default: {
-      if (statusCode >= 500) {
-        return new DatabaseError(message, originalError, context);
-      }
       return new NetworkError(message, statusCode, originalError, context);
     }
   }

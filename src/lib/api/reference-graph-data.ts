@@ -69,14 +69,8 @@ function processData(
   const dates = data.map(({ date }) => new Date(date));
   const pets = data.map(({ pet }) => Number(pet));
 
-  try {
-    validateDates(dates);
-    validatePets(pets);
-  } catch (error) {
-    throw new FetchError(
-      error instanceof Error ? error.message : "Validation error"
-    );
-  }
+  validateDates(dates);
+  validatePets(pets);
 
   return { dates, pets };
 }

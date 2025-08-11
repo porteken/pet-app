@@ -198,7 +198,7 @@ describe("handleApiResponse", () => {
     );
   });
 
-  it("uses default error message for unknown error format", async () => {
+  it("handle Validation failed", async () => {
     const mockResponse = {
       json: vi.fn().mockResolvedValue({ unknown: "format" }),
       ok: false,
@@ -213,6 +213,166 @@ describe("handleApiResponse", () => {
     expect(mockCreateError).toHaveBeenCalledWith(
       "Validation failed. Please check your input.",
       422,
+      undefined,
+      undefined,
+      expect.objectContaining({ url: "https://api.example.com/test" })
+    );
+  });
+  it("uses default error message for unknown error format", async () => {
+    const mockResponse = {
+      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+      ok: false,
+      status: 654,
+      url: "https://api.example.com/test",
+    };
+
+    mockCreateError.mockReturnValue(new Error("Custom error"));
+
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+
+    expect(mockCreateError).toHaveBeenCalledWith(
+      `Request failed with status 654`,
+      654,
+      undefined,
+      undefined,
+      expect.objectContaining({ url: "https://api.example.com/test" })
+    );
+  });
+  it("uses service error when service is unavailable", async () => {
+    const mockResponse = {
+      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+      ok: false,
+      status: 503,
+      url: "https://api.example.com/test",
+    };
+
+    mockCreateError.mockReturnValue(new Error("Custom error"));
+
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+
+    expect(mockCreateError).toHaveBeenCalledWith(
+      `Service unavailable. Please try again later.`,
+      503,
+      undefined,
+      undefined,
+      expect.objectContaining({ url: "https://api.example.com/test" })
+    );
+  });
+  it("uses gateway error when gateway is bad", async () => {
+    const mockResponse = {
+      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+      ok: false,
+      status: 502,
+      url: "https://api.example.com/test",
+    };
+
+    mockCreateError.mockReturnValue(new Error("Custom error"));
+
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+
+    expect(mockCreateError).toHaveBeenCalledWith(
+      `Bad gateway. The server is temporarily unavailable.`,
+      502,
+      undefined,
+      undefined,
+      expect.objectContaining({ url: "https://api.example.com/test" })
+    );
+  });
+  it("uses internal error when Internal Service error", async () => {
+    const mockResponse = {
+      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+      ok: false,
+      status: 500,
+      url: "https://api.example.com/test",
+    };
+
+    mockCreateError.mockReturnValue(new Error("Custom error"));
+
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+
+    expect(mockCreateError).toHaveBeenCalledWith(
+      `Internal server error. Please try again later.`,
+      500,
+      undefined,
+      undefined,
+      expect.objectContaining({ url: "https://api.example.com/test" })
+    );
+  });
+  it("uses not found error when not found", async () => {
+    const mockResponse = {
+      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+      ok: false,
+      status: 404,
+      url: "https://api.example.com/test",
+    };
+
+    mockCreateError.mockReturnValue(new Error("Custom error"));
+
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+
+    expect(mockCreateError).toHaveBeenCalledWith(
+      `The requested resource was not found.`,
+      404,
+      undefined,
+      undefined,
+      expect.objectContaining({ url: "https://api.example.com/test" })
+    );
+  });
+  it("uses access denied error when access denied", async () => {
+    const mockResponse = {
+      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+      ok: false,
+      status: 403,
+      url: "https://api.example.com/test",
+    };
+
+    mockCreateError.mockReturnValue(new Error("Custom error"));
+
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+
+    expect(mockCreateError).toHaveBeenCalledWith(
+      `Access denied. You don't have permission to perform this action.`,
+      403,
+      undefined,
+      undefined,
+      expect.objectContaining({ url: "https://api.example.com/test" })
+    );
+  });
+  it("uses authentication required error when not authenticated", async () => {
+    const mockResponse = {
+      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+      ok: false,
+      status: 401,
+      url: "https://api.example.com/test",
+    };
+
+    mockCreateError.mockReturnValue(new Error("Custom error"));
+
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+
+    expect(mockCreateError).toHaveBeenCalledWith(
+      `Authentication required. Please log in.`,
+      401,
+      undefined,
+      undefined,
+      expect.objectContaining({ url: "https://api.example.com/test" })
+    );
+  });
+  it("uses invalid request error when bad request", async () => {
+    const mockResponse = {
+      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+      ok: false,
+      status: 400,
+      url: "https://api.example.com/test",
+    };
+
+    mockCreateError.mockReturnValue(new Error("Custom error"));
+
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+
+    expect(mockCreateError).toHaveBeenCalledWith(
+      `Invalid request. Please check your input.`,
+      400,
       undefined,
       undefined,
       expect.objectContaining({ url: "https://api.example.com/test" })

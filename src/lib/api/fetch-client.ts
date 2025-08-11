@@ -92,14 +92,8 @@ function processTrendData(data: PetYearAvgMaxData[]): {
   const years = data.map(({ year }) => year);
   const yearPets = data.map(({ pet }) => Number(pet));
 
-  try {
-    validateYears(years);
-    validateYearPets(yearPets);
-  } catch (error) {
-    throw new FetchError(
-      error instanceof Error ? error.message : "Validation error"
-    );
-  }
+  validateYears(years);
+  validateYearPets(yearPets);
 
   return { yearPets, years };
 }

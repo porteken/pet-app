@@ -34,15 +34,11 @@ export const GraphSection = memo<GraphSectionProperties>(
     );
 
     const detailsButton = useMemo(() => {
-      if (!selectedLocation) {
-        return;
-      }
-
       return (
         <div className="flex justify-center">
           <Button
             onClick={() => {
-              globalThis.location.href = `/${selectedLocation.location_id}`;
+              globalThis.location.href = `/${selectedLocation!.location_id}`;
             }}
             variant="filled"
           >

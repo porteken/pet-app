@@ -50,7 +50,7 @@ vi.mock("@/components/ui/modal", () => ({
 }));
 
 vi.mock("../map-component", () => ({
-  default: vi.fn(({ locations, onMarkerClick }) => (
+  MapComponent: vi.fn(({ locations, onMarkerClick }) => (
     <div data-testid="map-component">
       Map with {locations.length} locations
       <button

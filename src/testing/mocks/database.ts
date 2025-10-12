@@ -35,5 +35,3 @@ export const resetDatabase = () => {
 
   drop(database);
 };
-
-export type Location = ReturnType<typeof database.location.create>;

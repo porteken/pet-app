@@ -19,7 +19,7 @@ import { LocationProperties } from "@/types/types";
 
 import { ErrorGraphDisplay } from "./components/error-graph-display";
 import { GraphSection } from "./components/graph-section";
-import MapComponent from "./map-component";
+import { MapComponent } from "./map-component";
 import { MapProperties } from "./types";
 
 const Modal = dynamic(() => import("@/components/ui/modal"), {

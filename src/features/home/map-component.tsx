@@ -201,5 +201,3 @@ export const MapComponent = memo<MapComponentProperties>(
 );
 
 MapComponent.displayName = "MapComponent";
-
-export default MapComponent;

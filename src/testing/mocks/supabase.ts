@@ -6,7 +6,7 @@ export const createMockSupabaseClient = () => ({
   }),
 });
 
-export const createMockSupabaseQuery = () => ({
+const createMockSupabaseQuery = () => ({
   eq: vi.fn().mockReturnThis(),
   order: vi.fn(),
   select: vi.fn().mockReturnThis(),

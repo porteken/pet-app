@@ -3,11 +3,6 @@ export interface FetchLocationProperties {
   locations: LocationProperties[];
 }
 
-export interface LocationOptionItem {
-  key: number;
-  title: string;
-}
-
 export interface LocationOptionSection {
   items: LocationOptionItem[];
   title: string;
@@ -41,4 +36,9 @@ export interface TrendGraphDataProperties {
   trendline_pets: number[];
   year_pets: number[];
   years: number[];
+}
+
+interface LocationOptionItem {
+  key: number;
+  title: string;
 }

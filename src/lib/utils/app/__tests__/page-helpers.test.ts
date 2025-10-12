@@ -15,7 +15,7 @@ async function getMockFetchLocations() {
   return vi.mocked(fetchServer.FetchLocations);
 }
 
-vi.mock("@/lib/constants/constants", () => ({
+vi.mock("@/lib/constants", () => ({
   DEFAULT_GRAPH_MEASURE: "temperature",
   ERROR_MESSAGES: {
     NO_DATA: "No location data available",

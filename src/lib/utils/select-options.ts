@@ -1,4 +1,4 @@
-import { GRAPH_CONFIG } from "@/lib/utils/constants";
+import { GRAPH_CONFIG } from "@/lib/constants";
 import { SelectOptionProperties } from "@/types/types";
 
 export const GraphOptions: SelectOptionProperties[] = [

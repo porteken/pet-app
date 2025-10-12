@@ -4,7 +4,7 @@ import { Group, Paper, Select } from "@mantine/core";
 import { useSearchParams } from "next/navigation";
 import React, { useMemo } from "react";
 
-import { APP_CONFIG } from "@/lib/utils/constants";
+import { APP_CONFIG } from "@/lib/constants";
 import { NavProperties } from "@/types/types";
 
 import { NavButtons } from "./header-bar/components";
@@ -54,7 +54,7 @@ export const HeaderBar = ({
       grouped[city.state].push(city);
     }
 
-    const sortedStates = Object.keys(grouped).sort((a, b) =>
+    const sortedStates = Object.keys(grouped).toSorted((a, b) =>
       a.localeCompare(b)
     );
     return sortedStates.map(state => ({

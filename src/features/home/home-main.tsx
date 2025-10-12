@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import React, {
   FC,
   ReactElement,
@@ -11,7 +12,6 @@ import React, {
 
 import { GenerateTrendGraph } from "@/features/generate-graph";
 import { HeaderBar } from "@/features/header-bar";
-import Modal from "@/features/modal";
 import { setGraphMeasure } from "@/lib/actions/actions";
 import { FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { GraphOptions } from "@/lib/utils/select-options";
@@ -21,6 +21,15 @@ import { ErrorGraphDisplay } from "./components/error-graph-display";
 import { GraphSection } from "./components/graph-section";
 import MapComponent from "./map-component";
 import { MapProperties } from "./types";
+
+const Modal = dynamic(() => import("@/components/ui/modal"), {
+  ssr: false,
+});
+
+const SELECT_OPTIONS = GraphOptions.map(option => ({
+  label: option.label,
+  value: option.key,
+}));
 
 const Home: FC<MapProperties> = ({
   initialGraphMeasure,
@@ -38,24 +47,9 @@ const Home: FC<MapProperties> = ({
   const [selectedLocation, setSelectedLocation] =
     useState<LocationProperties>();
 
-  useEffect(() => {
-    if (initialGraphMeasure && selectedGraphMeasure !== initialGraphMeasure) {
-      setSelectedGraphMeasure(initialGraphMeasure);
-    }
-  }, [initialGraphMeasure, selectedGraphMeasure]);
-
   const locationMap = useMemo(() => {
     return new Map(locations.map(loc => [loc.location_id, loc]));
   }, [locations]);
-
-  const selectOptions = useMemo(
-    () =>
-      GraphOptions.map(option => ({
-        label: option.label,
-        value: option.key,
-      })),
-    [GraphOptions]
-  );
 
   const generateGraph = useCallback(
     async (locationId: number, option: string) => {
@@ -86,19 +80,23 @@ const Home: FC<MapProperties> = ({
       if (selectedLocationId !== undefined) {
         setSelectedGraphMeasure(option);
         await setGraphMeasure(option);
-        await generateGraph(selectedLocationId!, option);
       }
     },
     [selectedLocationId, generateGraph]
   );
 
+  useEffect(() => {
+    if (selectedLocationId !== undefined) {
+      generateGraph(selectedLocationId, selectedGraphMeasure);
+    }
+  }, [selectedLocationId, selectedGraphMeasure, generateGraph]);
+
   const handleMarkerClick = useCallback(
-    async (locationId: number) => {
+    (locationId: number) => {
       setSelectedLocationId(locationId);
       const location = locationMap.get(locationId);
       setSelectedLocation(location);
       setModalOpen(true);
-      await generateGraph(locationId, selectedGraphMeasure);
     },
     [generateGraph, selectedGraphMeasure, locationMap]
   );
@@ -126,7 +124,7 @@ const Home: FC<MapProperties> = ({
           petGraph={petGraph}
           selectedGraphMeasure={selectedGraphMeasure}
           selectedLocation={selectedLocation}
-          selectOptions={selectOptions}
+          selectOptions={SELECT_OPTIONS}
         />
       </Modal>
     </div>

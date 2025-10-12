@@ -284,10 +284,16 @@ describe("fetch-server", () => {
       mockLinearRegression.predict.mockReturnValue(1438);
 
       await FetchTrendGraphData("avg", 1);
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year_avg");
+      expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(
+        1,
+        "pet_year_avg"
+      );
 
       await FetchTrendGraphData("max", 1);
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year_max");
+      expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(
+        2,
+        "pet_year_max"
+      );
     });
   });
 });

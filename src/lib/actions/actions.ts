@@ -2,11 +2,12 @@
 
 import { cookies } from "next/headers";
 
-const graphMeasureCookieName = "graph-measure";
+import { GRAPH_MEASURE_COOKIE_NAME } from "@/lib/constants";
+
 export async function setGraphMeasure(measure: string) {
   const cookieStore = await cookies();
 
-  cookieStore.set(graphMeasureCookieName, measure, {
+  cookieStore.set(GRAPH_MEASURE_COOKIE_NAME, measure, {
     expires: new Date(Date.now() + 365 * 24 * 60 * 1000),
     httpOnly: true,
     path: "/",

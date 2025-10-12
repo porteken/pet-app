@@ -9,18 +9,12 @@ interface TrendAnalysisProperties {
   id: number;
   initialGraphMeasure: string;
   onMeasureChange: (measure: string) => Promise<void>;
-  TrendlinePets: number[];
-  YearPets: number[];
-  Years: number[];
 }
 
 export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
   id,
   initialGraphMeasure,
   onMeasureChange,
-  TrendlinePets,
-  YearPets,
-  Years,
 }) => {
   const [selectedGraphMeasure, setSelectedGraphMeasure] =
     React.useState(initialGraphMeasure);
@@ -30,10 +24,7 @@ export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
 
   const generatePetTrendGraph = React.useCallback(
     async (option: string) => {
-      const graphData =
-        option === selectedGraphMeasure
-          ? { trendline_pets: TrendlinePets, year_pets: YearPets, years: Years }
-          : await FetchTrendGraphData(option, id);
+      const graphData = await FetchTrendGraphData(option, id);
 
       const { trendline_pets, year_pets, years } = graphData;
       const graph = GenerateTrendGraph(
@@ -44,7 +35,7 @@ export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
       );
       setTrendGraph(graph);
     },
-    [Years, YearPets, TrendlinePets, selectedGraphMeasure, id]
+    [id, setTrendGraph]
   );
 
   const handleGraphMeasureChange = React.useCallback(
@@ -52,7 +43,6 @@ export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
       const option = event.target.value;
       setSelectedGraphMeasure(option);
       await onMeasureChange(option);
-      await generatePetTrendGraph(option);
     },
     [generatePetTrendGraph, onMeasureChange]
   );

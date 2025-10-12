@@ -5,7 +5,7 @@ import {
   DEFAULT_GRAPH_MEASURE,
   ERROR_MESSAGES,
   GRAPH_MEASURE_COOKIE_NAME,
-} from "@/lib/constants/constants";
+} from "@/lib/constants";
 
 export const getGraphMeasureFromCookies = async (): Promise<string> => {
   const cookieStore = await cookies();

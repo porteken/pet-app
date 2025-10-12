@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
 
-import { DatabaseError } from "@/features/database-error";
+import { DatabaseError } from "@/components/ui/database-error";
 import {
   FetchLocations,
   FetchReferenceGraphData,

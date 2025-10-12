@@ -147,8 +147,16 @@ describe("useTrendGraphData", () => {
       expect(result.current.data).toEqual(mockData2);
     });
 
-    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("temperature", 123);
-    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("temperature", 456);
+    expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(
+      1,
+      "temperature",
+      123
+    );
+    expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(
+      2,
+      "temperature",
+      456
+    );
   });
 
   it("updates when option changes", async () => {
@@ -178,8 +186,12 @@ describe("useTrendGraphData", () => {
       expect(result.current.data).toEqual(mockData2);
     });
 
-    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("temperature", 123);
-    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("humidity", 123);
+    expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(
+      1,
+      "temperature",
+      123
+    );
+    expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(2, "humidity", 123);
   });
 
   it("has correct stale time", () => {

@@ -23,6 +23,7 @@ vi.mock("@/lib/api/fetch-client", () => ({
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
+    refresh: vi.fn(),
   }),
 }));
 
@@ -34,7 +35,7 @@ vi.mock("@/features/header-bar", () => ({
   )),
 }));
 
-vi.mock("@/features/modal", () => ({
+vi.mock("@/components/ui/modal", () => ({
   default: vi.fn(({ children, onClose, open, title }) =>
     open ? (
       <div data-testid="modal" role="dialog">
@@ -242,18 +243,15 @@ describe("Home", () => {
     it("should handle graph measure change when a location is selected", async () => {
       render(<Home {...defaultProps} />);
 
-      // First, select a location to ensure selectedLocationId is not undefined
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
       });
 
-      // Change the select value, which triggers handleSelectChange
       const selectElement = screen.getByTestId("graph-measure-select");
       fireEvent.change(selectElement, { target: { value: "max" } });
 
-      // Assert that the functions within the if block are called
       await waitFor(() => {
         expect(setGraphMeasure).toHaveBeenCalledWith("max");
         expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1);

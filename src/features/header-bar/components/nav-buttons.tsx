@@ -4,7 +4,7 @@ import { Button } from "@mantine/core";
 import Link from "next/link";
 import React from "react";
 
-import { APP_CONFIG } from "@/lib/utils/constants";
+import { APP_CONFIG } from "@/lib/constants";
 
 interface NavButtonsProperties {
   buildUrl: (path: string, includeSearchParameters?: boolean) => string;

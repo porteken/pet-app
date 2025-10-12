@@ -24,14 +24,14 @@ export async function FetchLocations(): Promise<FetchLocationProperties> {
     );
   }
 
-  const states = [...new Set(locations.map(({ state }) => state))].sort(
+  const states = [...new Set(locations.map(({ state }) => state))].toSorted(
     (a, b) => a.localeCompare(b)
   );
 
   const LocationOptions: LocationOptionSection[] = states.map(state => ({
     items: locations
       .filter(loc => loc.state === state)
-      .sort((a, b) => a.city.localeCompare(b.city))
+      .toSorted((a, b) => a.city.localeCompare(b.city))
       .map(({ city, location_id }) => ({
         key: location_id,
         title: city,

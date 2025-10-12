@@ -21,9 +21,6 @@ const Main: FC<PageProperties> = ({
   location,
   LocationOptions,
   ReferencePets,
-  TrendlinePets,
-  YearPets,
-  Years,
 }) => {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -36,9 +33,6 @@ const Main: FC<PageProperties> = ({
             id={id}
             initialGraphMeasure={initialGraphMeasure}
             onMeasureChange={handleMeasureChange}
-            TrendlinePets={TrendlinePets}
-            YearPets={YearPets}
-            Years={Years}
           />
 
           <ReferenceData

@@ -188,7 +188,7 @@ describe("FetchTrendGraphData", () => {
     });
 
     await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
-      "Unexpected error in FetchTrendGraphData: Error: Regression calculation failed"
+      "Failed to fetch trend graph data for location 1 (avg): Regression calculation failed"
     );
   });
 

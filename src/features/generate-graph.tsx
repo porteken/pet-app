@@ -3,7 +3,9 @@
 import type { Layout } from "plotly.js";
 
 import dynamic from "next/dynamic";
-import React, { useEffect, useState } from "react";
+import React from "react";
+
+import { GRAPH_COLORS } from "@/lib/constants";
 
 interface PlotlyConfig {
   displaylogo: boolean;
@@ -30,40 +32,20 @@ interface PlotlyTrace {
   y: number[];
 }
 
-export const Plot = dynamic(() => import("react-plotly.js"), {
+const Plot = dynamic(() => import("react-plotly.js"), {
   loading: () => (
     <div className="flex h-[600px] items-center justify-center text-gray-500">
       Loading chart...
     </div>
   ),
+  ssr: false,
 });
-
-const GRAPH_COLORS = {
-  background: "#ffffff",
-  grid: "#e5e7eb",
-  primary: "#ef4444",
-  secondary: "#000000",
-} as const;
 
 const PlotWrapper: React.FC<{
   config: PlotlyConfig;
   data: PlotlyTrace[];
   layout: Partial<Layout>;
 }> = ({ config, data, layout }) => {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  if (!isClient) {
-    return (
-      <div className="flex h-64 items-center justify-center text-gray-500">
-        Loading chart...
-      </div>
-    );
-  }
-
   return (
     <Plot
       config={config}

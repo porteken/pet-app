@@ -47,8 +47,8 @@ describe("reference-graph-data", () => {
 
       expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year");
       expect(mockQuery.select).toHaveBeenCalled();
-      expect(mockQuery.eq).toHaveBeenCalledWith("location_id", 1);
-      expect(mockQuery.eq).toHaveBeenCalledWith("year", "2023");
+      expect(mockQuery.eq).toHaveBeenNthCalledWith(1, "location_id", 1);
+      expect(mockQuery.eq).toHaveBeenNthCalledWith(2, "year", "2023");
       expect(mockQuery.order).toHaveBeenCalledWith("date", { ascending: true });
 
       expect(result.dates).toEqual([

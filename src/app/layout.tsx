@@ -26,6 +26,8 @@ export default function RootLayout({
         <ColorSchemeScript />
         <title />
       </head>
+      {/* suppressHydrationWarning needed for Mantine's ColorSchemeScript
+          which injects inline scripts that differ between server and client */}
       <body suppressHydrationWarning>
         <MantineProvider>{children}</MantineProvider>
       </body>

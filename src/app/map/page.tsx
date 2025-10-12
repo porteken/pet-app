@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
 const graphMeasureCookieName = "graph-measure";
 const defaultGraphMeasure = "avg";
-import { DatabaseError } from "@/features/database-error";
+import { DatabaseError } from "@/components/ui/database-error";
 import { FetchLocations } from "@/lib/api/fetch-server";
 
 const Home = dynamic(() => import("@/features/home/home-main"));

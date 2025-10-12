@@ -60,8 +60,13 @@ export async function FetchTrendGraphData(
   });
 
   if (hasError(response)) {
-    const message = `Unexpected error in FetchTrendGraphData: Error: ${response.error.message}`;
-    throw new Error(message);
+    throw new FetchError(
+      `Failed to fetch trend graph data for location ${locationId} (${option}): ${response.error.message}`,
+      {
+        code: response.error.code,
+        context: { locationId, option, statusCode: response.error.status },
+      }
+    );
   }
 
   return response.data;

@@ -95,7 +95,7 @@ export const GenerateTrendGraph = (
     },
     paper_bgcolor: GRAPH_COLORS.background,
     plot_bgcolor: GRAPH_COLORS.background,
-    title: { text: `${graph_type} PET in summer (2000-2023)` },
+    title: { text: `${graph_type} PET in summer (2000-2025)` },
     xaxis: {
       gridcolor: GRAPH_COLORS.grid,
       title: { text: "Year" },
@@ -196,7 +196,7 @@ export const GenerateReferenceGraph = async (
     },
     paper_bgcolor: GRAPH_COLORS.background,
     plot_bgcolor: GRAPH_COLORS.background,
-    title: { text: `PET in summer 2023 vs ${referenceYear}` },
+    title: { text: `PET in summer 2025 vs ${referenceYear}` },
     xaxis: {
       gridcolor: GRAPH_COLORS.grid,
       tickformat: "%b %-d",

@@ -13,7 +13,7 @@ export const GRAPH_CONFIG = {
     MAX: "max",
   },
   YEAR_RANGE: {
-    END: 2023,
+    END: 2025,
     START: 2000,
   },
 } as const;

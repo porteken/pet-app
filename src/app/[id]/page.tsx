@@ -93,7 +93,7 @@ export default async function LocationPage({
 
 async function fetchGraphData(locationId: number) {
   const [currentData, referenceData, trendData] = await Promise.all([
-    FetchReferenceGraphData("2023", locationId),
+    FetchReferenceGraphData("2025", locationId),
     FetchReferenceGraphData("2000", locationId),
     FetchTrendGraphData("avg", locationId),
   ]);

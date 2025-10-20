@@ -26,12 +26,12 @@ describe("Select Options", () => {
   });
 
   describe("YearOptions", () => {
-    it("should return year options from 2000 to 2022", () => {
+    it("should return year options from 2000 to 2024", () => {
       const yearOptions = YearOptions();
 
-      expect(yearOptions).toHaveLength(23);
+      expect(yearOptions).toHaveLength(25);
       expect(yearOptions[0]).toEqual({ key: "2000", label: "2000" });
-      expect(yearOptions[22]).toEqual({ key: "2022", label: "2022" });
+      expect(yearOptions[24]).toEqual({ key: "2024", label: "2024" });
     });
 
     it("should generate consecutive years", () => {
@@ -56,7 +56,7 @@ describe("Select Options", () => {
 
         const year = Number.parseInt(option.key, 10);
         expect(year).toBeGreaterThanOrEqual(2000);
-        expect(year).toBeLessThan(2023);
+        expect(year).toBeLessThan(2025);
       }
     });
 
@@ -74,7 +74,7 @@ describe("Select Options", () => {
       const endYear = Number.parseInt(yearOptions.at(-1)!.key, 10);
 
       expect(startYear).toBe(2000);
-      expect(endYear).toBe(2022);
+      expect(endYear).toBe(2024);
       expect(yearOptions.length).toBe(endYear - startYear + 1);
     });
   });

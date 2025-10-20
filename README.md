@@ -1,12 +1,12 @@
 # Historical PET USA
 
-A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) that visualizes Physiological Equivalent Temperature (PET) data for the top 500 largest cities in the United States from 2000 to 2023.
+A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) that visualizes Physiological Equivalent Temperature (PET) data for the top 500 largest cities in the United States from 2000 to 2025.
 
 ## 🌟 Features
 
 - **Interactive Map**: Explore PET data across 500+ US cities with an interactive Leaflet map
 - **Trend Analysis**: View average and maximum PET trends over time with regression analysis
-- **Year Comparison**: Compare PET data between 2023 and any selected year
+- **Year Comparison**: Compare PET data between 2025 and any selected year
 - **Responsive Design**: Optimized for desktop and mobile devices
 - **Real-time Data**: Dynamic data fetching with Supabase backend
 

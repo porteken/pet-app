@@ -51,7 +51,7 @@ describe("Graph Components", () => {
 
         expect(screen.getByTestId("plotly-graph")).toBeInTheDocument();
         expect(screen.getByTestId("graph-title")).toHaveTextContent(
-          "Average PET in summer (2000-2023)"
+          "Average PET in summer (2000-2025)"
         );
       });
 
@@ -67,7 +67,7 @@ describe("Graph Components", () => {
 
         expect(screen.getByTestId("plotly-graph")).toBeInTheDocument();
         expect(screen.getByTestId("graph-title")).toHaveTextContent(
-          "Max PET in summer (2000-2023)"
+          "Max PET in summer (2000-2025)"
         );
       });
     });
@@ -164,7 +164,7 @@ describe("Graph Components", () => {
         );
         const { unmount: unmount1 } = render(averageResult);
         expect(screen.getByTestId("graph-title")).toHaveTextContent(
-          "Average PET in summer (2000-2023)"
+          "Average PET in summer (2000-2025)"
         );
         unmount1();
 
@@ -176,7 +176,7 @@ describe("Graph Components", () => {
         );
         const { unmount: unmount2 } = render(maxResult);
         expect(screen.getByTestId("graph-title")).toHaveTextContent(
-          "Max PET in summer (2000-2023)"
+          "Max PET in summer (2000-2025)"
         );
         unmount2();
 
@@ -188,7 +188,7 @@ describe("Graph Components", () => {
         );
         render(unknownResult);
         expect(screen.getByTestId("graph-title")).toHaveTextContent(
-          "Max PET in summer (2000-2023)"
+          "Max PET in summer (2000-2025)"
         );
       });
     });
@@ -512,7 +512,7 @@ describe("Graph Components", () => {
       const graphLayout = screen.getByTestId("graph-layout");
       const layout = JSON.parse(graphLayout.textContent || "{}");
 
-      expect(layout.title.text).toBe("Max PET in summer (2000-2023)");
+      expect(layout.title.text).toBe("Max PET in summer (2000-2025)");
       expect(layout.xaxis.title.text).toBe("Year");
       expect(layout.yaxis.title.text).toBe("PET");
       expect(layout.paper_bgcolor).toBe("#ffffff");
@@ -682,7 +682,7 @@ describe("Graph Components", () => {
       render(unknownResult);
 
       expect(screen.getByTestId("graph-title")).toHaveTextContent(
-        "Max PET in summer (2000-2023)"
+        "Max PET in summer (2000-2025)"
       );
     });
   });

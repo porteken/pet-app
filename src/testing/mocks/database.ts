@@ -13,7 +13,7 @@ export const database = factory({
     state: () => "Test State",
   },
   petData: {
-    date: () => new Date("2023-01-01"),
+    date: () => new Date("2025-01-01"),
     id: primaryKey(() => petDataCounter++),
     location_id: () => 1,
     measure_type: () => "avg",
@@ -24,7 +24,7 @@ export const database = factory({
     location_id: () => 1,
     measure_type: () => "avg",
     pet_count: () => Math.floor(Math.random() * 100) + 1,
-    year: () => 2023,
+    year: () => 2025,
   },
 });
 

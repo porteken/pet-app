@@ -222,7 +222,7 @@ export const GenerateReferenceGraph = async (
         size: 6,
       },
       mode: "lines+markers",
-      name: "2023 PET",
+      name: "2025 PET",
       type: "scatter",
       x: dates,
       y: currentPets,

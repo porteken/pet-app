@@ -21,6 +21,6 @@ export const GRAPH_CONFIG = {
 export const GRAPH_COLORS = {
   background: "#ffffff",
   grid: "#e5e7eb",
-  primary: "#ef4444",
+  primary: "#3b82f6",
   secondary: "#000000",
 } as const;

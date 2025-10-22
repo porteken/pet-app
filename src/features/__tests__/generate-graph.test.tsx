@@ -436,8 +436,8 @@ describe("Graph Components", () => {
     const mockData = [
       {
         hovertemplate: "Test: %{x}<br>Value: %{y:.2f}<extra></extra>",
-        line: { color: "#ef4444", width: 2 },
-        marker: { color: "#ef4444", size: 6 },
+        line: { color: "#3b82f6", width: 2 },
+        marker: { color: "#3b82f6", size: 6 },
         mode: "lines+markers" as const,
         name: "Test Data",
         type: "scatter" as const,
@@ -516,8 +516,8 @@ describe("Graph Components", () => {
       const graphData = screen.getByTestId("graph-data");
       const data = JSON.parse(graphData.textContent || "[]");
 
-      expect(data[0].line.color).toBe("#ef4444");
-      expect(data[0].marker.color).toBe("#ef4444");
+      expect(data[0].line.color).toBe("#3b82f6");
+      expect(data[0].marker.color).toBe("#3b82f6");
 
       expect(data[1].line.color).toBe("#000000");
       expect(data[1].line.dash).toBe("dashdot");

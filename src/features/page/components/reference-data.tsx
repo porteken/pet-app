@@ -58,7 +58,7 @@ export const ReferenceData: React.FC<ReferenceDataProperties> = ({
     generatePetReferenceGraph(selectedReferenceYear);
   }, [generatePetReferenceGraph, selectedReferenceYear]);
 
-  const years = Array.from({ length: 23 }, (_, index) => 2000 + index);
+  const years = Array.from({ length: 25 }, (_, index) => 2000 + index);
 
   return (
     <div className="space-y-6">

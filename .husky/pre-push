@@ -4,11 +4,12 @@ echo "🚀 Running pre-push checks..."
 npm run test:unit
 npm run test:integration
 
+# Run critical E2E tests (excluding known flaky mobile test)
+npm run test:e2e:critical
+
 # Run build to ensure everything compiles
 npm run build
 
-# Run critical E2E tests (excluding known flaky mobile test)
-npm run test:e2e:critical
 
 
 echo "✅ Pre-push checks passed!"

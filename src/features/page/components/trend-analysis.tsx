@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 "use client";
 
 import React from "react";
@@ -5,6 +6,11 @@ import React from "react";
 import { GenerateTrendGraph } from "@/features/generate-graph";
 import { FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { calculateForecast } from "@/lib/utils/forecast";
+import {
+  getForecastHeatStressDescription,
+  getHeatStressDescription,
+  type HeatStressDescription,
+} from "@/lib/utils/heat-stress";
 
 import { ForecastControls } from "./forecast-controls";
 
@@ -26,6 +32,10 @@ export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
   >();
   const [forecastEnabled, setForecastEnabled] = React.useState(false);
   const [forecastYearsAhead, setForecastYearsAhead] = React.useState(10);
+  const [currentHeatStress, setCurrentHeatStress] =
+    React.useState<HeatStressDescription | null>(null);
+  const [forecastHeatStress, setForecastHeatStress] =
+    React.useState<HeatStressDescription | null>(null);
 
   const generatePetTrendGraph = React.useCallback(
     async (option: string, enableForecast: boolean, yearsAhead: number) => {
@@ -36,6 +46,34 @@ export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
       const forecastData = enableForecast
         ? calculateForecast(years, year_pets, yearsAhead)
         : undefined;
+
+      // Get the most recent year's PET value for current heat stress
+      const currentYear = Math.max(...years);
+      const currentYearIndex = years.indexOf(currentYear);
+      const currentPetValue = year_pets[currentYearIndex];
+
+      // Update current heat stress description
+      setCurrentHeatStress(
+        getHeatStressDescription(currentPetValue, option, currentYear)
+      );
+
+      // Update forecast heat stress description if forecast is enabled
+      if (
+        enableForecast &&
+        forecastData &&
+        forecastData.forecastValues.length > 0
+      ) {
+        const finalForecastYear = forecastData.forecastYears.at(-1);
+        const finalForecastValue = forecastData.forecastValues.at(-1);
+        setForecastHeatStress(
+          getForecastHeatStressDescription(
+            finalForecastValue,
+            finalForecastYear
+          )
+        );
+      } else {
+        setForecastHeatStress(null);
+      }
 
       const graph = GenerateTrendGraph(
         years,
@@ -107,6 +145,24 @@ export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
             yearsAhead={forecastYearsAhead}
           />
         </div>
+        {currentHeatStress && (
+          <div className="mb-4 rounded-lg bg-blue-50 p-4">
+            <p className="text-sm font-medium text-gray-900">
+              {currentHeatStress.prefix}{" "}
+              <span className={`font-bold ${currentHeatStress.colorClass}`}>
+                {currentHeatStress.value}
+              </span>
+            </p>
+            {forecastEnabled && forecastHeatStress && (
+              <p className="mt-2 text-sm font-medium text-gray-900">
+                {forecastHeatStress.prefix}{" "}
+                <span className={`font-bold ${forecastHeatStress.colorClass}`}>
+                  {forecastHeatStress.value}
+                </span>
+              </p>
+            )}
+          </div>
+        )}
         <div className="h-[700px]">{trendGraph}</div>
       </div>
     </div>

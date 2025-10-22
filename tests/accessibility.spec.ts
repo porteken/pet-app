@@ -10,6 +10,10 @@ test.describe("Accessibility Tests", () => {
 
     await page.goto("/1");
 
+    // Wait for the page and graphs to load
+
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
 
@@ -18,6 +22,8 @@ test.describe("Accessibility Tests", () => {
 
     await page.keyboard.press("ArrowDown");
     await page.keyboard.press("Enter");
+
+    // Wait for graphs to re-render
 
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
   });
@@ -29,6 +35,8 @@ test.describe("Accessibility Tests", () => {
 
     const mainHeading = page.getByRole("heading", { level: 1 });
     await expect(mainHeading.first()).toBeVisible();
+
+    // Wait for the page to be fully loaded by waiting for the select elements
 
     const graphMeasureLabel = page.locator('label[for="graph-measure"]');
     await expect(graphMeasureLabel).toBeVisible();
@@ -80,9 +88,15 @@ test.describe("Accessibility Tests", () => {
 
     await page.goto("/1");
 
+    // Wait for initial graphs to load
+    await page.waitForSelector(".js-plotly-plot", { state: "visible" });
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+
     const graphMeasure = page.locator("select#graph-measure");
     await graphMeasure.selectOption("max");
 
+    // Wait for graphs to re-render after selection change
+    await page.waitForTimeout(500);
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
   });
 
@@ -93,12 +107,18 @@ test.describe("Accessibility Tests", () => {
 
     await page.setViewportSize({ height: 600, width: 800 });
 
+    // Wait for page to be fully loaded
+    await page.waitForSelector("select#graph-measure", { state: "visible" });
+
     await expect(page.getByText("Trend Analysis")).toBeVisible();
     await expect(page.getByText("Reference Data")).toBeVisible();
 
     const graphMeasure = page.locator("select#graph-measure");
     await expect(graphMeasure).toBeVisible();
     await graphMeasure.selectOption("max");
+
+    // Wait for layout to settle after selection change
+    await page.waitForTimeout(300);
 
     const bodyScrollWidth = await page.evaluate(
       () => document.body.scrollWidth

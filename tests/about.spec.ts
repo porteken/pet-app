@@ -3,6 +3,9 @@ import { expect, test } from "@playwright/test";
 test.describe("About Page", () => {
   test("should display about content", async ({ page }) => {
     await page.goto("/about");
+
+    // Wait for the page to be fully loaded
+
     await expect(page.getByText("Purpose of the Application")).toBeVisible();
     await expect(page.getByText("What is PET?")).toBeVisible();
     await expect(

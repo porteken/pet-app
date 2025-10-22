@@ -254,10 +254,19 @@ export const GenerateReferenceGraph = async (
   };
 
   return (
-    <PlotWrapper
-      config={config}
-      data={data}
-      layout={{ ...layout, height: 600, width: 900 }}
-    />
+    <div
+      style={{ height: 600, margin: "0 auto", maxWidth: 900, width: "100%" }}
+    >
+      <PlotWrapper
+        config={config}
+        data={data}
+        layout={{
+          ...layout,
+          autosize: true,
+          height: undefined,
+          width: undefined,
+        }}
+      />
+    </div>
   );
 };

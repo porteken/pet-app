@@ -1,5 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
-
+import "dotenv/config";
 export default defineConfig({
   forbidOnly: !!process.env.CI,
   fullyParallel: true,
@@ -22,7 +22,7 @@ export default defineConfig({
   },
 
   webServer: {
-    command: process.env.PLAYWRIGHT_START || "npm run dev",
+    command: "npx next start",
     reuseExistingServer: !process.env.CI,
     timeout: 180 * 1000,
     url: "http://localhost:3000",

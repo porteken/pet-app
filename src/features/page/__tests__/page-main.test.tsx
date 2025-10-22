@@ -48,6 +48,7 @@ vi.mock("@/lib/api/fetch-client", () => ({
     pets: [10, 20],
   }),
   FetchTrendGraphData: vi.fn().mockResolvedValue({
+    increase_per_year: 0.5,
     trendline_pets: [5, 10, 15],
     year_pets: [7, 12, 17],
     years: [2020, 2021, 2022],
@@ -163,7 +164,9 @@ describe("PageMain", () => {
         [2020, 2021, 2022],
         "avg",
         [7, 12, 17],
-        [5, 10, 15]
+        [5, 10, 15],
+        0.5,
+        undefined
       );
     });
 

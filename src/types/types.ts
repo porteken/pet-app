@@ -3,6 +3,18 @@ export interface FetchLocationProperties {
   locations: LocationProperties[];
 }
 
+export interface ForecastData {
+  forecastValues: number[];
+  forecastYears: number[];
+  lowerBound: number[];
+  upperBound: number[];
+}
+
+export interface ForecastSettings {
+  enabled: boolean;
+  yearsAhead: number;
+}
+
 export interface LocationOptionSection {
   items: LocationOptionItem[];
   title: string;
@@ -33,6 +45,7 @@ export interface SelectOptionProperties {
 }
 
 export interface TrendGraphDataProperties {
+  increase_per_year: number;
   trendline_pets: number[];
   year_pets: number[];
   years: number[];

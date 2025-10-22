@@ -14,6 +14,7 @@ import { GenerateTrendGraph } from "@/features/generate-graph";
 import { HeaderBar } from "@/features/header-bar";
 import { setGraphMeasure } from "@/lib/actions/actions";
 import { FetchTrendGraphData } from "@/lib/api/fetch-client";
+import { calculateForecast } from "@/lib/utils/forecast";
 import { GraphOptions } from "@/lib/utils/select-options";
 import { LocationProperties } from "@/types/types";
 
@@ -46,24 +47,36 @@ const Home: FC<MapProperties> = ({
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] =
     useState<LocationProperties>();
+  const [forecastEnabled, setForecastEnabled] = useState(false);
+  const [forecastYearsAhead, setForecastYearsAhead] = useState(10);
 
   const locationMap = useMemo(() => {
     return new Map(locations.map(loc => [loc.location_id, loc]));
   }, [locations]);
 
   const generateGraph = useCallback(
-    async (locationId: number, option: string) => {
+    async (
+      locationId: number,
+      option: string,
+      enableForecast: boolean,
+      yearsAhead: number
+    ) => {
       setGraphLoading(true);
       try {
-        const { trendline_pets, year_pets, years } = await FetchTrendGraphData(
-          option,
-          locationId
-        );
+        const { increase_per_year, trendline_pets, year_pets, years } =
+          await FetchTrendGraphData(option, locationId);
+
+        const forecastData = enableForecast
+          ? calculateForecast(years, year_pets, yearsAhead)
+          : undefined;
+
         const graph = GenerateTrendGraph(
           years,
           option,
           year_pets,
-          trendline_pets
+          trendline_pets,
+          increase_per_year,
+          forecastData
         );
         setPetGraph(graph);
       } catch {
@@ -87,9 +100,20 @@ const Home: FC<MapProperties> = ({
 
   useEffect(() => {
     if (selectedLocationId !== undefined) {
-      generateGraph(selectedLocationId, selectedGraphMeasure);
+      generateGraph(
+        selectedLocationId,
+        selectedGraphMeasure,
+        forecastEnabled,
+        forecastYearsAhead
+      );
     }
-  }, [selectedLocationId, selectedGraphMeasure, generateGraph]);
+  }, [
+    selectedLocationId,
+    selectedGraphMeasure,
+    forecastEnabled,
+    forecastYearsAhead,
+    generateGraph,
+  ]);
 
   const handleMarkerClick = useCallback(
     (locationId: number) => {
@@ -119,7 +143,11 @@ const Home: FC<MapProperties> = ({
         }
       >
         <GraphSection
+          forecastEnabled={forecastEnabled}
+          forecastYearsAhead={forecastYearsAhead}
           graphLoading={graphLoading}
+          onForecastToggle={setForecastEnabled}
+          onForecastYearsChange={setForecastYearsAhead}
           onSelectChange={handleSelectChange}
           petGraph={petGraph}
           selectedGraphMeasure={selectedGraphMeasure}

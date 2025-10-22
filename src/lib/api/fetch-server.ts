@@ -83,7 +83,12 @@ export async function FetchTrendGraphData(
   locationId: number
 ): Promise<TrendGraphDataProperties> {
   if (!locationId || Number.isNaN(locationId) || locationId <= 0) {
-    return { trendline_pets: [], year_pets: [], years: [] };
+    return {
+      increase_per_year: 0,
+      trendline_pets: [],
+      year_pets: [],
+      years: [],
+    };
   }
 
   if (!option || !["avg", "max"].includes(option)) {
@@ -111,7 +116,12 @@ export async function FetchTrendGraphData(
   const year_pets = data.map(({ pet }: { pet: number }) => Number(pet));
 
   if (years.length === 0 || year_pets.length === 0) {
-    return { trendline_pets: [], year_pets: [], years: [] };
+    return {
+      increase_per_year: 0,
+      trendline_pets: [],
+      year_pets: [],
+      years: [],
+    };
   }
 
   const reg = new SimpleLinearRegression(years, year_pets);
@@ -119,5 +129,5 @@ export async function FetchTrendGraphData(
     (year: number) => Math.round(reg.predict(year) * 100) / 100
   );
 
-  return { trendline_pets, year_pets, years };
+  return { increase_per_year: reg.slope, trendline_pets, year_pets, years };
 }

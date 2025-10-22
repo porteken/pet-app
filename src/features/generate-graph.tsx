@@ -15,18 +15,21 @@ interface PlotlyConfig {
 }
 
 interface PlotlyTrace {
+  fill?: "none" | "tonexty" | "tozeroy";
+  fillcolor?: string;
   hovertemplate: string;
   line: {
     color: string;
-    dash?: "dashdot";
+    dash?: "dashdot" | "dot";
     width: number;
   };
   marker?: {
     color: string;
     size: number;
   };
-  mode: "lines" | "lines+markers";
+  mode: "lines" | "lines+markers" | "none";
   name: string;
+  showlegend?: boolean;
   type: "scatter";
   x: Date[] | number[];
   y: number[];
@@ -66,7 +69,14 @@ export const GenerateTrendGraph = (
   years: number[],
   option: string,
   year_pets: number[],
-  trendline_pets: number[]
+  trendline_pets: number[],
+  increase_per_year: number,
+  forecastData?: {
+    forecastValues: number[];
+    forecastYears: number[];
+    lowerBound: number[];
+    upperBound: number[];
+  }
 ): React.ReactElement => {
   if (
     years.length === 0 ||
@@ -81,6 +91,10 @@ export const GenerateTrendGraph = (
   }
 
   const graph_type = option === "avg" ? "Average" : "Max";
+  const increaseText =
+    increase_per_year >= 0
+      ? `+${increase_per_year.toFixed(2)}`
+      : increase_per_year.toFixed(2);
 
   const layout: Partial<Layout> = {
     autosize: true,
@@ -91,11 +105,13 @@ export const GenerateTrendGraph = (
       b: 40,
       l: 40,
       r: 20,
-      t: 40,
+      t: 60,
     },
     paper_bgcolor: GRAPH_COLORS.background,
     plot_bgcolor: GRAPH_COLORS.background,
-    title: { text: `${graph_type} PET in summer (2000-2025)` },
+    title: {
+      text: `${graph_type} PET in summer (2000-2025)<br><sub>Increase per year: ${increaseText}°C</sub>`,
+    },
     xaxis: {
       gridcolor: GRAPH_COLORS.grid,
       title: { text: "Year" },
@@ -139,6 +155,56 @@ export const GenerateTrendGraph = (
       y: trendline_pets,
     },
   ];
+
+  // Add forecast data if provided
+  if (forecastData && forecastData.forecastYears.length > 0) {
+    data.push(
+      // Lower bound (invisible, used for fill)
+      {
+        fill: "none",
+        hovertemplate: "Year: %{x}<br>Lower: %{y:.2f}<extra></extra>",
+        line: {
+          color: "rgba(128, 128, 128, 0)",
+          width: 0,
+        },
+        mode: "lines",
+        name: "Lower Bound",
+        showlegend: false,
+        type: "scatter",
+        x: forecastData.forecastYears,
+        y: forecastData.lowerBound,
+      },
+      // Upper bound (fills to lower bound)
+      {
+        fill: "tonexty",
+        fillcolor: "rgba(128, 128, 128, 0.2)",
+        hovertemplate: "Year: %{x}<br>Upper: %{y:.2f}<extra></extra>",
+        line: {
+          color: "rgba(128, 128, 128, 0)",
+          width: 0,
+        },
+        mode: "lines",
+        name: "95% Confidence",
+        type: "scatter",
+        x: forecastData.forecastYears,
+        y: forecastData.upperBound,
+      },
+      // Forecast trendline
+      {
+        hovertemplate: "Year: %{x}<br>Forecast: %{y:.2f}<extra></extra>",
+        line: {
+          color: GRAPH_COLORS.secondary,
+          dash: "dot",
+          width: 2,
+        },
+        mode: "lines",
+        name: "Forecast",
+        type: "scatter",
+        x: forecastData.forecastYears,
+        y: forecastData.forecastValues,
+      }
+    );
+  }
 
   const config: PlotlyConfig = {
     displaylogo: false,

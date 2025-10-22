@@ -53,6 +53,7 @@ export async function FetchTrendGraphData(
     const trendlinePets = years.map(year => reg.predict(year));
 
     return {
+      increase_per_year: reg.slope,
       trendline_pets: trendlinePets,
       year_pets: yearPets,
       years,

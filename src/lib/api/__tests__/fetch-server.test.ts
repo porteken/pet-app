@@ -228,9 +228,24 @@ describe("fetch-server", () => {
       const result2 = await FetchTrendGraphData("avg", -1);
       const result3 = await FetchTrendGraphData("avg", Number.NaN);
 
-      expect(result1).toEqual({ trendline_pets: [], year_pets: [], years: [] });
-      expect(result2).toEqual({ trendline_pets: [], year_pets: [], years: [] });
-      expect(result3).toEqual({ trendline_pets: [], year_pets: [], years: [] });
+      expect(result1).toEqual({
+        increase_per_year: 0,
+        trendline_pets: [],
+        year_pets: [],
+        years: [],
+      });
+      expect(result2).toEqual({
+        increase_per_year: 0,
+        trendline_pets: [],
+        year_pets: [],
+        years: [],
+      });
+      expect(result3).toEqual({
+        increase_per_year: 0,
+        trendline_pets: [],
+        year_pets: [],
+        years: [],
+      });
     });
 
     it("should throw error for invalid option", async () => {
@@ -253,7 +268,12 @@ describe("fetch-server", () => {
 
       const result = await FetchTrendGraphData("avg", 1);
 
-      expect(result).toEqual({ trendline_pets: [], year_pets: [], years: [] });
+      expect(result).toEqual({
+        increase_per_year: 0,
+        trendline_pets: [],
+        year_pets: [],
+        years: [],
+      });
     });
 
     it("should handle database errors", async () => {

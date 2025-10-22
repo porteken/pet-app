@@ -37,6 +37,7 @@ describe("Graph Components", () => {
     const mockYears = [2020, 2021, 2022, 2023];
     const mockYearPets = [25.5, 26.2, 27.1, 28];
     const mockTrendlinePets = [25, 26, 27, 28];
+    const mockIncreasePerYear = 0.5;
 
     describe("Basic Rendering", () => {
       it("should render graph with average option", () => {
@@ -44,7 +45,8 @@ describe("Graph Components", () => {
           [2000, 2001],
           "avg",
           [25, 26],
-          [25.1, 25.9]
+          [25.1, 25.9],
+          0.45
         );
 
         render(result);
@@ -60,7 +62,8 @@ describe("Graph Components", () => {
           mockYears,
           "max",
           mockYearPets,
-          mockTrendlinePets
+          mockTrendlinePets,
+          mockIncreasePerYear
         );
 
         render(result);
@@ -78,7 +81,8 @@ describe("Graph Components", () => {
           [],
           "avg",
           mockYearPets,
-          mockTrendlinePets
+          mockTrendlinePets,
+          mockIncreasePerYear
         );
 
         render(result);
@@ -93,7 +97,8 @@ describe("Graph Components", () => {
           mockYears,
           "avg",
           [],
-          mockTrendlinePets
+          mockTrendlinePets,
+          mockIncreasePerYear
         );
 
         render(result);
@@ -104,7 +109,13 @@ describe("Graph Components", () => {
       });
 
       it("should handle empty trendline_pets array", () => {
-        const result = GenerateTrendGraph(mockYears, "avg", mockYearPets, []);
+        const result = GenerateTrendGraph(
+          mockYears,
+          "avg",
+          mockYearPets,
+          [],
+          mockIncreasePerYear
+        );
 
         render(result);
 
@@ -114,7 +125,13 @@ describe("Graph Components", () => {
       });
 
       it("should handle all empty arrays", () => {
-        const result = GenerateTrendGraph([], "avg", [], []);
+        const result = GenerateTrendGraph(
+          [],
+          "avg",
+          [],
+          [],
+          mockIncreasePerYear
+        );
 
         render(result);
 
@@ -130,7 +147,8 @@ describe("Graph Components", () => {
           mockYears,
           "avg",
           mockYearPets,
-          mockTrendlinePets
+          mockTrendlinePets,
+          mockIncreasePerYear
         );
 
         render(result);
@@ -160,7 +178,8 @@ describe("Graph Components", () => {
           mockYears,
           "avg",
           mockYearPets,
-          mockTrendlinePets
+          mockTrendlinePets,
+          mockIncreasePerYear
         );
         const { unmount: unmount1 } = render(averageResult);
         expect(screen.getByTestId("graph-title")).toHaveTextContent(
@@ -172,7 +191,8 @@ describe("Graph Components", () => {
           mockYears,
           "max",
           mockYearPets,
-          mockTrendlinePets
+          mockTrendlinePets,
+          mockIncreasePerYear
         );
         const { unmount: unmount2 } = render(maxResult);
         expect(screen.getByTestId("graph-title")).toHaveTextContent(
@@ -184,7 +204,8 @@ describe("Graph Components", () => {
           mockYears,
           "unknown" as any,
           mockYearPets,
-          mockTrendlinePets
+          mockTrendlinePets,
+          mockIncreasePerYear
         );
         render(unknownResult);
         expect(screen.getByTestId("graph-title")).toHaveTextContent(
@@ -199,7 +220,8 @@ describe("Graph Components", () => {
           mockYears,
           "avg",
           mockYearPets,
-          mockTrendlinePets
+          mockTrendlinePets,
+          mockIncreasePerYear
         );
 
         render(result);
@@ -215,7 +237,8 @@ describe("Graph Components", () => {
           singleYear,
           "avg",
           singleYearPets,
-          singleTrendlinePets
+          singleTrendlinePets,
+          mockIncreasePerYear
         );
 
         render(result);
@@ -484,7 +507,8 @@ describe("Graph Components", () => {
         [2020, 2021],
         "avg",
         [25, 26],
-        [25.1, 25.9]
+        [25.1, 25.9],
+        0.45
       );
 
       render(result);
@@ -504,7 +528,8 @@ describe("Graph Components", () => {
         [2020, 2021],
         "max",
         [30, 31],
-        [29.5, 30.5]
+        [29.5, 30.5],
+        0.5
       );
 
       render(result);
@@ -512,7 +537,9 @@ describe("Graph Components", () => {
       const graphLayout = screen.getByTestId("graph-layout");
       const layout = JSON.parse(graphLayout.textContent || "{}");
 
-      expect(layout.title.text).toBe("Max PET in summer (2000-2025)");
+      expect(layout.title.text).toBe(
+        "Max PET in summer (2000-2025)<br><sub>Increase per year: +0.50°C</sub>"
+      );
       expect(layout.xaxis.title.text).toBe("Year");
       expect(layout.yaxis.title.text).toBe("PET");
       expect(layout.paper_bgcolor).toBe("#ffffff");
@@ -524,7 +551,8 @@ describe("Graph Components", () => {
         [2020, 2021],
         "avg",
         [25, 26],
-        [25.1, 25.9]
+        [25.1, 25.9],
+        0.45
       );
 
       render(result);
@@ -547,7 +575,8 @@ describe("Graph Components", () => {
         [2020, 2021],
         "avg",
         [25, 26],
-        [25.1, 25.9]
+        [25.1, 25.9],
+        0.45
       );
 
       render(result);
@@ -635,7 +664,8 @@ describe("Graph Components", () => {
         largeYears,
         "avg",
         largeYearPets,
-        largeTrendlinePets
+        largeTrendlinePets,
+        0.1
       );
 
       render(result);
@@ -647,7 +677,8 @@ describe("Graph Components", () => {
         [2020, 2021, 2022],
         "max",
         [0.001, 999.999, -50.5],
-        [0.1, 1000, -50]
+        [0.1, 1000, -50],
+        0.5
       );
 
       render(result);
@@ -664,7 +695,8 @@ describe("Graph Components", () => {
         [2020, 2021, 2022],
         "avg",
         [25, 26],
-        [25.1]
+        [25.1],
+        0.5
       );
 
       render(result);
@@ -676,7 +708,8 @@ describe("Graph Components", () => {
         [2020, 2021],
         "unknown_option",
         [25, 26],
-        [25.1, 25.9]
+        [25.1, 25.9],
+        0.45
       );
 
       render(unknownResult);

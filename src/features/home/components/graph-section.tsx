@@ -1,8 +1,14 @@
 import { Button, Loader, Select } from "@mantine/core";
 import React, { memo, useMemo } from "react";
 
+import { ForecastControls } from "./forecast-controls";
+
 interface GraphSectionProperties {
+  forecastEnabled: boolean;
+  forecastYearsAhead: number;
   graphLoading: boolean;
+  onForecastToggle: (enabled: boolean) => void;
+  onForecastYearsChange: (years: number) => void;
   onSelectChange: (value: string) => void;
   petGraph?: React.ReactElement;
   selectedGraphMeasure: string;
@@ -16,7 +22,11 @@ interface GraphSectionProperties {
 
 export const GraphSection = memo<GraphSectionProperties>(
   ({
+    forecastEnabled,
+    forecastYearsAhead,
     graphLoading,
+    onForecastToggle,
+    onForecastYearsChange,
     onSelectChange,
     petGraph,
     selectedGraphMeasure,
@@ -58,7 +68,7 @@ export const GraphSection = memo<GraphSectionProperties>(
     );
     return (
       <div className="flex min-h-[340px] w-full max-w-[90vw] min-w-[320px] flex-col items-center space-y-4">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md space-y-4">
           <Select
             className="w-full"
             data={selectOptions}
@@ -66,6 +76,12 @@ export const GraphSection = memo<GraphSectionProperties>(
             onChange={value => onSelectChange(value!)}
             size="sm"
             value={selectedGraphMeasure}
+          />
+          <ForecastControls
+            enabled={forecastEnabled}
+            onToggle={onForecastToggle}
+            onYearsChange={onForecastYearsChange}
+            yearsAhead={forecastYearsAhead}
           />
         </div>
         {graphContent}

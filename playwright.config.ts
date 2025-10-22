@@ -22,7 +22,7 @@ export default defineConfig({
   },
 
   webServer: {
-    command: "npm start",
+    command: "npx run dev",
     reuseExistingServer: !process.env.CI,
     timeout: 180 * 1000,
     url: "http://localhost:3000",

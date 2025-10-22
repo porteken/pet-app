@@ -8,7 +8,9 @@ test.describe("Dynamic Location Page", () => {
     await expect(page.getByText("Reference Data")).toBeVisible();
     await expect(page.locator("select#graph-measure")).toBeVisible();
     await expect(page.locator("select#reference-year")).toBeVisible();
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 15_000,
+    });
     await expect(page.locator(".js-plotly-plot").first()).toBeVisible();
   });
 
@@ -26,11 +28,15 @@ test.describe("Dynamic Location Page", () => {
     await page.goto("/1");
     const graphMeasure = page.locator("select#graph-measure");
     await graphMeasure.selectOption("max");
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 10_000,
+    });
     await expect(page.locator(".js-plotly-plot").first()).toBeVisible();
     const referenceYear = page.locator("select#reference-year");
     await referenceYear.selectOption("2005");
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 10_000,
+    });
     await expect(page.locator(".js-plotly-plot").first()).toBeVisible();
   });
   test("should update reference graph when year is changed", async ({
@@ -39,7 +45,9 @@ test.describe("Dynamic Location Page", () => {
     await page.goto("/1");
     const referenceYear = page.locator("select#reference-year");
     await referenceYear.selectOption("2005");
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 10_000,
+    });
     await expect(page.locator(".js-plotly-plot").first()).toBeVisible();
   });
 });

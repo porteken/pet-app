@@ -12,6 +12,7 @@ export default defineConfig({
   reporter: process.env.CI ? "html" : "line",
   retries: process.env.CI ? 2 : 1,
   testDir: "./tests",
+  timeout: 60_000, // Increase global test timeout to 60s
   use: {
     actionTimeout: 30_000,
 

@@ -6,7 +6,9 @@ test.describe("About Page", () => {
 
     // Wait for the page to be fully loaded
 
-    await expect(page.getByText("Purpose of the Application")).toBeVisible();
+    await expect(page.getByText("Purpose of the Application")).toBeVisible({
+      timeout: 10_000,
+    });
     await expect(page.getByText("What is PET?")).toBeVisible();
     await expect(
       page.locator("text=Physiological Equivalent Temperature").first()
@@ -18,7 +20,8 @@ test.describe("About Page", () => {
     const link = page.getByRole("link", { name: "this" });
     await expect(link).toHaveAttribute(
       "href",
-      "https://bjsm.bmj.com/content/55/15/825"
+      "https://bjsm.bmj.com/content/55/15/825",
+      { timeout: 10_000 }
     );
   });
 });

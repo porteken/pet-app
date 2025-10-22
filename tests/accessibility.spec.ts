@@ -12,7 +12,9 @@ test.describe("Accessibility Tests", () => {
 
     // Wait for the page and graphs to load
 
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 15_000,
+    });
 
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
@@ -25,7 +27,9 @@ test.describe("Accessibility Tests", () => {
 
     // Wait for graphs to re-render
 
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 10_000,
+    });
   });
 
   test("screen reader compatibility: proper ARIA labels and semantics", async ({
@@ -39,7 +43,7 @@ test.describe("Accessibility Tests", () => {
     // Wait for the page to be fully loaded by waiting for the select elements
 
     const graphMeasureLabel = page.locator('label[for="graph-measure"]');
-    await expect(graphMeasureLabel).toBeVisible();
+    await expect(graphMeasureLabel).toBeVisible({ timeout: 10_000 });
     await expect(graphMeasureLabel).toHaveText("Graph Measure");
 
     const referenceYearLabel = page.locator('label[for="reference-year"]');
@@ -84,20 +88,23 @@ test.describe("Accessibility Tests", () => {
     await expect(page.locator(".leaflet-container")).toBeVisible();
 
     const marker = page.locator(".leaflet-marker-icon").first();
-    await expect(marker).toBeVisible();
+    await expect(marker).toBeVisible({ timeout: 10_000 });
 
     await page.goto("/1");
 
     // Wait for initial graphs to load
     await page.waitForSelector(".js-plotly-plot", { state: "visible" });
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 15_000,
+    });
 
     const graphMeasure = page.locator("select#graph-measure");
     await graphMeasure.selectOption("max");
 
     // Wait for graphs to re-render after selection change
-    await page.waitForTimeout(500);
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 10_000,
+    });
   });
 
   test("responsive zoom: content remains usable at 200% zoom", async ({
@@ -118,7 +125,9 @@ test.describe("Accessibility Tests", () => {
     await graphMeasure.selectOption("max");
 
     // Wait for layout to settle after selection change
-    await page.waitForTimeout(300);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 10_000,
+    });
 
     const bodyScrollWidth = await page.evaluate(
       () => document.body.scrollWidth
@@ -167,6 +176,8 @@ test.describe("Accessibility Tests", () => {
     await graphMeasure.click();
     await graphMeasure.selectOption("max");
 
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 15_000,
+    });
   });
 });

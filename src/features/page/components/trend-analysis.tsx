@@ -4,6 +4,7 @@
 import React from "react";
 
 import { ForecastControls } from "@/components/forecast/forecast-controls";
+import { ForecastTable } from "@/components/forecast/forecast-table";
 import { GenerateTrendGraph } from "@/features/generate-graph";
 import { FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { calculateForecast } from "@/lib/utils/forecast";
@@ -35,6 +36,15 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     React.useState<HeatStressDescription | null>(null);
   const [forecastHeatStress, setForecastHeatStress] =
     React.useState<HeatStressDescription | null>(null);
+  const [forecastData, setForecastData] = React.useState<
+    | undefined
+    | {
+        forecastValues: number[];
+        forecastYears: number[];
+        lowerBound25: number[];
+        upperBound75: number[];
+      }
+  >();
 
   const generatePetTrendGraph = React.useCallback(
     async (option: string, enableForecast: boolean, yearsAhead: number) => {
@@ -61,14 +71,20 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       ) {
         const finalForecastYear = forecastData.forecastYears.at(-1)!;
         const finalForecastValue = forecastData.forecastValues.at(-1)!;
+        const finalLowerBound25 = forecastData.lowerBound25.at(-1)!;
+        const finalUpperBound75 = forecastData.upperBound75.at(-1)!;
         setForecastHeatStress(
           getForecastHeatStressDescription(
             finalForecastValue,
-            finalForecastYear
+            finalForecastYear,
+            finalLowerBound25,
+            finalUpperBound75
           )
         );
+        setForecastData(forecastData);
       } else {
         setForecastHeatStress(null);
+        setForecastData(undefined);
       }
 
       const graph = GenerateTrendGraph(
@@ -155,11 +171,19 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
                 <span className={`font-bold ${forecastHeatStress.colorClass}`}>
                   {forecastHeatStress.value}
                 </span>
+                {forecastHeatStress.confidenceRange && (
+                  <span className="ml-2 text-xs text-gray-600">
+                    {forecastHeatStress.confidenceRange}
+                  </span>
+                )}
               </p>
             )}
           </div>
         )}
         <div className="h-[700px]">{trendGraph}</div>
+        {forecastEnabled && forecastData && (
+          <ForecastTable forecastData={forecastData} />
+        )}
       </div>
     </div>
   );

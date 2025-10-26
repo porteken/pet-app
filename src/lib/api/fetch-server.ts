@@ -1,8 +1,11 @@
+/* eslint-disable unicorn/no-null */
 "use server";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 import { createClient } from "@/config/supabase/server";
 import { DatabaseError } from "@/lib/utils/errors";
+import { calculateForecast } from "@/lib/utils/forecast";
 import { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
 import {
   FetchLocationProperties,
@@ -10,13 +13,61 @@ import {
   ReferenceGraphDataProperties,
   TrendGraphDataProperties,
 } from "@/types/types";
+type HistoricalDataRecord = {
+  location_id: any;
+  pet: any;
+  year: any;
+};
+const fetchTask = async (
+  locationIdsInChunk: any[],
+  supabase: SupabaseClient<any, "public", "public", any, any>
+) => {
+  const pageSize = 500;
+  let allChunkData: HistoricalDataRecord[] = [];
+  let page = 0;
+  let moreDataExists = true;
+
+  while (moreDataExists) {
+    const from = page * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error: historicalError } = await supabase
+      .from(`pet_year_avg`)
+      .select("location_id, year, pet")
+
+      .in("location_id", locationIdsInChunk)
+      .order("year", { ascending: true })
+      .range(from, to);
+
+    if (historicalError) {
+      throw new DatabaseError(
+        "Failed to fetch historical data from database",
+        historicalError
+      );
+    }
+
+    if (data && data.length > 0) {
+      allChunkData = [...allChunkData, ...data];
+
+      if (data.length < pageSize) {
+        moreDataExists = false;
+      } else {
+        page++;
+      }
+    } else {
+      moreDataExists = false;
+    }
+  }
+  return allChunkData;
+};
 
 export async function FetchCityRankings(year: number): Promise<
   Array<{
     avg_pet: number;
     changeFrom2000: null | number;
     city: string;
-    FutureValue: null | number;
+    FutureValueLower: null | number;
+    FutureValueUpper: null | number;
     location_id: number;
     max_pet: number;
     p25: number;
@@ -95,6 +146,36 @@ export async function FetchCityRankings(year: number): Promise<
     );
   }
 
+  let historicalData: HistoricalDataRecord[] = [];
+
+  const locationChunkSize = 1000;
+
+  const promises = [];
+  for (let index = 0; index < locations.length; index += locationChunkSize) {
+    const locationChunk = locations.slice(index, index + locationChunkSize);
+    const locationIdsInChunk = locationChunk.map(loc => loc.location_id);
+
+    promises.push(fetchTask(locationIdsInChunk, supabase));
+  }
+
+  const historicalDataArrays = await Promise.all(promises);
+
+  historicalData = historicalDataArrays.flat();
+
+  const historicalByLocation = new Map<
+    number,
+    Array<{ pet: number; year: number }>
+  >();
+  for (const { location_id, pet, year: dataYear } of historicalData) {
+    if (!historicalByLocation.has(location_id)) {
+      historicalByLocation.set(location_id, []);
+    }
+    historicalByLocation.get(location_id)!.push({
+      pet: Number(pet),
+      year: dataYear,
+    });
+  }
+
   const combinedData = petAvg
     .map(({ location_id, pet }) => {
       const pet_max = petMax.find(loc => loc.location_id === location_id);
@@ -106,17 +187,20 @@ export async function FetchCityRankings(year: number): Promise<
       const avgPet = Number(pet);
       const maxPet = Number(pet_max!.pet);
 
+      const locationHistory = historicalByLocation.get(location_id);
+      const { forecast2100Lower, forecast2100Upper } = calculate2100Forecast(
+        locationHistory,
+        year
+      );
+
       return location && percentiles
         ? {
             avg_pet: avgPet,
-            // eslint-disable-next-line unicorn/no-null
+
             changeFrom2000: pet2000 === undefined ? null : avgPet - pet2000,
             city: location.city,
-            FutureValue:
-              pet2000 === undefined
-                ? // eslint-disable-next-line unicorn/no-null
-                  null
-                : ((avgPet - pet2000) / (year - 2000)) * (2100 - year) + avgPet,
+            FutureValueLower: forecast2100Lower,
+            FutureValueUpper: forecast2100Upper,
             location_id,
             max_pet: maxPet,
             p25: percentiles[0].p25,
@@ -256,4 +340,66 @@ export async function FetchTrendGraphData(
   );
 
   return { increase_per_year: reg.slope, trendline_pets, year_pets, years };
+}
+
+function calculate2100Forecast(
+  locationHistory: Array<{ pet: number; year: number }> | undefined,
+  year: number
+): {
+  forecast2100Lower: null | number;
+
+  forecast2100Upper: null | number;
+} {
+  let forecast2100Lower: null | number = null;
+
+  let forecast2100Upper: null | number = null;
+
+  if (locationHistory && locationHistory.length >= 2) {
+    const years = locationHistory.map(d => d.year);
+
+    const values = locationHistory.map(d => d.pet);
+
+    const yearsAhead = 2100 - year;
+
+    const forecastResult = calculateForecast(years, values, yearsAhead);
+
+    const forecast2100Value = forecastResult.forecastValues.at(-1);
+
+    const lower25 = forecastResult.lowerBound25.at(-1);
+
+    const upper75 = forecastResult.upperBound75.at(-1);
+
+    if (
+      forecast2100Value !== undefined &&
+      lower25 !== undefined &&
+      upper75 !== undefined &&
+      forecastResult.forecastValues.length > 0
+    ) {
+      forecast2100Lower = lower25;
+
+      forecast2100Upper = upper75;
+
+      return { forecast2100Lower, forecast2100Upper };
+    }
+  }
+
+  if (locationHistory && locationHistory.length > 1) {
+    const years = locationHistory.map(d => d.year);
+
+    const values = locationHistory.map(d => d.pet);
+
+    const regression = new SimpleLinearRegression(years, values);
+
+    const { lowerBound, upperBound } = regression.predictWithConfidence(
+      2100,
+
+      0.5
+    );
+
+    forecast2100Lower = lowerBound;
+
+    forecast2100Upper = upperBound;
+  }
+
+  return { forecast2100Lower, forecast2100Upper };
 }

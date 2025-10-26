@@ -25,7 +25,8 @@ interface RankingItem {
   avg_pet: number;
   changeFrom2000: null | number;
   city: string;
-  FutureValue: null | number;
+  FutureValueLower: null | number;
+  FutureValueUpper: null | number;
   location_id: number;
   max_pet: number;
   p25: number;
@@ -56,7 +57,6 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
     | "avg_pet"
     | "change"
     | "city"
-    | "FutureValue"
     | "max_pet"
     | "rank"
     | "state";
@@ -117,10 +117,6 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
         }
         case "city": {
           comparison = a.city.localeCompare(b.city);
-          break;
-        }
-        case "FutureValue": {
-          comparison = a.FutureValue! - b.FutureValue!;
           break;
         }
         case "max_pet": {
@@ -311,16 +307,8 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                       )}
                     </div>
                   </th>
-                  <th
-                    className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                    onClick={() => handleSort("FutureValue")}
-                  >
-                    <div className="flex items-center gap-1">
-                      2100 Forecasted PET
-                      {sortColumn === "FutureValue" && (
-                        <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
-                      )}
-                    </div>
+                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    2100 Pet (25-75th% Forecast)
                   </th>
                 </tr>
               </thead>
@@ -330,7 +318,8 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                     avg_pet,
                     changeFrom2000,
                     city,
-                    FutureValue,
+                    FutureValueLower,
+                    FutureValueUpper,
                     location_id,
                     max_pet,
                     p25,
@@ -340,9 +329,7 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                   }) => {
                     const avgheatStressInfo = getHeatStressInfo(avg_pet);
                     const maxheatStressInfo = getHeatStressInfo(max_pet);
-                    const futureheatStressInfo = FutureValue
-                      ? getHeatStressInfo(FutureValue)
-                      : "";
+
                     return (
                       <tr
                         className="hover:bg-gray-50"
@@ -391,11 +378,23 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                           )}
                         </td>
                         <td className="px-6 py-4 text-sm whitespace-nowrap">
-                          <span
-                            className={`font-semibold ${futureheatStressInfo ? futureheatStressInfo.color : ""}`}
-                          >
-                            {FutureValue ? FutureValue.toFixed(1) : ""}
-                          </span>
+                          <div>
+                            <span
+                              className={`font-semibold ${
+                                getHeatStressInfo(FutureValueLower!).color
+                              }`}
+                            >
+                              {FutureValueLower!.toFixed(1)}
+                            </span>
+                            <span> - </span>
+                            <span
+                              className={`font-semibold ${
+                                getHeatStressInfo(FutureValueUpper!).color
+                              }`}
+                            >
+                              {FutureValueUpper!.toFixed(1)}
+                            </span>
+                          </div>
                         </td>
                       </tr>
                     );

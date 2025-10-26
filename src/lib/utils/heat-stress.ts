@@ -1,5 +1,6 @@
 export interface HeatStressDescription {
   colorClass: string;
+  confidenceRange?: string;
   prefix: string;
   value: string;
 }
@@ -18,11 +19,26 @@ export type HeatStressLevel =
 
 export function getForecastHeatStressDescription(
   petValue: number,
-  year: number
+  year: number,
+  lowerBound25?: number,
+  upperBound75?: number
 ): HeatStressDescription {
   const info = getHeatStressInfo(petValue);
+
+  const hasValidBounds =
+    lowerBound25 !== undefined &&
+    upperBound75 !== undefined &&
+    !Number.isNaN(lowerBound25) &&
+    !Number.isNaN(upperBound75) &&
+    Math.abs(upperBound75 - lowerBound25) > 0.1;
+
+  const confidenceRange = hasValidBounds
+    ? `(25-75%: ${lowerBound25.toFixed(1)}-${upperBound75.toFixed(1)}°C)`
+    : undefined;
+
   return {
     colorClass: info.color,
+    confidenceRange,
     prefix: `By end of ${year}, it could be`,
     value: info.value,
   };

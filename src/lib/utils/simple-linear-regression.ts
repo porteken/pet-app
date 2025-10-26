@@ -47,6 +47,7 @@ export class SimpleLinearRegression {
       Math.sqrt(1 + 1 / n + (x - this.xMean) ** 2 / (n * this.xVariance));
 
     const tValueMap: Record<number, number> = {
+      0.5: 0.674,
       0.8: 1.282,
       0.95: 1.96,
       0.99: 2.576,

@@ -107,6 +107,11 @@ export const GraphSection = memo<GraphSectionProperties>(
                   >
                     {forecastHeatStress.value}
                   </span>
+                  {forecastHeatStress.confidenceRange && (
+                    <span className="ml-2 text-xs text-gray-600">
+                      {forecastHeatStress.confidenceRange}
+                    </span>
+                  )}
                 </p>
               )}
             </div>

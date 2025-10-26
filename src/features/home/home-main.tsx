@@ -96,15 +96,33 @@ const Home: FC<MapProperties> = ({
         if (
           enableForecast &&
           forecastData &&
-          forecastData.forecastValues.length > 0
+          forecastData.forecastValues.length > 0 &&
+          forecastData.lowerBound25.length > 0 &&
+          forecastData.upperBound75.length > 0
         ) {
-          const finalForecastYear = forecastData.forecastYears.at(-1)!;
-          const finalForecastValue = forecastData.forecastValues.at(-1)!;
-          const forecastHeatStress = getForecastHeatStressDescription(
-            finalForecastValue,
-            finalForecastYear
-          );
-          setForecastHeatStress(forecastHeatStress);
+          const finalForecastYear = forecastData.forecastYears.at(-1);
+          const finalForecastValue = forecastData.forecastValues.at(-1);
+          const finalLowerBound25 = forecastData.lowerBound25.at(-1);
+          const finalUpperBound75 = forecastData.upperBound75.at(-1);
+
+          if (
+            finalForecastYear !== undefined &&
+            finalForecastValue !== undefined &&
+            finalLowerBound25 !== undefined &&
+            finalUpperBound75 !== undefined &&
+            !Number.isNaN(finalLowerBound25) &&
+            !Number.isNaN(finalUpperBound75)
+          ) {
+            const forecastHeatStress = getForecastHeatStressDescription(
+              finalForecastValue,
+              finalForecastYear,
+              finalLowerBound25,
+              finalUpperBound75
+            );
+            setForecastHeatStress(forecastHeatStress);
+          } else {
+            setForecastHeatStress(undefined);
+          }
         } else {
           setForecastHeatStress(undefined);
         }

@@ -74,8 +74,8 @@ export const GenerateTrendGraph = (
   forecastData?: {
     forecastValues: number[];
     forecastYears: number[];
-    lowerBound25: number[];
-    upperBound75: number[];
+    lowerBound10: number[];
+    upperBound90: number[];
   }
 ): React.ReactElement => {
   if (
@@ -161,15 +161,14 @@ export const GenerateTrendGraph = (
     const lastPetValue = year_pets.at(-1)!;
 
     data.push({
-      hovertemplate:
-        "Year: %{x}<br>Forecast (Median): %{y:.2f}°C<extra></extra>",
+      hovertemplate: "Year: %{x}<br>Forecast: %{y:.2f}°C<extra></extra>",
       line: {
         color: GRAPH_COLORS.secondary,
         dash: "dot",
         width: 2,
       },
       mode: "lines",
-      name: "Forecast (Median)",
+      name: "Forecast",
       type: "scatter",
       x: [lastYear, ...forecastData.forecastYears],
       y: [lastPetValue, ...forecastData.forecastValues],

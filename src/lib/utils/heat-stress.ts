@@ -20,20 +20,20 @@ export type HeatStressLevel =
 export function getForecastHeatStressDescription(
   petValue: number,
   year: number,
-  lowerBound25?: number,
-  upperBound75?: number
+  lowerBound10?: number,
+  upperBound90?: number
 ): HeatStressDescription {
   const info = getHeatStressInfo(petValue);
 
   const hasValidBounds =
-    lowerBound25 !== undefined &&
-    upperBound75 !== undefined &&
-    !Number.isNaN(lowerBound25) &&
-    !Number.isNaN(upperBound75) &&
-    Math.abs(upperBound75 - lowerBound25) > 0.1;
+    lowerBound10 !== undefined &&
+    upperBound90 !== undefined &&
+    !Number.isNaN(lowerBound10) &&
+    !Number.isNaN(upperBound90) &&
+    Math.abs(upperBound90 - lowerBound10) > 0.1;
 
   const confidenceRange = hasValidBounds
-    ? `(25-75%: ${lowerBound25.toFixed(1)}-${upperBound75.toFixed(1)}°C)`
+    ? `(10-90%: ${lowerBound10.toFixed(1)}-${upperBound90.toFixed(1)}°C)`
     : undefined;
 
   return {

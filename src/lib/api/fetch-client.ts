@@ -20,6 +20,82 @@ interface PetYearAvgMaxData {
 
 import { apiRequest, hasError } from "./api-client";
 
+export async function FetchForecastData(
+  locationId: number,
+  yearsAhead: number
+): Promise<
+  | undefined
+  | {
+      forecastValues: number[];
+      forecastYears: number[];
+      lowerBound10: number[];
+      upperBound90: number[];
+    }
+> {
+  if (globalThis.window === undefined) {
+    throw new Error(
+      "FetchForecastData can only be called in browser environment"
+    );
+  }
+
+  if (!validateLocationId(locationId)) {
+    throw new FetchError(`Invalid location ID: ${locationId}`);
+  }
+
+  const response = await apiRequest(async () => {
+    const supabase = createClient();
+
+    const { data: historicalData } = await supabase
+      .from("pet_year_avg")
+      .select("year")
+      .eq("location_id", locationId)
+      .order("year", { ascending: false })
+      .limit(1);
+
+    if (!historicalData || historicalData.length === 0) {
+      return;
+    }
+
+    const lastHistoricalYear = historicalData[0].year;
+    const targetYear = lastHistoricalYear + yearsAhead;
+
+    const { data, error } = await supabase
+      .from("pet_forecast")
+      .select("year, pet, lower, upper")
+      .eq("location_id", locationId)
+      .gt("year", lastHistoricalYear)
+      .lte("year", targetYear)
+      .order("year", { ascending: true });
+
+    if (error) {
+      throw new FetchError("Database error fetching forecast data", error);
+    }
+
+    if (!data || data.length === 0) {
+      return;
+    }
+
+    return {
+      forecastValues: data.map(d => Number(d.pet)),
+      forecastYears: data.map(d => d.year),
+      lowerBound10: data.map(d => Number(d.lower)),
+      upperBound90: data.map(d => Number(d.upper)),
+    };
+  });
+
+  if (hasError(response)) {
+    throw new FetchError(
+      `Failed to fetch forecast data for location ${locationId}: ${response.error.message}`,
+      {
+        code: response.error.code,
+        context: { locationId, statusCode: response.error.status },
+      }
+    );
+  }
+
+  return response.data;
+}
+
 export async function FetchTrendGraphData(
   option: string,
   locationId: number
@@ -73,6 +149,8 @@ export async function FetchTrendGraphData(
   return response.data;
 }
 
+export { FetchReferenceGraphData } from "./reference-graph-data";
+
 async function fetchTrendData(
   supabase: SupabaseClient,
   tableName: string,
@@ -103,5 +181,3 @@ function processTrendData(data: PetYearAvgMaxData[]): {
 
   return { yearPets, years };
 }
-
-export { FetchReferenceGraphData } from "./reference-graph-data";

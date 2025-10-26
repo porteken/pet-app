@@ -23,7 +23,7 @@ const color_mapping = (value: number) => {
 };
 interface RankingItem {
   avg_pet: number;
-  changeFrom2000: null | number;
+  changePerDecade: null | number;
   city: string;
   FutureValueLower: null | number;
   FutureValueUpper: null | number;
@@ -110,8 +110,8 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
           break;
         }
         case "change": {
-          const aChange = a.changeFrom2000 ?? 0;
-          const bChange = b.changeFrom2000 ?? 0;
+          const aChange = a.changePerDecade ?? 0;
+          const bChange = b.changePerDecade ?? 0;
           comparison = aChange - bChange;
           break;
         }
@@ -233,175 +233,220 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
           )}
         </div>
 
-        <div className="overflow-hidden rounded-lg bg-white shadow">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                    onClick={() => handleSort("rank")}
-                  >
-                    <div className="flex items-center gap-1">
-                      Rank
-                      {sortColumn === "rank" && (
-                        <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
-                      )}
+        <div className="flex gap-6">
+          <div className="w-64 flex-shrink-0">
+            <div className="sticky top-4 rounded-lg bg-white p-6 shadow">
+              <h3 className="mb-4 text-lg font-semibold text-gray-900">
+                Heat Stress Levels
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div>
+                    <div className="font-semibold text-green-600">
+                      None to Slight
                     </div>
-                  </th>
-                  <th
-                    className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                    onClick={() => handleSort("city")}
-                  >
-                    <div className="flex items-center gap-1">
-                      City
-                      {sortColumn === "city" && (
-                        <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
-                      )}
+                    <div className="text-sm text-gray-600">&lt; 29°C</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div>
+                    <div className="font-semibold text-yellow-600">
+                      Moderate
                     </div>
-                  </th>
-                  <th
-                    className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                    onClick={() => handleSort("state")}
-                  >
-                    <div className="flex items-center gap-1">
-                      State
-                      {sortColumn === "state" && (
-                        <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th
-                    className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                    onClick={() => handleSort("avg_pet")}
-                  >
-                    <div className="flex items-center gap-1">
-                      Avg Value
-                      {sortColumn === "avg_pet" && (
-                        <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th
-                    className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                    onClick={() => handleSort("max_pet")}
-                  >
-                    <div className="flex items-center gap-1">
-                      Max Value
-                      {sortColumn === "max_pet" && (
-                        <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                    PET Range (25th to 75th percentile)
-                  </th>
-                  <th
-                    className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                    onClick={() => handleSort("change")}
-                  >
-                    <div className="flex items-center gap-1">
-                      Change from 2000
-                      {sortColumn === "change" && (
-                        <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                    2100 Pet (25-75th% Forecast)
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {paginatedRankings.map(
-                  ({
-                    avg_pet,
-                    changeFrom2000,
-                    city,
-                    FutureValueLower,
-                    FutureValueUpper,
-                    location_id,
-                    max_pet,
-                    p25,
-                    p75,
-                    rank,
-                    state,
-                  }) => {
-                    const avgheatStressInfo = getHeatStressInfo(avg_pet);
-                    const maxheatStressInfo = getHeatStressInfo(max_pet);
+                    <div className="text-sm text-gray-600">29-35°C</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div>
+                    <div className="font-semibold text-orange-600">Strong</div>
+                    <div className="text-sm text-gray-600">35-41°C</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div>
+                    <div className="font-semibold text-red-600">Extreme</div>
+                    <div className="text-sm text-gray-600">&gt; 41°C</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                    return (
-                      <tr
-                        className="hover:bg-gray-50"
-                        key={location_id}
-                        onClick={() => router.push(`/${location_id}`)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
-                          {rank}
-                        </td>
-                        <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
-                          {city}
-                        </td>
-                        <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                          {state}
-                        </td>
-                        <td className="px-6 py-4 text-sm whitespace-nowrap">
-                          <span
-                            className={`font-semibold ${avgheatStressInfo.color}`}
-                          >
-                            {avg_pet.toFixed(1)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm whitespace-nowrap">
-                          <span
-                            className={`font-semibold ${maxheatStressInfo.color}`}
-                          >
-                            {max_pet.toFixed(1)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                          {getPetRange(p25, p75)}
-                        </td>
-                        <td className="px-6 py-4 text-sm whitespace-nowrap">
-                          {changeFrom2000 === null ? (
-                            <span className="text-gray-400">N/A</span>
-                          ) : (
+          <div className="flex-1 overflow-hidden rounded-lg bg-white shadow">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th
+                      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
+                      onClick={() => handleSort("rank")}
+                    >
+                      <div className="flex items-center gap-1">
+                        Rank
+                        {sortColumn === "rank" && (
+                          <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
+                      onClick={() => handleSort("city")}
+                    >
+                      <div className="flex items-center gap-1">
+                        City
+                        {sortColumn === "city" && (
+                          <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
+                      onClick={() => handleSort("state")}
+                    >
+                      <div className="flex items-center gap-1">
+                        State
+                        {sortColumn === "state" && (
+                          <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
+                      onClick={() => handleSort("avg_pet")}
+                    >
+                      <div className="flex items-center gap-1">
+                        Avg PET
+                        {sortColumn === "avg_pet" && (
+                          <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
+                      onClick={() => handleSort("max_pet")}
+                    >
+                      <div className="flex items-center gap-1">
+                        Max PET
+                        {sortColumn === "max_pet" && (
+                          <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      PET Range (25th-75th percentile)
+                    </th>
+                    <th
+                      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
+                      onClick={() => handleSort("change")}
+                    >
+                      <div className="flex items-center gap-1">
+                        Change per Decade
+                        {sortColumn === "change" && (
+                          <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      2100 Forecast Range
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {paginatedRankings.map(
+                    ({
+                      avg_pet,
+                      changePerDecade,
+                      city,
+                      FutureValueLower,
+                      FutureValueUpper,
+                      location_id,
+                      max_pet,
+                      p25,
+                      p75,
+                      rank,
+                      state,
+                    }) => {
+                      const avgheatStressInfo = getHeatStressInfo(avg_pet);
+                      const maxheatStressInfo = getHeatStressInfo(max_pet);
+
+                      return (
+                        <tr
+                          className="hover:bg-gray-50"
+                          key={location_id}
+                          onClick={() => router.push(`/${location_id}`)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
+                            {rank}
+                          </td>
+                          <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                            {city}
+                          </td>
+                          <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                            {state}
+                          </td>
+                          <td className="px-6 py-4 text-sm whitespace-nowrap">
                             <span
-                              className={`font-semibold ${color_mapping(
-                                changeFrom2000
-                              )}`}
+                              className={`font-semibold ${avgheatStressInfo.color}`}
                             >
-                              {changeFrom2000 > 0 ? "+" : ""}
-                              {changeFrom2000.toFixed(1)}
+                              {avg_pet.toFixed(1)}°C
                             </span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-sm whitespace-nowrap">
-                          <div>
+                          </td>
+                          <td className="px-6 py-4 text-sm whitespace-nowrap">
                             <span
-                              className={`font-semibold ${
-                                getHeatStressInfo(FutureValueLower!).color
-                              }`}
+                              className={`font-semibold ${maxheatStressInfo.color}`}
                             >
-                              {FutureValueLower!.toFixed(1)}
+                              {max_pet.toFixed(1)}°C
                             </span>
-                            <span> - </span>
-                            <span
-                              className={`font-semibold ${
-                                getHeatStressInfo(FutureValueUpper!).color
-                              }`}
-                            >
-                              {FutureValueUpper!.toFixed(1)}
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  }
-                )}
-              </tbody>
-            </table>
+                          </td>
+                          <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                            {getPetRange(p25, p75)}°C
+                          </td>
+                          <td className="px-6 py-4 text-sm whitespace-nowrap">
+                            {changePerDecade === null ? (
+                              <span className="text-gray-400">N/A</span>
+                            ) : (
+                              <span
+                                className={`font-semibold ${color_mapping(
+                                  changePerDecade
+                                )}`}
+                              >
+                                {changePerDecade > 0 ? "+" : ""}
+                                {changePerDecade.toFixed(1)}°C
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-sm whitespace-nowrap">
+                            {FutureValueLower !== null &&
+                            FutureValueUpper !== null ? (
+                              <div>
+                                <span
+                                  className={`font-semibold ${
+                                    getHeatStressInfo(FutureValueLower).color
+                                  }`}
+                                >
+                                  {FutureValueLower.toFixed(1)}
+                                </span>
+                                <span> - </span>
+                                <span
+                                  className={`font-semibold ${
+                                    getHeatStressInfo(FutureValueUpper).color
+                                  }`}
+                                >
+                                  {FutureValueUpper.toFixed(1)}°C
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-gray-400">N/A</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    }
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 

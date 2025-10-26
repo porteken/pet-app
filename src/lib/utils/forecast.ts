@@ -169,8 +169,8 @@ export function calculateForecast(
     return {
       forecastValues: [],
       forecastYears: [],
-      lowerBound25: [],
-      upperBound75: [],
+      lowerBound10: [],
+      upperBound90: [],
     };
   }
 
@@ -178,8 +178,8 @@ export function calculateForecast(
 
   const forecastYears: number[] = [];
   const forecastValues: number[] = [];
-  const lowerBound25: number[] = [];
-  const upperBound75: number[] = [];
+  const lowerBound10: number[] = [];
+  const upperBound90: number[] = [];
 
   const lastYear = years.at(-1)!;
 
@@ -193,14 +193,14 @@ export function calculateForecast(
     } = model.forecastWithConfidence(step, 0.5);
 
     forecastValues.push(prediction);
-    lowerBound25.push(lower25);
-    upperBound75.push(upper75);
+    lowerBound10.push(lower25);
+    upperBound90.push(upper75);
   }
 
   return {
     forecastValues,
     forecastYears,
-    lowerBound25,
-    upperBound75,
+    lowerBound10,
+    upperBound90,
   };
 }

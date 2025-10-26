@@ -13,8 +13,7 @@ import React, {
 import { GenerateTrendGraph } from "@/features/generate-graph";
 import { HeaderBar } from "@/features/header-bar";
 import { setGraphMeasure } from "@/lib/actions/actions";
-import { FetchTrendGraphData } from "@/lib/api/fetch-client";
-import { calculateForecast } from "@/lib/utils/forecast";
+import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 import {
   getForecastHeatStressDescription,
   getHeatStressDescription,
@@ -80,7 +79,7 @@ const Home: FC<MapProperties> = ({
           await FetchTrendGraphData(option, locationId);
 
         const forecastData = enableForecast
-          ? calculateForecast(years, year_pets, yearsAhead)
+          ? await FetchForecastData(locationId, yearsAhead)
           : undefined;
 
         const currentYear = Math.max(...years);
@@ -97,13 +96,13 @@ const Home: FC<MapProperties> = ({
           enableForecast &&
           forecastData &&
           forecastData.forecastValues.length > 0 &&
-          forecastData.lowerBound25.length > 0 &&
-          forecastData.upperBound75.length > 0
+          forecastData.lowerBound10.length > 0 &&
+          forecastData.upperBound90.length > 0
         ) {
           const finalForecastYear = forecastData.forecastYears.at(-1);
           const finalForecastValue = forecastData.forecastValues.at(-1);
-          const finalLowerBound25 = forecastData.lowerBound25.at(-1);
-          const finalUpperBound75 = forecastData.upperBound75.at(-1);
+          const finalLowerBound25 = forecastData.lowerBound10.at(-1);
+          const finalUpperBound75 = forecastData.upperBound90.at(-1);
 
           if (
             finalForecastYear !== undefined &&

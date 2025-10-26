@@ -161,7 +161,7 @@ const Home: FC<MapProperties> = ({
       generateGraph(
         selectedLocationId,
         selectedGraphMeasure,
-        forecastEnabled,
+        forecastEnabled && selectedGraphMeasure === "avg",
         forecastYearsAhead
       );
     }

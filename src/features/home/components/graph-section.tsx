@@ -83,12 +83,14 @@ export const GraphSection = memo<GraphSectionProperties>(
             size="sm"
             value={selectedGraphMeasure}
           />
-          <ForecastControls
-            enabled={forecastEnabled}
-            onToggle={onForecastToggle}
-            onYearsChange={onForecastYearsChange}
-            yearsAhead={forecastYearsAhead}
-          />
+          {selectedGraphMeasure === "avg" && (
+            <ForecastControls
+              enabled={forecastEnabled}
+              onToggle={onForecastToggle}
+              onYearsChange={onForecastYearsChange}
+              yearsAhead={forecastYearsAhead}
+            />
+          )}
           {heatStressDescription && (
             <div className="rounded-lg bg-blue-50 p-3">
               <p className="text-sm font-medium text-gray-900">

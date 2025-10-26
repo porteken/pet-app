@@ -99,7 +99,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   React.useEffect(() => {
     generatePetTrendGraph(
       selectedGraphMeasure,
-      forecastEnabled,
+      forecastEnabled && selectedGraphMeasure === "avg",
       forecastYearsAhead
     );
   }, [
@@ -137,12 +137,14 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
               </option>
             </select>
           </div>
-          <ForecastControls
-            enabled={forecastEnabled}
-            onToggle={setForecastEnabled}
-            onYearsChange={setForecastYearsAhead}
-            yearsAhead={forecastYearsAhead}
-          />
+          {selectedGraphMeasure === "avg" && (
+            <ForecastControls
+              enabled={forecastEnabled}
+              onToggle={setForecastEnabled}
+              onYearsChange={setForecastYearsAhead}
+              yearsAhead={forecastYearsAhead}
+            />
+          )}
         </div>
         {currentHeatStress && (
           <div className="mb-4 rounded-lg bg-blue-50 p-4">

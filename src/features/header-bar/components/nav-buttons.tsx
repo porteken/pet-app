@@ -23,6 +23,15 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
       </Button>
 
       <Button
+        aria-label="Navigate to rankings page"
+        component={Link}
+        href="/rankings"
+        variant="subtle"
+      >
+        Rankings
+      </Button>
+
+      <Button
         aria-label="Navigate to about page"
         component={Link}
         href="/about"

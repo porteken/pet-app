@@ -1,12 +1,16 @@
 import { Button, Loader, Select } from "@mantine/core";
 import React, { memo, useMemo } from "react";
 
-import { ForecastControls } from "./forecast-controls";
+import type { HeatStressDescription } from "@/lib/utils/heat-stress";
+
+import { ForecastControls } from "@/components/forecast/forecast-controls";
 
 interface GraphSectionProperties {
   forecastEnabled: boolean;
+  forecastHeatStress?: HeatStressDescription;
   forecastYearsAhead: number;
   graphLoading: boolean;
+  heatStressDescription?: HeatStressDescription;
   onForecastToggle: (enabled: boolean) => void;
   onForecastYearsChange: (years: number) => void;
   onSelectChange: (value: string) => void;
@@ -23,8 +27,10 @@ interface GraphSectionProperties {
 export const GraphSection = memo<GraphSectionProperties>(
   ({
     forecastEnabled,
+    forecastHeatStress,
     forecastYearsAhead,
     graphLoading,
+    heatStressDescription,
     onForecastToggle,
     onForecastYearsChange,
     onSelectChange,
@@ -83,6 +89,28 @@ export const GraphSection = memo<GraphSectionProperties>(
             onYearsChange={onForecastYearsChange}
             yearsAhead={forecastYearsAhead}
           />
+          {heatStressDescription && (
+            <div className="rounded-lg bg-blue-50 p-3">
+              <p className="text-sm font-medium text-gray-900">
+                {heatStressDescription.prefix}{" "}
+                <span
+                  className={`font-bold ${heatStressDescription.colorClass}`}
+                >
+                  {heatStressDescription.value}
+                </span>
+              </p>
+              {forecastEnabled && forecastHeatStress && (
+                <p className="mt-2 text-sm font-medium text-gray-900">
+                  {forecastHeatStress.prefix}{" "}
+                  <span
+                    className={`font-bold ${forecastHeatStress.colorClass}`}
+                  >
+                    {forecastHeatStress.value}
+                  </span>
+                </p>
+              )}
+            </div>
+          )}
         </div>
         {graphContent}
         {detailsButton}

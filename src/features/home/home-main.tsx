@@ -15,6 +15,11 @@ import { HeaderBar } from "@/features/header-bar";
 import { setGraphMeasure } from "@/lib/actions/actions";
 import { FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { calculateForecast } from "@/lib/utils/forecast";
+import {
+  getForecastHeatStressDescription,
+  getHeatStressDescription,
+  type HeatStressDescription,
+} from "@/lib/utils/heat-stress";
 import { GraphOptions } from "@/lib/utils/select-options";
 import { LocationProperties } from "@/types/types";
 
@@ -26,11 +31,6 @@ import { MapProperties } from "./types";
 const Modal = dynamic(() => import("@/components/ui/modal"), {
   ssr: false,
 });
-
-const SELECT_OPTIONS = GraphOptions.map(option => ({
-  label: option.label,
-  value: option.key,
-}));
 
 const Home: FC<MapProperties> = ({
   initialGraphMeasure,
@@ -49,10 +49,23 @@ const Home: FC<MapProperties> = ({
     useState<LocationProperties>();
   const [forecastEnabled, setForecastEnabled] = useState(false);
   const [forecastYearsAhead, setForecastYearsAhead] = useState(10);
+  const [heatStressDescription, setHeatStressDescription] =
+    useState<HeatStressDescription>();
+  const [forecastHeatStress, setForecastHeatStress] =
+    useState<HeatStressDescription>();
 
   const locationMap = useMemo(() => {
     return new Map(locations.map(loc => [loc.location_id, loc]));
   }, [locations]);
+
+  const selectOptions = useMemo(
+    () =>
+      GraphOptions.map(option => ({
+        label: option.label,
+        value: option.key,
+      })),
+    []
+  );
 
   const generateGraph = useCallback(
     async (
@@ -70,6 +83,34 @@ const Home: FC<MapProperties> = ({
           ? calculateForecast(years, year_pets, yearsAhead)
           : undefined;
 
+        // Calculate heat stress description for the most recent year
+        const currentYear = Math.max(...years);
+        const currentYearIndex = years.indexOf(currentYear);
+        const currentPetValue = year_pets[currentYearIndex];
+        const heatStress = getHeatStressDescription(
+          currentPetValue,
+          option,
+          currentYear
+        );
+        setHeatStressDescription(heatStress);
+
+        // Calculate forecast heat stress if enabled
+        if (
+          enableForecast &&
+          forecastData &&
+          forecastData.forecastValues.length > 0
+        ) {
+          const finalForecastYear = forecastData.forecastYears.at(-1)!;
+          const finalForecastValue = forecastData.forecastValues.at(-1)!;
+          const forecastHeatStress = getForecastHeatStressDescription(
+            finalForecastValue,
+            finalForecastYear
+          );
+          setForecastHeatStress(forecastHeatStress);
+        } else {
+          setForecastHeatStress(undefined);
+        }
+
         const graph = GenerateTrendGraph(
           years,
           option,
@@ -81,11 +122,13 @@ const Home: FC<MapProperties> = ({
         setPetGraph(graph);
       } catch {
         setPetGraph(<ErrorGraphDisplay />);
+        setHeatStressDescription(undefined);
+        setForecastHeatStress(undefined);
       } finally {
         setGraphLoading(false);
       }
     },
-    []
+    [] // No dependencies needed - uses only parameters and stable setters
   );
 
   const handleSelectChange = useCallback(
@@ -95,7 +138,7 @@ const Home: FC<MapProperties> = ({
         await setGraphMeasure(option);
       }
     },
-    [selectedLocationId, generateGraph]
+    [selectedLocationId]
   );
 
   useEffect(() => {
@@ -122,7 +165,7 @@ const Home: FC<MapProperties> = ({
       setSelectedLocation(location);
       setModalOpen(true);
     },
-    [generateGraph, selectedGraphMeasure, locationMap]
+    [locationMap]
   );
 
   return (
@@ -144,15 +187,17 @@ const Home: FC<MapProperties> = ({
       >
         <GraphSection
           forecastEnabled={forecastEnabled}
+          forecastHeatStress={forecastHeatStress}
           forecastYearsAhead={forecastYearsAhead}
           graphLoading={graphLoading}
+          heatStressDescription={heatStressDescription}
           onForecastToggle={setForecastEnabled}
           onForecastYearsChange={setForecastYearsAhead}
           onSelectChange={handleSelectChange}
           petGraph={petGraph}
           selectedGraphMeasure={selectedGraphMeasure}
           selectedLocation={selectedLocation}
-          selectOptions={SELECT_OPTIONS}
+          selectOptions={selectOptions}
         />
       </Modal>
     </div>

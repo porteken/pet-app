@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
     return new NextResponse(undefined, { status: 404 });
   }
 
-  const knownRoutes = ["/about", "/map"];
+  const knownRoutes = ["/about", "/map", "/rankings"];
   if (knownRoutes.includes(pathname)) {
     return NextResponse.next();
   }

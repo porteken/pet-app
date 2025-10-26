@@ -159,37 +159,7 @@ export const GenerateTrendGraph = (
   // Add forecast data if provided
   if (forecastData && forecastData.forecastYears.length > 0) {
     data.push(
-      // Lower bound (invisible, used for fill)
-      {
-        fill: "none",
-        hovertemplate: "Year: %{x}<br>Lower: %{y:.2f}<extra></extra>",
-        line: {
-          color: "rgba(128, 128, 128, 0)",
-          width: 0,
-        },
-        mode: "lines",
-        name: "Lower Bound",
-        showlegend: false,
-        type: "scatter",
-        x: forecastData.forecastYears,
-        y: forecastData.lowerBound,
-      },
-      // Upper bound (fills to lower bound)
-      {
-        fill: "tonexty",
-        fillcolor: "rgba(128, 128, 128, 0.2)",
-        hovertemplate: "Year: %{x}<br>Upper: %{y:.2f}<extra></extra>",
-        line: {
-          color: "rgba(128, 128, 128, 0)",
-          width: 0,
-        },
-        mode: "lines",
-        name: "95% Confidence",
-        type: "scatter",
-        x: forecastData.forecastYears,
-        y: forecastData.upperBound,
-      },
-      // Forecast trendline
+      // Forecast trendline (no confidence bands)
       {
         hovertemplate: "Year: %{x}<br>Forecast: %{y:.2f}<extra></extra>",
         line: {

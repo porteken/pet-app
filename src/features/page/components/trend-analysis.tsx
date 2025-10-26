@@ -3,6 +3,7 @@
 
 import React from "react";
 
+import { ForecastControls } from "@/components/forecast/forecast-controls";
 import { GenerateTrendGraph } from "@/features/generate-graph";
 import { FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { calculateForecast } from "@/lib/utils/forecast";
@@ -12,15 +13,13 @@ import {
   type HeatStressDescription,
 } from "@/lib/utils/heat-stress";
 
-import { ForecastControls } from "./forecast-controls";
-
 interface TrendAnalysisProperties {
   id: number;
   initialGraphMeasure: string;
   onMeasureChange: (measure: string) => Promise<void>;
 }
 
-export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
+const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   id,
   initialGraphMeasure,
   onMeasureChange,
@@ -63,8 +62,8 @@ export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
         forecastData &&
         forecastData.forecastValues.length > 0
       ) {
-        const finalForecastYear = forecastData.forecastYears.at(-1);
-        const finalForecastValue = forecastData.forecastValues.at(-1);
+        const finalForecastYear = forecastData.forecastYears.at(-1)!;
+        const finalForecastValue = forecastData.forecastValues.at(-1)!;
         setForecastHeatStress(
           getForecastHeatStressDescription(
             finalForecastValue,
@@ -85,7 +84,7 @@ export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
       );
       setTrendGraph(graph);
     },
-    [id, setTrendGraph]
+    [id]
   );
 
   const handleGraphMeasureChange = React.useCallback(
@@ -94,7 +93,7 @@ export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
       setSelectedGraphMeasure(option);
       await onMeasureChange(option);
     },
-    [generatePetTrendGraph, onMeasureChange]
+    [onMeasureChange]
   );
 
   React.useEffect(() => {
@@ -168,3 +167,7 @@ export const TrendAnalysis: React.FC<TrendAnalysisProperties> = ({
     </div>
   );
 };
+
+TrendAnalysisComponent.displayName = "TrendAnalysis";
+
+export const TrendAnalysis = React.memo(TrendAnalysisComponent);

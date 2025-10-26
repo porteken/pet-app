@@ -3,6 +3,8 @@ export class SimpleLinearRegression {
   private readonly intercept: number;
   private readonly standardError: number;
   private readonly xData: number[];
+  private readonly xMean: number;
+  private readonly xVariance: number;
   private readonly yData: number[];
 
   constructor(x: number[], y: number[]) {
@@ -23,6 +25,10 @@ export class SimpleLinearRegression {
     this.slope = result.slope;
     this.intercept = result.intercept;
     this.standardError = this.calculateStandardError(x, y);
+    const n = this.xData.length;
+    this.xMean = this.xData.reduce((sum, value) => sum + value, 0) / n;
+    this.xVariance =
+      this.xData.reduce((sum, value) => sum + (value - this.xMean) ** 2, 0) / n;
   }
 
   predict(x: number): number {
@@ -31,23 +37,27 @@ export class SimpleLinearRegression {
 
   predictWithConfidence(
     x: number,
-    confidenceLevel: number = 0.95
+    confidenceLevel: number = 0.8
   ): { lowerBound: number; prediction: number; upperBound: number } {
     const prediction = this.predict(x);
     const n = this.xData.length;
-    const xMean = this.xData.reduce((sum, value) => sum + value, 0) / n;
-    const xVariance =
-      this.xData.reduce((sum, value) => sum + (value - xMean) ** 2, 0) / n;
 
     // Standard error for prediction interval (wider than confidence interval)
     // This accounts for both the error in the mean and the scatter of individual points
     const predictionError =
       this.standardError *
-      Math.sqrt(1 + 1 / n + (x - xMean) ** 2 / (n * xVariance));
+      Math.sqrt(1 + 1 / n + (x - this.xMean) ** 2 / (n * this.xVariance));
 
     // Use t-distribution critical value (approximated for large n)
+    // For 80% confidence and large n, t ≈ 1.282
     // For 95% confidence and large n, t ≈ 1.96
-    const tValue = confidenceLevel === 0.95 ? 1.96 : 2.576; // 95% or 99%
+    // For 99% confidence and large n, t ≈ 2.576
+    const tValueMap: Record<number, number> = {
+      0.8: 1.282,
+      0.95: 1.96,
+      0.99: 2.576,
+    };
+    const tValue = tValueMap[confidenceLevel] ?? 1.282;
 
     const margin = tValue * predictionError;
 

@@ -12,6 +12,8 @@ import React, {
   useState,
 } from "react";
 
+import { HeatStressLegend } from "@/features/page/components/heat-stress-legend";
+
 interface Location {
   city: string;
   lat: number;
@@ -184,18 +186,25 @@ export const MapComponent = memo<MapComponentProperties>(
     }
 
     return (
-      <MapContainer
-        center={[39.5, -98.35]}
-        scrollWheelZoom
-        style={{ height: "100vh", width: "100vw" }}
-        zoom={5}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {markers}
-      </MapContainer>
+      <div className="relative h-screen w-screen">
+        <MapContainer
+          center={[39.5, -98.35]}
+          scrollWheelZoom
+          style={{ height: "100vh", width: "100vw" }}
+          zoom={5}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          {markers}
+        </MapContainer>
+        <div className="pointer-events-none absolute bottom-6 left-6 z-[1000]">
+          <div className="pointer-events-auto">
+            <HeatStressLegend />
+          </div>
+        </div>
+      </div>
     );
   }
 );

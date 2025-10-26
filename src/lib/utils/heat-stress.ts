@@ -5,17 +5,13 @@ export interface HeatStressDescription {
   value: string;
 }
 
-export interface HeatStressInfo {
+interface HeatStressInfo {
   color: string;
   level: HeatStressLevel;
   value: string;
 }
 
-export type HeatStressLevel =
-  | "Extreme"
-  | "Moderate"
-  | "None to Slight"
-  | "Strong";
+type HeatStressLevel = "Extreme" | "Moderate" | "None to Slight" | "Strong";
 
 export function getForecastHeatStressDescription(
   petValue: number,
@@ -42,19 +38,6 @@ export function getForecastHeatStressDescription(
     prefix: `By end of ${year}, it could be`,
     value: info.value,
   };
-}
-
-export function getHeatStressColor(petValue: number): string {
-  if (petValue < 29) {
-    return "text-green-600";
-  }
-  if (petValue >= 29.1 && petValue <= 35) {
-    return "text-yellow-600";
-  }
-  if (petValue >= 35.1 && petValue <= 41) {
-    return "text-orange-600";
-  }
-  return "text-red-600";
 }
 
 export function getHeatStressDescription(
@@ -94,17 +77,4 @@ export function getHeatStressInfo(petValue: number): HeatStressInfo {
     level,
     value: petValue.toFixed(1),
   };
-}
-
-export function getHeatStressLevel(petValue: number): HeatStressLevel {
-  if (petValue < 29) {
-    return "None to Slight";
-  }
-  if (petValue >= 29.1 && petValue <= 35) {
-    return "Moderate";
-  }
-  if (petValue >= 35.1 && petValue <= 41) {
-    return "Strong";
-  }
-  return "Extreme";
 }

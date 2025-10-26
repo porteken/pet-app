@@ -5,8 +5,8 @@
  * Includes realistic variability based on historical patterns.
  */
 export class TimeSeriesForecast {
-  private readonly alpha: number; // Level smoothing parameter
-  private readonly beta: number; // Trend smoothing parameter
+  private readonly alpha: number;
+  private readonly beta: number;
   private readonly data: number[];
   private readonly level: number[];
   private readonly residualPattern: number[];
@@ -23,21 +23,18 @@ export class TimeSeriesForecast {
       throw new Error("data must have at least 3 points");
     }
 
-    this.alpha = alpha; // Lower alpha = more weight to historical trend
-    this.beta = beta; // Lower beta = smoother trend estimation
+    this.alpha = alpha;
+    this.beta = beta;
     this.data = [...data];
     this.level = [];
     this.trend = [];
     this.residuals = [];
     this.residualPattern = [];
 
-    // Initialize level and trend using the first few points
     this.initializeComponents();
 
-    // Apply Holt's linear trend method
     this.applyHoltsMethod();
 
-    // Calculate standard error and variance from residuals
     this.standardError = this.calculateStandardError();
     this.yearlyVariance = this.calculateYearlyVariance();
   }
@@ -53,11 +50,8 @@ export class TimeSeriesForecast {
     const lastLevel = this.level.at(-1)!;
     const lastTrend = this.trend.at(-1)!;
 
-    // Base forecast from overall trend
     const baseForecast = lastLevel + stepsAhead * lastTrend;
 
-    // Add realistic variability based on historical patterns
-    // Use a cyclical pattern + random component
     const cyclicalComponent =
       this.yearlyVariance * Math.sin((stepsAhead * Math.PI) / 3);
     const randomComponent =
@@ -75,19 +69,16 @@ export class TimeSeriesForecast {
   ): { lowerBound: number; prediction: number; upperBound: number } {
     const prediction = this.forecast(stepsAhead);
 
-    // Standard error increases with forecast horizon
-    // For Holt's method, variance increases quadratically with h
     const h = stepsAhead;
-    const varianceFactor = Math.sqrt(1 + h * h * 0.1); // Simplified variance growth
+    const varianceFactor = Math.sqrt(1 + h * h * 0.1);
 
     const predictionError = this.standardError * varianceFactor;
 
-    // Z-scores for different confidence levels
     const zValueMap: Record<number, number> = {
-      0.8: 1.282, // 80% confidence
-      0.9: 1.645, // 90% confidence
-      0.95: 1.96, // 95% confidence
-      0.99: 2.576, // 99% confidence
+      0.8: 1.282,
+      0.9: 1.645,
+      0.95: 1.96,
+      0.99: 2.576,
     };
     const zValue = zValueMap[confidenceLevel] ?? 1.282;
 
@@ -121,7 +112,6 @@ export class TimeSeriesForecast {
     const n = this.data.length;
 
     for (let t = 1; t < n; t++) {
-      // Update level: α * data[t] + (1 - α) * (level[t-1] + trend[t-1])
       const previousLevel = this.level[t - 1];
       const previousTrend = this.trend[t - 1];
 
@@ -129,12 +119,10 @@ export class TimeSeriesForecast {
         this.alpha * this.data[t] +
         (1 - this.alpha) * (previousLevel + previousTrend);
 
-      // Update trend: β * (level[t] - level[t-1]) + (1 - β) * trend[t-1]
       this.trend[t] =
         this.beta * (this.level[t] - previousLevel) +
         (1 - this.beta) * previousTrend;
 
-      // Calculate residual (one-step ahead forecast error)
       const forecast = previousLevel + previousTrend;
       this.residuals[t] = this.data[t] - forecast;
     }
@@ -145,13 +133,11 @@ export class TimeSeriesForecast {
       return 0;
     }
 
-    // Calculate mean squared error from residuals
     const sumSquared = this.residuals.reduce(
       (sum, residual) => sum + residual * residual,
       0
     );
 
-    // Use n-2 degrees of freedom (similar to linear regression)
     return Math.sqrt(sumSquared / (this.residuals.length - 2));
   }
 
@@ -160,27 +146,23 @@ export class TimeSeriesForecast {
       return 0;
     }
 
-    // Calculate year-to-year differences to understand natural variability
     const yearToYearChanges: number[] = [];
     for (let index = 1; index < this.data.length; index++) {
       yearToYearChanges.push(Math.abs(this.data[index] - this.data[index - 1]));
     }
 
-    // Use the average year-to-year change as a measure of variability
     const avgChange =
       yearToYearChanges.reduce((sum, change) => sum + change, 0) /
       yearToYearChanges.length;
 
-    return avgChange * 0.6; // Scale down to 60% for realistic but not extreme variation
+    return avgChange * 0.6;
   }
 
   private initializeComponents(): void {
     const n = this.data.length;
 
-    // Initialize level as the first data point
     this.level[0] = this.data[0];
 
-    // Initialize trend as the average change over the first few points
     this.trend[0] = n >= 2 ? this.data[1] - this.data[0] : 0;
   }
 

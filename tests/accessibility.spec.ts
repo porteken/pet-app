@@ -10,8 +10,6 @@ test.describe("Accessibility Tests", () => {
 
     await page.goto("/1");
 
-    // Wait for the page and graphs to load
-
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
       timeout: 15_000,
     });
@@ -25,8 +23,6 @@ test.describe("Accessibility Tests", () => {
     await page.keyboard.press("ArrowDown");
     await page.keyboard.press("Enter");
 
-    // Wait for graphs to re-render
-
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
       timeout: 10_000,
     });
@@ -39,8 +35,6 @@ test.describe("Accessibility Tests", () => {
 
     const mainHeading = page.getByRole("heading", { level: 1 });
     await expect(mainHeading.first()).toBeVisible();
-
-    // Wait for the page to be fully loaded by waiting for the select elements
 
     const graphMeasureLabel = page.locator('label[for="graph-measure"]');
     await expect(graphMeasureLabel).toBeVisible({ timeout: 10_000 });
@@ -92,7 +86,6 @@ test.describe("Accessibility Tests", () => {
 
     await page.goto("/1");
 
-    // Wait for initial graphs to load
     await page.waitForSelector(".js-plotly-plot", { state: "visible" });
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
       timeout: 15_000,
@@ -101,7 +94,6 @@ test.describe("Accessibility Tests", () => {
     const graphMeasure = page.locator("select#graph-measure");
     await graphMeasure.selectOption("max");
 
-    // Wait for graphs to re-render after selection change
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
       timeout: 10_000,
     });
@@ -114,7 +106,6 @@ test.describe("Accessibility Tests", () => {
 
     await page.setViewportSize({ height: 600, width: 800 });
 
-    // Wait for page to be fully loaded
     await page.waitForSelector("select#graph-measure", { state: "visible" });
 
     await expect(page.getByText("Trend Analysis")).toBeVisible();
@@ -124,7 +115,6 @@ test.describe("Accessibility Tests", () => {
     await expect(graphMeasure).toBeVisible();
     await graphMeasure.selectOption("max");
 
-    // Wait for layout to settle after selection change
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
       timeout: 10_000,
     });

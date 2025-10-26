@@ -16,7 +16,6 @@ export function calculateForecast(
     };
   }
 
-  // Use time series forecasting with Holt's linear trend method
   const ts = new TimeSeriesForecast(yearPets);
   const lastYear = Math.max(...years);
   const forecastYears: number[] = [];
@@ -24,15 +23,12 @@ export function calculateForecast(
   const lowerBound: number[] = [];
   const upperBound: number[] = [];
 
-  // Add the last historical year as the first point to connect the lines
-  // Use 0 steps ahead for current position
   const lastYearPrediction = ts.forecastWithConfidence(0, 0.8);
   forecastYears.push(lastYear);
   forecastValues.push(lastYearPrediction.prediction);
   lowerBound.push(lastYearPrediction.lowerBound);
   upperBound.push(lastYearPrediction.upperBound);
 
-  // Generate future predictions using time series forecast
   for (let index = 1; index <= yearsAhead; index++) {
     const futureYear = lastYear + index;
     const {

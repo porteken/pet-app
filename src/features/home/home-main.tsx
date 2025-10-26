@@ -83,7 +83,6 @@ const Home: FC<MapProperties> = ({
           ? calculateForecast(years, year_pets, yearsAhead)
           : undefined;
 
-        // Calculate heat stress description for the most recent year
         const currentYear = Math.max(...years);
         const currentYearIndex = years.indexOf(currentYear);
         const currentPetValue = year_pets[currentYearIndex];
@@ -94,7 +93,6 @@ const Home: FC<MapProperties> = ({
         );
         setHeatStressDescription(heatStress);
 
-        // Calculate forecast heat stress if enabled
         if (
           enableForecast &&
           forecastData &&
@@ -128,7 +126,7 @@ const Home: FC<MapProperties> = ({
         setGraphLoading(false);
       }
     },
-    [] // No dependencies needed - uses only parameters and stable setters
+    []
   );
 
   const handleSelectChange = useCallback(

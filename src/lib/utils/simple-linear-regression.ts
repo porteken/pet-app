@@ -42,16 +42,10 @@ export class SimpleLinearRegression {
     const prediction = this.predict(x);
     const n = this.xData.length;
 
-    // Standard error for prediction interval (wider than confidence interval)
-    // This accounts for both the error in the mean and the scatter of individual points
     const predictionError =
       this.standardError *
       Math.sqrt(1 + 1 / n + (x - this.xMean) ** 2 / (n * this.xVariance));
 
-    // Use t-distribution critical value (approximated for large n)
-    // For 80% confidence and large n, t ≈ 1.282
-    // For 95% confidence and large n, t ≈ 1.96
-    // For 99% confidence and large n, t ≈ 2.576
     const tValueMap: Record<number, number> = {
       0.8: 1.282,
       0.95: 1.96,
@@ -97,7 +91,6 @@ export class SimpleLinearRegression {
       return 0;
     }
 
-    // Calculate sum of squared residuals
     let sumSquaredResiduals = 0;
     for (let index = 0; index < n; index++) {
       const predicted = this.slope * x[index] + this.intercept;
@@ -105,7 +98,6 @@ export class SimpleLinearRegression {
       sumSquaredResiduals += residual * residual;
     }
 
-    // Standard error of the estimate
     return Math.sqrt(sumSquaredResiduals / (n - 2));
   }
 }

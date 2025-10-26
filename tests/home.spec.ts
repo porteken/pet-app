@@ -15,7 +15,7 @@ test.describe("Home Page", () => {
     await page.goto("/");
     const marker = page.locator(".leaflet-marker-icon").first();
     await expect(marker).toBeVisible({ timeout: 10_000 });
-    // eslint-disable-next-line playwright/no-force-option
+
     await marker.click({ force: true });
     await expect(
       page.getByRole("button", { name: "View Full Details" })

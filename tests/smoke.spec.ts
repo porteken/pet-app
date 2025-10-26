@@ -13,7 +13,7 @@ test.describe("Smoke Tests - Critical User Journeys", () => {
 
     const marker = page.locator(".leaflet-marker-icon").first();
     await expect(marker).toBeVisible({ timeout: 10_000 });
-    // eslint-disable-next-line playwright/no-force-option
+
     await marker.click({ force: true });
 
     await expect(
@@ -89,9 +89,9 @@ test.describe("Smoke Tests - Critical User Journeys", () => {
     await marker.waitFor({ state: "visible", timeout: 10_000 });
 
     await page.setViewportSize({ height: 1024, width: 768 });
-    // Wait for viewport to stabilize by checking the marker is still visible
+
     await expect(marker).toBeVisible({ timeout: 10_000 });
-    // eslint-disable-next-line playwright/no-force-option
+
     await marker.click({ force: true });
 
     const viewDetailsButton = page.getByRole("button", {
@@ -118,7 +118,7 @@ test.describe("Smoke Tests - Critical User Journeys", () => {
 
     const loadTime = Date.now() - startTime;
 
-    expect(loadTime).toBeLessThan(10_000); // Increased to 10s for more realistic expectations
+    expect(loadTime).toBeLessThan(10_000);
 
     const errors: string[] = [];
     page.on("console", message => {
@@ -132,7 +132,7 @@ test.describe("Smoke Tests - Critical User Journeys", () => {
     await expect(page.getByText("Trend Analysis")).toBeVisible();
 
     const dataLoadTime = Date.now() - dataStartTime;
-    expect(dataLoadTime).toBeLessThan(15_000); // Increased to 15s to account for graph rendering
+    expect(dataLoadTime).toBeLessThan(15_000);
 
     expect(errors.length).toBeLessThan(3);
   });

@@ -2,78 +2,79 @@
 
 import { MultiSelect, Pagination, Select } from "@mantine/core";
 import { useRouter } from "next/navigation";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useTransition } from "react";
 
 import { HeaderBar } from "@/features/header-bar";
+import { setRankingsYear } from "@/lib/actions/rankings-actions";
 import { getHeatStressInfo } from "@/lib/utils/heat-stress";
 import { LocationOptionSection } from "@/types/types";
 
 const getPetRange = (p25: number, p75: number): string => {
   return `${p25.toFixed(1)}-${p75.toFixed(1)}`;
 };
+const color_mapping = (value: number) => {
+  if (value > 0) {
+    return "text-red-600";
+  } else if (value < 0) {
+    return "text-blue-600";
+  }
 
+  return "text-grey-600";
+};
 interface RankingItem {
+  avg_pet: number;
   changeFrom2000: null | number;
   city: string;
+  FutureValue: null | number;
   location_id: number;
+  max_pet: number;
   p25: number;
   p75: number;
-  pet: number;
   rank: number;
   state: string;
 }
 
 interface RankingsMainProperties {
-  initialMeasure: "avg" | "max";
   initialYear: number;
   LocationOptions: LocationOptionSection[];
   rankings: RankingItem[];
 }
 
 export const RankingsMain: React.FC<RankingsMainProperties> = ({
-  initialMeasure,
   initialYear,
   LocationOptions,
   rankings,
 }) => {
   const router = useRouter();
-  const [selectedMeasure, setSelectedMeasure] = useState(initialMeasure);
   const [selectedYear, setSelectedYear] = useState(initialYear);
+  const [isPending, startTransition] = useTransition();
 
-  // Filter states
-  // eslint-disable-next-line unicorn/no-null -- Mantine Select requires null for clearable functionality
-  const [stateFilter, setStateFilter] = useState<null | string>(null);
+  const [stateFilter, setStateFilter] = useState<string[]>([]);
   const [heatStressFilter, setHeatStressFilter] = useState<string[]>([]);
 
-  // Sorting state
   type SortColumn =
+    | "avg_pet"
     | "change"
     | "city"
-    | "heat_stress"
-    | "pet"
+    | "FutureValue"
+    | "max_pet"
     | "rank"
     | "state";
   const [sortColumn, setSortColumn] = useState<SortColumn>("rank");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  // Generate year options from 2000 to 2025
   const yearOptions = Array.from({ length: 26 }, (_, index) => ({
     label: String(2000 + index),
     value: String(2000 + index),
   }));
 
-  const measureOptions = [
-    { label: "Average", value: "avg" },
-    { label: "Maximum", value: "max" },
-  ];
-
-  // Get unique states from rankings
   const stateOptions = useMemo(() => {
-    const uniqueStates = [...new Set(rankings.map(r => r.state))].toSorted();
+    const uniqueStates = [...new Set(rankings.map(r => r.state))].toSorted(
+      (a, b) => a.localeCompare(b)
+    );
     return uniqueStates.map(state => ({ label: state, value: state }));
   }, [rankings]);
 
@@ -81,22 +82,17 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
     { label: "None to Slight", value: "None to Slight" },
     { label: "Moderate", value: "Moderate" },
     { label: "Strong", value: "Strong" },
-    { label: "Very Strong", value: "Very Strong" },
     { label: "Extreme", value: "Extreme" },
   ];
 
-  // Filter and sort rankings
   const filteredAndSortedRankings = useMemo(() => {
-    // First filter
-    const filtered = rankings.filter(({ pet, state }) => {
-      // State filter
-      if (stateFilter && state !== stateFilter) {
+    const filtered = rankings.filter(({ avg_pet, state }) => {
+      if (stateFilter.length > 0 && !stateFilter.includes(state)) {
         return false;
       }
 
-      // Heat stress level filter
       if (heatStressFilter.length > 0) {
-        const heatStressInfo = getHeatStressInfo(pet);
+        const heatStressInfo = getHeatStressInfo(avg_pet);
         if (!heatStressFilter.includes(heatStressInfo.level)) {
           return false;
         }
@@ -105,11 +101,14 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
       return true;
     });
 
-    // Then sort
     return filtered.toSorted((a, b) => {
       let comparison = 0;
 
       switch (sortColumn) {
+        case "avg_pet": {
+          comparison = a.avg_pet - b.avg_pet;
+          break;
+        }
         case "change": {
           const aChange = a.changeFrom2000 ?? 0;
           const bChange = b.changeFrom2000 ?? 0;
@@ -120,14 +119,12 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
           comparison = a.city.localeCompare(b.city);
           break;
         }
-        case "heat_stress": {
-          const aLevel = getHeatStressInfo(a.pet).level;
-          const bLevel = getHeatStressInfo(b.pet).level;
-          comparison = aLevel.localeCompare(bLevel);
+        case "FutureValue": {
+          comparison = a.FutureValue! - b.FutureValue!;
           break;
         }
-        case "pet": {
-          comparison = a.pet - b.pet;
+        case "max_pet": {
+          comparison = a.max_pet - b.max_pet;
           break;
         }
         case "rank": {
@@ -144,41 +141,32 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
     });
   }, [rankings, stateFilter, heatStressFilter, sortColumn, sortDirection]);
 
-  // Paginate the results
   const paginatedRankings = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     return filteredAndSortedRankings.slice(startIndex, endIndex);
   }, [filteredAndSortedRankings, currentPage, itemsPerPage]);
 
-  // Calculate total pages
   const totalPages = Math.ceil(filteredAndSortedRankings.length / itemsPerPage);
 
-  // Reset to page 1 when filters or sorting changes
   React.useEffect(() => {
     setCurrentPage(1);
   }, [stateFilter, heatStressFilter, sortColumn, sortDirection]);
 
   const handleYearChange = (value: null | string) => {
     if (value) {
-      setSelectedYear(Number(value));
-      router.push(`/rankings?year=${value}&measure=${selectedMeasure}`);
-    }
-  };
-
-  const handleMeasureChange = (value: null | string) => {
-    if (value) {
-      setSelectedMeasure(value as "avg" | "max");
-      router.push(`/rankings?year=${selectedYear}&measure=${value}`);
+      const year = Number(value);
+      setSelectedYear(year);
+      startTransition(() => {
+        void setRankingsYear(year);
+      });
     }
   };
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
-      // Toggle direction if clicking the same column
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
-      // Set new column and default to ascending
       setSortColumn(column);
       setSortDirection("asc");
     }
@@ -190,33 +178,24 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
       <main className="mx-auto max-w-7xl px-4 py-8">
         <div className="mb-8">
           <h1 className="mb-2 text-3xl font-bold text-gray-900">
-            City Rankings by Heat Stress
+            Cities ranked by Average PET
           </h1>
-          <p className="text-gray-600">
-            Cities ranked by PET (Physiological Equivalent Temperature) values
-            in descending order
-          </p>
         </div>
 
         <div className="mb-6 flex flex-wrap gap-4">
           <Select
             className="w-48"
             data={yearOptions}
+            disabled={isPending}
             label="Year"
             onChange={handleYearChange}
             value={String(selectedYear)}
           />
-          <Select
-            className="w-48"
-            data={measureOptions}
-            label="Measure Type"
-            onChange={handleMeasureChange}
-            value={selectedMeasure}
-          />
-          <Select
+          <MultiSelect
             className="w-48"
             clearable
             data={stateOptions}
+            disabled={isPending}
             label="State"
             onChange={setStateFilter}
             placeholder="All states"
@@ -226,7 +205,8 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
             className="w-64"
             clearable
             data={heatStressOptions}
-            label="Heat Stress Level"
+            disabled={isPending}
+            label="Avg Heat Stress Level"
             onChange={setHeatStressFilter}
             placeholder="All levels"
             value={heatStressFilter}
@@ -297,17 +277,28 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                   </th>
                   <th
                     className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                    onClick={() => handleSort("pet")}
+                    onClick={() => handleSort("avg_pet")}
                   >
                     <div className="flex items-center gap-1">
-                      PET Value
-                      {sortColumn === "pet" && (
+                      Avg Value
+                      {sortColumn === "avg_pet" && (
+                        <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
+                    onClick={() => handleSort("max_pet")}
+                  >
+                    <div className="flex items-center gap-1">
+                      Max Value
+                      {sortColumn === "max_pet" && (
                         <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
                       )}
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                    PET Range
+                    PET Range (25th to 75th percentile)
                   </th>
                   <th
                     className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
@@ -322,11 +313,11 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                   </th>
                   <th
                     className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                    onClick={() => handleSort("heat_stress")}
+                    onClick={() => handleSort("FutureValue")}
                   >
                     <div className="flex items-center gap-1">
-                      Heat Stress Level
-                      {sortColumn === "heat_stress" && (
+                      2100 Forecasted PET
+                      {sortColumn === "FutureValue" && (
                         <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
                       )}
                     </div>
@@ -336,16 +327,22 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
               <tbody className="divide-y divide-gray-200 bg-white">
                 {paginatedRankings.map(
                   ({
+                    avg_pet,
                     changeFrom2000,
                     city,
+                    FutureValue,
                     location_id,
+                    max_pet,
                     p25,
                     p75,
-                    pet,
                     rank,
                     state,
                   }) => {
-                    const heatStressInfo = getHeatStressInfo(pet);
+                    const avgheatStressInfo = getHeatStressInfo(avg_pet);
+                    const maxheatStressInfo = getHeatStressInfo(max_pet);
+                    const futureheatStressInfo = FutureValue
+                      ? getHeatStressInfo(FutureValue)
+                      : "";
                     return (
                       <tr
                         className="hover:bg-gray-50"
@@ -364,9 +361,16 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                         </td>
                         <td className="px-6 py-4 text-sm whitespace-nowrap">
                           <span
-                            className={`font-semibold ${heatStressInfo.color}`}
+                            className={`font-semibold ${avgheatStressInfo.color}`}
                           >
-                            {pet.toFixed(1)}
+                            {avg_pet.toFixed(1)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm whitespace-nowrap">
+                          <span
+                            className={`font-semibold ${maxheatStressInfo.color}`}
+                          >
+                            {max_pet.toFixed(1)}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
@@ -377,13 +381,9 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                             <span className="text-gray-400">N/A</span>
                           ) : (
                             <span
-                              className={`font-semibold ${
-                                changeFrom2000 > 0
-                                  ? "text-red-600"
-                                  : changeFrom2000 < 0
-                                    ? "text-blue-600"
-                                    : "text-gray-600"
-                              }`}
+                              className={`font-semibold ${color_mapping(
+                                changeFrom2000
+                              )}`}
                             >
                               {changeFrom2000 > 0 ? "+" : ""}
                               {changeFrom2000.toFixed(1)}
@@ -392,9 +392,9 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                         </td>
                         <td className="px-6 py-4 text-sm whitespace-nowrap">
                           <span
-                            className={`inline-flex rounded-full px-2 text-xs leading-5 font-semibold ${heatStressInfo.color}`}
+                            className={`font-semibold ${futureheatStressInfo ? futureheatStressInfo.color : ""}`}
                           >
-                            {heatStressInfo.level}
+                            {FutureValue ? FutureValue.toFixed(1) : ""}
                           </span>
                         </td>
                       </tr>

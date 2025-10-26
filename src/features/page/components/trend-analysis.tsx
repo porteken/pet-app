@@ -46,17 +46,14 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
         ? calculateForecast(years, year_pets, yearsAhead)
         : undefined;
 
-      // Get the most recent year's PET value for current heat stress
       const currentYear = Math.max(...years);
       const currentYearIndex = years.indexOf(currentYear);
       const currentPetValue = year_pets[currentYearIndex];
 
-      // Update current heat stress description
       setCurrentHeatStress(
         getHeatStressDescription(currentPetValue, option, currentYear)
       );
 
-      // Update forecast heat stress description if forecast is enabled
       if (
         enableForecast &&
         forecastData &&

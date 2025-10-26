@@ -4,8 +4,6 @@ test.describe("About Page", () => {
   test("should display about content", async ({ page }) => {
     await page.goto("/about");
 
-    // Wait for the page to be fully loaded
-
     await expect(page.getByText("Purpose of the Application")).toBeVisible({
       timeout: 10_000,
     });

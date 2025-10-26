@@ -156,24 +156,20 @@ export const GenerateTrendGraph = (
     },
   ];
 
-  // Add forecast data if provided
   if (forecastData && forecastData.forecastYears.length > 0) {
-    data.push(
-      // Forecast trendline (no confidence bands)
-      {
-        hovertemplate: "Year: %{x}<br>Forecast: %{y:.2f}<extra></extra>",
-        line: {
-          color: GRAPH_COLORS.secondary,
-          dash: "dot",
-          width: 2,
-        },
-        mode: "lines",
-        name: "Forecast",
-        type: "scatter",
-        x: forecastData.forecastYears,
-        y: forecastData.forecastValues,
-      }
-    );
+    data.push({
+      hovertemplate: "Year: %{x}<br>Forecast: %{y:.2f}<extra></extra>",
+      line: {
+        color: GRAPH_COLORS.secondary,
+        dash: "dot",
+        width: 2,
+      },
+      mode: "lines",
+      name: "Forecast",
+      type: "scatter",
+      x: forecastData.forecastYears,
+      y: forecastData.forecastValues,
+    });
   }
 
   const config: PlotlyConfig = {

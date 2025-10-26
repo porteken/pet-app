@@ -19,7 +19,7 @@ mockSimpleLinearRegression();
 describe("FetchTrendGraphData", () => {
   it("should throw error when called in non-browser environment", async () => {
     const originalWindow = globalThis.window;
-    // @ts-expect-error - Testing non-browser environment
+
     delete globalThis.window;
 
     await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(

@@ -55,7 +55,6 @@ export function getHeatStressDescription(
   };
 }
 
-// Optimized: Single pass through threshold checks
 export function getHeatStressInfo(petValue: number): HeatStressInfo {
   let color: string;
   let level: HeatStressLevel;

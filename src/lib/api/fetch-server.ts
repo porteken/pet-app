@@ -79,7 +79,6 @@ export async function FetchCityRankings(year: number): Promise<
       percentileError
     );
   }
-  console.log(percentiles_data);
 
   const { data: futurePetData, error: futurePetError } = await supabase
     .from("pet_forecast")

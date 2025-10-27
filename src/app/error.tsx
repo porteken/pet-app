@@ -2,7 +2,7 @@
 
 import { Button, Container, Stack, Text, Title } from "@mantine/core";
 
-export default function Error({
+export default function ErrorPage({
   error,
   reset,
 }: {

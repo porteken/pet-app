@@ -2,6 +2,10 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+// Helper function to create async delay for testing
+const createDelay = (ms: number) =>
+  new Promise(resolve => setTimeout(resolve, ms));
+
 vi.mock("@/lib/actions/actions", () => ({
   setGraphMeasure: vi.fn().mockResolvedValue({}),
 }));
@@ -220,11 +224,7 @@ describe("Home", () => {
     });
 
     it("should show loading state during graph generation", async () => {
-      const slowFetch = vi
-        .fn()
-        .mockImplementation(
-          () => new Promise(resolve => setTimeout(resolve, 100))
-        );
+      const slowFetch = vi.fn().mockImplementation(() => createDelay(100));
       vi.mocked(FetchTrendGraphData).mockImplementation(slowFetch);
 
       render(<Home {...defaultProps} />);

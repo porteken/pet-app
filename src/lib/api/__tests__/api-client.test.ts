@@ -17,6 +17,10 @@ vi.mock("@/lib/utils/errors", () => ({
   },
 }));
 
+// Helper function to create async delay for testing
+const createDelay = (ms: number) =>
+  new Promise(resolve => setTimeout(resolve, ms));
+
 describe("api-client", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -170,7 +174,7 @@ describe("api-client", () => {
     it("should handle async request function correctly", async () => {
       const mockData = { async: true };
       const mockRequestFunction = vi.fn(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await createDelay(10);
         return mockData;
       });
 

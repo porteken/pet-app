@@ -235,7 +235,9 @@ describe("Page Component", () => {
   it("renders with large datasets", async () => {
     const manyLocations = Array.from({ length: 100 }, (_, index) => ({
       id: index + 1,
+      // eslint-disable-next-line sonarjs/pseudo-random -- Safe for test data generation
       lat: Math.random() * 180 - 90,
+      // eslint-disable-next-line sonarjs/pseudo-random -- Safe for test data generation
       lng: Math.random() * 360 - 180,
       name: `Location ${index + 1}`,
     }));

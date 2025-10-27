@@ -17,12 +17,14 @@ export const database = factory({
     id: primaryKey(() => petDataCounter++),
     location_id: () => 1,
     measure_type: () => "avg",
+    // eslint-disable-next-line sonarjs/pseudo-random -- Safe for test data generation
     pet_count: () => Math.floor(Math.random() * 100) + 1,
   },
   trendData: {
     id: primaryKey(() => trendDataCounter++),
     location_id: () => 1,
     measure_type: () => "avg",
+    // eslint-disable-next-line sonarjs/pseudo-random -- Safe for test data generation
     pet_count: () => Math.floor(Math.random() * 100) + 1,
     year: () => 2025,
   },

@@ -9,8 +9,8 @@ import { setRankingsYear } from "@/lib/actions/rankings-actions";
 import { getHeatStressInfo } from "@/lib/utils/heat-stress";
 import { LocationOptionSection } from "@/types/types";
 
-const getPetRange = (p25: number, p75: number): string => {
-  return `${p25.toFixed(1)}-${p75.toFixed(1)}`;
+const getPetRange = (p10: number, p90: number): string => {
+  return `${p10.toFixed(1)}-${p90.toFixed(1)}`;
 };
 const color_mapping = (value: number) => {
   if (value > 0) {
@@ -29,8 +29,8 @@ interface RankingItem {
   FutureValueUpper: null | number;
   location_id: number;
   max_pet: number;
-  p25: number;
-  p75: number;
+  p10: number;
+  p90: number;
   rank: number;
   state: string;
 }
@@ -333,7 +333,7 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                       </div>
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                      PET Range (25th-75th percentile)
+                      PET Range (10th-90th percentile)
                     </th>
                     <th
                       className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
@@ -361,8 +361,8 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                       FutureValueUpper,
                       location_id,
                       max_pet,
-                      p25,
-                      p75,
+                      p10,
+                      p90,
                       rank,
                       state,
                     }) => {
@@ -400,7 +400,7 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                            {getPetRange(p25, p75)}°C
+                            {getPetRange(p10, p90)}°C
                           </td>
                           <td className="px-6 py-4 text-sm whitespace-nowrap">
                             {changePerDecade === null ? (

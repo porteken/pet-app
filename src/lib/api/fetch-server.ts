@@ -21,8 +21,8 @@ export async function FetchCityRankings(year: number): Promise<
     FutureValueUpper: null | number;
     location_id: number;
     max_pet: number;
-    p25: number;
-    p75: number;
+    p10: number;
+    p90: number;
     rank: number;
     state: string;
   }>
@@ -71,7 +71,7 @@ export async function FetchCityRankings(year: number): Promise<
 
   const { data: percentiles_data, error: percentileError } = await supabase
     .from(`pet_percentiles`)
-    .select("location_id,year,p25,p75")
+    .select("location_id,year,p10,p90")
     .eq("year", year);
   if (percentileError || !percentiles_data) {
     throw new DatabaseError(
@@ -79,6 +79,7 @@ export async function FetchCityRankings(year: number): Promise<
       percentileError
     );
   }
+  console.log(percentiles_data);
 
   const { data: futurePetData, error: futurePetError } = await supabase
     .from("pet_forecast")
@@ -140,8 +141,8 @@ export async function FetchCityRankings(year: number): Promise<
             FutureValueUpper: forecast2100Upper,
             location_id,
             max_pet: maxPet,
-            p25: percentiles[0].p25,
-            p75: percentiles[0].p75,
+            p10: percentiles[0].p10,
+            p90: percentiles[0].p90,
             state: location.state,
           }
         : undefined;

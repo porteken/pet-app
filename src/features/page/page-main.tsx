@@ -29,14 +29,14 @@ const Main: FC<PageProperties> = ({
       <main className="mx-auto max-w-full px-4 py-8">
         <PageHeader location={location} />
 
-        <div className="flex gap-8">
-          <div className="w-64 flex-shrink-0">
-            <div className="sticky top-8">
+        <div className="flex flex-col gap-8 lg:flex-row">
+          <div className="w-full lg:w-64 lg:flex-shrink-0">
+            <div className="lg:sticky lg:top-8">
               <HeatStressLegend />
             </div>
           </div>
 
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <div className="grid gap-8 lg:grid-cols-2">
               <TrendAnalysis
                 id={id}

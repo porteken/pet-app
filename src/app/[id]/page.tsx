@@ -92,10 +92,16 @@ export default async function LocationPage({
 }
 
 async function fetchGraphData(locationId: number) {
-  const [currentData, referenceData, trendData] = await Promise.all([
-    FetchReferenceGraphData("2025", locationId),
+  // First fetch trend data to get the latest available year
+  const trendData = await FetchTrendGraphData("avg", locationId);
+
+  // Get the latest year from the trend data
+  const latestYear =
+    trendData.years.length > 0 ? String(Math.max(...trendData.years)) : "2024";
+
+  const [currentData, referenceData] = await Promise.all([
+    FetchReferenceGraphData(latestYear, locationId),
     FetchReferenceGraphData("2000", locationId),
-    FetchTrendGraphData("avg", locationId),
   ]);
 
   return {

@@ -60,7 +60,7 @@ export async function FetchForecastData(
     const targetYear = lastHistoricalYear + yearsAhead;
 
     const { data, error } = await supabase
-      .from("pet_forecast")
+      .from("pet_year_avg")
       .select("year, pet, lower, upper")
       .eq("location_id", locationId)
       .gt("year", lastHistoricalYear)

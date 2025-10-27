@@ -6,8 +6,8 @@ export default function LocationError({
   error,
   reset,
 }: {
-  error: Error & { digest?: string };
-  reset: () => void;
+  readonly error: Error & { digest?: string };
+  readonly reset: () => void;
 }) {
   return (
     <Container py="xl" size="sm">

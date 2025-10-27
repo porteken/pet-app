@@ -15,14 +15,14 @@ const defaultGraphMeasure = "avg";
 const Page = dynamic(() => import("@/features/page/page-main"));
 
 interface InvalidLocationErrorProperties {
-  message: string;
-  title: string;
+  readonly message: string;
+  readonly title: string;
 }
 
 export default async function LocationPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  readonly params: Promise<{ id: string }>;
 }) {
   const cookieStore = await cookies();
   const initialGraphMeasure =

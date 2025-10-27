@@ -35,6 +35,16 @@ export default [
   sonarjs.configs.recommended,
   importPlugin.flatConfigs.recommended,
   ...tseslint.configs.recommended,
+  {
+    files: ["**/*.{ts,tsx}"],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
   pluginPromise.configs["flat/recommended"],
   pluginReact.configs.flat.recommended,
   pluginReact.configs.flat["jsx-runtime"],
@@ -84,6 +94,7 @@ export default [
       "react/jsx-uses-react": "error",
       "react/prop-types": "off",
       "unicorn/better-regex": "warn",
+      "unicorn/prefer-global-this": "off",
     },
   },
   {

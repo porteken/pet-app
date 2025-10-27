@@ -113,7 +113,7 @@ export const MapComponent = memo<MapComponentProperties>(
     }, []);
 
     useEffect(() => {
-      if (globalThis.window !== undefined && typeof document !== "undefined") {
+      if (typeof document !== "undefined") {
         loadMap();
       }
     }, [loadMap]);

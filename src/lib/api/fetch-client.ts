@@ -32,14 +32,14 @@ export async function FetchForecastData(
       upperBound90: number[];
     }
 > {
-  if (globalThis.window === undefined) {
-    throw new Error(
-      "FetchForecastData can only be called in browser environment"
-    );
-  }
-
   if (!validateLocationId(locationId)) {
     throw new FetchError(`Invalid location ID: ${locationId}`);
+  }
+
+  if (typeof window === "undefined") {
+    throw new TypeError(
+      "FetchForecastData can only be called in browser environment"
+    );
   }
 
   const response = await apiRequest(async () => {
@@ -100,8 +100,8 @@ export async function FetchTrendGraphData(
   option: string,
   locationId: number
 ): Promise<TrendGraphDataProperties> {
-  if (globalThis.window === undefined) {
-    throw new Error(
+  if (typeof window === "undefined") {
+    throw new TypeError(
       "FetchTrendGraphData can only be called in browser environment"
     );
   }

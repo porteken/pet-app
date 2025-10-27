@@ -10,7 +10,7 @@ import {
   setupApiClientTest,
 } from "@/testing";
 
-import { FetchTrendGraphData } from "../fetch-client";
+import { FetchForecastData, FetchTrendGraphData } from "../fetch-client";
 
 mockSupabaseClient();
 mockValidationModule();
@@ -204,6 +204,223 @@ describe("FetchTrendGraphData", () => {
     await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
       "No data found for location 1"
     );
+  });
+});
+
+describe("FetchForecastData", () => {
+  let mockSupabaseClient: ReturnType<
+    (typeof import("@/testing"))["createMockSupabaseClient"]
+  >;
+  let mockValidation: ReturnType<
+    (typeof import("@/testing"))["createMockValidation"]
+  >;
+
+  beforeEach(async () => {
+    clearAllMocks();
+
+    const setup = await setupApiClientTest();
+    mockSupabaseClient = setup.mockSupabaseClient;
+    mockValidation = setup.mockValidation;
+  });
+
+  it("should throw error when called in non-browser environment", async () => {
+    const originalWindow = globalThis.window;
+
+    delete globalThis.window;
+
+    await expect(FetchForecastData(1, 10)).rejects.toThrow(
+      "FetchForecastData can only be called in browser environment"
+    );
+
+    globalThis.window = originalWindow;
+  });
+
+  it("should throw FetchError for invalid location ID", async () => {
+    mockValidation.validateLocationId.mockReturnValue(false);
+
+    await expect(FetchForecastData(-1, 10)).rejects.toThrow(
+      new FetchError("Invalid location ID: -1")
+    );
+  });
+
+  it("should fetch forecast data successfully", async () => {
+    const mockHistoricalData = [{ year: 2025 }];
+    const mockForecastData = [
+      { lower: 28.5, pet: 30.5, upper: 32.5, year: 2026 },
+      { lower: 29, pet: 31, upper: 33, year: 2027 },
+    ];
+
+    const mockHistoricalQuery = {
+      eq: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: mockHistoricalData }),
+      order: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    const mockForecastQuery = {
+      eq: vi.fn().mockReturnThis(),
+      gt: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi
+        .fn()
+        .mockResolvedValue({ data: mockForecastData, error: undefined }),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    mockSupabaseClient.from
+      .mockReturnValueOnce(mockHistoricalQuery)
+      .mockReturnValueOnce(mockForecastQuery);
+
+    const result = await FetchForecastData(1, 10);
+
+    expect(mockSupabaseClient.from).toHaveBeenCalledExactlyOnceWith(
+      "pet_year_avg"
+    );
+    expect(mockSupabaseClient.from).toHaveBeenCalledTimes(2);
+    expect(result).toEqual({
+      forecastValues: [30.5, 31],
+      forecastYears: [2026, 2027],
+      lowerBound10: [28.5, 29],
+      upperBound90: [32.5, 33],
+    });
+  });
+
+  it("should return undefined when no historical data found", async () => {
+    const mockHistoricalQuery = {
+      eq: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: [] }),
+      order: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    mockSupabaseClient.from.mockReturnValue(mockHistoricalQuery);
+
+    const result = await FetchForecastData(1, 10);
+
+    expect(result).toBeUndefined();
+  });
+
+  it("should return undefined when no forecast data found", async () => {
+    const mockHistoricalData = [{ year: 2025 }];
+
+    const mockHistoricalQuery = {
+      eq: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: mockHistoricalData }),
+      order: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    const mockForecastQuery = {
+      eq: vi.fn().mockReturnThis(),
+      gt: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: [], error: undefined }),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    mockSupabaseClient.from
+      .mockReturnValueOnce(mockHistoricalQuery)
+      .mockReturnValueOnce(mockForecastQuery);
+
+    const result = await FetchForecastData(1, 10);
+
+    expect(result).toBeUndefined();
+  });
+
+  it("should handle database errors when fetching forecast", async () => {
+    const mockHistoricalData = [{ year: 2025 }];
+    const mockError = new Error("Database connection failed");
+
+    const mockHistoricalQuery = {
+      eq: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: mockHistoricalData }),
+      order: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    const mockForecastQuery = {
+      eq: vi.fn().mockReturnThis(),
+      gt: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    mockSupabaseClient.from
+      .mockReturnValueOnce(mockHistoricalQuery)
+      .mockReturnValueOnce(mockForecastQuery);
+
+    await expect(FetchForecastData(1, 10)).rejects.toThrow(
+      "Database error fetching forecast data"
+    );
+  });
+
+  it("should calculate correct target year based on yearsAhead", async () => {
+    const mockHistoricalData = [{ year: 2020 }];
+    const mockForecastData = [
+      { lower: 28.5, pet: 30.5, upper: 32.5, year: 2021 },
+      { lower: 30, pet: 32, upper: 34, year: 2025 },
+    ];
+
+    const mockHistoricalQuery = {
+      eq: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: mockHistoricalData }),
+      order: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    const mockForecastQuery = {
+      eq: vi.fn().mockReturnThis(),
+      gt: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi
+        .fn()
+        .mockResolvedValue({ data: mockForecastData, error: undefined }),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    mockSupabaseClient.from
+      .mockReturnValueOnce(mockHistoricalQuery)
+      .mockReturnValueOnce(mockForecastQuery);
+
+    await FetchForecastData(1, 5);
+
+    expect(mockForecastQuery.gt).toHaveBeenCalledWith("year", 2020);
+    expect(mockForecastQuery.lte).toHaveBeenCalledWith("year", 2025);
+  });
+
+  it("should convert pet, lower, and upper values to numbers", async () => {
+    const mockHistoricalData = [{ year: 2025 }];
+    const mockForecastData = [
+      { lower: "28.5", pet: "30.5", upper: "32.5", year: 2026 },
+    ];
+
+    const mockHistoricalQuery = {
+      eq: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue({ data: mockHistoricalData }),
+      order: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    const mockForecastQuery = {
+      eq: vi.fn().mockReturnThis(),
+      gt: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi
+        .fn()
+        .mockResolvedValue({ data: mockForecastData, error: undefined }),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    mockSupabaseClient.from
+      .mockReturnValueOnce(mockHistoricalQuery)
+      .mockReturnValueOnce(mockForecastQuery);
+
+    const result = await FetchForecastData(1, 1);
+
+    expect(result?.forecastValues).toEqual([30.5]);
+    expect(result?.lowerBound10).toEqual([28.5]);
+    expect(result?.upperBound90).toEqual([32.5]);
   });
 });
 

@@ -274,7 +274,7 @@ describe("FetchForecastData", () => {
     const result = await FetchForecastData(1, 10);
 
     expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(1, "pet_year_avg");
-    expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(2, "pet_year_avg");
+    expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(2, "pet_forecast");
     expect(mockSupabaseClient.from).toHaveBeenCalledTimes(2);
     expect(result).toEqual({
       forecastValues: [30.5, 31],

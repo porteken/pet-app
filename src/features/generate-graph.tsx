@@ -159,20 +159,58 @@ export const GenerateTrendGraph = (
   if (forecastData && forecastData.forecastYears.length > 0) {
     const lastYear = years.at(-1)!;
     const lastPetValue = year_pets.at(-1)!;
+    const lastLowerBound = lastPetValue;
+    const lastUpperBound = lastPetValue;
 
-    data.push({
-      hovertemplate: "Year: %{x}<br>Forecast: %{y:.2f}°C<extra></extra>",
-      line: {
-        color: GRAPH_COLORS.secondary,
-        dash: "dot",
-        width: 2,
+    data.push(
+      // Add upper confidence band (transparent, just for filling)
+      {
+        fill: "none",
+        hovertemplate:
+          "Year: %{x}<br>Upper Bound (90%): %{y:.2f}°C<extra></extra>",
+        line: {
+          color: "rgba(99, 102, 241, 0.2)",
+          width: 0,
+        },
+        mode: "lines",
+        name: "90% Confidence",
+        showlegend: false,
+        type: "scatter",
+        x: [lastYear, ...forecastData.forecastYears],
+        y: [lastUpperBound, ...forecastData.upperBound90],
       },
-      mode: "lines",
-      name: "Forecast",
-      type: "scatter",
-      x: [lastYear, ...forecastData.forecastYears],
-      y: [lastPetValue, ...forecastData.forecastValues],
-    });
+      // Add lower confidence band (fills to previous trace)
+      {
+        fill: "tonexty",
+        fillcolor: "rgba(99, 102, 241, 0.2)",
+        hovertemplate:
+          "Year: %{x}<br>Lower Bound (10%): %{y:.2f}°C<extra></extra>",
+        line: {
+          color: "rgba(99, 102, 241, 0.2)",
+          width: 0,
+        },
+        mode: "lines",
+        name: "80% Confidence Interval",
+        showlegend: true,
+        type: "scatter",
+        x: [lastYear, ...forecastData.forecastYears],
+        y: [lastLowerBound, ...forecastData.lowerBound10],
+      },
+      // Add forecast line on top of confidence bands
+      {
+        hovertemplate: "Year: %{x}<br>Forecast: %{y:.2f}°C<extra></extra>",
+        line: {
+          color: GRAPH_COLORS.secondary,
+          dash: "dot",
+          width: 2,
+        },
+        mode: "lines",
+        name: "Forecast",
+        type: "scatter",
+        x: [lastYear, ...forecastData.forecastYears],
+        y: [lastPetValue, ...forecastData.forecastValues],
+      }
+    );
   }
 
   const config: PlotlyConfig = {

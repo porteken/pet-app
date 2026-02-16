@@ -92,10 +92,8 @@ export default async function LocationPage({
 }
 
 async function fetchGraphData(locationId: number) {
-  // First fetch trend data to get the latest available year
   const trendData = await FetchTrendGraphData("avg", locationId);
 
-  // Get the latest year from the trend data
   const latestYear =
     trendData.years.length > 0 ? String(Math.max(...trendData.years)) : "2024";
 

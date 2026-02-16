@@ -1,13 +1,11 @@
 @import "tailwindcss";
 @layer utilities {
-  /* Leaflet map container styles */
   .leaflet-container {
     height: 100vh !important;
     width: 100% !important;
     z-index: 1;
   }
 
-  /* Prevent layout shifts during map loading */
   .map-loading {
     min-height: 400px;
     display: flex;
@@ -15,7 +13,6 @@
     justify-content: center;
   }
 
-  /* Error state styling */
   .map-error {
     min-height: 400px;
     display: flex;
@@ -26,12 +23,10 @@
     border-radius: 0.5rem;
   }
 
-  /* Ensure proper z-index for popups */
   .leaflet-popup {
     z-index: 1000;
   }
 
-  /* Custom scrollbar for better UX */
   ::-webkit-scrollbar {
     width: 8px;
   }
@@ -78,7 +73,6 @@
   }
 }
 
-/* Allow Leaflet popups to display large content and dropdowns without clipping */
 .leaflet-popup-content {
   max-width: 95vw !important;
   max-height: 90vh !important;

@@ -17,7 +17,6 @@ vi.mock("@/lib/utils/errors", () => ({
   },
 }));
 
-// Helper function to create async delay for testing
 const createDelay = (ms: number) =>
   new Promise(resolve => setTimeout(resolve, ms));
 

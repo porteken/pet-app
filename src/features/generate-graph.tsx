@@ -163,7 +163,6 @@ export const GenerateTrendGraph = (
     const lastUpperBound = lastPetValue;
 
     data.push(
-      // Add upper confidence band (transparent, just for filling)
       {
         fill: "none",
         hovertemplate:
@@ -179,7 +178,6 @@ export const GenerateTrendGraph = (
         x: [lastYear, ...forecastData.forecastYears],
         y: [lastUpperBound, ...forecastData.upperBound90],
       },
-      // Add lower confidence band (fills to previous trace)
       {
         fill: "tonexty",
         fillcolor: "rgba(99, 102, 241, 0.2)",
@@ -196,7 +194,6 @@ export const GenerateTrendGraph = (
         x: [lastYear, ...forecastData.forecastYears],
         y: [lastLowerBound, ...forecastData.lowerBound10],
       },
-      // Add forecast line on top of confidence bands
       {
         hovertemplate: "Year: %{x}<br>Forecast: %{y:.2f}°C<extra></extra>",
         line: {

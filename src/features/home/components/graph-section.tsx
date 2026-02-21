@@ -1,10 +1,12 @@
-import { Button, Loader, Select } from "@mantine/core";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { memo, useCallback, useMemo } from "react";
 
 import type { HeatStressDescription } from "@/lib/utils/heat-stress";
 
 import { ForecastControls } from "@/components/forecast/forecast-controls";
+import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 
 interface GraphSectionProperties {
   forecastEnabled: boolean;
@@ -44,7 +46,11 @@ export const GraphSection = memo<GraphSectionProperties>(
     const loadingUI = useMemo(
       () => (
         <div className="flex size-full flex-col items-center justify-center">
-          <Loader size="md" />
+          <Loader2
+            aria-label="Loading graph"
+            className="size-6 animate-spin text-blue-600"
+            data-testid="graph-loader"
+          />
           <span className="mt-2 text-gray-500">Loading graph...</span>
         </div>
       ),
@@ -60,11 +66,7 @@ export const GraphSection = memo<GraphSectionProperties>(
     const detailsButton = useMemo(() => {
       return (
         <div className="flex justify-center">
-          <Button
-            disabled={!selectedLocation}
-            onClick={handleViewDetails}
-            variant="filled"
-          >
+          <Button disabled={!selectedLocation} onClick={handleViewDetails}>
             View Full Details
           </Button>
         </div>

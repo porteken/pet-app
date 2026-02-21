@@ -9,8 +9,10 @@ test.describe("City Selection", () => {
 
     await page.waitForLoadState("domcontentloaded");
 
-    const citySelect = page.locator("[placeholder*='City']").first();
+    const citySelect = page.getByTestId("city-selector");
+    const citySearch = page.getByRole("searchbox");
     await expect(citySelect).toBeVisible();
+    await expect(citySearch).toBeVisible();
   });
 
   test("should display city selection dropdown on home page", async ({
@@ -20,7 +22,7 @@ test.describe("City Selection", () => {
 
     await page.waitForLoadState("domcontentloaded");
 
-    const citySelect = page.locator("[placeholder*='City']").first();
+    const citySelect = page.getByTestId("city-selector");
     await expect(citySelect).toBeVisible();
   });
 
@@ -31,7 +33,7 @@ test.describe("City Selection", () => {
 
     await page.waitForLoadState("domcontentloaded");
 
-    const citySelect = page.locator("[placeholder*='City']").first();
+    const citySelect = page.getByTestId("city-selector");
     await expect(citySelect).toBeVisible();
   });
 
@@ -40,21 +42,16 @@ test.describe("City Selection", () => {
 
     await page.waitForLoadState("domcontentloaded");
 
-    const citySelect = page.locator("[placeholder*='City']").first();
+    const citySelect = page.getByTestId("city-selector");
     await expect(citySelect).toBeVisible();
 
-    await citySelect.click();
-
-    const options = page.locator("[role='option']");
-    await options.first().waitFor({ timeout: 5000 });
-
-    const optionCount = await options.count();
-    expect(optionCount).toBeGreaterThan(0);
-
-    const firstOption = page.locator("[role='option']").first();
-    await firstOption.click();
-
-    await expect(page).toHaveURL(/\/\d+/);
+    const firstCityValue = await citySelect.evaluate(
+      (select: HTMLSelectElement) =>
+        [...select.options].find(option => option.value !== "")?.value
+    );
+    expect(firstCityValue).toBeDefined();
+    await citySelect.selectOption(firstCityValue as string);
+    await expect(page).toHaveURL(new RegExp(`/${firstCityValue}(\\?.*)?$`));
   });
 
   test("should allow searching for cities", async ({ page }) => {
@@ -62,20 +59,36 @@ test.describe("City Selection", () => {
 
     await page.waitForLoadState("domcontentloaded");
 
-    const citySelect = page.locator("[placeholder*='City']").first();
+    const citySelect = page.getByTestId("city-selector");
+    const citySearch = page.getByRole("searchbox");
     await expect(citySelect).toBeVisible();
+    await expect(citySearch).toBeVisible();
 
-    await citySelect.fill("New York");
+    const firstOptionLabel = await citySelect.evaluate(
+      (select: HTMLSelectElement) =>
+        [...select.options].find(option => option.value !== "")?.text
+    );
+    expect(firstOptionLabel).toBeDefined();
+    const query = (firstOptionLabel as string)
+      .split(/[\s,]+/)
+      .find(part => part.length >= 3)
+      ?.slice(0, 3)
+      .toLowerCase();
 
-    await citySelect.click();
+    expect(query).toBeDefined();
+    await citySearch.fill(query as string);
 
-    const options = page.locator("[role='option']");
-    await options.first().waitFor({ timeout: 5000 });
+    const filteredOptionCount = await citySelect.evaluate(
+      (select: HTMLSelectElement, searchQuery: string) =>
+        [...select.options].filter(
+          option =>
+            option.value !== "" &&
+            !option.disabled &&
+            option.text.toLowerCase().includes(searchQuery)
+        ).length,
+      query as string
+    );
 
-    const filteredOptions = page
-      .locator("[role='option']")
-      .filter({ hasText: "New York" });
-    const optionCount = await filteredOptions.count();
-    expect(optionCount).toBeGreaterThan(0);
+    expect(filteredOptionCount).toBeGreaterThan(0);
   });
 });

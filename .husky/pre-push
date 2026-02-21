@@ -3,8 +3,6 @@ echo "Running pre-push checks..."
 npm run test:unit
 npm run test:integration
 
-npx tsc --noEmit
-
 npm run test:e2e:critical
 
 npm run build

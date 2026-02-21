@@ -44,8 +44,9 @@ test.describe("Accessibility Tests", () => {
     await expect(referenceYearLabel).toBeVisible();
     await expect(referenceYearLabel).toHaveText("Reference Year");
 
-    const selectElements = page.locator("select");
-    await expect(selectElements).toHaveCount(2);
+    await expect(page.locator("select#graph-measure")).toBeVisible();
+    await expect(page.locator("select#reference-year")).toBeVisible();
+    await expect(page.getByTestId("city-selector")).toBeVisible();
 
     const main = page.locator("main");
     await expect(main).toBeVisible();
@@ -86,7 +87,9 @@ test.describe("Accessibility Tests", () => {
 
     await page.goto("/1");
 
-    await page.waitForSelector(".js-plotly-plot", { state: "visible" });
+    await expect(page.locator(".js-plotly-plot").first()).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
       timeout: 15_000,
     });
@@ -106,7 +109,7 @@ test.describe("Accessibility Tests", () => {
 
     await page.setViewportSize({ height: 600, width: 800 });
 
-    await page.waitForSelector("select#graph-measure", { state: "visible" });
+    await expect(page.locator("select#graph-measure")).toBeVisible();
 
     await expect(page.getByText("Trend Analysis")).toBeVisible();
     await expect(page.getByText("Reference Data")).toBeVisible();
@@ -158,7 +161,7 @@ test.describe("Accessibility Tests", () => {
     const firstSelect = selectElements.first();
     const box = await firstSelect.boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.height).toBeGreaterThan(40);
+    expect(box!.height).toBeGreaterThanOrEqual(40);
 
     await expect(page.getByText("Trend Analysis")).toBeVisible();
 

@@ -17,13 +17,6 @@ describe("Test Utilities", () => {
       expect(mockSupabaseClient.from).toBeDefined();
       expect(typeof mockSupabaseClient.from).toBe("function");
     });
-
-    it("should create proper mock structure", async () => {
-      const { mockSupabaseClient } = await setupApiClientTest();
-
-      expect(mockSupabaseClient.from).toBeDefined();
-      expect(typeof mockSupabaseClient.from).toBe("function");
-    });
   });
 
   describe("setupApiServerTest", () => {
@@ -57,10 +50,6 @@ describe("Test Utilities", () => {
   });
 
   describe("clearAllMocks", () => {
-    it("should be a function", () => {
-      expect(typeof clearAllMocks).toBe("function");
-    });
-
     it("should not throw when called", () => {
       expect(() => clearAllMocks()).not.toThrow();
     });

@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
 
-import "@mantine/core/styles.css";
 import "leaflet/dist/leaflet.css";
-import {
-  ColorSchemeScript,
-  mantineHtmlProps,
-  MantineProvider,
-} from "@mantine/core";
 import * as React from "react";
 
 import "./globals.css";
@@ -22,14 +16,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" {...mantineHtmlProps}>
+    <html lang="en">
       <head>
-        <ColorSchemeScript />
         <title />
       </head>
-      <body suppressHydrationWarning>
-        <MantineProvider>{children}</MantineProvider>
-      </body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

@@ -1,10 +1,15 @@
-import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import React from "react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { NavButtons } from "../nav-buttons";
+
+interface MockLinkProperties
+  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+  children: React.ReactNode;
+  href: string;
+}
 
 beforeAll(() => {
   Object.defineProperty(globalThis, "matchMedia", {
@@ -30,7 +35,7 @@ beforeAll(() => {
 
 vi.mock("next/link", () => ({
   __esModule: true,
-  default: ({ children, href, ...rest }: any) => (
+  default: ({ children, href, ...rest }: MockLinkProperties) => (
     <a href={href} {...rest}>
       {children}
     </a>
@@ -40,12 +45,8 @@ vi.mock("next/link", () => ({
 describe("NavButtons", () => {
   const mockBuildUrl = vi.fn().mockImplementation(path => path);
 
-  const renderWithProvider = (ui: React.ReactElement) => {
-    return render(<MantineProvider>{ui}</MantineProvider>);
-  };
-
   it("should render all navigation buttons", () => {
-    renderWithProvider(<NavButtons buildUrl={mockBuildUrl} />);
+    render(<NavButtons buildUrl={mockBuildUrl} />);
 
     expect(screen.getByText("Map")).toBeInTheDocument();
     expect(screen.getByText("About")).toBeInTheDocument();
@@ -53,7 +54,7 @@ describe("NavButtons", () => {
   });
 
   it("should render buttons with correct links", () => {
-    renderWithProvider(<NavButtons buildUrl={mockBuildUrl} />);
+    render(<NavButtons buildUrl={mockBuildUrl} />);
 
     expect(screen.getByLabelText("Navigate to map view")).toHaveAttribute(
       "href",
@@ -71,7 +72,7 @@ describe("NavButtons", () => {
 
   it("should use buildUrl function for the Map link", () => {
     mockBuildUrl.mockReturnValueOnce("/with-params");
-    renderWithProvider(<NavButtons buildUrl={mockBuildUrl} />);
+    render(<NavButtons buildUrl={mockBuildUrl} />);
 
     expect(screen.getByLabelText("Navigate to map view")).toHaveAttribute(
       "href",

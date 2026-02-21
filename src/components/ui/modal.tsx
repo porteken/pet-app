@@ -1,6 +1,8 @@
 "use client";
-import { Modal as MantineModal } from "@mantine/core";
+
 import React, { memo, type ReactNode } from "react";
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog";
 
 interface ModalProperties {
   children: ReactNode;
@@ -11,17 +13,25 @@ interface ModalProperties {
 
 const Modal = memo<ModalProperties>(({ children, onClose, open, title }) => {
   return (
-    <MantineModal
-      centered
-      closeOnClickOutside
-      closeOnEscape
-      onClose={onClose}
-      opened={open}
-      size="xl"
-      title={title}
+    <Dialog
+      onOpenChange={nextOpen => {
+        if (!nextOpen) {
+          onClose();
+        }
+      }}
+      open={open}
     >
-      <div className="mb-6">{children}</div>
-    </MantineModal>
+      <DialogContent aria-describedby={undefined}>
+        {title ? (
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+          </DialogHeader>
+        ) : (
+          <DialogTitle className="sr-only">Details</DialogTitle>
+        )}
+        <div className="mt-4 mb-6">{children}</div>
+      </DialogContent>
+    </Dialog>
   );
 });
 

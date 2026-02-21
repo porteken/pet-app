@@ -1,16 +1,12 @@
-import { Container, Stack, Text, Title } from "@mantine/core";
-
 export default function NotFound() {
   return (
-    <Container py="xl" size="sm">
-      <Stack align="center" gap="lg" ta="center">
-        <Title order={1} size="h2">
-          404 - Not Found
-        </Title>
-        <Text c="dimmed" size="md">
+    <div className="mx-auto max-w-xl px-4 py-12">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <h1 className="text-3xl font-bold text-gray-900">404 - Not Found</h1>
+        <p className="text-base text-gray-600">
           The page you are looking for does not exist.
-        </Text>
-      </Stack>
-    </Container>
+        </p>
+      </div>
+    </div>
   );
 }

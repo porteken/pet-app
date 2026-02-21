@@ -27,7 +27,7 @@ Based on [this study](https://bjsm.bmj.com/content/55/15/825), PET may provide b
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 15, React 19, TypeScript
-- **UI Framework**: NextUI, Tailwind CSS, Mantine
+- **UI Framework**: shadcn/ui, Tailwind CSS
 - **Maps**: React Leaflet, OpenStreetMap
 - **Charts**: Plotly.js, React Plotly
 - **Database**: Supabase (PostgreSQL)

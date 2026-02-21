@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Container, Stack, Text, Title } from "@mantine/core";
+import { Button } from "@/components/ui/button";
 
 export default function ErrorPage({
   error,
@@ -10,23 +10,17 @@ export default function ErrorPage({
   readonly reset: () => void;
 }) {
   return (
-    <Container py="xl" size="sm">
-      <Stack align="center" gap="lg" ta="center">
-        <Title c="red" order={1} size="h2">
+    <div className="mx-auto max-w-xl px-4 py-12">
+      <div className="flex flex-col items-center gap-6 text-center">
+        <h1 className="text-3xl font-bold text-red-600">
           Something went wrong!
-        </Title>
-        <Text c="dimmed" maw={400} size="md">
+        </h1>
+        <p className="max-w-md text-base text-gray-600">
           {error.message || "An unexpected error occurred"}
-        </Text>
+        </p>
 
-        <Stack gap="sm" maw={400} w="100%">
-          <Button
-            color="blue"
-            fullWidth
-            onClick={() => reset()}
-            size="md"
-            variant="filled"
-          >
+        <div className="flex w-full max-w-md flex-col gap-3">
+          <Button className="w-full" onClick={() => reset()} type="button">
             Try again
           </Button>
 
@@ -41,8 +35,8 @@ export default function ErrorPage({
               </a>
             </p>
           </div>
-        </Stack>
-      </Stack>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }

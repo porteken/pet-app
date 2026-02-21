@@ -1,9 +1,11 @@
 "use client";
 
-import { MultiSelect, Pagination, Select } from "@mantine/core";
 import { useRouter } from "next/navigation";
 import React, { useMemo, useState, useTransition } from "react";
 
+import { MultiSelect } from "@/components/ui/multi-select";
+import { Pagination } from "@/components/ui/pagination";
+import { Select } from "@/components/ui/select";
 import { HeaderBar } from "@/features/header-bar";
 import { setRankingsYear } from "@/lib/actions/rankings-actions";
 import { getHeatStressInfo } from "@/lib/utils/heat-stress";
@@ -149,7 +151,7 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
     setCurrentPage(1);
   }, [stateFilter, heatStressFilter, sortColumn, sortDirection]);
 
-  const handleYearChange = (value: null | string) => {
+  const handleYearChange = (value: string) => {
     if (value) {
       const year = Number(value);
       setSelectedYear(year);

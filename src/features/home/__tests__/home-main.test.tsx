@@ -68,10 +68,10 @@ vi.mock("../map-component", () => ({
   )),
 }));
 
-vi.mock("@mantine/core", () => ({
+vi.mock("@/components/ui/button", () => ({
   Button: vi.fn(({ children, onClick, variant }) => (
     <button
-      data-testid="mantine-button"
+      data-testid="shadcn-button"
       data-variant={variant}
       onClick={onClick}
       type="button"
@@ -79,26 +79,34 @@ vi.mock("@mantine/core", () => ({
       {children}
     </button>
   )),
-  Loader: vi.fn(({ size }) => (
-    <div data-size={size} data-testid="mantine-loader">
-      Loading...
-    </div>
-  )),
-  Select: vi.fn(({ data, onChange, value }) => (
-    <div>
-      <select
-        data-testid="graph-measure-select"
-        onChange={event => onChange?.(event.target.value)}
-        value={value}
-      >
-        {data.map((option: any) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  )),
+}));
+
+vi.mock("@/components/ui/select", () => ({
+  Select: vi.fn(
+    ({
+      data,
+      onChange,
+      value,
+    }: {
+      data: Array<{ label: string; value: string }>;
+      onChange?: (value: string) => void;
+      value?: string;
+    }) => (
+      <div>
+        <select
+          data-testid="graph-measure-select"
+          onChange={event => onChange?.(event.target.value)}
+          value={value}
+        >
+          {data.map(option => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    )
+  ),
 }));
 
 vi.mock("@/lib/utils/select-options", () => ({
@@ -237,7 +245,7 @@ describe("Home", () => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
       });
 
-      expect(screen.getByTestId("mantine-loader")).toBeInTheDocument();
+      expect(screen.getByTestId("graph-loader")).toBeInTheDocument();
       expect(screen.getByText("Loading graph...")).toBeInTheDocument();
     });
 
@@ -282,7 +290,7 @@ describe("Home", () => {
 
       await waitFor(() => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
-        expect(screen.getByTestId("mantine-button")).toHaveTextContent(
+        expect(screen.getByTestId("shadcn-button")).toHaveTextContent(
           "View Full Details"
         );
       });
@@ -297,7 +305,7 @@ describe("Home", () => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByTestId("mantine-button"));
+      fireEvent.click(screen.getByTestId("shadcn-button"));
 
       expect(mockPush).toHaveBeenCalledWith("/1");
     });

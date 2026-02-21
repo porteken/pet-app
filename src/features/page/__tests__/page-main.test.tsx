@@ -93,20 +93,6 @@ describe("PageMain", () => {
     vi.clearAllMocks();
   });
 
-  describe("Basic Properties", () => {
-    it("should be importable", () => {
-      expect(PageMain).toBeDefined();
-    });
-
-    it("should be a function component", () => {
-      expect(typeof PageMain).toBe("function");
-    });
-
-    it("should have correct display name or be anonymous function", () => {
-      expect(PageMain.name === "Main" || PageMain.name === "").toBe(true);
-    });
-  });
-
   describe("Component Rendering", () => {
     it("should render the page with title and location information", async () => {
       await act(async () => {

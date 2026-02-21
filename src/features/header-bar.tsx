@@ -1,9 +1,9 @@
 "use client";
 
-import { Group, Paper, Select } from "@mantine/core";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useMemo } from "react";
 
+import { Select } from "@/components/ui/select";
 import { APP_CONFIG } from "@/lib/constants";
 import { NavProperties } from "@/types/types";
 
@@ -93,10 +93,11 @@ export const HeaderBar = ({
             {APP_CONFIG.NAME}
           </h1>
         </div>
-        <Paper className="bg-white shadow-none" p="md">
-          <Group className="flex flex-wrap justify-center gap-3">
+        <div className="rounded-md bg-white p-4">
+          <div className="flex flex-wrap justify-center gap-3">
             <Select
               data={selectData}
+              data-testid="city-selector"
               onChange={value => {
                 if (value) {
                   router.push(`/${value}`);
@@ -104,19 +105,13 @@ export const HeaderBar = ({
               }}
               placeholder={id! >= 0 ? "Change City" : "Select City"}
               searchable
-              styles={{
-                dropdown: {
-                  backgroundColor: "white",
-                  borderRadius: "4px",
-                },
-              }}
               value={currentCity?.key.toString()}
               w={300}
             />
 
             <NavButtons buildUrl={buildUrl} />
-          </Group>
-        </Paper>
+          </div>
+        </div>
       </div>
     </header>
   );

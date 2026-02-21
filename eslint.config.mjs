@@ -2,7 +2,6 @@
 import pluginJs from "@eslint/js";
 import nextPlugin from "@next/eslint-plugin-next";
 import vitest from "@vitest/eslint-plugin";
-import mantine from "eslint-config-mantine";
 import eslintConfigPrettier from "eslint-config-prettier";
 import importPlugin from "eslint-plugin-import";
 import perfectionist from "eslint-plugin-perfectionist";
@@ -63,7 +62,6 @@ export default [
   },
   eslintPluginUnicorn.configs.recommended,
   perfectionist.configs["recommended-natural"],
-  ...mantine,
   {
     rules: {
       "import/no-restricted-paths": [

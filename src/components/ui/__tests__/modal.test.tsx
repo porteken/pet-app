@@ -1,38 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import React, { type ReactNode } from "react";
+import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import Modal from "../modal";
-
-interface MockModalProperties {
-  children: ReactNode;
-  onClose: () => void;
-  opened: boolean;
-  title?: string;
-}
-
-vi.mock("@mantine/core", () => ({
-  Modal: ({ children, onClose, opened, title }: MockModalProperties) => {
-    if (!opened) {
-      return;
-    }
-    return (
-      <div
-        aria-modal="true"
-        data-opened={opened}
-        data-testid="modal"
-        role="dialog"
-      >
-        {title && <div data-testid="modal-title">{title}</div>}
-        <div className="mb-6">{children}</div>
-        <button data-testid="close-button" onClick={onClose} type="button">
-          Close
-        </button>
-      </div>
-    );
-  },
-}));
 
 describe("Modal", () => {
   const mockOnClose = vi.fn();
@@ -50,9 +21,7 @@ describe("Modal", () => {
       </Modal>
     );
 
-    const modal = screen.getByTestId("modal");
-    expect(modal).toBeInTheDocument();
-    expect(modal).toHaveAttribute("data-opened", "true");
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText(testContent)).toBeInTheDocument();
   });
 
@@ -63,7 +32,7 @@ describe("Modal", () => {
       </Modal>
     );
 
-    expect(screen.getByTestId("modal-title")).toHaveTextContent(testTitle);
+    expect(screen.getByText(testTitle)).toBeInTheDocument();
   });
 
   it("calls onClose when close button is clicked", () => {
@@ -73,7 +42,7 @@ describe("Modal", () => {
       </Modal>
     );
 
-    fireEvent.click(screen.getByTestId("close-button"));
+    fireEvent.click(screen.getByRole("button", { name: /close/i }));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
@@ -103,6 +72,6 @@ describe("Modal", () => {
       </Modal>
     );
 
-    expect(screen.queryByTestId("modal")).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

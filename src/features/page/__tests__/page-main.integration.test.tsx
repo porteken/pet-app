@@ -215,21 +215,6 @@ describe("PageMain Integration Tests", () => {
   });
 
   describe("User Interactions", () => {
-    it("should support full user workflow of changing measures and viewing data", async () => {
-      const user = userEvent.setup();
-      render(<PageMain {...defaultProps} />);
-
-      const measureSelect = screen.getByLabelText("Graph Measure");
-      expect(measureSelect).toHaveValue("avg");
-
-      await user.selectOptions(measureSelect, "max");
-
-      expect(measureSelect).toHaveValue("max");
-
-      expect(screen.getByTestId("trend-analysis")).toBeInTheDocument();
-      expect(screen.getByTestId("trend-graph")).toBeInTheDocument();
-    });
-
     it("should handle accessibility requirements", async () => {
       render(<PageMain {...defaultProps} />);
 

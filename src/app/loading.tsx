@@ -1,14 +1,15 @@
-import { Container, Loader, Stack, Text } from "@mantine/core";
+import { Loader2 } from "lucide-react";
 
 export default function Loading() {
   return (
-    <Container py="xl" size="sm">
-      <Stack align="center" gap="lg" ta="center">
-        <Loader size="lg" />
-        <Text c="dimmed" size="md">
-          Loading...
-        </Text>
-      </Stack>
-    </Container>
+    <div className="mx-auto max-w-xl px-4 py-12">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <Loader2
+          aria-label="Loading"
+          className="size-8 animate-spin text-blue-600"
+        />
+        <p className="text-base text-gray-600">Loading...</p>
+      </div>
+    </div>
   );
 }

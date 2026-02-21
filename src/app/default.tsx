@@ -1,16 +1,12 @@
-import { Container, Stack, Text, Title } from "@mantine/core";
-
 export default function Default() {
   return (
-    <Container py="xl" size="sm">
-      <Stack align="center" gap="lg" ta="center">
-        <Title order={1} size="h2">
-          Default Page
-        </Title>
-        <Text c="dimmed" size="md">
+    <div className="mx-auto max-w-xl px-4 py-12">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <h1 className="text-3xl font-bold text-gray-900">Default Page</h1>
+        <p className="text-base text-gray-600">
           This is the default fallback page for parallel routes.
-        </Text>
-      </Stack>
-    </Container>
+        </p>
+      </div>
+    </div>
   );
 }

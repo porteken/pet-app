@@ -5,7 +5,7 @@ import { prefetchTrendGraphData } from "@/lib/api/query-client";
 
 interface MarkerEventHandlers {
   click: () => void;
-  mouseover: () => void;
+  mouseover?: () => void;
 }
 
 interface MarkerProperties {

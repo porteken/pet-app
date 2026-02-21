@@ -1,5 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 import "dotenv/config";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
   forbidOnly: !!process.env.CI,
   fullyParallel: true,
@@ -24,6 +29,7 @@ export default defineConfig({
 
   webServer: {
     command: "npm run dev",
+    cwd: projectRoot,
     reuseExistingServer: !process.env.CI,
     timeout: 180 * 1000,
     url: "http://localhost:3000",

@@ -1,6 +1,12 @@
 import * as Sentry from "@sentry/nextjs";
 
+const isE2ETestRun = process.env.NEXT_PUBLIC_E2E_TEST === "true";
+
 export async function register() {
+  if (isE2ETestRun) {
+    return;
+  }
+
   if (process.env.NEXT_RUNTIME === "nodejs") {
     await import("../sentry.server.config");
   }
@@ -10,4 +16,12 @@ export async function register() {
   }
 }
 
-export const onRequestError = Sentry.captureRequestError;
+export const onRequestError: typeof Sentry.captureRequestError = (
+  ...arguments_
+) => {
+  if (isE2ETestRun) {
+    return;
+  }
+
+  return Sentry.captureRequestError(...arguments_);
+};

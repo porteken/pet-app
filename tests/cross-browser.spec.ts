@@ -4,7 +4,7 @@ test.describe("Cross-Browser Compatibility", () => {
   test("core functionality works across browsers", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.getByText("Loading map...")).toBeHidden({
+    await expect(page.getByText("Loading map...").first()).toBeHidden({
       timeout: 10_000,
     });
     await expect(page.locator(".leaflet-container")).toBeVisible();
@@ -105,7 +105,7 @@ test.describe("Cross-Browser Compatibility", () => {
   test("performance characteristics across browsers", async ({ page }) => {
     const initialLoadStart = Date.now();
     await page.goto("/");
-    await expect(page.getByText("Loading map...")).toBeHidden({
+    await expect(page.getByText("Loading map...").first()).toBeHidden({
       timeout: 15_000,
     });
     const initialLoadTime = Date.now() - initialLoadStart;

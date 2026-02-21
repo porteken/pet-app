@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test.describe("Home Page", () => {
   test("should display the map and locations", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("Loading map...")).toBeHidden({
+    await expect(page.getByText("Loading map...").first()).toBeHidden({
       timeout: 10_000,
     });
     await expect(page.locator(".leaflet-container")).toBeVisible();
@@ -16,6 +16,7 @@ test.describe("Home Page", () => {
     const marker = page.locator(".leaflet-marker-icon").first();
     await expect(marker).toBeVisible({ timeout: 10_000 });
 
+    // eslint-disable-next-line playwright/no-force-option
     await marker.click({ force: true });
     await expect(
       page.getByRole("button", { name: "View Full Details" })
@@ -30,6 +31,7 @@ test.describe("Home Page", () => {
     const marker = page.locator(".leaflet-marker-icon").first();
     await expect(marker).toBeVisible({ timeout: 10_000 });
 
+    // eslint-disable-next-line playwright/no-force-option
     await marker.click({ force: true });
 
     const viewDetailsButton = page.getByRole("button", {

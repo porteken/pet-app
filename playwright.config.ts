@@ -30,7 +30,11 @@ export default defineConfig({
   webServer: {
     command: "npm run dev:e2e",
     cwd: projectRoot,
+    env: {
+      NEXT_PUBLIC_E2E_TEST: "true",
+    },
     reuseExistingServer: !process.env.CI,
+    stderr: "ignore",
     timeout: 180 * 1000,
     url: "http://localhost:3000",
   },

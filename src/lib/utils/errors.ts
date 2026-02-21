@@ -1,12 +1,17 @@
 import * as Sentry from "@sentry/nextjs";
 
+export type ErrorContext = Record<string, unknown> & {
+  field?: string;
+  resource?: string;
+};
+
 export class AppError extends Error {
   constructor(
     message: string,
     public readonly code: string,
     public readonly statusCode = 500,
     public readonly originalError?: unknown,
-    public readonly context?: Record<string, any>
+    public readonly context?: ErrorContext
   ) {
     super(message);
     this.name = "AppError";
@@ -48,7 +53,7 @@ export class DatabaseError extends AppError {
   constructor(
     message: string,
     originalError?: unknown,
-    context?: Record<string, any>
+    context?: ErrorContext
   ) {
     super(message, "DATABASE_ERROR", 500, originalError, context);
     this.name = "DatabaseError";
@@ -60,7 +65,7 @@ export class NetworkError extends AppError {
     message: string,
     statusCode: number,
     originalError?: unknown,
-    context?: Record<string, any>
+    context?: ErrorContext
   ) {
     super(message, "NETWORK_ERROR", statusCode, originalError, context);
     this.name = "NetworkError";
@@ -93,7 +98,7 @@ export const createError = (
   statusCode: number = 500,
   _code?: string,
   originalError?: unknown,
-  context?: Record<string, any>
+  context?: ErrorContext
 ): AppError => {
   switch (true) {
     case statusCode === 400: {
@@ -119,7 +124,7 @@ export const createError = (
 
 export const handleAsyncError = (
   error: unknown,
-  context?: Record<string, any>
+  context?: ErrorContext
 ): AppError => {
   if (error instanceof AppError) {
     return error;

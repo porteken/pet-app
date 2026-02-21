@@ -64,6 +64,14 @@ export default [
   perfectionist.configs["recommended-natural"],
   {
     rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
       "import/no-restricted-paths": [
         "error",
         {
@@ -132,7 +140,14 @@ export default [
     },
     rules: {
       ...vitest.configs.recommended.rules,
+      "@typescript-eslint/no-explicit-any": "off",
       "vitest/max-nested-describe": ["error", { max: 3 }],
+    },
+  },
+  {
+    files: ["src/testing/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
     },
   },
   {

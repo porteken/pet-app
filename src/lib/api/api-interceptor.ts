@@ -1,8 +1,12 @@
-import { createError, NetworkError } from "@/lib/utils/errors";
+import {
+  createError,
+  type ErrorContext,
+  NetworkError,
+} from "@/lib/utils/errors";
 
 export const handleApiResponse = async <T>(
   response: Response,
-  context?: Record<string, any>
+  context?: ErrorContext
 ): Promise<T> => {
   if (!response.ok) {
     const errorMessage = await extractErrorMessage(response);
@@ -85,7 +89,7 @@ const getDefaultErrorMessage = (statusCode: number): string => {
 export const apiRequest = async <T>(
   url: string,
   options: RequestInit = {},
-  context?: Record<string, any>
+  context?: ErrorContext
 ): Promise<T> => {
   try {
     const response = await fetch(url, {
@@ -113,7 +117,7 @@ export const apiRequestWithRetry = async <T>(
   url: string,
   options: RequestInit = {},
   retries: number = 3,
-  context?: Record<string, any>
+  context?: ErrorContext
 ): Promise<T> => {
   let lastError: Error | undefined;
 

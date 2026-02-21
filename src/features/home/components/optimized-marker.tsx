@@ -3,10 +3,20 @@ import React, { memo, useCallback } from "react";
 
 import { prefetchTrendGraphData } from "@/lib/api/query-client";
 
+interface MarkerProperties {
+  eventHandlers: {
+    click: () => void;
+    mouseover?: () => void;
+  };
+  icon?: Icon;
+  key?: React.Key;
+  position: [number, number];
+}
+
 interface OptimizedMarkerProperties {
   icon: Icon;
   locationId: number;
-  MarkerComponent: React.ComponentType<Record<string, unknown>>;
+  MarkerComponent: React.ComponentType<MarkerProperties>;
   onClick: (locationId: number) => void;
   position: [number, number];
   selectedGraphMeasure: string;

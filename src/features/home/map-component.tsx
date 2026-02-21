@@ -46,7 +46,6 @@ type MarkerType = ComponentType<{
     mouseover?: () => void;
   };
   icon?: Icon;
-  key: number;
   position: [number, number];
 }>;
 

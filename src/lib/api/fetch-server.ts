@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-null */
 "use server";
 import { cookies } from "next/headers";
 
@@ -15,10 +14,10 @@ import {
 export async function FetchCityRankings(year: number): Promise<
   Array<{
     avg_pet: number;
-    changePerDecade: null | number;
+    changePerDecade: number | undefined;
     city: string;
-    FutureValueLower: null | number;
-    FutureValueUpper: null | number;
+    FutureValueLower: number | undefined;
+    FutureValueUpper: number | undefined;
     location_id: number;
     max_pet: number;
     p10: number;
@@ -149,10 +148,10 @@ export async function FetchCityRankings(year: number): Promise<
     return [
       {
         avg_pet: Number(pet),
-        changePerDecade: changePerDecadeMap.get(location_id) ?? null,
+        changePerDecade: changePerDecadeMap.get(location_id) ?? undefined,
         city: location.city,
-        FutureValueLower: futurePet?.lower ?? null,
-        FutureValueUpper: futurePet?.upper ?? null,
+        FutureValueLower: futurePet?.lower ?? undefined,
+        FutureValueUpper: futurePet?.upper ?? undefined,
         location_id,
         max_pet: maxPet,
         p10: percentiles.p10,

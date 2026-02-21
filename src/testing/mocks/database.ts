@@ -2,7 +2,9 @@ import { drop, factory, primaryKey } from "@mswjs/data";
 
 let locationCounter = 1;
 let petDataCounter = 1;
+let petCountCounter = 1;
 let trendDataCounter = 1;
+let trendCountCounter = 1;
 
 export const database = factory({
   location: {
@@ -17,15 +19,13 @@ export const database = factory({
     id: primaryKey(() => petDataCounter++),
     location_id: () => 1,
     measure_type: () => "avg",
-    // eslint-disable-next-line sonarjs/pseudo-random -- Safe for test data generation
-    pet_count: () => Math.floor(Math.random() * 100) + 1,
+    pet_count: () => ((petCountCounter++ - 1) % 100) + 1,
   },
   trendData: {
     id: primaryKey(() => trendDataCounter++),
     location_id: () => 1,
     measure_type: () => "avg",
-    // eslint-disable-next-line sonarjs/pseudo-random -- Safe for test data generation
-    pet_count: () => Math.floor(Math.random() * 100) + 1,
+    pet_count: () => ((trendCountCounter++ - 1) % 100) + 1,
     year: () => 2025,
   },
 });
@@ -33,7 +33,9 @@ export const database = factory({
 export const resetDatabase = () => {
   locationCounter = 1;
   petDataCounter = 1;
+  petCountCounter = 1;
   trendDataCounter = 1;
+  trendCountCounter = 1;
 
   drop(database);
 };

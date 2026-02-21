@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Icon } from "leaflet";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -23,8 +24,8 @@ const MockMarkerComponent = vi.fn(({ eventHandlers, icon, position }) => (
 ));
 
 describe("OptimizedMarker", () => {
-  const mockProperties = {
-    icon: { iconUrl: "test-icon.png" },
+  const mockProperties: React.ComponentProps<typeof OptimizedMarker> = {
+    icon: { iconUrl: "test-icon.png" } as unknown as Icon,
     locationId: 123,
     MarkerComponent: MockMarkerComponent,
     onClick: vi.fn(),

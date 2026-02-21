@@ -25,10 +25,10 @@ const color_mapping = (value: number) => {
 };
 interface RankingItem {
   avg_pet: number;
-  changePerDecade: null | number;
+  changePerDecade: number | undefined;
   city: string;
-  FutureValueLower: null | number;
-  FutureValueUpper: null | number;
+  FutureValueLower: number | undefined;
+  FutureValueUpper: number | undefined;
   location_id: number;
   max_pet: number;
   p10: number;
@@ -405,7 +405,7 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                             {getPetRange(p10, p90)}°C
                           </td>
                           <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            {changePerDecade === null ? (
+                            {changePerDecade === undefined ? (
                               <span className="text-gray-400">N/A</span>
                             ) : (
                               <span
@@ -419,8 +419,8 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                             )}
                           </td>
                           <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            {FutureValueLower !== null &&
-                            FutureValueUpper !== null ? (
+                            {FutureValueLower !== undefined &&
+                            FutureValueUpper !== undefined ? (
                               <div>
                                 <span
                                   className={`font-semibold ${

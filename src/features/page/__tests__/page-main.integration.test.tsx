@@ -149,8 +149,7 @@ describe("PageMain Integration Tests", () => {
     it("should display location information correctly", async () => {
       const customLocation = database.location.create({
         city: "Austin",
-        // eslint-disable-next-line sonarjs/pseudo-random -- Safe for test data generation
-        location_id: Math.floor(Math.random() * 10_000) + 20_000,
+        location_id: 20_001,
         state: "Texas",
       });
 

@@ -352,8 +352,8 @@ describe("fetch-server", () => {
 
       const result = await FetchCityRankings(2024);
 
-      expect(result[0].FutureValueLower).toBeNull();
-      expect(result[0].FutureValueUpper).toBeNull();
+      expect(result[0].FutureValueLower).toBeUndefined();
+      expect(result[0].FutureValueUpper).toBeUndefined();
     });
 
     it("should handle cities with null change values", async () => {
@@ -402,7 +402,7 @@ describe("fetch-server", () => {
 
       const result = await FetchCityRankings(2024);
 
-      expect(result[0].changePerDecade).toBeNull();
+      expect(result[0].changePerDecade).toBeUndefined();
     });
   });
 

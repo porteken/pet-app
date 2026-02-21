@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-null */
 "use client";
 
 import React from "react";
@@ -30,10 +29,12 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   >();
   const [forecastEnabled, setForecastEnabled] = React.useState(false);
   const [forecastYearsAhead, setForecastYearsAhead] = React.useState(10);
-  const [currentHeatStress, setCurrentHeatStress] =
-    React.useState<HeatStressDescription | null>(null);
-  const [forecastHeatStress, setForecastHeatStress] =
-    React.useState<HeatStressDescription | null>(null);
+  const [currentHeatStress, setCurrentHeatStress] = React.useState<
+    HeatStressDescription | undefined
+  >();
+  const [forecastHeatStress, setForecastHeatStress] = React.useState<
+    HeatStressDescription | undefined
+  >();
 
   const generatePetTrendGraph = React.useCallback(
     async (option: string, enableForecast: boolean, yearsAhead: number) => {
@@ -49,8 +50,8 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           : undefined;
 
         if (years.length === 0 || year_pets.length === 0) {
-          setCurrentHeatStress(null);
-          setForecastHeatStress(null);
+          setCurrentHeatStress(undefined);
+          setForecastHeatStress(undefined);
           setTrendGraph(
             GenerateTrendGraph([], option, [], [], 0, forecastData)
           );
@@ -83,7 +84,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
             )
           );
         } else {
-          setForecastHeatStress(null);
+          setForecastHeatStress(undefined);
         }
 
         const graph = GenerateTrendGraph(
@@ -97,8 +98,8 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
         setTrendGraph(graph);
       } catch {
         setTrendGraph(GenerateTrendGraph([], option, [], [], 0));
-        setCurrentHeatStress(null);
-        setForecastHeatStress(null);
+        setCurrentHeatStress(undefined);
+        setForecastHeatStress(undefined);
       }
     },
     [id]

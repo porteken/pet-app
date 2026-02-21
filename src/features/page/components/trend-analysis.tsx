@@ -58,8 +58,8 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           return;
         }
 
-        const currentYear = Math.max(...years);
-        const currentYearIndex = years.indexOf(currentYear);
+        const currentYear = years.at(-1)!;
+        const currentYearIndex = years.length - 1;
         const currentPetValue = year_pets[currentYearIndex];
 
         setCurrentHeatStress(

@@ -15,7 +15,7 @@ interface LocationItem {
   title: string;
 }
 
-export const HeaderBar = ({
+const HeaderBarComponent = ({
   id,
   LocationOptions,
 }: NavProperties): React.ReactElement => {
@@ -31,12 +31,10 @@ export const HeaderBar = ({
     return baseUrl;
   };
 
-  const safeLocationOptions = Array.isArray(LocationOptions)
-    ? LocationOptions
-    : [];
-
   const groupedCities = useMemo(() => {
-    const allCities = safeLocationOptions.flatMap(section =>
+    const options = Array.isArray(LocationOptions) ? LocationOptions : [];
+
+    const allCities = options.flatMap(section =>
       [...(section.items || [])].map(
         item =>
           ({
@@ -62,7 +60,7 @@ export const HeaderBar = ({
       group: state,
       items: grouped[state].toSorted((a, b) => a.title.localeCompare(b.title)),
     }));
-  }, [safeLocationOptions]);
+  }, [LocationOptions]);
 
   const currentCity = useMemo(() => {
     if (!id) {
@@ -117,3 +115,7 @@ export const HeaderBar = ({
     </header>
   );
 };
+
+HeaderBarComponent.displayName = "HeaderBar";
+
+export const HeaderBar = React.memo(HeaderBarComponent);

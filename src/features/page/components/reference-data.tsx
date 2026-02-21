@@ -12,7 +12,9 @@ interface ReferenceDataProperties {
   ReferencePets: number[];
 }
 
-export const ReferenceData: React.FC<ReferenceDataProperties> = ({
+const REFERENCE_YEARS = Array.from({ length: 25 }, (_, index) => 2000 + index);
+
+const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   CurrentDates,
   CurrentPets,
   id,
@@ -57,8 +59,6 @@ export const ReferenceData: React.FC<ReferenceDataProperties> = ({
     generatePetReferenceGraph(selectedReferenceYear);
   }, [generatePetReferenceGraph, selectedReferenceYear]);
 
-  const years = Array.from({ length: 25 }, (_, index) => 2000 + index);
-
   return (
     <div className="space-y-6">
       <div className="rounded-lg bg-white p-6 shadow-md">
@@ -78,7 +78,7 @@ export const ReferenceData: React.FC<ReferenceDataProperties> = ({
             onChange={handleReferenceYearChange}
             value={selectedReferenceYear}
           >
-            {years.map(year => (
+            {REFERENCE_YEARS.map(year => (
               <option key={`year-${year}`} value={year.toString()}>
                 {year}
               </option>
@@ -90,3 +90,7 @@ export const ReferenceData: React.FC<ReferenceDataProperties> = ({
     </div>
   );
 };
+
+ReferenceDataComponent.displayName = "ReferenceData";
+
+export const ReferenceData = React.memo(ReferenceDataComponent);

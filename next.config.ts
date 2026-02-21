@@ -34,11 +34,15 @@ const nextConfig: NextConfig = {
 };
 
 export default withSentryConfig(withBundleAnalyzer(nextConfig), {
-  automaticVercelMonitors: true,
-  disableLogger: true,
   org: "personal-project-0l",
   project: "javascript-nextjs",
   silent: !process.env.CI,
   tunnelRoute: "/monitoring",
+  webpack: {
+    automaticVercelMonitors: true,
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
   widenClientFileUpload: true,
 });

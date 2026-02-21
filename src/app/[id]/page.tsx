@@ -40,7 +40,11 @@ export default async function LocationPage({
     );
   }
 
-  const locationData = await fetchLocationData();
+  const [locationData, graphData] = await Promise.all([
+    fetchLocationData(),
+    fetchGraphData(locationId),
+  ]);
+
   if (!locationData) {
     return (
       <DatabaseError
@@ -73,8 +77,6 @@ export default async function LocationPage({
     );
   }
 
-  const graphData = await fetchGraphData(locationId);
-
   return (
     <Page
       CurrentDates={graphData.dates}
@@ -95,7 +97,7 @@ async function fetchGraphData(locationId: number) {
   const trendData = await FetchTrendGraphData("avg", locationId);
 
   const latestYear =
-    trendData.years.length > 0 ? String(Math.max(...trendData.years)) : "2024";
+    trendData.years.length > 0 ? String(trendData.years.at(-1)) : "2024";
 
   const [currentData, referenceData] = await Promise.all([
     FetchReferenceGraphData(latestYear, locationId),

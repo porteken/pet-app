@@ -23,6 +23,19 @@ const color_mapping = (value: number) => {
 
   return "text-grey-600";
 };
+
+const YEAR_OPTIONS = Array.from({ length: 26 }, (_, index) => ({
+  label: String(2000 + index),
+  value: String(2000 + index),
+}));
+
+const HEAT_STRESS_OPTIONS = [
+  { label: "None to Slight", value: "None to Slight" },
+  { label: "Moderate", value: "Moderate" },
+  { label: "Strong", value: "Strong" },
+  { label: "Extreme", value: "Extreme" },
+];
+
 interface RankingItem {
   avg_pet: number;
   changePerDecade: number | undefined;
@@ -68,24 +81,12 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  const yearOptions = Array.from({ length: 26 }, (_, index) => ({
-    label: String(2000 + index),
-    value: String(2000 + index),
-  }));
-
   const stateOptions = useMemo(() => {
     const uniqueStates = [...new Set(rankings.map(r => r.state))].toSorted(
       (a, b) => a.localeCompare(b)
     );
     return uniqueStates.map(state => ({ label: state, value: state }));
   }, [rankings]);
-
-  const heatStressOptions = [
-    { label: "None to Slight", value: "None to Slight" },
-    { label: "Moderate", value: "Moderate" },
-    { label: "Strong", value: "Strong" },
-    { label: "Extreme", value: "Extreme" },
-  ];
 
   const filteredAndSortedRankings = useMemo(() => {
     const filtered = rankings.filter(({ avg_pet, state }) => {
@@ -183,7 +184,7 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Select
             className="w-full"
-            data={yearOptions}
+            data={YEAR_OPTIONS}
             disabled={isPending}
             label="Year"
             onChange={handleYearChange}
@@ -202,7 +203,7 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
           <MultiSelect
             className="w-full"
             clearable
-            data={heatStressOptions}
+            data={HEAT_STRESS_OPTIONS}
             disabled={isPending}
             label="Avg Heat Stress Level"
             onChange={setHeatStressFilter}

@@ -96,6 +96,7 @@ export const HeaderBar = ({
         <div className="rounded-md bg-white p-4">
           <div className="flex flex-wrap justify-center gap-3">
             <Select
+              className="w-full sm:w-[300px]"
               data={selectData}
               data-testid="city-selector"
               onChange={value => {

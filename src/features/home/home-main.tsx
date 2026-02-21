@@ -13,7 +13,8 @@ import React, {
 import { GenerateTrendGraph } from "@/features/generate-graph";
 import { HeaderBar } from "@/features/header-bar";
 import { setGraphMeasure } from "@/lib/actions/actions";
-import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
+import { FetchForecastData } from "@/lib/api/fetch-client";
+import { getTrendGraphQueryOptions, queryClient } from "@/lib/api/query-client";
 import {
   getForecastHeatStressDescription,
   getHeatStressDescription,
@@ -75,7 +76,9 @@ const Home: FC<MapProperties> = ({
     ) => {
       setGraphLoading(true);
       try {
-        const trendGraphDataPromise = FetchTrendGraphData(option, locationId);
+        const trendGraphDataPromise = queryClient.fetchQuery(
+          getTrendGraphQueryOptions(locationId, option)
+        );
         const forecastDataPromise = enableForecast
           ? FetchForecastData(locationId, yearsAhead)
           : undefined;

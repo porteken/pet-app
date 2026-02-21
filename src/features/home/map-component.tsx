@@ -12,6 +12,7 @@ import React, {
   useState,
 } from "react";
 
+import { PageLoader } from "@/components/app/page-loader";
 import { HeatStressLegend } from "@/features/page/components/heat-stress-legend";
 
 import { OptimizedMarker } from "./components/optimized-marker";
@@ -44,7 +45,7 @@ type MarkerType = ComponentType<{
     click: () => void;
     mouseover?: () => void;
   };
-  icon?: any;
+  icon?: Icon;
   key: number;
   position: [number, number];
 }>;
@@ -111,11 +112,7 @@ export const MapComponent = memo<MapComponentProperties>(
     }, [locations, customIcon, Marker, onMarkerClick, selectedGraphMeasure]);
 
     if (!isLoaded || !MapContainer || !TileLayer || !Marker || !customIcon) {
-      return (
-        <div className="flex h-[100dvh] items-center justify-center bg-gray-100">
-          <p>Loading map...</p>
-        </div>
-      );
+      return <PageLoader />;
     }
 
     if (!locations || locations.length === 0) {

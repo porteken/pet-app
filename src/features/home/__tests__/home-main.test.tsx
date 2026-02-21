@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -17,12 +18,32 @@ vi.mock("@/features/generate-graph", () => ({
 }));
 
 vi.mock("@/lib/api/fetch-client", () => ({
+  FetchForecastData: vi.fn().mockResolvedValue({
+    forecastValues: [25, 26],
+    forecastYears: [2003, 2004],
+    lowerBound10: [24, 25],
+    upperBound90: [26, 27],
+  }),
   FetchTrendGraphData: vi.fn().mockResolvedValue({
     trendline_pets: [20, 22, 24],
     year_pets: [20, 22, 24],
     years: [2000, 2001, 2002],
   }),
 }));
+
+vi.mock("@/lib/api/query-client", async importOriginal => {
+  const actual =
+    await importOriginal<typeof import("@/lib/api/query-client")>();
+  return {
+    ...actual,
+    queryClient: {
+      fetchQuery: vi.fn(async options => {
+        return options.queryFn();
+      }),
+      prefetchQuery: vi.fn(),
+    },
+  };
+});
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({

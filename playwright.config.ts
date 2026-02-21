@@ -28,7 +28,7 @@ export default defineConfig({
   },
 
   webServer: {
-    command: "npm run dev",
+    command: "npm run dev:e2e",
     cwd: projectRoot,
     reuseExistingServer: !process.env.CI,
     timeout: 180 * 1000,

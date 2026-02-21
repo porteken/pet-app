@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:e2e": "next dev --webpack",
     "build": "next build --turbopack",
     "start": "node .next/standalone/server.js",
     "lint": "eslint .",
@@ -24,8 +25,8 @@
     "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@mantine/core": "^8.3.14",
-    "@mantine/hooks": "^8.3.14",
+    "@mantine/core": "^8.3.15",
+    "@mantine/hooks": "^8.3.15",
     "@mswjs/data": "^0.16.2",
     "@sentry/nextjs": "^10.19.0",
     "@supabase/ssr": "^0.7.0",

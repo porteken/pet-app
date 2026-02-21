@@ -36,14 +36,27 @@ export async function FetchCityRankings(year: number): Promise<
   const cookieStore = cookies();
   const supabase = await createClient(cookieStore);
 
-  const { data: petAvg, error: petAvgError } = await supabase
-    .from(`pet_year_avg`)
-    .select("location_id, pet")
-    .eq("year", year);
-  const { data: petMax, error: petMaxError } = await supabase
-    .from(`pet_year_max`)
-    .select("location_id, pet")
-    .eq("year", year);
+  const [
+    { data: petAvg, error: petAvgError },
+    { data: petMax, error: petMaxError },
+    { data: locations, error: locError },
+    { data: percentiles_data, error: percentileError },
+    { data: futurePetData, error: futurePetError },
+    { data: petChangeData, error: petChangeError },
+  ] = await Promise.all([
+    supabase.from("pet_year_avg").select("location_id, pet").eq("year", year),
+    supabase.from("pet_year_max").select("location_id, pet").eq("year", year),
+    supabase.from("locations").select("location_id, city, state"),
+    supabase
+      .from("pet_percentiles")
+      .select("location_id,year,p10,p90")
+      .eq("year", year),
+    supabase
+      .from("pet_forecast")
+      .select("location_id, lower, upper")
+      .eq("year", 2100),
+    supabase.from("pet_change").select("location_id, change"),
+  ]);
 
   if (petAvgError || !petAvg) {
     throw new DatabaseError(
@@ -58,10 +71,6 @@ export async function FetchCityRankings(year: number): Promise<
     );
   }
 
-  const { data: locations, error: locError } = await supabase
-    .from("locations")
-    .select("location_id, city, state");
-
   if (locError || !locations) {
     throw new DatabaseError(
       "Failed to fetch location data from database",
@@ -69,10 +78,6 @@ export async function FetchCityRankings(year: number): Promise<
     );
   }
 
-  const { data: percentiles_data, error: percentileError } = await supabase
-    .from(`pet_percentiles`)
-    .select("location_id,year,p10,p90")
-    .eq("year", year);
   if (percentileError || !percentiles_data) {
     throw new DatabaseError(
       "Failed to fetch percentiles from database",
@@ -80,10 +85,6 @@ export async function FetchCityRankings(year: number): Promise<
     );
   }
 
-  const { data: futurePetData, error: futurePetError } = await supabase
-    .from("pet_forecast")
-    .select("location_id, lower, upper")
-    .eq("year", 2100);
   if (futurePetError || !futurePetData) {
     throw new DatabaseError(
       "Failed to fetch future PET data from database",
@@ -99,10 +100,6 @@ export async function FetchCityRankings(year: number): Promise<
     });
   }
 
-  const { data: petChangeData, error: petChangeError } = await supabase
-    .from("pet_change")
-    .select("location_id, change");
-
   if (petChangeError || !petChangeData) {
     throw new DatabaseError(
       "Failed to fetch pet change data from database",
@@ -110,48 +107,65 @@ export async function FetchCityRankings(year: number): Promise<
     );
   }
 
-  const changePerDecadeMap = new Map<number, number>();
-  for (const { change, location_id } of petChangeData) {
-    changePerDecadeMap.set(location_id, Number(change));
-  }
+  const changePerDecadeMap = new Map<number, number>(
+    petChangeData.map(({ change, location_id }) => [
+      location_id,
+      Number(change),
+    ])
+  );
+  const petMaxMap = new Map<number, number>(
+    petMax.map(({ location_id, pet }) => [location_id, Number(pet)])
+  );
+  const locationMap = new Map<
+    number,
+    {
+      city: string;
+      state: string;
+    }
+  >(
+    locations.map(({ city, location_id, state }) => [
+      location_id,
+      { city, state },
+    ])
+  );
+  const percentileMap = new Map<number, { p10: number; p90: number }>(
+    percentiles_data.map(({ location_id, p10, p90 }) => [
+      location_id,
+      { p10: Number(p10), p90: Number(p90) },
+    ])
+  );
 
-  const combinedData = petAvg
-    .map(({ location_id, pet }) => {
-      const pet_max = petMax.find(loc => loc.location_id === location_id);
-      const location = locations.find(loc => loc.location_id === location_id);
-      const percentiles = percentiles_data.filter(
-        loc => loc.location_id === location_id
-      );
-      const avgPet = Number(pet);
-      const maxPet = Number(pet_max!.pet);
+  const combinedData = petAvg.flatMap(({ location_id, pet }) => {
+    const location = locationMap.get(location_id);
+    const maxPet = petMaxMap.get(location_id);
+    const percentiles = percentileMap.get(location_id);
 
-      const futurePet = futurePetMap.get(location_id);
-      const forecast2100Lower = futurePet?.lower ?? null;
-      const forecast2100Upper = futurePet?.upper ?? null;
+    if (!location || maxPet === undefined || !percentiles) {
+      return [];
+    }
 
-      const changePerDecade = changePerDecadeMap.get(location_id) ?? null;
+    const futurePet = futurePetMap.get(location_id);
 
-      return location && percentiles
-        ? {
-            avg_pet: avgPet,
-            changePerDecade,
-            city: location.city,
-            FutureValueLower: forecast2100Lower,
-            FutureValueUpper: forecast2100Upper,
-            location_id,
-            max_pet: maxPet,
-            p10: percentiles[0].p10,
-            p90: percentiles[0].p90,
-            state: location.state,
-          }
-        : undefined;
-    })
-    .filter(Boolean);
+    return [
+      {
+        avg_pet: Number(pet),
+        changePerDecade: changePerDecadeMap.get(location_id) ?? null,
+        city: location.city,
+        FutureValueLower: futurePet?.lower ?? null,
+        FutureValueUpper: futurePet?.upper ?? null,
+        location_id,
+        max_pet: maxPet,
+        p10: percentiles.p10,
+        p90: percentiles.p90,
+        state: location.state,
+      },
+    ];
+  });
 
   const rankings = combinedData
-    .toSorted((a, b) => b!.avg_pet - a!.avg_pet)
+    .toSorted((a, b) => b.avg_pet - a.avg_pet)
     .map((item, index) => ({
-      ...item!,
+      ...item,
       rank: index + 1,
     }));
 
@@ -171,20 +185,25 @@ export async function FetchLocations(): Promise<FetchLocationProperties> {
     );
   }
 
-  const states = [...new Set(locations.map(({ state }) => state))].toSorted(
-    (a, b) => a.localeCompare(b)
-  );
+  const groupedByState = new Map<
+    string,
+    Array<{ key: number; title: string }>
+  >();
+  for (const { city, location_id, state } of locations) {
+    const stateLocations = groupedByState.get(state);
+    if (stateLocations) {
+      stateLocations.push({ key: location_id, title: city });
+    } else {
+      groupedByState.set(state, [{ key: location_id, title: city }]);
+    }
+  }
 
-  const LocationOptions: LocationOptionSection[] = states.map(state => ({
-    items: locations
-      .filter(loc => loc.state === state)
-      .toSorted((a, b) => a.city.localeCompare(b.city))
-      .map(({ city, location_id }) => ({
-        key: location_id,
-        title: city,
-      })),
-    title: state,
-  }));
+  const LocationOptions: LocationOptionSection[] = [...groupedByState.entries()]
+    .toSorted((a, b) => a[0].localeCompare(b[0]))
+    .map(([state, stateLocations]) => ({
+      items: stateLocations.toSorted((a, b) => a.title.localeCompare(b.title)),
+      title: state,
+    }));
 
   return { LocationOptions, locations };
 }

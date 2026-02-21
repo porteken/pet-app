@@ -30,7 +30,7 @@ const Main: FC<PageProperties> = ({
         <PageHeader location={location} />
 
         <div className="flex flex-col gap-8 lg:flex-row">
-          <div className="w-full lg:w-64 lg:flex-shrink-0">
+          <div className="w-full lg:w-64 lg:shrink-0">
             <div className="lg:sticky lg:top-8">
               <HeatStressLegend />
             </div>

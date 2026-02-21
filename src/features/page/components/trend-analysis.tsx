@@ -37,52 +37,69 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
 
   const generatePetTrendGraph = React.useCallback(
     async (option: string, enableForecast: boolean, yearsAhead: number) => {
-      const graphData = await FetchTrendGraphData(option, id);
+      try {
+        const trendGraphDataPromise = FetchTrendGraphData(option, id);
+        const forecastDataPromise = enableForecast
+          ? FetchForecastData(id, yearsAhead)
+          : undefined;
+        const { increase_per_year, trendline_pets, year_pets, years } =
+          await trendGraphDataPromise;
+        const forecastData = forecastDataPromise
+          ? await forecastDataPromise
+          : undefined;
 
-      const { increase_per_year, trendline_pets, year_pets, years } = graphData;
+        if (years.length === 0 || year_pets.length === 0) {
+          setCurrentHeatStress(null);
+          setForecastHeatStress(null);
+          setTrendGraph(
+            GenerateTrendGraph([], option, [], [], 0, forecastData)
+          );
+          return;
+        }
 
-      const forecastData = enableForecast
-        ? await FetchForecastData(id, yearsAhead)
-        : undefined;
+        const currentYear = Math.max(...years);
+        const currentYearIndex = years.indexOf(currentYear);
+        const currentPetValue = year_pets[currentYearIndex];
 
-      const currentYear = Math.max(...years);
-      const currentYearIndex = years.indexOf(currentYear);
-      const currentPetValue = year_pets[currentYearIndex];
-
-      setCurrentHeatStress(
-        getHeatStressDescription(currentPetValue, option, currentYear)
-      );
-
-      if (
-        enableForecast &&
-        forecastData &&
-        forecastData.forecastValues.length > 0
-      ) {
-        const finalForecastYear = forecastData.forecastYears.at(-1)!;
-        const finalForecastValue = forecastData.forecastValues.at(-1)!;
-        const finalLowerBound25 = forecastData.lowerBound10.at(-1)!;
-        const finalUpperBound75 = forecastData.upperBound90.at(-1)!;
-        setForecastHeatStress(
-          getForecastHeatStressDescription(
-            finalForecastValue,
-            finalForecastYear,
-            finalLowerBound25,
-            finalUpperBound75
-          )
+        setCurrentHeatStress(
+          getHeatStressDescription(currentPetValue, option, currentYear)
         );
-      } else {
+
+        if (
+          enableForecast &&
+          forecastData &&
+          forecastData.forecastValues.length > 0
+        ) {
+          const finalForecastYear = forecastData.forecastYears.at(-1)!;
+          const finalForecastValue = forecastData.forecastValues.at(-1)!;
+          const finalLowerBound25 = forecastData.lowerBound10.at(-1)!;
+          const finalUpperBound75 = forecastData.upperBound90.at(-1)!;
+          setForecastHeatStress(
+            getForecastHeatStressDescription(
+              finalForecastValue,
+              finalForecastYear,
+              finalLowerBound25,
+              finalUpperBound75
+            )
+          );
+        } else {
+          setForecastHeatStress(null);
+        }
+
+        const graph = GenerateTrendGraph(
+          years,
+          option,
+          year_pets,
+          trendline_pets,
+          increase_per_year,
+          forecastData
+        );
+        setTrendGraph(graph);
+      } catch {
+        setTrendGraph(GenerateTrendGraph([], option, [], [], 0));
+        setCurrentHeatStress(null);
         setForecastHeatStress(null);
       }
-
-      const graph = GenerateTrendGraph(
-        years,
-        option,
-        year_pets,
-        trendline_pets,
-        increase_per_year,
-        forecastData
-      );
-      setTrendGraph(graph);
     },
     [id]
   );
@@ -169,7 +186,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
             )}
           </div>
         )}
-        <div className="h-[700px]">{trendGraph}</div>
+        <div className="h-[clamp(380px,68vh,700px)]">{trendGraph}</div>
       </div>
     </div>
   );

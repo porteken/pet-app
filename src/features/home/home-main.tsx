@@ -75,12 +75,19 @@ const Home: FC<MapProperties> = ({
     ) => {
       setGraphLoading(true);
       try {
-        const { increase_per_year, trendline_pets, year_pets, years } =
-          await FetchTrendGraphData(option, locationId);
-
-        const forecastData = enableForecast
-          ? await FetchForecastData(locationId, yearsAhead)
+        const trendGraphDataPromise = FetchTrendGraphData(option, locationId);
+        const forecastDataPromise = enableForecast
+          ? FetchForecastData(locationId, yearsAhead)
           : undefined;
+        const { increase_per_year, trendline_pets, year_pets, years } =
+          await trendGraphDataPromise;
+        const forecastData = forecastDataPromise
+          ? await forecastDataPromise
+          : undefined;
+
+        if (years.length === 0 || year_pets.length === 0) {
+          throw new Error("No trend data available");
+        }
 
         const currentYear = Math.max(...years);
         const currentYearIndex = years.indexOf(currentYear);
@@ -184,12 +191,16 @@ const Home: FC<MapProperties> = ({
   );
 
   return (
-    <div className="relative h-screen w-full">
+    <div className="relative h-[100dvh] w-full">
       <div className="absolute inset-x-0 top-0 z-50">
         <HeaderBar LocationOptions={LocationOptions} />
       </div>
       <div className="absolute inset-0 top-0">
-        <MapComponent locations={locations} onMarkerClick={handleMarkerClick} />
+        <MapComponent
+          locations={locations}
+          onMarkerClick={handleMarkerClick}
+          selectedGraphMeasure={selectedGraphMeasure}
+        />
       </div>
       <Modal
         onClose={() => setModalOpen(false)}

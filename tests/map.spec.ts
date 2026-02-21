@@ -23,4 +23,24 @@ test.describe("Map Page", () => {
       page.getByRole("button", { name: "View Full Details" })
     ).toBeVisible({ timeout: 10_000 });
   });
+
+  test("should navigate to selected location from map modal", async ({
+    page,
+  }) => {
+    await page.goto("/map");
+    const marker = page.locator(".leaflet-marker-icon").first();
+    await expect(marker).toBeVisible({ timeout: 10_000 });
+
+    await marker.click({ force: true });
+
+    const viewDetailsButton = page.getByRole("button", {
+      name: "View Full Details",
+    });
+    await expect(viewDetailsButton).toBeVisible({ timeout: 10_000 });
+    await expect(viewDetailsButton).toBeEnabled();
+    await viewDetailsButton.focus();
+    await page.keyboard.press("Enter");
+
+    await expect(page).toHaveURL(/\/\d+$/);
+  });
 });

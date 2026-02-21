@@ -1,7 +1,7 @@
 "use client";
 
 import { Group, Paper, Select } from "@mantine/core";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useMemo } from "react";
 
 import { APP_CONFIG } from "@/lib/constants";
@@ -19,6 +19,7 @@ export const HeaderBar = ({
   id,
   LocationOptions,
 }: NavProperties): React.ReactElement => {
+  const router = useRouter();
   const searchParameters = useSearchParams();
 
   const buildUrl = (path: string, includeSearchParameters = true) => {
@@ -93,12 +94,12 @@ export const HeaderBar = ({
           </h1>
         </div>
         <Paper className="bg-white shadow-none" p="md">
-          <Group className="hidden justify-center gap-4 sm:flex">
+          <Group className="flex flex-wrap justify-center gap-3">
             <Select
               data={selectData}
               onChange={value => {
                 if (value) {
-                  globalThis.location.href = `/${value}`;
+                  router.push(`/${value}`);
                 }
               }}
               placeholder={id! >= 0 ? "Change City" : "Select City"}

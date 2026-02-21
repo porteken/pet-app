@@ -37,7 +37,7 @@ interface PlotlyTrace {
 
 const Plot = dynamic(() => import("react-plotly.js"), {
   loading: () => (
-    <div className="flex h-[600px] items-center justify-center text-gray-500">
+    <div className="flex h-[clamp(360px,62vh,600px)] items-center justify-center text-gray-500">
       Loading chart...
     </div>
   ),
@@ -84,7 +84,7 @@ export const GenerateTrendGraph = (
     trendline_pets.length === 0
   ) {
     return (
-      <div className="flex h-[600px] items-center justify-center text-gray-500">
+      <div className="flex h-[clamp(360px,62vh,600px)] items-center justify-center text-gray-500">
         No data available for the selected parameters
       </div>
     );
@@ -219,7 +219,12 @@ export const GenerateTrendGraph = (
 
   return (
     <div
-      style={{ height: 600, margin: "0 auto", maxWidth: 900, width: "100%" }}
+      style={{
+        height: "clamp(360px, 62vh, 600px)",
+        margin: "0 auto",
+        maxWidth: 900,
+        width: "100%",
+      }}
     >
       <PlotWrapper
         config={config}
@@ -247,7 +252,7 @@ export const GenerateReferenceGraph = async (
     currentPets.length === 0
   ) {
     return (
-      <div className="flex h-[600px] items-center justify-center text-gray-500">
+      <div className="flex h-[clamp(360px,62vh,600px)] items-center justify-center text-gray-500">
         No data available for the selected parameters
       </div>
     );
@@ -325,7 +330,12 @@ export const GenerateReferenceGraph = async (
 
   return (
     <div
-      style={{ height: 600, margin: "0 auto", maxWidth: 900, width: "100%" }}
+      style={{
+        height: "clamp(360px, 62vh, 600px)",
+        margin: "0 auto",
+        maxWidth: 900,
+        width: "100%",
+      }}
     >
       <PlotWrapper
         config={config}

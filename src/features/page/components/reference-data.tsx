@@ -49,9 +49,8 @@ export const ReferenceData: React.FC<ReferenceDataProperties> = ({
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       const year = event.target.value;
       setSelectedReferenceYear(year);
-      generatePetReferenceGraph(year);
     },
-    [generatePetReferenceGraph]
+    []
   );
 
   React.useEffect(() => {
@@ -86,7 +85,7 @@ export const ReferenceData: React.FC<ReferenceDataProperties> = ({
             ))}
           </select>
         </div>
-        <div className="h-[700px]">{referenceGraph}</div>
+        <div className="h-[clamp(380px,68vh,700px)]">{referenceGraph}</div>
       </div>
     </div>
   );

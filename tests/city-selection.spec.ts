@@ -1,6 +1,18 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("City Selection", () => {
+  test("should keep city selection visible on mobile viewport", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ height: 667, width: 375 });
+    await page.goto("/");
+
+    await page.waitForLoadState("domcontentloaded");
+
+    const citySelect = page.locator("[placeholder*='City']").first();
+    await expect(citySelect).toBeVisible();
+  });
+
   test("should display city selection dropdown on home page", async ({
     page,
   }) => {

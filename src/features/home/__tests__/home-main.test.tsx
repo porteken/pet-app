@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const createDelay = (ms: number) =>
   new Promise(resolve => setTimeout(resolve, ms));
+const mockPush = vi.fn();
 
 vi.mock("@/lib/actions/actions", () => ({
   setGraphMeasure: vi.fn().mockResolvedValue({}),
@@ -25,7 +26,7 @@ vi.mock("@/lib/api/fetch-client", () => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
-    push: vi.fn(),
+    push: mockPush,
     refresh: vi.fn(),
   }),
 }));
@@ -150,6 +151,7 @@ const defaultProps = {
 describe("Home", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPush.mockReset();
   });
 
   describe("Basic Properties", () => {
@@ -287,12 +289,6 @@ describe("Home", () => {
     });
 
     it("should navigate to location page when 'View Full Details' is clicked", async () => {
-      const mockLocation = { href: "" };
-      Object.defineProperty(globalThis, "location", {
-        value: mockLocation,
-        writable: true,
-      });
-
       render(<Home {...defaultProps} />);
 
       fireEvent.click(screen.getByTestId("marker-click"));
@@ -303,7 +299,7 @@ describe("Home", () => {
 
       fireEvent.click(screen.getByTestId("mantine-button"));
 
-      expect(mockLocation.href).toBe("/1");
+      expect(mockPush).toHaveBeenCalledWith("/1");
     });
   });
 

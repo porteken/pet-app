@@ -20,7 +20,12 @@ test.describe("Smoke Tests - Critical User Journeys", () => {
       page.getByRole("button", { name: "View Full Details" })
     ).toBeVisible({ timeout: 10_000 });
 
-    await page.getByRole("button", { name: "View Full Details" }).click();
+    const detailsButton = page.getByRole("button", {
+      name: "View Full Details",
+    });
+    await expect(detailsButton).toBeEnabled();
+    await detailsButton.focus();
+    await page.keyboard.press("Enter");
 
     await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
     await expect(page.getByText("Trend Analysis")).toBeVisible();
@@ -98,10 +103,12 @@ test.describe("Smoke Tests - Critical User Journeys", () => {
       name: "View Full Details",
     });
     await expect(viewDetailsButton).toBeVisible({ timeout: 10_000 });
+    await expect(viewDetailsButton).toBeEnabled();
 
     await page.setViewportSize({ height: 667, width: 375 });
 
-    await viewDetailsButton.click();
+    await viewDetailsButton.focus();
+    await page.keyboard.press("Enter");
 
     await expect(page.getByText("Trend Analysis")).toBeVisible();
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {

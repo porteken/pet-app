@@ -14,6 +14,8 @@ import React, {
 
 import { HeatStressLegend } from "@/features/page/components/heat-stress-legend";
 
+import { OptimizedMarker } from "./components/optimized-marker";
+
 interface Location {
   city: string;
   lat: number;
@@ -25,6 +27,7 @@ interface Location {
 interface MapComponentProperties {
   locations: Location[];
   onMarkerClick: (_locationId: number) => void;
+  selectedGraphMeasure: string;
 }
 
 type MapContainerType = ComponentType<{
@@ -39,14 +42,11 @@ type MarkerType = ComponentType<{
   children?: ReactNode;
   eventHandlers: {
     click: () => void;
+    mouseover?: () => void;
   };
   icon?: any;
   key: number;
   position: [number, number];
-}>;
-
-type PopupType = ComponentType<{
-  children?: ReactNode;
 }>;
 
 type TileLayerType = ComponentType<{
@@ -55,58 +55,32 @@ type TileLayerType = ComponentType<{
 }>;
 
 export const MapComponent = memo<MapComponentProperties>(
-  ({ locations, onMarkerClick }) => {
+  ({ locations, onMarkerClick, selectedGraphMeasure }) => {
     const [MapContainer, setMapContainer] = useState<MapContainerType>();
     const [TileLayer, setTileLayer] = useState<TileLayerType>();
     const [Marker, setMarker] = useState<MarkerType>();
-    const [Popup, setPopup] = useState<PopupType>();
     const [isLoaded, setIsLoaded] = useState(false);
     const [customIcon, setCustomIcon] = useState<Icon>();
 
     const loadMap = useCallback(async () => {
-      if (!document.querySelector('link[href*="leaflet.css"]')) {
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-        link.integrity = "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=";
-        link.crossOrigin = "";
-        document.head.append(link);
-
-        await new Promise(resolve => {
-          link.addEventListener("load", resolve);
-          link.addEventListener("error", resolve);
-        });
-      }
-
       const reactLeaflet = await import("react-leaflet");
 
       const L = await import("leaflet");
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-        iconUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-        shadowUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-      });
+      const markerSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="40" viewBox="0 0 28 40" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 11.2 14 26 14 26s14-14.8 14-26C28 6.268 21.732 0 14 0z" fill="#2563EB"/><circle cx="14" cy="14" r="5" fill="white"/></svg>`;
+      const markerUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(markerSvg)}`;
 
-      const customIcon = new L.Icon({
-        iconAnchor: [12, 41],
-        iconRetinaUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-        iconSize: [25, 41],
-        iconUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-        shadowUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+      const customIcon = L.icon({
+        className: "pet-map-marker-icon",
+        iconAnchor: [14, 40],
+        iconRetinaUrl: markerUrl,
+        iconSize: [28, 40],
+        iconUrl: markerUrl,
+        popupAnchor: [0, -34],
       });
 
       setMapContainer(() => reactLeaflet.MapContainer);
       setTileLayer(() => reactLeaflet.TileLayer);
       setMarker(() => reactLeaflet.Marker);
-      setPopup(() => reactLeaflet.Popup);
       setIsLoaded(true);
 
       setCustomIcon(customIcon);
@@ -124,20 +98,21 @@ export const MapComponent = memo<MapComponentProperties>(
       }
 
       return locations.map(loc => (
-        <Marker
-          eventHandlers={{
-            click: () => onMarkerClick(loc.location_id),
-          }}
+        <OptimizedMarker
           icon={customIcon}
           key={loc.location_id}
+          locationId={loc.location_id}
+          MarkerComponent={Marker}
+          onClick={onMarkerClick}
           position={[loc.lat, loc.lng]}
+          selectedGraphMeasure={selectedGraphMeasure}
         />
       ));
-    }, [locations, customIcon, Marker, onMarkerClick]);
+    }, [locations, customIcon, Marker, onMarkerClick, selectedGraphMeasure]);
 
-    if (!isLoaded || !MapContainer || !TileLayer || !Marker || !Popup) {
+    if (!isLoaded || !MapContainer || !TileLayer || !Marker || !customIcon) {
       return (
-        <div className="flex h-screen items-center justify-center bg-gray-100">
+        <div className="flex h-[100dvh] items-center justify-center bg-gray-100">
           <p>Loading map...</p>
         </div>
       );
@@ -145,7 +120,7 @@ export const MapComponent = memo<MapComponentProperties>(
 
     if (!locations || locations.length === 0) {
       return (
-        <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="flex h-[100dvh] items-center justify-center bg-gray-50">
           <div className="mx-auto max-w-md p-6 text-center">
             <div className="mb-6">
               <svg
@@ -186,11 +161,11 @@ export const MapComponent = memo<MapComponentProperties>(
     }
 
     return (
-      <div className="relative h-screen w-screen">
+      <div className="relative h-dvh w-full">
         <MapContainer
           center={[39.5, -98.35]}
           scrollWheelZoom
-          style={{ height: "100vh", width: "100vw" }}
+          style={{ height: "100dvh", width: "100%" }}
           zoom={5}
         >
           <TileLayer
@@ -199,7 +174,7 @@ export const MapComponent = memo<MapComponentProperties>(
           />
           {markers}
         </MapContainer>
-        <div className="pointer-events-none absolute bottom-6 left-6 z-[1000]">
+        <div className="pointer-events-none absolute bottom-6 left-6 z-1000">
           <div className="pointer-events-auto">
             <HeatStressLegend />
           </div>

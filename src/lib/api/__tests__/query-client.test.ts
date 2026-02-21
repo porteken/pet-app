@@ -90,6 +90,7 @@ describe("getTrendGraphQueryOptions", () => {
     const locationId = 456;
     const option = "humidity";
     const mockData = {
+      increase_per_year: 0.5,
       trendline_pets: [1, 2, 3],
       year_pets: [10, 20, 30],
       years: [2021, 2022, 2023],
@@ -117,6 +118,7 @@ describe("getTrendGraphQueryOptions", () => {
     for (const { locationId, option } of testCases) {
       mockFetchTrendGraphData.mockClear();
       mockFetchTrendGraphData.mockResolvedValue({
+        increase_per_year: 0.5,
         trendline_pets: [1, 2, 3],
         year_pets: [10, 20, 30],
         years: [2021, 2022, 2023],
@@ -281,6 +283,7 @@ describe("Integration tests", () => {
 
   it("prefetch and invalidate work together", async () => {
     const mockData = {
+      increase_per_year: 0.5,
       trendline_pets: [1, 2, 3],
       year_pets: [10, 20, 30],
       years: [2021, 2022, 2023],
@@ -311,6 +314,7 @@ describe("Integration tests", () => {
 
   it("query options work with actual query client", async () => {
     const mockData = {
+      increase_per_year: 0.9,
       trendline_pets: [4, 5, 6],
       year_pets: [40, 50, 60],
       years: [2020, 2021, 2022],

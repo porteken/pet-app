@@ -20,7 +20,7 @@ describe("FetchTrendGraphData", () => {
   it("should throw error when called in non-browser environment", async () => {
     const originalWindow = globalThis.window;
 
-    delete globalThis.window;
+    Reflect.deleteProperty(globalThis, "window");
 
     await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
       "FetchTrendGraphData can only be called in browser environment"
@@ -226,7 +226,7 @@ describe("FetchForecastData", () => {
   it("should throw error when called in non-browser environment", async () => {
     const originalWindow = globalThis.window;
 
-    delete globalThis.window;
+    Reflect.deleteProperty(globalThis, "window");
 
     await expect(FetchForecastData(1, 10)).rejects.toThrow(
       "FetchForecastData can only be called in browser environment"

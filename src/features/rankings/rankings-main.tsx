@@ -178,9 +178,9 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
           </h1>
         </div>
 
-        <div className="mb-6 flex flex-wrap gap-4">
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Select
-            className="w-48"
+            className="w-full"
             data={yearOptions}
             disabled={isPending}
             label="Year"
@@ -188,7 +188,7 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
             value={String(selectedYear)}
           />
           <MultiSelect
-            className="w-48"
+            className="w-full"
             clearable
             data={stateOptions}
             disabled={isPending}
@@ -198,7 +198,7 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
             value={stateFilter}
           />
           <MultiSelect
-            className="w-64"
+            className="w-full"
             clearable
             data={heatStressOptions}
             disabled={isPending}
@@ -209,7 +209,7 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
           />
         </div>
 
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-gray-600">
             Showing{" "}
             {filteredAndSortedRankings.length === 0
@@ -233,9 +233,9 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
           )}
         </div>
 
-        <div className="flex gap-6">
-          <div className="w-64 flex-shrink-0">
-            <div className="sticky top-4 rounded-lg bg-white p-6 shadow">
+        <div className="flex flex-col gap-6 xl:flex-row">
+          <div className="w-full xl:w-64 xl:shrink-0">
+            <div className="rounded-lg bg-white p-6 shadow xl:sticky xl:top-4">
               <h3 className="mb-4 text-lg font-semibold text-gray-900">
                 Heat Stress Levels
               </h3>

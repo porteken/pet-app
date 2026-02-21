@@ -22,13 +22,14 @@ Object.defineProperty(globalThis, "matchMedia", {
 
 const mockUseSearchParameters = vi.fn();
 const mockGet = vi.fn();
+const mockPush = vi.fn();
 const mockToString = vi.fn().mockReturnValue("");
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     back: vi.fn(),
     forward: vi.fn(),
-    push: vi.fn(),
+    push: mockPush,
     refresh: vi.fn(),
     replace: vi.fn(),
   }),
@@ -96,11 +97,6 @@ describe("HeaderBar", () => {
     mockUseSearchParameters.mockReturnValue({
       get: mockGet,
       toString: mockToString,
-    });
-
-    Object.defineProperty(globalThis, "location", {
-      value: { href: "" },
-      writable: true,
     });
   });
 
@@ -248,7 +244,7 @@ describe("HeaderBar", () => {
         })
       );
 
-      expect(globalThis.location.href).toBe("/1");
+      expect(mockPush).toHaveBeenCalledWith("/1");
     });
 
     it("should have proper placeholder text based on ID", () => {

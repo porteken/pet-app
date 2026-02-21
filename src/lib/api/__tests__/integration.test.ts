@@ -14,6 +14,7 @@ describe("API Integration Tests", () => {
   describe("Client-Server Integration", () => {
     it("should handle complete trend data flow", async () => {
       const mockTrendData = {
+        increase_per_year: 1.2,
         trendline_pets: [12, 16, 22],
         year_pets: [10, 15, 20],
         years: [2020, 2021, 2022],
@@ -59,6 +60,7 @@ describe("API Integration Tests", () => {
             return Promise.reject(new Error("Invalid location ID"));
           }
           return Promise.resolve({
+            increase_per_year: 0,
             trendline_pets: [],
             year_pets: [],
             years: [],

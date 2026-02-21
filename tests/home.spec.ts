@@ -21,4 +21,28 @@ test.describe("Home Page", () => {
       page.getByRole("button", { name: "View Full Details" })
     ).toBeVisible({ timeout: 10_000 });
   });
+
+  test("should navigate to location details from modal action", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const marker = page.locator(".leaflet-marker-icon").first();
+    await expect(marker).toBeVisible({ timeout: 10_000 });
+
+    await marker.click({ force: true });
+
+    const viewDetailsButton = page.getByRole("button", {
+      name: "View Full Details",
+    });
+    await expect(viewDetailsButton).toBeVisible({ timeout: 10_000 });
+    await expect(viewDetailsButton).toBeEnabled();
+    await viewDetailsButton.focus();
+    await page.keyboard.press("Enter");
+
+    await expect(page).toHaveURL(/\/\d+$/);
+    await expect(page.getByText("Trend Analysis")).toBeVisible({
+      timeout: 15_000,
+    });
+  });
 });

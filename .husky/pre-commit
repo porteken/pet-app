@@ -4,6 +4,8 @@ npx lint-staged
 
 npm run test:unit
 
+npx tsc --noEmit
+
 npm run test:integration
 
 echo "Pre-commit checks passed!"

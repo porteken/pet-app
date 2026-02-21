@@ -1,5 +1,6 @@
 import { Button, Loader, Select } from "@mantine/core";
-import React, { memo, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import React, { memo, useCallback, useMemo } from "react";
 
 import type { HeatStressDescription } from "@/lib/utils/heat-stress";
 
@@ -39,6 +40,7 @@ export const GraphSection = memo<GraphSectionProperties>(
     selectedLocation,
     selectOptions,
   }) => {
+    const router = useRouter();
     const loadingUI = useMemo(
       () => (
         <div className="flex size-full flex-col items-center justify-center">
@@ -49,37 +51,46 @@ export const GraphSection = memo<GraphSectionProperties>(
       []
     );
 
+    const handleViewDetails = useCallback(() => {
+      if (selectedLocation) {
+        router.push(`/${selectedLocation.location_id}`);
+      }
+    }, [router, selectedLocation]);
+
     const detailsButton = useMemo(() => {
       return (
         <div className="flex justify-center">
           <Button
-            onClick={() => {
-              globalThis.location.href = `/${selectedLocation!.location_id}`;
-            }}
+            disabled={!selectedLocation}
+            onClick={handleViewDetails}
             variant="filled"
           >
             View Full Details
           </Button>
         </div>
       );
-    }, [selectedLocation]);
+    }, [handleViewDetails, selectedLocation]);
 
     const graphContent = useMemo(
       () => (
-        <div className="flex min-h-[300px] w-full max-w-4xl items-center justify-center">
+        <div className="flex min-h-75 w-full max-w-4xl items-center justify-center">
           {graphLoading ? loadingUI : petGraph}
         </div>
       ),
       [graphLoading, loadingUI, petGraph]
     );
     return (
-      <div className="flex min-h-[340px] w-full max-w-[90vw] min-w-[320px] flex-col items-center space-y-4">
+      <div className="flex min-h-85 w-full max-w-[90vw] min-w-[320px] flex-col items-center space-y-4">
         <div className="w-full max-w-md space-y-4">
           <Select
             className="w-full"
             data={selectOptions}
             label="Measure"
-            onChange={value => onSelectChange(value!)}
+            onChange={value => {
+              if (value) {
+                onSelectChange(value);
+              }
+            }}
             size="sm"
             value={selectedGraphMeasure}
           />

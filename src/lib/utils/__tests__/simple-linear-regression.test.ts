@@ -105,6 +105,130 @@ describe("SimpleLinearRegression", () => {
     });
   });
 
+  describe("predictWithConfidence", () => {
+    it("should return prediction with confidence bounds", () => {
+      const x = [1, 2, 3, 4, 5];
+      const y = [2.1, 3.9, 6.2, 7.8, 10.1];
+      const regression = new SimpleLinearRegression(x, y);
+
+      const result = regression.predictWithConfidence(6, 0.8);
+
+      expect(result).toHaveProperty("prediction");
+      expect(result).toHaveProperty("lowerBound");
+      expect(result).toHaveProperty("upperBound");
+      expect(result.prediction).toBeCloseTo(12, 0);
+      expect(result.lowerBound).toBeLessThan(result.prediction);
+      expect(result.upperBound).toBeGreaterThan(result.prediction);
+    });
+
+    it("should use default confidence level of 0.8", () => {
+      const x = [1, 2, 3, 4, 5];
+      const y = [2.1, 3.9, 6.2, 7.8, 10.1];
+      const regression = new SimpleLinearRegression(x, y);
+
+      const result = regression.predictWithConfidence(6);
+
+      expect(result.prediction).toBeCloseTo(12, 0);
+    });
+
+    it("should support 0.5 confidence level", () => {
+      const x = [1, 2, 3, 4, 5];
+      const y = [2.1, 3.9, 6.2, 7.8, 10.1];
+      const regression = new SimpleLinearRegression(x, y);
+
+      const result = regression.predictWithConfidence(6, 0.5);
+
+      expect(result.prediction).toBeCloseTo(12, 0);
+      expect(result.lowerBound).toBeLessThan(result.prediction);
+      expect(result.upperBound).toBeGreaterThan(result.prediction);
+    });
+
+    it("should support 0.95 confidence level", () => {
+      const x = [1, 2, 3, 4, 5];
+      const y = [2.1, 3.9, 6.2, 7.8, 10.1];
+      const regression = new SimpleLinearRegression(x, y);
+
+      const result = regression.predictWithConfidence(6, 0.95);
+
+      expect(result.prediction).toBeCloseTo(12, 0);
+    });
+
+    it("should support 0.99 confidence level", () => {
+      const x = [1, 2, 3, 4, 5];
+      const y = [2.1, 3.9, 6.2, 7.8, 10.1];
+      const regression = new SimpleLinearRegression(x, y);
+
+      const result = regression.predictWithConfidence(6, 0.99);
+
+      expect(result.prediction).toBeCloseTo(12, 0);
+    });
+
+    it("should fall back to 0.8 t-value for unknown confidence levels", () => {
+      const x = [1, 2, 3, 4, 5];
+      const y = [2.1, 3.9, 6.2, 7.8, 10.1];
+      const regression = new SimpleLinearRegression(x, y);
+
+      const result = regression.predictWithConfidence(6, 0.75);
+
+      expect(result.prediction).toBeCloseTo(12, 0);
+    });
+
+    it("should have wider interval for higher confidence level", () => {
+      const x = [1, 2, 3, 4, 5];
+      const y = [2.1, 3.9, 6.2, 7.8, 10.1];
+      const regression = new SimpleLinearRegression(x, y);
+
+      const result80 = regression.predictWithConfidence(6, 0.8);
+      const result95 = regression.predictWithConfidence(6, 0.95);
+
+      const interval80 = result80.upperBound - result80.lowerBound;
+      const interval95 = result95.upperBound - result95.lowerBound;
+
+      expect(interval95).toBeGreaterThan(interval80);
+    });
+
+    it("should handle prediction with noisy data", () => {
+      const x = [1, 2, 3, 4, 5];
+      const y = [2.5, 3.8, 6.2, 7.7, 10.3];
+      const regression = new SimpleLinearRegression(x, y);
+
+      const result = regression.predictWithConfidence(6);
+
+      expect(Number.isFinite(result.prediction)).toBe(true);
+      expect(Number.isFinite(result.lowerBound)).toBe(true);
+      expect(Number.isFinite(result.upperBound)).toBe(true);
+    });
+
+    it("should have prediction equal to predict() result", () => {
+      const x = [1, 2, 3, 4, 5];
+      const y = [2.1, 3.9, 6.2, 7.8, 10.1];
+      const regression = new SimpleLinearRegression(x, y);
+
+      const prediction = regression.predict(6);
+      const confidenceResult = regression.predictWithConfidence(6);
+
+      expect(confidenceResult.prediction).toBe(prediction);
+    });
+  });
+
+  describe("slope property", () => {
+    it("should expose slope as public readonly property", () => {
+      const x = [1, 2, 3, 4, 5];
+      const y = [2, 4, 6, 8, 10];
+      const regression = new SimpleLinearRegression(x, y);
+
+      expect(regression.slope).toBeCloseTo(2, 10);
+    });
+
+    it("should calculate correct slope for negative correlation", () => {
+      const x = [1, 2, 3, 4, 5];
+      const y = [10, 8, 6, 4, 2];
+      const regression = new SimpleLinearRegression(x, y);
+
+      expect(regression.slope).toBeCloseTo(-2, 10);
+    });
+  });
+
   describe("edge cases", () => {
     it("should handle very large numbers", () => {
       const x = [1_000_000, 2_000_000, 3_000_000];
@@ -130,6 +254,16 @@ describe("SimpleLinearRegression", () => {
       const prediction = regression.predict(1);
       expect(typeof prediction).toBe("number");
       expect(Number.isFinite(prediction)).toBe(true);
+    });
+
+    it("should return zero standard error for n <= 2", () => {
+      const x = [1, 2];
+      const y = [2, 4];
+      const regression = new SimpleLinearRegression(x, y);
+
+      const result = regression.predictWithConfidence(3, 0.8);
+      expect(result.lowerBound).toBe(result.prediction);
+      expect(result.upperBound).toBe(result.prediction);
     });
   });
 });

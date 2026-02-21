@@ -719,4 +719,167 @@ describe("Graph Components", () => {
       );
     });
   });
+
+  describe("Forecast Data", () => {
+    const mockYears = [2020, 2021, 2022, 2023];
+    const mockYearPets = [25.5, 26.2, 27.1, 28];
+    const mockTrendlinePets = [25, 26, 27, 28];
+    const mockIncreasePerYear = 0.5;
+
+    const mockForecastData = {
+      forecastValues: [29, 30, 31],
+      forecastYears: [2024, 2025, 2026],
+      lowerBound10: [27, 28, 29],
+      upperBound90: [31, 32, 33],
+    };
+
+    it("should render forecast data when provided", () => {
+      const result = GenerateTrendGraph(
+        mockYears,
+        "avg",
+        mockYearPets,
+        mockTrendlinePets,
+        mockIncreasePerYear,
+        mockForecastData
+      );
+
+      render(result);
+
+      const graphData = screen.getByTestId("graph-data");
+      const data = JSON.parse(graphData.textContent || "[]");
+
+      expect(data.length).toBe(5);
+      expect(data[2].name).toBe("90% Confidence");
+      expect(data[3].name).toBe("80% Confidence Interval");
+      expect(data[4].name).toBe("Forecast");
+    });
+
+    it("should include last year data in forecast traces", () => {
+      const result = GenerateTrendGraph(
+        mockYears,
+        "avg",
+        mockYearPets,
+        mockTrendlinePets,
+        mockIncreasePerYear,
+        mockForecastData
+      );
+
+      render(result);
+
+      const graphData = screen.getByTestId("graph-data");
+      const data = JSON.parse(graphData.textContent || "[]");
+
+      expect(data[2].x[0]).toBe(2023);
+      expect(data[3].x[0]).toBe(2023);
+      expect(data[4].x[0]).toBe(2023);
+    });
+
+    it("should connect forecast to last PET value", () => {
+      const result = GenerateTrendGraph(
+        mockYears,
+        "avg",
+        mockYearPets,
+        mockTrendlinePets,
+        mockIncreasePerYear,
+        mockForecastData
+      );
+
+      render(result);
+
+      const graphData = screen.getByTestId("graph-data");
+      const data = JSON.parse(graphData.textContent || "[]");
+
+      expect(data[4].y[0]).toBe(28);
+      expect(data[4].y.slice(1)).toEqual(mockForecastData.forecastValues);
+    });
+
+    it("should not render forecast traces when forecastData has empty years", () => {
+      const result = GenerateTrendGraph(
+        mockYears,
+        "avg",
+        mockYearPets,
+        mockTrendlinePets,
+        mockIncreasePerYear,
+        {
+          forecastValues: [29, 30],
+          forecastYears: [],
+          lowerBound10: [27, 28],
+          upperBound90: [31, 32],
+        }
+      );
+
+      render(result);
+
+      const graphData = screen.getByTestId("graph-data");
+      const data = JSON.parse(graphData.textContent || "[]");
+
+      expect(data.length).toBe(2);
+    });
+
+    it("should style confidence interval with fill", () => {
+      const result = GenerateTrendGraph(
+        mockYears,
+        "avg",
+        mockYearPets,
+        mockTrendlinePets,
+        mockIncreasePerYear,
+        mockForecastData
+      );
+
+      render(result);
+
+      const graphData = screen.getByTestId("graph-data");
+      const data = JSON.parse(graphData.textContent || "[]");
+
+      expect(data[2].fill).toBe("none");
+      expect(data[3].fill).toBe("tonexty");
+      expect(data[3].fillcolor).toBe("rgba(99, 102, 241, 0.2)");
+    });
+
+    it("should style forecast line with dot dash", () => {
+      const result = GenerateTrendGraph(
+        mockYears,
+        "avg",
+        mockYearPets,
+        mockTrendlinePets,
+        mockIncreasePerYear,
+        mockForecastData
+      );
+
+      render(result);
+
+      const graphData = screen.getByTestId("graph-data");
+      const data = JSON.parse(graphData.textContent || "[]");
+
+      expect(data[4].line.dash).toBe("dot");
+    });
+
+    it("should handle negative increase per year", () => {
+      const result = GenerateTrendGraph(
+        mockYears,
+        "avg",
+        mockYearPets,
+        mockTrendlinePets,
+        -0.35
+      );
+
+      render(result);
+
+      expect(screen.getByTestId("graph-title")).toHaveTextContent("-0.35°C");
+    });
+
+    it("should format positive increase per year with plus sign", () => {
+      const result = GenerateTrendGraph(
+        mockYears,
+        "avg",
+        mockYearPets,
+        mockTrendlinePets,
+        0.42
+      );
+
+      render(result);
+
+      expect(screen.getByTestId("graph-title")).toHaveTextContent("+0.42°C");
+    });
+  });
 });

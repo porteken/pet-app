@@ -138,9 +138,31 @@ vi.mock("@/lib/utils/select-options", () => ({
   ],
 }));
 
+vi.mock("@/components/forecast/forecast-controls", () => ({
+  ForecastControls: vi.fn(
+    ({ enabled, onToggle, onYearsChange, yearsAhead }) => (
+      <div data-testid="forecast-controls">
+        <button
+          data-testid="forecast-toggle"
+          onClick={() => onToggle(!enabled)}
+          type="button"
+        >
+          {enabled ? "Disable" : "Enable"} Forecast
+        </button>
+        <input
+          data-testid="forecast-years"
+          onChange={event_ => onYearsChange(Number(event_.target.value))}
+          type="number"
+          value={yearsAhead}
+        />
+      </div>
+    )
+  ),
+}));
+
 import { GenerateTrendGraph } from "@/features/generate-graph";
 import { setGraphMeasure } from "@/lib/actions/actions";
-import { FetchTrendGraphData } from "@/lib/api/fetch-client";
+import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 
 import Home from "../home-main";
 
@@ -350,6 +372,95 @@ describe("Home", () => {
           screen.getByRole("link", { name: /porteken@gmail.com/i })
         ).toBeInTheDocument();
       });
+    });
+  });
+
+  describe("Forecast Heat Stress", () => {
+    it("should display forecast heat stress when forecast is enabled and data is available", async () => {
+      vi.mocked(FetchForecastData).mockResolvedValue({
+        forecastValues: [28, 30, 32],
+        forecastYears: [2025, 2026, 2027],
+        lowerBound10: [26, 28, 30],
+        upperBound90: [30, 32, 34],
+      });
+
+      render(<Home {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId("marker-click"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId("forecast-toggle"));
+
+      await waitFor(() => {
+        expect(FetchForecastData).toHaveBeenCalled();
+      });
+    });
+
+    it("should handle forecast data with NaN bounds gracefully", async () => {
+      vi.mocked(FetchForecastData).mockResolvedValue({
+        forecastValues: [28, 30, 32],
+        forecastYears: [2025, 2026, 2027],
+        lowerBound10: [Number.NaN, Number.NaN, Number.NaN],
+        upperBound90: [Number.NaN, Number.NaN, Number.NaN],
+      });
+
+      render(<Home {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId("marker-click"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId("forecast-toggle"));
+
+      await waitFor(() => {
+        expect(FetchForecastData).toHaveBeenCalled();
+      });
+    });
+
+    it("should not call FetchForecastData when measure is not avg", async () => {
+      render(<Home {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId("marker-click"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+      });
+
+      const selectElement = screen.getByTestId("graph-measure-select");
+      fireEvent.change(selectElement, { target: { value: "max" } });
+
+      await waitFor(() => {
+        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1);
+      });
+
+      expect(screen.queryByTestId("forecast-controls")).not.toBeInTheDocument();
+    });
+
+    it("should update forecast years ahead when changed", async () => {
+      render(<Home {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId("marker-click"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+      });
+
+      const yearsInput = screen.getByTestId("forecast-years");
+      fireEvent.change(yearsInput, { target: { value: "15" } });
+
+      fireEvent.click(screen.getByTestId("forecast-toggle"));
+
+      await waitFor(() => {
+        expect(FetchForecastData).toHaveBeenCalled();
+      });
+
+      const callArguments = vi.mocked(FetchForecastData).mock.calls[0];
+      expect(callArguments[1]).toBe(15);
     });
   });
 });

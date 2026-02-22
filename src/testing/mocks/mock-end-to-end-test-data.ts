@@ -132,7 +132,11 @@ export const createMockSupabaseClient = () => {
     data,
     eq: () => createMockQuery(data, error),
     error,
+    gt: () => createMockQuery(data, error),
+    gte: () => createMockQuery(data, error),
     limit: () => createMockQuery(data, error),
+    lt: () => createMockQuery(data, error),
+    lte: () => createMockQuery(data, error),
     maybeSingle: () =>
       createMockQuery(Array.isArray(data) ? data[0] : data, error),
     order: () => createMockQuery(data, error),

@@ -45,12 +45,12 @@ export async function FetchForecastData(
   const response = await apiRequest(async () => {
     const supabase = createClient();
 
-    const { data: historicalData } = await supabase
+    const { data: historicalData } = (await supabase
       .from("pet_year_avg")
       .select("year")
       .eq("location_id", locationId)
       .order("year", { ascending: false })
-      .limit(1);
+      .limit(1)) as { data: null | Pick<PetYearAvgMaxData, "year">[] };
 
     if (!historicalData || historicalData.length === 0) {
       return;

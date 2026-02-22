@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("Smoke Tests - Critical User Journeys", () => {
+test.describe("Smoke Tests", () => {
   test("complete user journey: home → location selection → data analysis", async ({
     page,
   }) => {

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("Accessibility Tests", () => {
+test.describe("Accessibility", () => {
   test("keyboard navigation: complete user journey using only keyboard", async ({
     page,
   }) => {

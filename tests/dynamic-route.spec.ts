@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("Dynamic Location Page", () => {
+test.describe("Location Page", () => {
   test("should display location content and graphs", async ({ page }) => {
     await page.goto("/1");
     await expect(page.getByRole("heading", { name: /, / })).toBeVisible();
@@ -39,6 +39,7 @@ test.describe("Dynamic Location Page", () => {
     });
     await expect(page.locator(".js-plotly-plot").first()).toBeVisible();
   });
+
   test("should update reference graph when year is changed", async ({
     page,
   }) => {

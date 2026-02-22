@@ -117,7 +117,7 @@ test.describe("Rankings Page", () => {
     // Get the first available state option (states are full names like "Arizona", not abbreviations)
     const firstStateOption = stateSelect.locator("option").nth(1);
     const stateValue = await firstStateOption.getAttribute("value");
-    await stateSelect.selectOption(stateValue!);
+    await stateSelect.selectOption(stateValue);
 
     await expect(page.locator("table tbody tr").first()).toBeVisible({
       timeout: 10_000,
@@ -137,7 +137,7 @@ test.describe("Rankings Page", () => {
     // Get the first available heat stress level option (dynamically filtered based on data)
     const firstOption = heatStressSelect.locator("option").nth(1);
     const optionValue = await firstOption.getAttribute("value");
-    await heatStressSelect.selectOption(optionValue!);
+    await heatStressSelect.selectOption(optionValue);
 
     await expect(page.locator("table tbody tr").first()).toBeVisible({
       timeout: 15_000,

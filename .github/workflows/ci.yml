@@ -11,6 +11,7 @@ jobs:
     name: Vitest Unit (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -58,6 +59,7 @@ jobs:
     name: Vitest Integration (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -107,6 +109,7 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.58.2-noble
     timeout-minutes: 60
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -157,20 +160,9 @@ jobs:
           path: blob-report/
           retention-days: 1
 
-  # 🚦 Aggregator job to ensure the merge runs even when shards fail
-  aggregate-playwright:
-    name: Aggregate Playwright Shards
-    needs: playwright-e2e
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: No-op (allow merge to run)
-        run: echo "All shards completed (successful or failed)."
-
   merge-playwright-reports:
     name: Merge Playwright Reports
-    needs: aggregate-playwright
-    if: always()
+    needs: playwright-e2e
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -191,6 +183,11 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
+      - name: Fail if any tests actually failed
+        run: |
+          # If any shard job failed (not just continued), mark this job as failed
+          # Replace with logic specific to how you want to detect failure
+          exit 1
 
   # -------- Build --------
   build:

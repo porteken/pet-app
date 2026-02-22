@@ -213,3 +213,7 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+- name: 'notify vercel'
+  uses: 'vercel/repository-dispatch/actions/status@v1'
+  with:
+    name: Vercel - ai-resume-analyzer-app: workflow

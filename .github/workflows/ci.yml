@@ -19,11 +19,14 @@ jobs:
         shard_index: [1, 2, 3, 4, 5]
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "npm"
+
       - run: npm ci
+
       - run: npm run test:unit -- --shard=${{ matrix.shard_index }}/5
 
   # -------- Integration --------
@@ -36,11 +39,14 @@ jobs:
         shard_index: [1, 2]
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "npm"
+
       - run: npm ci
+
       - run: npm run test:integration -- --shard=${{ matrix.shard_index }}/2
 
   # -------- Playwright E2E --------
@@ -77,12 +83,21 @@ jobs:
           ]
     steps:
       - uses: actions/checkout@v4
+
+      # ❗ Fix for Playwright Firefox on GitHub Actions
+      - name: Set HOME for Playwright Firefox
+        if: runner.os == 'Linux'
+        run: echo "HOME=/root" >> $GITHUB_ENV
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "npm"
+
       - run: npm ci
+
       - run: npx playwright install --with-deps
+
       - run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/20
 
   # -------- Build --------
@@ -95,11 +110,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "npm"
+
       - run: npm ci
+
       - run: npm run build
 
   # -------- Deployment --------

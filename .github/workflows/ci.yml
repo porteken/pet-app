@@ -1,48 +1,22 @@
-name: CI
+name: CI and Deploy
 
 on:
-  pull_request:
   push:
+    branches:
+      - dev
+      - prd
+  pull_request:
   workflow_dispatch:
-  repository_dispatch:
-    types: [vercel.deployment.ready]
 
 jobs:
-  # -------- Vitest Unit Shards --------
+  # -------- Vitest Unit --------
   vitest-unit:
-    name: Vitest Unit (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
+    name: Vitest Unit (shard ${{ matrix.shard_index }}/5)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         shard_index: [1, 2, 3, 4, 5]
-        shard_total: [5]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.client_payload.git.sha || github.sha }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "npm"
-      - run: npm ci
-      - name: Run Vitest unit shard
-        run: npm run test:unit -- --reporter=blob --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
-      - name: Upload Vitest unit blob report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: vitest-unit-blob-${{ matrix.shard_index }}
-          path: .vitest-reports/
-          include-hidden-files: true
-          retention-days: 1
-
-  merge-vitest-unit-reports:
-    name: Merge Vitest Unit Reports
-    needs: vitest-unit
-    if: always()
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -50,50 +24,16 @@ jobs:
           node-version: 22
           cache: "npm"
       - run: npm ci
-      - uses: actions/download-artifact@v4
-        with:
-          path: all-vitest-unit-blob-reports
-          pattern: vitest-unit-blob-*
-          merge-multiple: true
-      - run: npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=default
-      - name: Fail if any tests failed
-        if: needs.vitest-unit.result == 'failure'
-        run: exit 1
+      - run: npm run test:unit -- --shard=${{ matrix.shard_index }}/5
 
-  # -------- Vitest Integration Shards --------
+  # -------- Integration --------
   vitest-integration:
-    name: Vitest Integration (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
+    name: Vitest Integration (shard ${{ matrix.shard_index }}/2)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         shard_index: [1, 2]
-        shard_total: [2]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.client_payload.git.sha || github.sha }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "npm"
-      - run: npm ci
-      - run: npm run test:integration -- --reporter=blob --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
-      - name: Upload Vitest integration blob report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: vitest-integration-blob-${{ matrix.shard_index }}
-          path: .vitest-reports/
-          include-hidden-files: true
-          retention-days: 1
-
-  merge-vitest-integration-reports:
-    name: Merge Vitest Integration Reports
-    needs: vitest-integration
-    if: always()
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -101,23 +41,14 @@ jobs:
           node-version: 22
           cache: "npm"
       - run: npm ci
-      - uses: actions/download-artifact@v4
-        with:
-          path: all-vitest-integration-blob-reports
-          pattern: vitest-integration-blob-*
-          merge-multiple: true
-      - run: npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=default
-      - name: Fail if any tests failed
-        if: needs.vitest-integration.result == 'failure'
-        run: exit 1
+      - run: npm run test:integration -- --shard=${{ matrix.shard_index }}/2
 
   # -------- Playwright E2E --------
   playwright-e2e:
-    name: E2E Playwright (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
+    name: E2E Playwright (shard ${{ matrix.shard_index }}/20)
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.58.2-noble
-    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -144,45 +75,6 @@ jobs:
             19,
             20,
           ]
-        shard_total: [20]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.client_payload.git.sha || github.sha }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "npm"
-
-      - name: Set HOME for Playwright (fix Firefox launch)
-        if: runner.os == 'Linux'
-        run: echo "HOME=/root" >> $GITHUB_ENV
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
-      - name: Run Playwright shard
-        run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }} --reporter=blob
-
-      - name: Upload Playwright blob report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: blob-report-${{ matrix.shard_index }}
-          path: blob-report/
-          retention-days: 1
-
-  merge-playwright-reports:
-    name: Merge Playwright Reports
-    needs: playwright-e2e
-    if: always()
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -190,20 +82,16 @@ jobs:
           node-version: 22
           cache: "npm"
       - run: npm ci
-      - uses: actions/download-artifact@v4
-        with:
-          path: all-blob-reports
-          pattern: blob-report-*
-          merge-multiple: true
-      - name: Merge into HTML
-        run: npx playwright merge-reports --reporter html ./all-blob-reports
-      - name: Fail if any shard failed
-        if: needs.playwright-e2e.result == 'failure'
-        run: exit 1
+      - run: npx playwright install --with-deps
+      - run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/20
 
   # -------- Build --------
   build:
     name: Build
+    needs:
+      - vitest-unit
+      - vitest-integration
+      - playwright-e2e
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -214,15 +102,25 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-  # -------- FINAL PASS CHECK --------
-  final-check:
-    name: Complete CI Status
-    needs:
-      - merge-vitest-unit-reports
-      - merge-vitest-integration-reports
-      - merge-playwright-reports
-      - build
+  # -------- Deployment --------
+  deploy:
+    name: Trigger Vercel Deploy Hook
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: CI Complete
-        run: echo "🎉 All tests passed and build succeeded!"
+      - name: Get branch name
+        id: branch
+        run: |
+          echo "branch=${GITHUB_REF#refs/heads/}" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Dev
+        if: steps.branch.outputs.branch == 'dev'
+        run: |
+          echo "Triggering Vercel preview deploy for dev"
+          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_DEV }}"
+
+      - name: Deploy to Prod
+        if: steps.branch.outputs.branch == 'prd'
+        run: |
+          echo "Triggering Vercel production deploy for prd"
+          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_PRD }}"

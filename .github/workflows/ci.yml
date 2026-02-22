@@ -27,7 +27,7 @@ jobs:
       - name: Run Vitest unit shard
         run: npm run test:unit -- --reporter=blob --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
       - name: Upload Vitest unit blob report
-        if: ${{ !cancelled() }}
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vitest-unit-blob-${{ matrix.shard_index }}
@@ -74,7 +74,7 @@ jobs:
       - name: Run Vitest integration shard
         run: npm run test:integration -- --reporter=blob --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
       - name: Upload Vitest integration blob report
-        if: ${{ !cancelled() }}
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vitest-integration-blob-${{ matrix.shard_index }}
@@ -102,12 +102,10 @@ jobs:
 
   # -------- Playwright E2E Parallel Shards --------
   playwright-e2e:
-    name: E2E (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
+    name: E2E Playwright (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
     container:
-      # 🎯 Use exact Playwright container your project depends on
       image: mcr.microsoft.com/playwright:v1.58.2-noble
-
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -144,7 +142,6 @@ jobs:
           node-version: 22
           cache: npm
 
-      # 🧠 Fix Firefox launch issue by setting HOME to /root on Linux
       - name: Set HOME for Firefox/Playwright
         if: runner.os == 'Linux'
         run: echo "HOME=/root" >> $GITHUB_ENV
@@ -153,16 +150,27 @@ jobs:
       - name: Run Playwright E2E shard
         run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }} --reporter=blob
       - name: Upload Playwright blob report
-        if: ${{ !cancelled() }}
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: blob-report-${{ matrix.shard_index }}
           path: blob-report/
           retention-days: 1
 
+  # 🚦 Aggregator job to ensure the merge runs even when shards fail
+  aggregate-playwright:
+    name: Aggregate Playwright Shards
+    needs: playwright-e2e
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: No-op (allow merge to run)
+        run: echo "All shards completed (successful or failed)."
+
   merge-playwright-reports:
     name: Merge Playwright Reports
-    needs: playwright-e2e
+    needs: aggregate-playwright
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -184,7 +192,7 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
-  # -------- Build (Completely Parallel) --------
+  # -------- Build --------
   build:
     name: Build
     runs-on: ubuntu-latest

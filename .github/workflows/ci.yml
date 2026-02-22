@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
+  # -------- Vitest Unit Shards --------
   vitest-unit:
     name: Vitest Unit (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
@@ -18,18 +19,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
+      - run: npm ci
       - name: Run Vitest unit shard
         run: npm run test:unit -- --reporter=blob --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
-
       - name: Upload Vitest unit blob report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -39,6 +35,27 @@ jobs:
           include-hidden-files: true
           retention-days: 1
 
+  merge-vitest-unit-reports:
+    name: Merge Vitest Unit Reports
+    needs: vitest-unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Download unit blob reports
+        uses: actions/download-artifact@v5
+        with:
+          path: all-vitest-unit-blob-reports
+          pattern: vitest-unit-blob-*
+          merge-multiple: true
+      - name: Merge unit reports
+        run: npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=default
+
+  # -------- Vitest Integration Shards --------
   vitest-integration:
     name: Vitest Integration (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
@@ -51,18 +68,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
+      - run: npm ci
       - name: Run Vitest integration shard
         run: npm run test:integration -- --reporter=blob --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
-
       - name: Upload Vitest integration blob report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -72,69 +84,36 @@ jobs:
           include-hidden-files: true
           retention-days: 1
 
-  merge-vitest-unit-reports:
-    name: Merge Vitest Unit Reports
-    if: ${{ always() && !cancelled() }}
-    needs: vitest-unit
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Download unit blob reports
-        uses: actions/download-artifact@v5
-        with:
-          path: all-vitest-unit-blob-reports
-          pattern: vitest-unit-blob-*
-          merge-multiple: true
-
-      - name: Merge unit reports
-        run: npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=default
-
   merge-vitest-integration-reports:
     name: Merge Vitest Integration Reports
-    if: ${{ always() && !cancelled() }}
     needs: vitest-integration
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Download integration reports
+      - run: npm ci
+      - name: Download integration blob reports
         uses: actions/download-artifact@v5
         with:
           path: all-vitest-integration-blob-reports
           pattern: vitest-integration-blob-*
           merge-multiple: true
-
       - name: Merge integration reports
         run: npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=default
 
+  # -------- Playwright E2E Shards --------
   playwright-e2e:
     name: E2E (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
-    needs:
-      - vitest-unit
-      - vitest-integration
-      - merge-vitest-unit-reports
-      - merge-vitest-integration-reports
     runs-on: ubuntu-latest
-    timeout-minutes: 60
     container:
       image: mcr.microsoft.com/playwright:v1.58.2-noble
+    timeout-minutes: 60
+    needs:
+      - merge-vitest-unit-reports
+      - merge-vitest-integration-reports
     strategy:
       fail-fast: false
       matrix:
@@ -143,18 +122,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Playwright tests
+      - run: npm ci
+      - name: Run Playwright E2E shard
         run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }} --reporter=blob
-
       - name: Upload Playwright blob report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -165,31 +139,24 @@ jobs:
 
   merge-playwright-reports:
     name: Merge Playwright Reports
-    if: ${{ always() && !cancelled() }}
     needs: playwright-e2e
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Download blob reports
+      - run: npm ci
+      - name: Download Playwright blob reports
         uses: actions/download-artifact@v5
         with:
           path: all-blob-reports
           pattern: blob-report-*
           merge-multiple: true
-
       - name: Merge Playwright reports
         run: npx playwright merge-reports --reporter html ./all-blob-reports
-
-      - name: Upload Playwright report
+      - name: Upload merged report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
@@ -197,23 +164,17 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
+  # -------- Build (Parallel) --------
   build:
     name: Build
-    needs:
-      - playwright-e2e
-      - merge-playwright-reports
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
+      - run: npm ci
       - name: Build
         run: npm run build

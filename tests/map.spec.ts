@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { clickClickableMarker } from "./helpers/map";
+
 test.describe("Map Page", () => {
   test("should display the map and markers", async ({ page }) => {
     await page.goto("/map");
@@ -34,18 +36,18 @@ test.describe("Map Page", () => {
     await expect(page.getByText("Loading map...").first()).toBeHidden({
       timeout: 30_000,
     });
-    const marker = page.locator(".leaflet-marker-icon").first();
-    await expect(marker).toBeVisible({ timeout: 10_000 });
-
-    await marker.dispatchEvent("click");
+    await clickClickableMarker(page);
     await expect(page.getByRole("dialog")).toBeVisible({ timeout: 10_000 });
 
     const viewDetailsButton = page.getByRole("button", {
       name: "View Full Details",
     });
     await expect(viewDetailsButton).toBeVisible({ timeout: 10_000 });
-    await viewDetailsButton.dispatchEvent("click");
+    await Promise.all([
+      page.waitForURL(/\/\d+(?:\?.*)?$/),
+      viewDetailsButton.click(),
+    ]);
 
-    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
+    await expect(page.getByText("Trend Analysis")).toBeVisible();
   });
 });

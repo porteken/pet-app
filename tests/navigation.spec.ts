@@ -1,10 +1,18 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
+
+async function waitForHomeMapReady(page: Page) {
+  await expect(page.getByText("Loading map...").first()).toBeHidden({
+    timeout: 30_000,
+  });
+  await expect(page.locator(".leaflet-container")).toBeVisible();
+}
 
 test.describe("Navigation", () => {
   test("should navigate to Map page from nav button", async ({ page }) => {
     await page.goto("/");
+    await waitForHomeMapReady(page);
 
-    const mapButton = page.getByRole("link", { name: "Map" });
+    const mapButton = page.getByRole("link", { name: "Navigate to map view" });
     await expect(mapButton).toBeVisible({ timeout: 10_000 });
 
     await mapButton.click();
@@ -15,6 +23,7 @@ test.describe("Navigation", () => {
 
   test("should navigate to Rankings page from nav button", async ({ page }) => {
     await page.goto("/");
+    await waitForHomeMapReady(page);
 
     const rankingsButton = page.getByRole("link", { name: /rankings/i });
     await expect(rankingsButton).toBeVisible({ timeout: 10_000 });
@@ -29,6 +38,7 @@ test.describe("Navigation", () => {
 
   test("should navigate to About page from nav button", async ({ page }) => {
     await page.goto("/");
+    await waitForHomeMapReady(page);
 
     const aboutButton = page.getByRole("link", { name: "About" });
     await expect(aboutButton).toBeVisible({ timeout: 10_000 });
@@ -53,15 +63,21 @@ test.describe("Navigation", () => {
 
   test("should navigate between all main pages", async ({ page }) => {
     await page.goto("/");
+    await waitForHomeMapReady(page);
 
     await page.getByRole("link", { name: "About" }).click();
     await expect(page).toHaveURL("/about");
+    await expect(page.getByText("Purpose of the Application")).toBeVisible();
 
     await page.getByRole("link", { name: /rankings/i }).click();
     await expect(page).toHaveURL("/rankings");
+    await expect(
+      page.getByRole("heading", { name: "Cities ranked by Average PET" })
+    ).toBeVisible();
 
     await page.getByRole("link", { name: "Map" }).click();
     await expect(page).toHaveURL("/");
+    await waitForHomeMapReady(page);
   });
 
   test("should maintain navigation on location page", async ({ page }) => {

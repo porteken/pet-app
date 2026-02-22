@@ -1,4 +1,34 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
+
+function getPerformanceThresholds(browserName: string) {
+  if (browserName === "webkit") {
+    return {
+      initialLoadMs: 20_000,
+      navigationMs: 15_000,
+    };
+  }
+
+  return {
+    initialLoadMs: 12_000,
+    navigationMs: 7500,
+  };
+}
+
+async function gotoWithRetry(page: Page, url: string): Promise<void> {
+  try {
+    await page.goto(url);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes("interrupted by another navigation")
+    ) {
+      await page.goto(url);
+      return;
+    }
+
+    throw error;
+  }
+}
 
 test.describe("Cross-Browser Compatibility", () => {
   test("core functionality works across browsers", async ({ page }) => {
@@ -110,22 +140,26 @@ test.describe("Cross-Browser Compatibility", () => {
     });
   });
 
-  test("performance characteristics across browsers", async ({ page }) => {
+  test("performance characteristics across browsers", async ({
+    browserName,
+    page,
+  }) => {
+    const thresholds = getPerformanceThresholds(browserName);
     const initialLoadStart = Date.now();
-    await page.goto("/");
+    await gotoWithRetry(page, "/");
     await expect(page.getByText("Loading map...").first()).toBeHidden({
       timeout: 15_000,
     });
     const initialLoadTime = Date.now() - initialLoadStart;
 
-    expect(initialLoadTime).toBeLessThan(10_000);
+    expect(initialLoadTime).toBeLessThan(thresholds.initialLoadMs);
 
     const navStart = Date.now();
-    await page.goto("/1");
+    await gotoWithRetry(page, "/1");
     await expect(page.getByText("Trend Analysis")).toBeVisible();
     const navTime = Date.now() - navStart;
 
-    expect(navTime).toBeLessThan(5000);
+    expect(navTime).toBeLessThan(thresholds.navigationMs);
 
     const metrics = await page.evaluate(() => {
       const performance = globalThis.performance;

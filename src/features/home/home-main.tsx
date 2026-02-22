@@ -217,7 +217,7 @@ const Home: FC<MapProperties> = ({
 
   return (
     <div className="relative h-[100dvh] w-full">
-      <div className="absolute inset-x-0 top-0 z-50">
+      <div className="absolute inset-x-0 top-0 z-[1000]">
         <HeaderBar LocationOptions={LocationOptions} />
       </div>
       <div className="absolute inset-0 top-0">

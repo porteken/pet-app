@@ -10,9 +10,8 @@ test.describe("City Selection", () => {
     await page.waitForLoadState("domcontentloaded");
 
     const citySelect = page.getByTestId("city-selector");
-    const citySearch = page.getByRole("searchbox");
     await expect(citySelect).toBeVisible();
-    await expect(citySearch).toBeVisible();
+    await expect(page.getByRole("searchbox")).toBeVisible();
   });
 
   test("should display city selection dropdown on home page", async ({
@@ -45,12 +44,12 @@ test.describe("City Selection", () => {
     const citySelect = page.getByTestId("city-selector");
     await expect(citySelect).toBeVisible();
 
-    const firstCityValue = await citySelect.evaluate(
-      (select: HTMLSelectElement) =>
-        [...select.options].find(option => option.value !== "")?.value
-    );
+    await citySelect.click();
+    const firstOption = page.getByTestId("searchable-select-option").first();
+    await expect(firstOption).toBeVisible();
+    const firstCityValue = await firstOption.getAttribute("data-value");
     expect(firstCityValue).toBeDefined();
-    await citySelect.selectOption(firstCityValue as string);
+    await firstOption.click();
     await expect(page).toHaveURL(new RegExp(`/${firstCityValue}(\\?.*)?$`));
   });
 
@@ -59,36 +58,30 @@ test.describe("City Selection", () => {
 
     await page.waitForLoadState("domcontentloaded");
 
-    const citySelect = page.getByTestId("city-selector");
     const citySearch = page.getByRole("searchbox");
-    await expect(citySelect).toBeVisible();
     await expect(citySearch).toBeVisible();
 
-    const firstOptionLabel = await citySelect.evaluate(
-      (select: HTMLSelectElement) =>
-        [...select.options].find(option => option.value !== "")?.text
-    );
-    expect(firstOptionLabel).toBeDefined();
-    const query = (firstOptionLabel as string)
-      .split(/[\s,]+/)
-      .find(part => part.length >= 3)
-      ?.slice(0, 3)
-      .toLowerCase();
+    await citySearch.click();
+    await citySearch.fill("new");
 
-    expect(query).toBeDefined();
-    await citySearch.fill(query as string);
+    const filteredOptions = page.getByTestId("searchable-select-option");
+    await expect(filteredOptions.first()).toBeVisible();
+    expect(await filteredOptions.count()).toBeGreaterThan(0);
+  });
 
-    const filteredOptionCount = await citySelect.evaluate(
-      (select: HTMLSelectElement, searchQuery: string) =>
-        [...select.options].filter(
-          option =>
-            option.value !== "" &&
-            !option.disabled &&
-            option.text.toLowerCase().includes(searchQuery)
-        ).length,
-      query as string
-    );
+  test("should allow searching for states", async ({ page }) => {
+    await page.goto("/");
 
-    expect(filteredOptionCount).toBeGreaterThan(0);
+    await page.waitForLoadState("domcontentloaded");
+
+    const citySearch = page.getByRole("searchbox");
+    await expect(citySearch).toBeVisible();
+
+    await citySearch.click();
+    await citySearch.fill("california");
+
+    const filteredOptions = page.getByTestId("searchable-select-option");
+    await expect(filteredOptions.first()).toBeVisible();
+    expect(await filteredOptions.count()).toBeGreaterThan(0);
   });
 });

@@ -97,6 +97,8 @@ describe("PageMain Integration Tests", () => {
       CurrentDates: [new Date("2023-01-01"), new Date("2023-02-01")],
       CurrentPets: [15, 25],
       id: location.location_id,
+      initialForecastEnabled: false,
+      initialForecastYearsAhead: 10,
       initialGraphMeasure: "avg",
       location,
       LocationOptions: [

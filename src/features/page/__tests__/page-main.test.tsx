@@ -69,6 +69,8 @@ describe("PageMain", () => {
     CurrentDates: [new Date("2023-01-01"), new Date("2023-02-01")],
     CurrentPets: [15, 25],
     id: 1,
+    initialForecastEnabled: false,
+    initialForecastYearsAhead: 10,
     initialGraphMeasure: "avg",
     location: {
       city: "Test City",

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { setGraphMeasure } from "../actions";
+import { setForecastPreferences, setGraphMeasure } from "../actions";
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn().mockResolvedValue({
@@ -183,5 +183,66 @@ describe("setGraphMeasure", () => {
 
     expect(cookiesSpy).toHaveBeenCalledWith();
     expect(cookiesSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("setForecastPreferences", () => {
+  let mockSet: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    const { cookies } = await import("next/headers");
+    const cookiesResult = await cookies();
+    mockSet = vi.mocked(cookiesResult.set);
+  });
+
+  it("sets both forecast cookies with correct values", async () => {
+    await setForecastPreferences(true, 20);
+
+    expect(mockSet).toHaveBeenNthCalledWith(
+      1,
+      "forecast-enabled",
+      "true",
+      expect.objectContaining({
+        expires: expect.any(Date),
+        httpOnly: true,
+        path: "/",
+      })
+    );
+    expect(mockSet).toHaveBeenNthCalledWith(
+      2,
+      "forecast-years-ahead",
+      "20",
+      expect.objectContaining({
+        expires: expect.any(Date),
+        httpOnly: true,
+        path: "/",
+      })
+    );
+  });
+
+  it("uses a 5-minute expiration window", async () => {
+    const beforeCall = Date.now();
+
+    await setForecastPreferences(false, 15);
+
+    const enabledCookieOptions = mockSet.mock.calls[0][2];
+    const yearsCookieOptions = mockSet.mock.calls[1][2];
+    const afterCall = Date.now();
+    const fiveMinutesMs = 5 * 60 * 1000;
+
+    expect(enabledCookieOptions.expires.getTime()).toBeGreaterThanOrEqual(
+      beforeCall + fiveMinutesMs - 1000
+    );
+    expect(enabledCookieOptions.expires.getTime()).toBeLessThanOrEqual(
+      afterCall + fiveMinutesMs + 1000
+    );
+    expect(yearsCookieOptions.expires.getTime()).toBeGreaterThanOrEqual(
+      beforeCall + fiveMinutesMs - 1000
+    );
+    expect(yearsCookieOptions.expires.getTime()).toBeLessThanOrEqual(
+      afterCall + fiveMinutesMs + 1000
+    );
   });
 });

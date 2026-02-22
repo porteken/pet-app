@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { LocationErrorHandler } from "@/components/app/error-handlers";
 import { PageLoader } from "@/components/app/page-loader";
 import {
+  getForecastPreferencesFromCookies,
   getGraphMeasureFromCookies,
   getLocationData,
 } from "@/lib/utils/app/page-helpers";
@@ -12,13 +13,16 @@ const Home = dynamic(() => import("@/features/home/home-main"), {
 });
 
 const Page = async () => {
-  const initialGraphMeasure = await getGraphMeasureFromCookies();
-
   try {
+    const initialGraphMeasure = await getGraphMeasureFromCookies();
+    const initialForecastPreferences =
+      await getForecastPreferencesFromCookies();
     const { LocationOptions, locations } = await getLocationData();
 
     return (
       <Home
+        initialForecastEnabled={initialForecastPreferences.enabled}
+        initialForecastYearsAhead={initialForecastPreferences.yearsAhead}
         initialGraphMeasure={initialGraphMeasure}
         LocationOptions={LocationOptions}
         locations={locations}

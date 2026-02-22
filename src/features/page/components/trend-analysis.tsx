@@ -4,6 +4,7 @@ import React from "react";
 
 import { ForecastControls } from "@/components/forecast/forecast-controls";
 import { GenerateTrendGraph } from "@/features/generate-graph";
+import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 import {
   getForecastHeatStressDescription,
@@ -13,12 +14,16 @@ import {
 
 interface TrendAnalysisProperties {
   id: number;
+  initialForecastEnabled: boolean;
+  initialForecastYearsAhead: number;
   initialGraphMeasure: string;
   onMeasureChange: (measure: string) => Promise<void>;
 }
 
 const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   id,
+  initialForecastEnabled,
+  initialForecastYearsAhead,
   initialGraphMeasure,
   onMeasureChange,
 }) => {
@@ -27,8 +32,12 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const [trendGraph, setTrendGraph] = React.useState<
     React.ReactElement | undefined
   >();
-  const [forecastEnabled, setForecastEnabled] = React.useState(false);
-  const [forecastYearsAhead, setForecastYearsAhead] = React.useState(10);
+  const [forecastEnabled, setForecastEnabled] = React.useState(
+    () => initialForecastEnabled
+  );
+  const [forecastYearsAhead, setForecastYearsAhead] = React.useState(
+    () => initialForecastYearsAhead
+  );
   const [currentHeatStress, setCurrentHeatStress] = React.useState<
     HeatStressDescription | undefined
   >();
@@ -127,6 +136,22 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     forecastYearsAhead,
   ]);
 
+  const handleForecastToggle = React.useCallback(
+    (enabled: boolean) => {
+      setForecastEnabled(enabled);
+      void setForecastPreferences(enabled, forecastYearsAhead);
+    },
+    [forecastYearsAhead]
+  );
+
+  const handleForecastYearsChange = React.useCallback(
+    (yearsAhead: number) => {
+      setForecastYearsAhead(yearsAhead);
+      void setForecastPreferences(forecastEnabled, yearsAhead);
+    },
+    [forecastEnabled]
+  );
+
   return (
     <div className="space-y-6">
       <div className="rounded-lg bg-white p-6 shadow-md">
@@ -158,8 +183,8 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           {selectedGraphMeasure === "avg" && (
             <ForecastControls
               enabled={forecastEnabled}
-              onToggle={setForecastEnabled}
-              onYearsChange={setForecastYearsAhead}
+              onToggle={handleForecastToggle}
+              onYearsChange={handleForecastYearsChange}
               yearsAhead={forecastYearsAhead}
             />
           )}

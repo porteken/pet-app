@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { setRankingsYear } from "../rankings-actions";
+import {
+  setRankingsHeatStress,
+  setRankingsState,
+  setRankingsYear,
+} from "../rankings-actions";
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn().mockResolvedValue({
@@ -155,6 +159,108 @@ describe("setRankingsYear", () => {
     expect(mockSet).toHaveBeenCalledWith(
       "rankings-year",
       "2025",
+      expect.any(Object)
+    );
+  });
+});
+
+describe("setRankingsState", () => {
+  let mockSet: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    const { cookies } = await import("next/headers");
+    const cookiesResult = await cookies();
+    mockSet = vi.mocked(cookiesResult.set);
+  });
+
+  it("sets the rankings state cookie with correct parameters", async () => {
+    await setRankingsState("TX");
+
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-state",
+      "TX",
+      expect.objectContaining({
+        httpOnly: true,
+        path: "/",
+        sameSite: "strict",
+      })
+    );
+  });
+
+  it("uses correct cookie name", async () => {
+    await setRankingsState("CA");
+
+    const cookieName = mockSet.mock.calls[0][0];
+    expect(cookieName).toBe("rankings-state");
+  });
+
+  it("calls revalidatePath with /rankings", async () => {
+    const { revalidatePath } = await import("next/cache");
+
+    await setRankingsState("NY");
+
+    expect(revalidatePath).toHaveBeenCalledWith("/rankings");
+  });
+
+  it("handles empty string for clearing filter", async () => {
+    await setRankingsState("");
+
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-state",
+      "",
+      expect.any(Object)
+    );
+  });
+});
+
+describe("setRankingsHeatStress", () => {
+  let mockSet: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    const { cookies } = await import("next/headers");
+    const cookiesResult = await cookies();
+    mockSet = vi.mocked(cookiesResult.set);
+  });
+
+  it("sets the rankings heat stress cookie with correct parameters", async () => {
+    await setRankingsHeatStress("Moderate");
+
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-heat-stress",
+      "Moderate",
+      expect.objectContaining({
+        httpOnly: true,
+        path: "/",
+        sameSite: "strict",
+      })
+    );
+  });
+
+  it("uses correct cookie name", async () => {
+    await setRankingsHeatStress("Extreme");
+
+    const cookieName = mockSet.mock.calls[0][0];
+    expect(cookieName).toBe("rankings-heat-stress");
+  });
+
+  it("calls revalidatePath with /rankings", async () => {
+    const { revalidatePath } = await import("next/cache");
+
+    await setRankingsHeatStress("Strong");
+
+    expect(revalidatePath).toHaveBeenCalledWith("/rankings");
+  });
+
+  it("handles empty string for clearing filter", async () => {
+    await setRankingsHeatStress("");
+
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-heat-stress",
+      "",
       expect.any(Object)
     );
   });

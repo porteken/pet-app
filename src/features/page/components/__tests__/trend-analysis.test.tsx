@@ -60,7 +60,12 @@ vi.mock("@/components/forecast/forecast-controls", () => ({
   ),
 }));
 
+vi.mock("@/lib/actions/actions", () => ({
+  setForecastPreferences: vi.fn().mockResolvedValue({}),
+}));
+
 import { GenerateTrendGraph } from "@/features/generate-graph";
+import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 import {
   getForecastHeatStressDescription,
@@ -71,6 +76,8 @@ import { TrendAnalysis } from "../trend-analysis";
 
 const defaultProps = {
   id: 1,
+  initialForecastEnabled: false,
+  initialForecastYearsAhead: 10,
   initialGraphMeasure: "avg",
   onMeasureChange: vi.fn().mockResolvedValue(Promise.resolve()),
 };
@@ -268,6 +275,8 @@ describe("TrendAnalysis", () => {
       await waitFor(() => {
         expect(FetchForecastData).toHaveBeenCalledWith(1, 10);
       });
+
+      expect(setForecastPreferences).toHaveBeenCalledWith(true, 10);
     });
 
     it("should update years ahead when input changes", async () => {
@@ -284,6 +293,22 @@ describe("TrendAnalysis", () => {
 
       await waitFor(() => {
         expect(FetchForecastData).toHaveBeenCalledWith(1, 15);
+      });
+
+      expect(setForecastPreferences).toHaveBeenCalledWith(false, 15);
+    });
+
+    it("should initialize forecast controls from cookie-backed props", async () => {
+      render(
+        <TrendAnalysis
+          {...defaultProps}
+          initialForecastEnabled={true}
+          initialForecastYearsAhead={20}
+        />
+      );
+
+      await waitFor(() => {
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 20);
       });
     });
 

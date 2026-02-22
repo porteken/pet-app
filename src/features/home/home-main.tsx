@@ -12,7 +12,7 @@ import React, {
 
 import { GenerateTrendGraph } from "@/features/generate-graph";
 import { HeaderBar } from "@/features/header-bar";
-import { setGraphMeasure } from "@/lib/actions/actions";
+import { setForecastPreferences, setGraphMeasure } from "@/lib/actions/actions";
 import { FetchForecastData } from "@/lib/api/fetch-client";
 import { getTrendGraphQueryOptions, queryClient } from "@/lib/api/query-client";
 import {
@@ -33,6 +33,8 @@ const Modal = dynamic(() => import("@/components/ui/modal"), {
 });
 
 const Home: FC<MapProperties> = ({
+  initialForecastEnabled,
+  initialForecastYearsAhead,
   initialGraphMeasure,
   LocationOptions,
   locations,
@@ -47,8 +49,12 @@ const Home: FC<MapProperties> = ({
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] =
     useState<LocationProperties>();
-  const [forecastEnabled, setForecastEnabled] = useState(false);
-  const [forecastYearsAhead, setForecastYearsAhead] = useState(10);
+  const [forecastEnabled, setForecastEnabled] = useState(
+    () => initialForecastEnabled
+  );
+  const [forecastYearsAhead, setForecastYearsAhead] = useState(
+    () => initialForecastYearsAhead
+  );
   const [heatStressDescription, setHeatStressDescription] =
     useState<HeatStressDescription>();
   const [forecastHeatStress, setForecastHeatStress] =
@@ -193,6 +199,22 @@ const Home: FC<MapProperties> = ({
     [locationMap]
   );
 
+  const handleForecastToggle = useCallback(
+    (enabled: boolean) => {
+      setForecastEnabled(enabled);
+      void setForecastPreferences(enabled, forecastYearsAhead);
+    },
+    [forecastYearsAhead]
+  );
+
+  const handleForecastYearsChange = useCallback(
+    (yearsAhead: number) => {
+      setForecastYearsAhead(yearsAhead);
+      void setForecastPreferences(forecastEnabled, yearsAhead);
+    },
+    [forecastEnabled]
+  );
+
   return (
     <div className="relative h-[100dvh] w-full">
       <div className="absolute inset-x-0 top-0 z-50">
@@ -220,8 +242,8 @@ const Home: FC<MapProperties> = ({
           forecastYearsAhead={forecastYearsAhead}
           graphLoading={graphLoading}
           heatStressDescription={heatStressDescription}
-          onForecastToggle={setForecastEnabled}
-          onForecastYearsChange={setForecastYearsAhead}
+          onForecastToggle={handleForecastToggle}
+          onForecastYearsChange={handleForecastYearsChange}
           onSelectChange={handleSelectChange}
           petGraph={petGraph}
           selectedGraphMeasure={selectedGraphMeasure}

@@ -18,6 +18,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/lib/actions/rankings-actions", () => ({
+  setRankingsHeatStress: vi.fn(),
+  setRankingsState: vi.fn(),
   setRankingsYear: vi.fn(),
 }));
 
@@ -36,90 +38,34 @@ vi.mock("@/components/ui/select", () => ({
       disabled,
       label,
       onChange,
+      placeholder,
       value,
     }: {
       data: Array<{ label: string; value: string }>;
       disabled?: boolean;
       label?: string;
       onChange?: (value: string) => void;
-      value?: string;
-    }) => (
-      <div>
-        {label && <label htmlFor="year-select">{label}</label>}
-        <select
-          data-testid="year-select"
-          disabled={disabled}
-          id="year-select"
-          onChange={event => onChange?.(event.target.value)}
-          value={value}
-        >
-          {data.map(option => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    )
-  ),
-}));
-
-vi.mock("@/components/ui/multi-select", () => ({
-  MultiSelect: vi.fn(
-    ({
-      clearable,
-      data,
-      disabled,
-      label,
-      onChange,
-      placeholder,
-      value = [],
-    }: {
-      clearable?: boolean;
-      data: Array<{ label: string; value: string }>;
-      disabled?: boolean;
-      label?: string;
-      onChange?: (value: string[]) => void;
       placeholder?: string;
-      value?: string[];
+      value?: string;
     }) => {
-      const testId =
-        label?.toLowerCase().replaceAll(/\s/g, "-") ?? "multi-select";
+      const testId = `${label?.toLowerCase().replaceAll(/\s/g, "-") ?? "select"}-select`;
       return (
-        <div data-testid={`multi-select-${testId}`}>
-          {label && <label>{label}</label>}
-          {clearable && value && value.length > 0 && (
-            <button
-              data-testid={`clear-${testId}`}
-              onClick={() => onChange?.([])}
-              type="button"
-            >
-              Clear
-            </button>
-          )}
+        <div>
+          {label && <label htmlFor={testId}>{label}</label>}
           <select
+            data-testid={testId}
             disabled={disabled}
-            multiple
-            onChange={event => {
-              const selectedValues = Array.from(
-                event.target.selectedOptions,
-                option => option.value
-              );
-              onChange?.(selectedValues);
-            }}
+            id={testId}
+            onChange={event => onChange?.(event.target.value)}
             value={value}
           >
+            {placeholder && <option value="">{placeholder}</option>}
             {data.map(option => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
             ))}
           </select>
-          <span data-testid={`${testId}-placeholder`}>
-            {value && value.length > 0
-              ? `${value.length} selected`
-              : placeholder}
-          </span>
         </div>
       );
     }
@@ -360,6 +306,8 @@ const mockRankings = [
 ];
 
 const defaultProps = {
+  initialHeatStress: "",
+  initialState: "",
   initialYear: 2020,
   LocationOptions: mockLocationOptions,
   rankings: mockRankings,
@@ -390,9 +338,9 @@ describe("RankingsMain", () => {
     it("should render state and heat stress filters", () => {
       render(<RankingsMain {...defaultProps} />);
 
-      expect(screen.getByTestId("multi-select-state")).toBeInTheDocument();
+      expect(screen.getByTestId("state-select")).toBeInTheDocument();
       expect(
-        screen.getByTestId("multi-select-avg-heat-stress-level")
+        screen.getByTestId("avg-heat-stress-level-select")
       ).toBeInTheDocument();
     });
 
@@ -460,9 +408,7 @@ describe("RankingsMain", () => {
     it("should show all states in the filter dropdown", () => {
       render(<RankingsMain {...defaultProps} />);
 
-      expect(screen.getByTestId("state-placeholder")).toHaveTextContent(
-        "All states"
-      );
+      expect(screen.getByRole("option", { name: "All states" })).toBeVisible();
     });
 
     it("should filter rankings by state", () => {
@@ -471,9 +417,7 @@ describe("RankingsMain", () => {
       expect(screen.getByText("Austin")).toBeInTheDocument();
       expect(screen.getByText("Phoenix")).toBeInTheDocument();
 
-      const stateSelect = within(
-        screen.getByTestId("multi-select-state")
-      ).getByRole("listbox");
+      const stateSelect = screen.getByTestId("state-select");
       fireEvent.change(stateSelect, { target: { value: "TX" } });
 
       expect(screen.getByText("Austin")).toBeInTheDocument();
@@ -484,9 +428,9 @@ describe("RankingsMain", () => {
     it("should filter rankings by heat stress level", () => {
       render(<RankingsMain {...defaultProps} />);
 
-      const heatStressSelect = within(
-        screen.getByTestId("multi-select-avg-heat-stress-level")
-      ).getByRole("listbox");
+      const heatStressSelect = screen.getByTestId(
+        "avg-heat-stress-level-select"
+      );
       fireEvent.change(heatStressSelect, {
         target: { value: "None to Slight" },
       });
@@ -600,10 +544,10 @@ describe("RankingsMain", () => {
       const currentPages = screen.getAllByTestId("current-page");
       expect(currentPages[0]).toHaveTextContent("2");
 
-      const heatStressSelect = within(
-        screen.getByTestId("multi-select-avg-heat-stress-level")
-      ).getByRole("listbox");
-      fireEvent.change(heatStressSelect, { target: { value: "High" } });
+      const heatStressSelect = screen.getByTestId(
+        "avg-heat-stress-level-select"
+      );
+      fireEvent.change(heatStressSelect, { target: { value: "Extreme" } });
 
       expect(screen.getByText(/Showing/)).toBeInTheDocument();
     });
@@ -781,9 +725,7 @@ describe("RankingsMain", () => {
     it("should apply state filter correctly", () => {
       render(<RankingsMain {...defaultProps} />);
 
-      const stateSelect = within(
-        screen.getByTestId("multi-select-state")
-      ).getByRole("listbox");
+      const stateSelect = screen.getByTestId("state-select");
       fireEvent.change(stateSelect, { target: { value: "AZ" } });
 
       expect(screen.getByText("Phoenix")).toBeInTheDocument();

@@ -5,13 +5,17 @@ export interface HeatStressDescription {
   value: string;
 }
 
+export type HeatStressLevel =
+  | "Extreme"
+  | "Moderate"
+  | "None to Slight"
+  | "Strong";
+
 interface HeatStressInfo {
   color: string;
   level: HeatStressLevel;
   value: string;
 }
-
-type HeatStressLevel = "Extreme" | "Moderate" | "None to Slight" | "Strong";
 
 export function getForecastHeatStressDescription(
   petValue: number,

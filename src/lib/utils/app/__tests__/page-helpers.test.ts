@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getGraphMeasureFromCookies, getLocationData } from "../page-helpers";
+import {
+  getForecastPreferencesFromCookies,
+  getGraphMeasureFromCookies,
+  getLocationData,
+} from "../page-helpers";
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn(),
@@ -16,11 +20,17 @@ async function getMockFetchLocations() {
 }
 
 vi.mock("@/lib/constants", () => ({
+  DEFAULT_FORECAST_ENABLED: false,
+  DEFAULT_FORECAST_YEARS_AHEAD: 10,
   DEFAULT_GRAPH_MEASURE: "temperature",
   ERROR_MESSAGES: {
     NO_DATA: "No location data available",
   },
+  FORECAST_ENABLED_COOKIE_NAME: "forecast-enabled",
+  FORECAST_YEARS_AHEAD_COOKIE_NAME: "forecast-years-ahead",
   GRAPH_MEASURE_COOKIE_NAME: "graph-measure",
+  MAX_FORECAST_YEARS_AHEAD: 75,
+  MIN_FORECAST_YEARS_AHEAD: 5,
 }));
 
 describe("page-helpers", () => {
@@ -114,6 +124,92 @@ describe("page-helpers", () => {
       );
       expect(mockCookies).toHaveBeenCalled();
       expect(mockCookieStore.get).toHaveBeenCalledWith("graph-measure");
+    });
+  });
+
+  describe("getForecastPreferencesFromCookies", () => {
+    it("returns defaults when cookies are missing", async () => {
+      const mockCookieStore = {
+        get: vi.fn(
+          (name: string) => (({}) as Record<string, { value: string }>)[name]
+        ),
+      };
+      mockCookies.mockResolvedValue(mockCookieStore);
+
+      const result = await getForecastPreferencesFromCookies();
+
+      expect(result).toEqual({
+        enabled: false,
+        yearsAhead: 10,
+      });
+      expect(mockCookieStore.get).toHaveBeenCalledWith("forecast-enabled");
+      expect(mockCookieStore.get).toHaveBeenCalledWith("forecast-years-ahead");
+    });
+
+    it("returns parsed cookie values when valid", async () => {
+      const mockCookieStore = {
+        get: vi.fn(
+          (name: string) =>
+            (
+              ({
+                "forecast-enabled": { value: "true" },
+                "forecast-years-ahead": { value: "25" },
+              }) as Record<string, { value: string }>
+            )[name]
+        ),
+      };
+      mockCookies.mockResolvedValue(mockCookieStore);
+
+      const result = await getForecastPreferencesFromCookies();
+
+      expect(result).toEqual({
+        enabled: true,
+        yearsAhead: 25,
+      });
+    });
+
+    it("falls back to default years for invalid values", async () => {
+      const mockCookieStore = {
+        get: vi.fn(
+          (name: string) =>
+            (
+              ({
+                "forecast-enabled": { value: "true" },
+                "forecast-years-ahead": { value: "200" },
+              }) as Record<string, { value: string }>
+            )[name]
+        ),
+      };
+      mockCookies.mockResolvedValue(mockCookieStore);
+
+      const result = await getForecastPreferencesFromCookies();
+
+      expect(result).toEqual({
+        enabled: true,
+        yearsAhead: 10,
+      });
+    });
+
+    it("treats non-true enabled values as false", async () => {
+      const mockCookieStore = {
+        get: vi.fn(
+          (name: string) =>
+            (
+              ({
+                "forecast-enabled": { value: "false" },
+                "forecast-years-ahead": { value: "15" },
+              }) as Record<string, { value: string }>
+            )[name]
+        ),
+      };
+      mockCookies.mockResolvedValue(mockCookieStore);
+
+      const result = await getForecastPreferencesFromCookies();
+
+      expect(result).toEqual({
+        enabled: false,
+        yearsAhead: 15,
+      });
     });
   });
 

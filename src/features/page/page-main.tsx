@@ -18,6 +18,8 @@ const Main: FC<PageProperties> = ({
   CurrentDates,
   CurrentPets,
   id,
+  initialForecastEnabled,
+  initialForecastYearsAhead,
   initialGraphMeasure,
   location,
   LocationOptions,
@@ -40,6 +42,8 @@ const Main: FC<PageProperties> = ({
             <div className="grid gap-8 lg:grid-cols-2">
               <TrendAnalysis
                 id={id}
+                initialForecastEnabled={initialForecastEnabled}
+                initialForecastYearsAhead={initialForecastYearsAhead}
                 initialGraphMeasure={initialGraphMeasure}
                 onMeasureChange={handleMeasureChange}
               />

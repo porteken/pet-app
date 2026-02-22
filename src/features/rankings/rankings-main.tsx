@@ -3,12 +3,18 @@
 import { useRouter } from "next/navigation";
 import React, { useMemo, useState, useTransition } from "react";
 
-import { MultiSelect } from "@/components/ui/multi-select";
 import { Pagination } from "@/components/ui/pagination";
 import { Select } from "@/components/ui/select";
 import { HeaderBar } from "@/features/header-bar";
-import { setRankingsYear } from "@/lib/actions/rankings-actions";
-import { getHeatStressInfo } from "@/lib/utils/heat-stress";
+import {
+  setRankingsHeatStress,
+  setRankingsState,
+  setRankingsYear,
+} from "@/lib/actions/rankings-actions";
+import {
+  getHeatStressInfo,
+  type HeatStressLevel,
+} from "@/lib/utils/heat-stress";
 import { LocationOptionSection } from "@/types/types";
 
 const getPetRange = (p10: number, p90: number): string => {
@@ -29,7 +35,7 @@ const YEAR_OPTIONS = Array.from({ length: 26 }, (_, index) => ({
   value: String(2000 + index),
 }));
 
-const HEAT_STRESS_OPTIONS = [
+const ALL_HEAT_STRESS_LEVELS = [
   { label: "None to Slight", value: "None to Slight" },
   { label: "Moderate", value: "Moderate" },
   { label: "Strong", value: "Strong" },
@@ -51,12 +57,16 @@ interface RankingItem {
 }
 
 interface RankingsMainProperties {
+  initialHeatStress: string;
+  initialState: string;
   initialYear: number;
   LocationOptions: LocationOptionSection[];
   rankings: RankingItem[];
 }
 
 export const RankingsMain: React.FC<RankingsMainProperties> = ({
+  initialHeatStress,
+  initialState,
   initialYear,
   LocationOptions,
   rankings,
@@ -65,8 +75,8 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
   const [selectedYear, setSelectedYear] = useState(initialYear);
   const [isPending, startTransition] = useTransition();
 
-  const [stateFilter, setStateFilter] = useState<string[]>([]);
-  const [heatStressFilter, setHeatStressFilter] = useState<string[]>([]);
+  const [stateFilter, setStateFilter] = useState(initialState);
+  const [heatStressFilter, setHeatStressFilter] = useState(initialHeatStress);
 
   type SortColumn =
     | "avg_pet"
@@ -82,21 +92,41 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
   const itemsPerPage = 20;
 
   const stateOptions = useMemo(() => {
-    const uniqueStates = [...new Set(rankings.map(r => r.state))].toSorted(
-      (a, b) => a.localeCompare(b)
-    );
+    const filteredByHeatStress = heatStressFilter
+      ? rankings.filter(
+          r => getHeatStressInfo(r.avg_pet).level === heatStressFilter
+        )
+      : rankings;
+
+    const uniqueStates = [
+      ...new Set(filteredByHeatStress.map(r => r.state)),
+    ].toSorted((a, b) => a.localeCompare(b));
     return uniqueStates.map(state => ({ label: state, value: state }));
-  }, [rankings]);
+  }, [rankings, heatStressFilter]);
+
+  const heatStressOptions = useMemo(() => {
+    const filteredByState = stateFilter
+      ? rankings.filter(r => r.state === stateFilter)
+      : rankings;
+
+    const availableLevels = new Set(
+      filteredByState.map(r => getHeatStressInfo(r.avg_pet).level)
+    );
+
+    return ALL_HEAT_STRESS_LEVELS.filter(option =>
+      availableLevels.has(option.value as HeatStressLevel)
+    );
+  }, [rankings, stateFilter]);
 
   const filteredAndSortedRankings = useMemo(() => {
     const filtered = rankings.filter(({ avg_pet, state }) => {
-      if (stateFilter.length > 0 && !stateFilter.includes(state)) {
+      if (stateFilter !== "" && state !== stateFilter) {
         return false;
       }
 
-      if (heatStressFilter.length > 0) {
+      if (heatStressFilter !== "") {
         const heatStressInfo = getHeatStressInfo(avg_pet);
-        if (!heatStressFilter.includes(heatStressInfo.level)) {
+        if (heatStressInfo.level !== heatStressFilter) {
           return false;
         }
       }
@@ -162,6 +192,34 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
     }
   };
 
+  const handleHeatStressChange = (value: string) => {
+    setHeatStressFilter(value);
+    startTransition(() => {
+      void setRankingsHeatStress(value);
+    });
+  };
+
+  const handleHeatStressClear = () => {
+    setHeatStressFilter("");
+    startTransition(() => {
+      void setRankingsHeatStress("");
+    });
+  };
+
+  const handleStateChange = (value: string) => {
+    setStateFilter(value);
+    startTransition(() => {
+      void setRankingsState(value);
+    });
+  };
+
+  const handleStateClear = () => {
+    setStateFilter("");
+    startTransition(() => {
+      void setRankingsState("");
+    });
+  };
+
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -190,23 +248,25 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
             onChange={handleYearChange}
             value={String(selectedYear)}
           />
-          <MultiSelect
+          <Select
             className="w-full"
             clearable
             data={stateOptions}
             disabled={isPending}
             label="State"
-            onChange={setStateFilter}
+            onChange={handleStateChange}
+            onClear={handleStateClear}
             placeholder="All states"
             value={stateFilter}
           />
-          <MultiSelect
+          <Select
             className="w-full"
             clearable
-            data={HEAT_STRESS_OPTIONS}
+            data={heatStressOptions}
             disabled={isPending}
             label="Avg Heat Stress Level"
-            onChange={setHeatStressFilter}
+            onChange={handleHeatStressChange}
+            onClear={handleHeatStressClear}
             placeholder="All levels"
             value={heatStressFilter}
           />

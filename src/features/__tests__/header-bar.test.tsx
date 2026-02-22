@@ -181,10 +181,32 @@ describe("HeaderBar", () => {
       render(<HeaderBar LocationOptions={mockLocationOptions} />);
 
       const selector = screen.getByTestId("city-selector");
-
-      fireEvent.change(selector, { target: { value: "1" } });
+      fireEvent.focus(selector);
+      fireEvent.click(screen.getByRole("option", { name: "New York" }));
 
       expect(mockPush).toHaveBeenCalledWith("/1");
+    });
+
+    it("should allow searching by state in the city autocomplete", () => {
+      render(<HeaderBar LocationOptions={mockLocationOptions} />);
+
+      const selector = screen.getByTestId("city-selector");
+      fireEvent.focus(selector);
+      fireEvent.change(selector, { target: { value: "test states" } });
+
+      expect(
+        screen.getByRole("option", { name: "New York" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("option", { name: "Los Angeles" })
+      ).toBeInTheDocument();
+    });
+
+    it("should clear city selection when clear button is clicked", () => {
+      render(<HeaderBar id={1} LocationOptions={mockLocationOptions} />);
+
+      fireEvent.click(screen.getByRole("button", { name: "Clear selection" }));
+      expect(mockPush).toHaveBeenCalledWith("/");
     });
 
     it("should have proper placeholder text based on ID", () => {

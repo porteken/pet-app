@@ -1,3 +1,11 @@
 export const GRAPH_MEASURE_COOKIE_NAME = "graph-measure" as const;
+export const RANKINGS_HEAT_STRESS_COOKIE_NAME = "rankings-heat-stress" as const;
+export const RANKINGS_STATE_COOKIE_NAME = "rankings-state" as const;
 export const RANKINGS_YEAR_COOKIE_NAME = "rankings-year" as const;
+export const FORECAST_ENABLED_COOKIE_NAME = "forecast-enabled" as const;
+export const FORECAST_YEARS_AHEAD_COOKIE_NAME = "forecast-years-ahead" as const;
 export const DEFAULT_GRAPH_MEASURE = "avg" as const;
+export const DEFAULT_FORECAST_ENABLED = false as const;
+export const DEFAULT_FORECAST_YEARS_AHEAD = 10 as const;
+export const MIN_FORECAST_YEARS_AHEAD = 5 as const;
+export const MAX_FORECAST_YEARS_AHEAD = 75 as const;

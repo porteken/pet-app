@@ -4,7 +4,11 @@ import { cookies } from "next/headers";
 
 import { RankingsMain } from "@/features/rankings/rankings-main";
 import { FetchCityRankings, FetchLocations } from "@/lib/api/fetch-server";
-import { RANKINGS_YEAR_COOKIE_NAME } from "@/lib/constants";
+import {
+  RANKINGS_HEAT_STRESS_COOKIE_NAME,
+  RANKINGS_STATE_COOKIE_NAME,
+  RANKINGS_YEAR_COOKIE_NAME,
+} from "@/lib/constants";
 
 export const metadata: Metadata = {
   description: "City rankings by heat stress (PET) values",
@@ -30,6 +34,10 @@ export default async function RankingsPage({
   const parameters = await searchParams;
   const cookieStore = await cookies();
 
+  const heatStressFromCookie = cookieStore.get(
+    RANKINGS_HEAT_STRESS_COOKIE_NAME
+  )?.value;
+  const stateFromCookie = cookieStore.get(RANKINGS_STATE_COOKIE_NAME)?.value;
   const yearFromCookie = cookieStore.get(RANKINGS_YEAR_COOKIE_NAME)?.value;
 
   const year = yearMapping(parameters.year, yearFromCookie);
@@ -40,6 +48,8 @@ export default async function RankingsPage({
 
   return (
     <RankingsMain
+      initialHeatStress={heatStressFromCookie ?? ""}
+      initialState={stateFromCookie ?? ""}
       initialYear={year}
       LocationOptions={LocationOptions}
       rankings={rankings}

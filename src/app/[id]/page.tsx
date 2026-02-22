@@ -7,10 +7,17 @@ import {
   FetchReferenceGraphData,
   FetchTrendGraphData,
 } from "@/lib/api/fetch-server";
+import {
+  DEFAULT_FORECAST_ENABLED,
+  DEFAULT_FORECAST_YEARS_AHEAD,
+  DEFAULT_GRAPH_MEASURE,
+  FORECAST_ENABLED_COOKIE_NAME,
+  FORECAST_YEARS_AHEAD_COOKIE_NAME,
+  GRAPH_MEASURE_COOKIE_NAME,
+  MAX_FORECAST_YEARS_AHEAD,
+  MIN_FORECAST_YEARS_AHEAD,
+} from "@/lib/constants";
 import { FetchLocationProperties, LocationProperties } from "@/types/types";
-
-const graphMeasureCookieName = "graph-measure";
-const defaultGraphMeasure = "avg";
 
 const Page = dynamic(() => import("@/features/page/page-main"));
 
@@ -26,7 +33,20 @@ export default async function LocationPage({
 }) {
   const cookieStore = await cookies();
   const initialGraphMeasure =
-    cookieStore.get(graphMeasureCookieName)?.value || defaultGraphMeasure;
+    cookieStore.get(GRAPH_MEASURE_COOKIE_NAME)?.value || DEFAULT_GRAPH_MEASURE;
+  const initialForecastEnabled =
+    cookieStore.get(FORECAST_ENABLED_COOKIE_NAME)?.value === "true"
+      ? true
+      : DEFAULT_FORECAST_ENABLED;
+  const initialForecastYearsAheadValue = Number(
+    cookieStore.get(FORECAST_YEARS_AHEAD_COOKIE_NAME)?.value
+  );
+  const initialForecastYearsAhead =
+    Number.isInteger(initialForecastYearsAheadValue) &&
+    initialForecastYearsAheadValue >= MIN_FORECAST_YEARS_AHEAD &&
+    initialForecastYearsAheadValue <= MAX_FORECAST_YEARS_AHEAD
+      ? initialForecastYearsAheadValue
+      : DEFAULT_FORECAST_YEARS_AHEAD;
 
   const { id } = await params;
   const locationId = await validateLocationId(id);
@@ -82,6 +102,8 @@ export default async function LocationPage({
       CurrentDates={graphData.dates}
       CurrentPets={graphData.pets}
       id={locationId}
+      initialForecastEnabled={initialForecastEnabled}
+      initialForecastYearsAhead={initialForecastYearsAhead}
       initialGraphMeasure={initialGraphMeasure}
       location={selectedLocation}
       LocationOptions={LocationOptions}

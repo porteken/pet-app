@@ -8,6 +8,7 @@ const createDelay = (ms: number) =>
 const mockPush = vi.fn();
 
 vi.mock("@/lib/actions/actions", () => ({
+  setForecastPreferences: vi.fn().mockResolvedValue({}),
   setGraphMeasure: vi.fn().mockResolvedValue({}),
 }));
 
@@ -25,6 +26,7 @@ vi.mock("@/lib/api/fetch-client", () => ({
     upperBound90: [26, 27],
   }),
   FetchTrendGraphData: vi.fn().mockResolvedValue({
+    increase_per_year: 0.5,
     trendline_pets: [20, 22, 24],
     year_pets: [20, 22, 24],
     years: [2000, 2001, 2002],
@@ -194,6 +196,8 @@ const mockLocations = [
 ];
 
 const defaultProps = {
+  initialForecastEnabled: false,
+  initialForecastYearsAhead: 10,
   initialGraphMeasure: "avg",
   LocationOptions: mockLocationOptions,
   locations: mockLocations,
@@ -376,7 +380,28 @@ describe("Home", () => {
   });
 
   describe("Forecast Heat Stress", () => {
-    it("should display forecast heat stress when forecast is enabled and data is available", async () => {
+    it("should fetch forecast data when forecast is enabled and marker clicked", async () => {
+      vi.mocked(FetchForecastData).mockResolvedValue({
+        forecastValues: [28, 30, 32],
+        forecastYears: [2025, 2026, 2027],
+        lowerBound10: [26, 28, 30],
+        upperBound90: [30, 32, 34],
+      });
+
+      render(<Home {...defaultProps} initialForecastEnabled={true} />);
+
+      fireEvent.click(screen.getByTestId("marker-click"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+      });
+
+      await waitFor(() =>
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10)
+      );
+    });
+
+    it("should fetch forecast when toggling forecast on", async () => {
       vi.mocked(FetchForecastData).mockResolvedValue({
         forecastValues: [28, 30, 32],
         forecastYears: [2025, 2026, 2027],
@@ -394,12 +419,10 @@ describe("Home", () => {
 
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
-      await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalled();
-      });
+      await waitFor(() => expect(FetchForecastData).toHaveBeenCalled());
     });
 
-    it("should handle forecast data with NaN bounds gracefully", async () => {
+    it("should handle forecast data with NaN bounds", async () => {
       vi.mocked(FetchForecastData).mockResolvedValue({
         forecastValues: [28, 30, 32],
         forecastYears: [2025, 2026, 2027],
@@ -407,7 +430,7 @@ describe("Home", () => {
         upperBound90: [Number.NaN, Number.NaN, Number.NaN],
       });
 
-      render(<Home {...defaultProps} />);
+      render(<Home {...defaultProps} initialForecastEnabled={true} />);
 
       fireEvent.click(screen.getByTestId("marker-click"));
 
@@ -415,52 +438,123 @@ describe("Home", () => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByTestId("forecast-toggle"));
+      await waitFor(() => expect(FetchForecastData).toHaveBeenCalled());
+    });
+
+    it("should handle forecast data with empty arrays", async () => {
+      vi.mocked(FetchForecastData).mockResolvedValue({
+        forecastValues: [],
+        forecastYears: [],
+        lowerBound10: [],
+        upperBound90: [],
+      });
+
+      render(<Home {...defaultProps} initialForecastEnabled={true} />);
+
+      fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalled();
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+      });
+
+      await waitFor(() => expect(FetchForecastData).toHaveBeenCalled());
+    });
+
+    it("should handle forecast with undefined final values", async () => {
+      vi.mocked(FetchForecastData).mockResolvedValue({
+        forecastValues: [],
+        forecastYears: [2025],
+        lowerBound10: [20],
+        upperBound90: [30],
+      });
+
+      render(<Home {...defaultProps} initialForecastEnabled={true} />);
+
+      fireEvent.click(screen.getByTestId("marker-click"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+      });
+
+      await waitFor(() => expect(FetchForecastData).toHaveBeenCalled());
+    });
+  });
+
+  describe("Initial State Handling", () => {
+    it("should initialize with forecast enabled from props", async () => {
+      render(<Home {...defaultProps} initialForecastEnabled={true} />);
+
+      fireEvent.click(screen.getByTestId("marker-click"));
+
+      await waitFor(() => {
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10);
       });
     });
 
-    it("should not call FetchForecastData when measure is not avg", async () => {
-      render(<Home {...defaultProps} />);
+    it("should initialize with different graph measure", async () => {
+      render(<Home {...defaultProps} initialGraphMeasure="max" />);
 
       fireEvent.click(screen.getByTestId("marker-click"));
-
-      await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
-      });
-
-      const selectElement = screen.getByTestId("graph-measure-select");
-      fireEvent.change(selectElement, { target: { value: "max" } });
 
       await waitFor(() => {
         expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1);
       });
-
-      expect(screen.queryByTestId("forecast-controls")).not.toBeInTheDocument();
     });
 
-    it("should update forecast years ahead when changed", async () => {
+    it("should initialize with custom forecast years ahead", async () => {
+      render(
+        <Home
+          {...defaultProps}
+          initialForecastEnabled={true}
+          initialForecastYearsAhead={20}
+        />
+      );
+
+      fireEvent.click(screen.getByTestId("marker-click"));
+
+      await waitFor(() => {
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 20);
+      });
+    });
+  });
+
+  describe("Empty Data Handling", () => {
+    it("should handle empty trend data years array", async () => {
+      vi.mocked(FetchTrendGraphData).mockResolvedValue({
+        increase_per_year: 0,
+        trendline_pets: [],
+        year_pets: [],
+        years: [],
+      });
+
       render(<Home {...defaultProps} />);
 
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
+        expect(
+          screen.getByText("Unable to load graph data")
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("should handle empty year_pets array", async () => {
+      vi.mocked(FetchTrendGraphData).mockResolvedValue({
+        increase_per_year: 0,
+        trendline_pets: [],
+        year_pets: [],
+        years: [2000],
       });
 
-      const yearsInput = screen.getByTestId("forecast-years");
-      fireEvent.change(yearsInput, { target: { value: "15" } });
+      render(<Home {...defaultProps} />);
 
-      fireEvent.click(screen.getByTestId("forecast-toggle"));
+      fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalled();
+        expect(
+          screen.getByText("Unable to load graph data")
+        ).toBeInTheDocument();
       });
-
-      const callArguments = vi.mocked(FetchForecastData).mock.calls[0];
-      expect(callArguments[1]).toBe(15);
     });
   });
 });

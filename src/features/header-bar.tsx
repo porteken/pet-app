@@ -76,7 +76,7 @@ const HeaderBarComponent = ({
       group: group.group,
       items: group.items.map(city => ({
         key: `city-${city.key}`,
-        label: `${city.title}, ${city.state}`,
+        label: city.title,
         value: city.key.toString(),
       })),
       key: `group-${group.group}`,
@@ -95,12 +95,16 @@ const HeaderBarComponent = ({
           <div className="flex flex-wrap justify-center gap-3">
             <Select
               className="w-full sm:w-[300px]"
+              clearable
               data={selectData}
               data-testid="city-selector"
               onChange={value => {
                 if (value) {
                   router.push(`/${value}`);
                 }
+              }}
+              onClear={() => {
+                router.push(buildUrl("/", true));
               }}
               placeholder={id! >= 0 ? "Change City" : "Select City"}
               searchable

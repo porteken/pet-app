@@ -114,10 +114,7 @@ test.describe("Rankings Page", () => {
     const stateSelect = page.getByLabel("State");
     await expect(stateSelect).toBeVisible({ timeout: 10_000 });
 
-    await stateSelect.click();
-
-    await page.keyboard.type("Arizona");
-    await page.keyboard.press("Enter");
+    await stateSelect.selectOption("AZ");
 
     await expect(page.locator("table tbody tr").first()).toBeVisible({
       timeout: 10_000,
@@ -134,10 +131,7 @@ test.describe("Rankings Page", () => {
     const heatStressSelect = page.getByLabel("Avg Heat Stress Level");
     await expect(heatStressSelect).toBeVisible({ timeout: 10_000 });
 
-    await heatStressSelect.click();
-
-    await page.keyboard.type("Extreme");
-    await page.keyboard.press("Enter");
+    await heatStressSelect.selectOption("Extreme");
 
     await expect(page.locator("table tbody tr").first()).toBeVisible({
       timeout: 10_000,

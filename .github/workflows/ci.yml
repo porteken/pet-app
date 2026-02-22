@@ -46,14 +46,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Download unit blob reports
-        uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v5
         with:
           path: all-vitest-unit-blob-reports
           pattern: vitest-unit-blob-*
           merge-multiple: true
-      - name: Merge unit reports
-        run: npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=default
+      - run: npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=default
 
   # -------- Vitest Integration Shards --------
   vitest-integration:
@@ -95,25 +93,20 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Download integration blob reports
-        uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v5
         with:
           path: all-vitest-integration-blob-reports
           pattern: vitest-integration-blob-*
           merge-multiple: true
-      - name: Merge integration reports
-        run: npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=default
+      - run: npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=default
 
-  # -------- Playwright E2E Shards --------
+  # -------- Playwright E2E Parallel Shards --------
   playwright-e2e:
     name: E2E (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.58.2-noble
     timeout-minutes: 60
-    needs:
-      - merge-vitest-unit-reports
-      - merge-vitest-integration-reports
     strategy:
       fail-fast: false
       matrix:
@@ -126,7 +119,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
       - name: Run Playwright E2E shard
         run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }} --reporter=blob
       - name: Upload Playwright blob report
@@ -148,23 +142,20 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Download Playwright blob reports
-        uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v5
         with:
           path: all-blob-reports
           pattern: blob-report-*
           merge-multiple: true
-      - name: Merge Playwright reports
-        run: npx playwright merge-reports --reporter html ./all-blob-reports
+      - run: npx playwright merge-reports --reporter html ./all-blob-reports
       - name: Upload merged report
-        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
 
-  # -------- Build (Parallel) --------
+  # -------- Build (Completely Parallel) --------
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -175,6 +166,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
       - name: Build
         run: npm run build

@@ -61,7 +61,7 @@ jobs:
           pattern: vitest-unit-blob-*
           merge-multiple: true
       - run: npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=default
-      - name: Fail if any tests actually failed
+      - name: Fail if any tests failed
         if: needs.vitest-unit.result == 'failure'
         run: exit 1
 
@@ -113,7 +113,7 @@ jobs:
           pattern: vitest-integration-blob-*
           merge-multiple: true
       - run: npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=default
-      - name: Fail if any tests actually failed
+      - name: Fail if any tests failed
         if: needs.vitest-integration.result == 'failure'
         run: exit 1
 
@@ -166,7 +166,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Playwright E2E
+      - name: Run Playwright shard
         run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }} --reporter=blob
 
       - name: Upload Playwright blob report
@@ -176,6 +176,29 @@ jobs:
           name: blob-report-${{ matrix.shard_index }}
           path: blob-report/
           retention-days: 1
+
+  merge-playwright-reports:
+    name: Merge Playwright Reports
+    needs: playwright-e2e
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+      - name: Merge into HTML
+        run: npx playwright merge-reports --reporter html ./all-blob-reports
+      - name: Fail if any shard failed
+        if: needs.playwright-e2e.result == 'failure'
+        run: exit 1
 
   # -------- Build --------
   build:

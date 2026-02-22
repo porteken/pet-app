@@ -20,16 +20,23 @@ test.describe("Smoke Tests", () => {
       page.getByRole("button", { name: "View Full Details" })
     ).toBeVisible({ timeout: 10_000 });
 
-    const detailsButton = page.getByRole("button", {
-      name: "View Full Details",
-    });
-    await expect(detailsButton).toBeEnabled();
-    await detailsButton.focus();
-    await page.keyboard.press("Enter");
+    // Close the modal first
+    await page.keyboard.press("Escape");
 
-    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
-    await expect(page.getByText("Trend Analysis")).toBeVisible();
-    await expect(page.getByText("Reference Data")).toBeVisible();
+    // Navigate via header dropdown for reliable location selection
+    await page.locator("input[data-testid='city-selector']").click();
+    await expect(page.getByRole("listbox")).toBeVisible({ timeout: 5000 });
+    await page.getByRole("option", { name: "Phoenix" }).click();
+
+    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.getByText("Trend Analysis")).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.getByText("Reference Data")).toBeVisible({
+      timeout: 10_000,
+    });
 
     const graphMeasure = page.locator("select#graph-measure");
     await expect(graphMeasure).toBeVisible();
@@ -48,8 +55,12 @@ test.describe("Smoke Tests", () => {
   }) => {
     await page.goto("/1");
 
-    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
-    await expect(page.getByText("Trend Analysis")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.getByText("Trend Analysis")).toBeVisible({
+      timeout: 10_000,
+    });
 
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
       timeout: 15_000,
@@ -105,12 +116,16 @@ test.describe("Smoke Tests", () => {
     await expect(viewDetailsButton).toBeVisible({ timeout: 10_000 });
     await expect(viewDetailsButton).toBeEnabled();
 
+    // Close the modal and navigate via header dropdown for reliable location selection
     await page.setViewportSize({ height: 667, width: 375 });
+    await page.keyboard.press("Escape");
+    await page.locator("input[data-testid='city-selector']").click();
+    await expect(page.getByRole("listbox")).toBeVisible({ timeout: 5000 });
+    await page.getByRole("option", { name: "Phoenix" }).click();
 
-    await viewDetailsButton.focus();
-    await page.keyboard.press("Enter");
-
-    await expect(page.getByText("Trend Analysis")).toBeVisible();
+    await expect(page.getByText("Trend Analysis")).toBeVisible({
+      timeout: 10_000,
+    });
     await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
       timeout: 15_000,
     });

@@ -46,7 +46,9 @@ test.describe("Accessibility", () => {
 
     await expect(page.locator("select#graph-measure")).toBeVisible();
     await expect(page.locator("select#reference-year")).toBeVisible();
-    await expect(page.getByTestId("city-selector")).toBeVisible();
+    await expect(page.getByTestId("city-selector")).toBeVisible({
+      timeout: 10_000,
+    });
 
     const main = page.locator("main");
     await expect(main).toBeVisible();

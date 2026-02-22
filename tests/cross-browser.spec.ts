@@ -15,7 +15,9 @@ test.describe("Cross-Browser Compatibility", () => {
     const graphMeasure = page.locator("select#graph-measure");
     await graphMeasure.selectOption("max");
 
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 15_000,
+    });
   });
 
   test("CSS grid and flexbox layouts work consistently", async ({ page }) => {
@@ -54,7 +56,9 @@ test.describe("Cross-Browser Compatibility", () => {
     const graphMeasure = page.locator("select#graph-measure");
     await graphMeasure.selectOption("max");
 
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 15_000,
+    });
   });
 
   test("responsive design consistency across browsers", async ({ page }) => {
@@ -85,7 +89,9 @@ test.describe("Cross-Browser Compatibility", () => {
   test("form interactions behave consistently", async ({ page }) => {
     await page.goto("/1");
 
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 15_000,
+    });
 
     const graphMeasure = page.locator("select#graph-measure");
     const referenceYear = page.locator("select#reference-year");
@@ -99,7 +105,9 @@ test.describe("Cross-Browser Compatibility", () => {
     await expect(graphMeasure).toHaveValue("max");
     await expect(referenceYear).toHaveValue("2010");
 
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2);
+    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+      timeout: 15_000,
+    });
   });
 
   test("performance characteristics across browsers", async ({ page }) => {

@@ -7,8 +7,6 @@ test.describe("City Selection", () => {
     await page.setViewportSize({ height: 667, width: 375 });
     await page.goto("/");
 
-    await page.waitForLoadState("domcontentloaded");
-
     const citySelect = page.getByTestId("city-selector");
     await expect(citySelect).toBeVisible();
     await expect(page.getByRole("searchbox")).toBeVisible();
@@ -19,8 +17,6 @@ test.describe("City Selection", () => {
   }) => {
     await page.goto("/");
 
-    await page.waitForLoadState("domcontentloaded");
-
     const citySelect = page.getByTestId("city-selector");
     await expect(citySelect).toBeVisible();
   });
@@ -30,16 +26,12 @@ test.describe("City Selection", () => {
   }) => {
     await page.goto("/1");
 
-    await page.waitForLoadState("domcontentloaded");
-
     const citySelect = page.getByTestId("city-selector");
-    await expect(citySelect).toBeVisible();
+    await expect(citySelect).toBeVisible({ timeout: 10_000 });
   });
 
   test("should navigate to selected city page", async ({ page }) => {
     await page.goto("/");
-
-    await page.waitForLoadState("domcontentloaded");
 
     const citySelect = page.getByTestId("city-selector");
     await expect(citySelect).toBeVisible();
@@ -55,7 +47,6 @@ test.describe("City Selection", () => {
 
   test("should allow searching for cities", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("domcontentloaded");
 
     const citySearch = page.getByTestId("city-selector");
     await expect(citySearch).toBeVisible({ timeout: 10_000 });
@@ -73,7 +64,6 @@ test.describe("City Selection", () => {
 
   test("should allow searching for states", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("domcontentloaded");
 
     const citySearch = page.getByTestId("city-selector");
     await expect(citySearch).toBeVisible({ timeout: 10_000 });

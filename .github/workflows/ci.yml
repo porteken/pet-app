@@ -122,7 +122,7 @@ jobs:
     name: E2E Playwright (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
     container:
-      image: ://mcr.microsoft.com # Use stable image
+      image: mcr.microsoft.com/playwright:v1.58.2-noble
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -152,15 +152,23 @@ jobs:
           ]
         shard_total: [20]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.client_payload.git.sha || github.sha }}
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "npm"
-      - run: npm ci
-      - run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }} --reporter=blob
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Playwright E2E
+        run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }} --reporter=blob
+
       - name: Upload Playwright blob report
         if: always()
         uses: actions/upload-artifact@v4
@@ -168,28 +176,6 @@ jobs:
           name: blob-report-${{ matrix.shard_index }}
           path: blob-report/
           retention-days: 1
-
-  merge-playwright-reports:
-    name: Merge Playwright Reports
-    needs: playwright-e2e
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "npm"
-      - run: npm ci
-      - uses: actions/download-artifact@v4
-        with:
-          path: all-blob-reports
-          pattern: blob-report-*
-          merge-multiple: true
-      - run: npx playwright merge-reports --reporter html ./all-blob-reports
-      - name: Fail if any tests actually failed
-        if: needs.playwright-e2e.result == 'failure'
-        run: exit 1
 
   # -------- Build --------
   build:

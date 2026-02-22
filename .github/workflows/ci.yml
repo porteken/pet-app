@@ -35,7 +35,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vitest-unit-blob-${{ matrix.shard_index }}
-          path: .vitest-reports/*
+          path: .vitest-reports/
           include-hidden-files: true
           retention-days: 1
 
@@ -68,7 +68,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vitest-integration-blob-${{ matrix.shard_index }}
-          path: .vitest-reports/*
+          path: .vitest-reports/
           include-hidden-files: true
           retention-days: 1
 
@@ -92,12 +92,12 @@ jobs:
       - name: Download unit blob reports
         uses: actions/download-artifact@v5
         with:
-          path: .vitest-reports
+          path: all-vitest-unit-blob-reports
           pattern: vitest-unit-blob-*
           merge-multiple: true
 
       - name: Merge unit reports
-        run: npx vitest --merge-reports --reporter=default
+        run: npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=default
 
   merge-vitest-integration-reports:
     name: Merge Vitest Integration Reports
@@ -119,12 +119,12 @@ jobs:
       - name: Download integration blob reports
         uses: actions/download-artifact@v5
         with:
-          path: .vitest-reports
+          path: all-vitest-integration-blob-reports
           pattern: vitest-integration-blob-*
           merge-multiple: true
 
       - name: Merge integration reports
-        run: npx vitest --config=vitest.integration.config.ts --merge-reports --reporter=default
+        run: npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=default
 
   playwright-e2e:
     name: E2E (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})

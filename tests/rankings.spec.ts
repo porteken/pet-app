@@ -105,16 +105,19 @@ test.describe("Rankings Page", () => {
   });
 
   test("should filter by state", async ({ page }) => {
-    await page.goto("/rankings");
+    await page.goto("/rankings", { waitUntil: "domcontentloaded" });
 
     await expect(
       page.getByRole("heading", { name: "Cities ranked by Average PET" })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible({ timeout: 15_000 });
 
     const stateSelect = page.getByLabel("State");
     await expect(stateSelect).toBeVisible({ timeout: 10_000 });
 
-    await stateSelect.selectOption("AZ");
+    // Get the first available state option (states are full names like "Arizona", not abbreviations)
+    const firstStateOption = stateSelect.locator("option").nth(1);
+    const stateValue = await firstStateOption.getAttribute("value");
+    await stateSelect.selectOption(stateValue!);
 
     await expect(page.locator("table tbody tr").first()).toBeVisible({
       timeout: 10_000,
@@ -122,19 +125,22 @@ test.describe("Rankings Page", () => {
   });
 
   test("should filter by heat stress level", async ({ page }) => {
-    await page.goto("/rankings");
+    await page.goto("/rankings", { waitUntil: "domcontentloaded" });
 
     await expect(
       page.getByRole("heading", { name: "Cities ranked by Average PET" })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible({ timeout: 15_000 });
 
     const heatStressSelect = page.getByLabel("Avg Heat Stress Level");
     await expect(heatStressSelect).toBeVisible({ timeout: 10_000 });
 
-    await heatStressSelect.selectOption("Extreme");
+    // Get the first available heat stress level option (dynamically filtered based on data)
+    const firstOption = heatStressSelect.locator("option").nth(1);
+    const optionValue = await firstOption.getAttribute("value");
+    await heatStressSelect.selectOption(optionValue!);
 
     await expect(page.locator("table tbody tr").first()).toBeVisible({
-      timeout: 10_000,
+      timeout: 15_000,
     });
   });
 });

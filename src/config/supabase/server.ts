@@ -1,7 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+import { createMockSupabaseClient } from "@/testing/mocks/mock-end-to-end-test-data";
+
+const isE2ETestRun = process.env.NEXT_PUBLIC_E2E_TEST === "true";
+
 export const createClient = async (cookieStore: ReturnType<typeof cookies>) => {
+  // Return mock client for E2E tests
+  if (isE2ETestRun) {
+    return createMockSupabaseClient();
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

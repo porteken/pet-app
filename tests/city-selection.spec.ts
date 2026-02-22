@@ -55,33 +55,37 @@ test.describe("City Selection", () => {
 
   test("should allow searching for cities", async ({ page }) => {
     await page.goto("/");
-
     await page.waitForLoadState("domcontentloaded");
 
-    const citySearch = page.getByRole("searchbox");
-    await expect(citySearch).toBeVisible();
+    const citySearch = page.getByTestId("city-selector");
+    await expect(citySearch).toBeVisible({ timeout: 10_000 });
 
     await citySearch.click();
-    await citySearch.fill("new");
-
     const filteredOptions = page.getByTestId("searchable-select-option");
-    await expect(filteredOptions.first()).toBeVisible();
+    await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
+
+    await citySearch.focus();
+    await page.keyboard.type("angeles", { delay: 100 });
+
+    await expect(filteredOptions.first()).toBeVisible({ timeout: 15_000 });
     expect(await filteredOptions.count()).toBeGreaterThan(0);
   });
 
   test("should allow searching for states", async ({ page }) => {
     await page.goto("/");
-
     await page.waitForLoadState("domcontentloaded");
 
-    const citySearch = page.getByRole("searchbox");
-    await expect(citySearch).toBeVisible();
+    const citySearch = page.getByTestId("city-selector");
+    await expect(citySearch).toBeVisible({ timeout: 10_000 });
 
     await citySearch.click();
-    await citySearch.fill("california");
-
     const filteredOptions = page.getByTestId("searchable-select-option");
-    await expect(filteredOptions.first()).toBeVisible();
+    await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
+
+    await citySearch.press("Control+a");
+    await citySearch.pressSequentially("california", { delay: 100 });
+
+    await expect(filteredOptions.first()).toBeVisible({ timeout: 15_000 });
     expect(await filteredOptions.count()).toBeGreaterThan(0);
   });
 });

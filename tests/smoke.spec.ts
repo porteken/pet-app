@@ -14,8 +14,7 @@ test.describe("Smoke Tests", () => {
     const marker = page.locator(".leaflet-marker-icon").first();
     await expect(marker).toBeVisible({ timeout: 10_000 });
 
-    // eslint-disable-next-line playwright/no-force-option
-    await marker.click({ force: true });
+    await marker.dispatchEvent("click");
 
     await expect(
       page.getByRole("button", { name: "View Full Details" })
@@ -98,8 +97,7 @@ test.describe("Smoke Tests", () => {
 
     await expect(marker).toBeVisible({ timeout: 10_000 });
 
-    // eslint-disable-next-line playwright/no-force-option
-    await marker.click({ force: true });
+    await marker.dispatchEvent("click");
 
     const viewDetailsButton = page.getByRole("button", {
       name: "View Full Details",

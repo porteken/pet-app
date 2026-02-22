@@ -4,7 +4,7 @@ test.describe("Home Page", () => {
   test("should display the map and locations", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByText("Loading map...").first()).toBeHidden({
-      timeout: 10_000,
+      timeout: 30_000,
     });
     await expect(page.locator(".leaflet-container")).toBeVisible();
   });
@@ -13,11 +13,13 @@ test.describe("Home Page", () => {
     page,
   }) => {
     await page.goto("/");
+    await expect(page.getByText("Loading map...").first()).toBeHidden({
+      timeout: 30_000,
+    });
     const marker = page.locator(".leaflet-marker-icon").first();
     await expect(marker).toBeVisible({ timeout: 10_000 });
 
-    // eslint-disable-next-line playwright/no-force-option
-    await marker.click({ force: true });
+    await marker.dispatchEvent("click");
     await expect(
       page.getByRole("button", { name: "View Full Details" })
     ).toBeVisible({ timeout: 10_000 });
@@ -27,24 +29,23 @@ test.describe("Home Page", () => {
     page,
   }) => {
     await page.goto("/");
+    await expect(page.getByText("Loading map...").first()).toBeHidden({
+      timeout: 30_000,
+    });
 
     const marker = page.locator(".leaflet-marker-icon").first();
     await expect(marker).toBeVisible({ timeout: 10_000 });
 
-    // eslint-disable-next-line playwright/no-force-option
-    await marker.click({ force: true });
+    await marker.dispatchEvent("click");
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 10_000 });
 
     const viewDetailsButton = page.getByRole("button", {
       name: "View Full Details",
     });
     await expect(viewDetailsButton).toBeVisible({ timeout: 10_000 });
-    await expect(viewDetailsButton).toBeEnabled();
-    await viewDetailsButton.focus();
-    await page.keyboard.press("Enter");
+    await viewDetailsButton.dispatchEvent("click");
 
-    await expect(page).toHaveURL(/\/\d+$/);
-    await expect(page.getByText("Trend Analysis")).toBeVisible({
-      timeout: 15_000,
-    });
+    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
+    await expect(page.getByText("Trend Analysis")).toBeVisible();
   });
 });

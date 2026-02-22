@@ -19,10 +19,6 @@ jobs:
         shard_index: [1, 2, 3, 4, 5]
         shard_total: [5]
     steps:
-      - name: Vercel Deployment Check Status
-        if: github.event_name == 'repository_dispatch'
-        uses: vercel/repository-dispatch/actions/status@v1
-
       - name: Checkout (Vercel Deployment)
         if: github.event_name == 'repository_dispatch'
         uses: actions/checkout@v5
@@ -36,7 +32,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
+          package-manager-cache: false
 
       - run: npm ci
 
@@ -61,7 +57,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
+          package-manager-cache: false
       - run: npm ci
       - uses: actions/download-artifact@v5
         with:
@@ -87,7 +83,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
+          package-manager-cache: false
       - run: npm ci
       - run: npm run test:integration -- --reporter=blob --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
 
@@ -109,7 +105,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
+          package-manager-cache: false
       - run: npm ci
       - uses: actions/download-artifact@v5
         with:
@@ -159,7 +155,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
+          package-manager-cache: false
       - run: npm ci
       - run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }} --reporter=blob
       - name: Upload Playwright blob report
@@ -179,7 +175,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
+          package-manager-cache: false
       - run: npm ci
       - uses: actions/download-artifact@v5
         with:
@@ -199,7 +195,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
+          package-manager-cache: false
       - run: npm ci
       - run: npm run build
 

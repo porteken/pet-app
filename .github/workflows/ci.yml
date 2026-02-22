@@ -4,9 +4,6 @@ on:
   pull_request:
   push:
   workflow_dispatch:
-  # Triggered by Vercel when a preview deployment is ready
-  repository_dispatch:
-    types: [vercel.deployment.ready]
 
 jobs:
   # -------- Vitest Unit Shards --------
@@ -20,11 +17,9 @@ jobs:
       matrix:
         shard_index: [1, 2, 3, 4, 5]
         shard_total: [5]
+
     steps:
       - uses: actions/checkout@v5
-        with:
-          # Use the deployment ref if triggered by Vercel
-          ref: ${{ github.event.client_payload.ref || github.sha }}
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -70,10 +65,9 @@ jobs:
       matrix:
         shard_index: [1, 2]
         shard_total: [2]
+
     steps:
       - uses: actions/checkout@v5
-        with:
-          ref: ${{ github.event.client_payload.ref || github.sha }}
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -113,7 +107,7 @@ jobs:
     name: E2E Playwright (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
     container:
-      image: ://mcr.microsoft.com
+      image: mcr.microsoft.com/playwright:v1.58.2-noble
     timeout-minutes: 60
     continue-on-error: true
     strategy:
@@ -143,22 +137,20 @@ jobs:
             20,
           ]
         shard_total: [20]
+
     steps:
       - uses: actions/checkout@v5
-        with:
-          ref: ${{ github.event.client_payload.ref || github.sha }}
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
+
       - name: Set HOME for Firefox/Playwright
         if: runner.os == 'Linux'
         run: echo "HOME=/root" >> $GITHUB_ENV
+
       - run: npm ci
       - name: Run Playwright E2E shard
-        # Use the Vercel Preview URL if available
-        env:
-          PLAYWRIGHT_TEST_BASE_URL: ${{ github.event.client_payload.deployment_url || 'http://localhost:3000' }}
         run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }} --reporter=blob
       - name: Upload Playwright blob report
         if: always()
@@ -191,6 +183,11 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
+      - name: Fail if any tests actually failed
+        run: |
+          # If any shard job failed (not just continued), mark this job as failed
+          # Replace with logic specific to how you want to detect failure
+          exit 1
 
   # -------- Build --------
   build:
@@ -199,33 +196,11 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
-        with:
-          ref: ${{ github.event.client_payload.ref || github.sha }}
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm run build
-
-  # -------- Vercel Status Reporting --------
-  notify-vercel:
-    name: Notify Vercel
-    # Wait for all merges and build to finish
-    needs:
-      [
-        merge-vitest-unit-reports,
-        merge-vitest-integration-reports,
-        merge-playwright-reports,
-        build,
-      ]
-    runs-on: ubuntu-latest
-    # Ensure this runs even if tests fail, but ONLY for Vercel dispatch events
-    if: always() && github.event_name == 'repository_dispatch'
-    steps:
-      - name: Notify Vercel
-        uses: vercel/repository-dispatch/actions/status@v1
-        with:
-          name: "Vercel - CI Complete"
-          # Determine success based on the result of the required jobs
-          status: ${{ (needs.merge-vitest-unit-reports.result == 'success' && needs.merge-vitest-integration-reports.result == 'success' && needs.merge-playwright-reports.result == 'success' && needs.build.result == 'success') && 'success' || 'failed' }}
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build

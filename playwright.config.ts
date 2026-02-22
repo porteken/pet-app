@@ -58,5 +58,5 @@ export default defineConfig({
     url: "http://localhost:3000",
   },
 
-  workers: 4,
+  workers: process.env.CI ? 1 : 4,
 });

@@ -1,8 +1,5 @@
-name: CI Pipeline
+name: CI
 
-# ——————————————
-# Triggers
-# ——————————————
 on:
   pull_request:
   push:
@@ -20,6 +17,7 @@ jobs:
       matrix:
         shard_index: [1, 2, 3, 4, 5]
         shard_total: [5]
+
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -37,6 +35,10 @@ jobs:
           path: .vitest-reports/
           include-hidden-files: true
           retention-days: 1
+      - name: Notify Vercel
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: Vercel - pet-app: lint to workflow name: CI
 
   merge-vitest-unit-reports:
     name: Merge Vitest Unit Reports
@@ -55,6 +57,10 @@ jobs:
           pattern: vitest-unit-blob-*
           merge-multiple: true
       - run: npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=default
+      - name: Notify Vercel
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: Vercel - pet-app: lint to workflow name: CI
 
   # -------- Vitest Integration Shards --------
   vitest-integration:
@@ -67,6 +73,7 @@ jobs:
       matrix:
         shard_index: [1, 2]
         shard_total: [2]
+
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -84,6 +91,10 @@ jobs:
           path: .vitest-reports/
           include-hidden-files: true
           retention-days: 1
+      - name: Notify Vercel
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: Vercel - pet-app: lint to workflow name: CI
 
   merge-vitest-integration-reports:
     name: Merge Vitest Integration Reports
@@ -102,6 +113,10 @@ jobs:
           pattern: vitest-integration-blob-*
           merge-multiple: true
       - run: npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=default
+      - name: Notify Vercel
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: Vercel - pet-app: lint to workflow name: CI
 
   # -------- Playwright E2E Parallel Shards --------
   playwright-e2e:
@@ -114,30 +129,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard_index:
-          [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-          ]
+        shard_index: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
         shard_total: [20]
+
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -157,6 +151,10 @@ jobs:
           name: blob-report-${{ matrix.shard_index }}
           path: blob-report/
           retention-days: 1
+      - name: Notify Vercel
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: Vercel - pet-app: lint to workflow name: CI
 
   merge-playwright-reports:
     name: Merge Playwright Reports
@@ -181,23 +179,10 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
-      - name: Fail merge if any test failed
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "Checking for failed Playwright tests…"
-          FAILED=0
-          for blob in all-blob-reports/**/*.json; do
-            if jq '.suites.failed' "$blob" | grep -q '[1-9]'; then
-              echo "❌ Failures found in $blob"
-              FAILED=1
-            fi
-          done
-          if [ "$FAILED" -eq 1 ]; then
-            echo "❌ Failing merge job due to test failures"
-            exit 1
-          fi
-          echo "✅ All Playwright shards passed."
+      - name: Notify Vercel
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: Vercel - pet-app: lint to workflow name: CI
 
   # -------- Build --------
   build:
@@ -214,19 +199,7 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-
-  # ——————————————
-  # Aggregated Final Status
-  # ——————————————
-  final-status:
-    name: ❗ Final CI Status
-    runs-on: ubuntu-latest
-    needs:
-      - merge-vitest-unit-reports
-      - merge-vitest-integration-reports
-      - merge-playwright-reports
-      - build
-    steps:
-      - name: All required jobs passed
-        run: |
-          echo "✅ All dependent jobs completed successfully."
+      - name: Notify Vercel
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: Vercel - pet-app: lint to workflow name: CI

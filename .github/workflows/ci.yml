@@ -19,20 +19,15 @@ jobs:
         shard_index: [1, 2, 3, 4, 5]
         shard_total: [5]
     steps:
-      - name: Checkout (Vercel Deployment)
-        if: github.event_name == 'repository_dispatch'
-        uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.client_payload.git.sha }}
+          ref: ${{ github.event.client_payload.git.sha || github.sha }}
 
-      - name: Checkout (Default)
-        if: github.event_name != 'repository_dispatch'
-        uses: actions/checkout@v5
-
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
-          package-manager-cache: false
+          cache: "npm"
 
       - run: npm ci
 
@@ -54,12 +49,13 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
-          package-manager-cache: false
+          cache: "npm"
       - run: npm ci
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v4
         with:
           path: all-vitest-unit-blob-reports
           pattern: vitest-unit-blob-*
@@ -80,10 +76,13 @@ jobs:
         shard_index: [1, 2]
         shard_total: [2]
     steps:
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.git.sha || github.sha }}
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
-          package-manager-cache: false
+          cache: "npm"
       - run: npm ci
       - run: npm run test:integration -- --reporter=blob --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
 
@@ -102,12 +101,13 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
-          package-manager-cache: false
+          cache: "npm"
       - run: npm ci
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v4
         with:
           path: all-vitest-integration-blob-reports
           pattern: vitest-integration-blob-*
@@ -122,7 +122,7 @@ jobs:
     name: E2E Playwright (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright:v1.58.2-noble
+      image: ://mcr.microsoft.com # Use stable image
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -152,10 +152,13 @@ jobs:
           ]
         shard_total: [20]
     steps:
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.git.sha || github.sha }}
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
-          package-manager-cache: false
+          cache: "npm"
       - run: npm ci
       - run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }} --reporter=blob
       - name: Upload Playwright blob report
@@ -172,12 +175,13 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
-          package-manager-cache: false
+          cache: "npm"
       - run: npm ci
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v4
         with:
           path: all-blob-reports
           pattern: blob-report-*
@@ -192,10 +196,11 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
-          package-manager-cache: false
+          cache: "npm"
       - run: npm ci
       - run: npm run build
 

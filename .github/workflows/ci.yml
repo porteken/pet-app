@@ -4,6 +4,8 @@ on:
   pull_request:
   push:
   workflow_dispatch:
+  # If using repository_dispatch to run CI based on Vercel deployment:
+  repository_dispatch:
 
 jobs:
   # -------- Vitest Unit Shards --------
@@ -20,6 +22,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+
+      # If using repository_dispatch for CI, checkout at deploy ref:
+      - name: Checkout with dispatch SHA
+        if: github.event_name == 'repository_dispatch'
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.client_payload.ref || github.sha }}
+
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -144,11 +154,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-
       - name: Set HOME for Firefox/Playwright
         if: runner.os == 'Linux'
         run: echo "HOME=/root" >> $GITHUB_ENV
-
       - run: npm ci
       - name: Run Playwright E2E shard
         run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }} --reporter=blob
@@ -185,8 +193,6 @@ jobs:
           retention-days: 14
       - name: Fail if any tests actually failed
         run: |
-          # If any shard job failed (not just continued), mark this job as failed
-          # Replace with logic specific to how you want to detect failure
           exit 1
 
   # -------- Build --------
@@ -204,3 +210,17 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+
+  # Optional: Notify Vercel (repository_dispatch)
+  notify-vercel:
+    name: Notify Vercel
+    needs: [merge-playwright-reports, build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'repository_dispatch'
+    steps:
+      - uses: actions/checkout@v5
+      - name: Notify Vercel
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          # Must be unique — appears as the deployment status name
+          name: "Vercel - CI Complete"

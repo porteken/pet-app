@@ -13,8 +13,30 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard_index: [1, 2, 3, 4]
-        shard_total: [4]
+        shard_index:
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+          ]
+        shard_total: [20]
 
     steps:
       - uses: actions/checkout@v5
@@ -46,8 +68,30 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard_index: [1, 2]
-        shard_total: [2]
+        shard_index:
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+          ]
+        shard_total: [20]
 
     steps:
       - uses: actions/checkout@v5
@@ -80,7 +124,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-node@v5
         with:
           node-version: 20
@@ -107,7 +150,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-node@v5
         with:
           node-version: 20
@@ -116,7 +158,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Download integration blob reports
+      - name: Download integration reports
         uses: actions/download-artifact@v5
         with:
           path: all-vitest-integration-blob-reports
@@ -138,8 +180,30 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard_index: [1, 2, 3, 4]
-        shard_total: [4]
+        shard_index:
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+          ]
+        shard_total: [20]
 
     steps:
       - uses: actions/checkout@v5
@@ -155,7 +219,7 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Run Playwright tests (shard)
+      - name: Run Playwright tests
         run: npm run test:e2e -- --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }} --reporter=blob
 
       - name: Upload Playwright blob report
@@ -174,7 +238,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-node@v5
         with:
           node-version: 20
@@ -211,7 +274,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-node@v5
         with:
           node-version: 20

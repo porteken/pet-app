@@ -34,11 +34,17 @@ vi.mock("@/features/header-bar", () => ({
 }));
 
 vi.mock("@/features/page/components/trend-analysis", () => ({
-  TrendAnalysis: vi.fn(({ initialGraphMeasure }) => (
+  TrendAnalysis: vi.fn(({ initialGraphMeasure, onMeasureChange }) => (
     <div data-testid="trend-analysis">
       <h2>Trend Analysis</h2>
       <label htmlFor="graph-measure">Graph Measure</label>
-      <select defaultValue={initialGraphMeasure} id="graph-measure">
+      <select
+        defaultValue={initialGraphMeasure}
+        id="graph-measure"
+        onChange={event => {
+          onMeasureChange(event.currentTarget.value);
+        }}
+      >
         <option value="avg">Average</option>
         <option value="max">Maximum</option>
       </select>
@@ -240,6 +246,10 @@ describe("PageMain Integration Tests", () => {
 
       await user.selectOptions(measureSelect, "max");
       expect(measureSelect).toHaveValue("max");
+
+      await waitFor(() => {
+        expect(setGraphMeasure).toHaveBeenCalledWith("max");
+      });
 
       expect(screen.getByTestId("header-bar")).toBeInTheDocument();
       expect(screen.getByTestId("trend-analysis")).toBeInTheDocument();

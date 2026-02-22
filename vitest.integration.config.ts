@@ -17,7 +17,10 @@ export default defineConfig({
       "src/utils/__tests__/test-utilities.ts",
     ],
     globals: true,
-    include: ["src/**/*.integration.test.{js,jsx,ts,tsx}"],
+    include: [
+      "src/**/*.integration.test.{js,jsx,ts,tsx}",
+      "src/**/integration.test.{js,jsx,ts,tsx}",
+    ],
     setupFiles: ["./vitest.setup.ts"],
   },
 });

@@ -11,7 +11,11 @@ import { TrendAnalysis } from "./components/trend-analysis";
 import { PageProperties } from "./types";
 
 const handleMeasureChange = async (measure: string): Promise<void> => {
-  await setGraphMeasure(measure);
+  try {
+    await setGraphMeasure(measure);
+  } catch {
+    // Keep the UI responsive even if persisting the preference fails.
+  }
 };
 
 const Main: FC<PageProperties> = ({

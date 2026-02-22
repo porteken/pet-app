@@ -244,6 +244,25 @@ describe("TrendAnalysis", () => {
       });
     });
 
+    it("should ignore onMeasureChange persistence errors", async () => {
+      const onMeasureChange = vi
+        .fn()
+        .mockRejectedValue(new Error("Server error"));
+
+      render(
+        <TrendAnalysis {...defaultProps} onMeasureChange={onMeasureChange} />
+      );
+
+      const select = screen.getByLabelText("Graph Measure");
+      fireEvent.change(select, { target: { value: "max" } });
+
+      await waitFor(() => {
+        expect(onMeasureChange).toHaveBeenCalledWith("max");
+      });
+
+      expect(select).toHaveValue("max");
+    });
+
     it("should hide forecast controls when changing to max measure", async () => {
       render(<TrendAnalysis {...defaultProps} />);
 
@@ -309,6 +328,24 @@ describe("TrendAnalysis", () => {
 
       await waitFor(() => {
         expect(FetchForecastData).toHaveBeenCalledWith(1, 20);
+      });
+    });
+
+    it("should ignore forecast preference persistence errors", async () => {
+      vi.mocked(setForecastPreferences).mockRejectedValueOnce(
+        new Error("Cookie write failed")
+      );
+
+      render(<TrendAnalysis {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("forecast-toggle")).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId("forecast-toggle"));
+
+      await waitFor(() => {
+        expect(setForecastPreferences).toHaveBeenCalledWith(true, 10);
       });
     });
 

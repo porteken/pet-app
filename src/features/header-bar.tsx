@@ -84,7 +84,7 @@ const HeaderBarComponent = ({
   }, [groupedCities]);
 
   return (
-    <header className="w-full border-b border-gray-200 bg-white/90 backdrop-blur-sm">
+    <header className="relative z-10 w-full border-b border-gray-200 bg-white">
       <div className="mx-auto max-w-4xl px-4">
         <div className="py-2 text-center">
           <h1 className="text-2xl font-extrabold dark:text-white">

@@ -217,8 +217,10 @@ const Home: FC<MapProperties> = ({
 
   return (
     <div className="relative h-[100dvh] w-full">
-      <div className="absolute inset-x-0 top-0 z-[1000]">
-        <HeaderBar LocationOptions={LocationOptions} />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[10010]">
+        <div className="pointer-events-auto">
+          <HeaderBar LocationOptions={LocationOptions} />
+        </div>
       </div>
       <div className="absolute inset-0 top-0">
         <MapComponent

@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 ##############################
-# Vitest Unit Test Shards
+# Vitest Unit Shards
 ##############################
 jobs:
   vitest-unit:
@@ -29,12 +29,14 @@ jobs:
 
       - run: npm ci
 
-      - name: Run Vitest Unit Shard with Blob
-        # Using blob reporter so Vitest writes blob file into .vitest-reports
-        run: npx vitest run --shard=${{ matrix.shard_index }}/5 --reporter=blob
+      - name: Run Vitest Unit with Blob
+        run: |
+          npx vitest run --shard=${{ matrix.shard_index }}/5 --reporter=blob
+
+        ### Important: Blob reporter writes to .vitest-reports
         continue-on-error: true
 
-      - name: Upload Vitest Unit Blobs
+      - name: Upload Unit Blob
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -61,7 +63,7 @@ jobs:
       - name: Prepare Blob Directory
         run: mkdir -p .vitest-reports
 
-      - name: Download Vitest Unit Blobs
+      - name: Download All Unit Blobs
         uses: actions/download-artifact@v4
         with:
           path: .vitest-reports
@@ -69,12 +71,12 @@ jobs:
 
       - name: Merge Vitest Unit Reports
         run: |
-          # Vitest will scan .vitest-reports for all blob files
+          # Vitest will scan .vitest-reports for the blob files
           npx vitest run --merge-reports --reporter=junit
         shell: bash
 
   ##############################
-  # Vitest Integration Test Shards
+  # Vitest Integration Shards
   ##############################
   vitest-integration:
     name: Vitest Integration (shard ${{ matrix.shard_index }}/2)
@@ -93,11 +95,12 @@ jobs:
 
       - run: npm ci
 
-      - name: Run Vitest Integration Shard with Blob
-        run: npx vitest run --shard=${{ matrix.shard_index }}/2 --reporter=blob
+      - name: Run Vitest Integration with Blob
+        run: |
+          npx vitest run --shard=${{ matrix.shard_index }}/2 --reporter=blob
         continue-on-error: true
 
-      - name: Upload Vitest Integration Blobs
+      - name: Upload Integration Blob
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -124,7 +127,7 @@ jobs:
       - name: Prepare Blob Directory
         run: mkdir -p .vitest-reports
 
-      - name: Download Vitest Integration Blobs
+      - name: Download All Integration Blobs
         uses: actions/download-artifact@v4
         with:
           path: .vitest-reports
@@ -135,9 +138,9 @@ jobs:
           npx vitest run --merge-reports --reporter=junit
         shell: bash
 
-  #################################
+  ##############################
   # Playwright E2E Shards
-  #################################
+  ##############################
   playwright-e2e:
     name: Playwright E2E (shard ${{ matrix.shard_index }}/20)
     runs-on: ubuntu-latest
@@ -183,20 +186,20 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps
 
-      - name: Run Playwright E2E Shard with Blob
+      - name: Run Playwright E2E with Blob
         run: npx playwright test --shard=${{ matrix.shard_index }}/20 --reporter=list,blob
         continue-on-error: true
 
-      - name: Upload Playwright Blobs
+      - name: Upload Playwright Blob
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-blob-${{ matrix.shard_index }}
           path: blob-report/*.zip
 
-  #################################
+  ##############################
   # Merge Playwright Reports
-  #################################
+  ##############################
   merge-playwright:
     name: Merge Playwright Reports
     needs: playwright-e2e
@@ -218,9 +221,8 @@ jobs:
           pattern: playwright-blob-*
           merge-multiple: true
 
-      - name: Merge Playwright With Line Reporter
+      - name: Merge Playwright with Line Reporter
         run: |
-          # Combine shard blobs and output concise test summary
           npx playwright merge-reports --reporter=line ./playwright-blobs
         shell: bash
 
@@ -242,7 +244,7 @@ jobs:
       - run: npm run build
 
   ##############################
-  # Deploy (after merges + build)
+  # Deploy (after all merges + build)
   ##############################
   deploy:
     name: Trigger Vercel Deploy

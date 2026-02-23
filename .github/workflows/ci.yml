@@ -9,6 +9,9 @@ on:
   workflow_dispatch:
 
 jobs:
+  ##################
+  # Vitest Unit
+  ##################
   vitest-unit:
     name: Vitest Unit (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
@@ -56,6 +59,9 @@ jobs:
         run: |
           npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=junit
 
+  ##################
+  # Vitest Integration
+  ##################
   vitest-integration:
     name: Vitest Integration (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
@@ -103,6 +109,9 @@ jobs:
         run: |
           npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=junit
 
+  ##################
+  # Playwright E2E
+  ##################
   playwright-e2e:
     name: Playwright E2E (shard ${{ matrix.shard_index }}/20)
     runs-on: ubuntu-latest
@@ -146,7 +155,7 @@ jobs:
       - run: npx playwright install --with-deps
       - run: npx playwright test --shard=${{ matrix.shard_index }}/20 --reporter=list,blob
         continue-on-error: true
-      - name: Upload Playwright result
+      - name: Upload Playwright blob results
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -164,16 +173,15 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Merge Blobs
+      - name: Merge all playwright blobs
         run: |
           npx playwright merge-reports --reporter=line ./playwright-blobs
 
+  ##################
+  # Build (Parallel with Tests)
+  ##################
   build:
     name: Build
-    needs:
-      - merge-vitest-unit
-      - merge-vitest-integration
-      - merge-playwright
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -184,9 +192,16 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+  ##################
+  # Deploy (After Build + Tests)
+  ##################
   deploy:
     name: Deploy to Vercel
-    needs: build
+    needs:
+      - build
+      - merge-vitest-unit
+      - merge-vitest-integration
+      - merge-playwright
     runs-on: ubuntu-latest
     steps:
       - name: Extract branch
@@ -206,7 +221,7 @@ jobs:
             echo "Calling preview deploy hook..."
             curl -X POST "$VERCEL_DEPLOY_HOOK_DEV"
           else
-            echo "No preview deploy hook secret set, skipping"
+            echo "VERCEL_DEPLOY_HOOK_DEV secret missing — skipping preview deploy"
           fi
 
       - name: Trigger Vercel Prod Deploy
@@ -215,8 +230,8 @@ jobs:
           VERCEL_DEPLOY_HOOK_PRD: ${{ secrets.VERCEL_DEPLOY_HOOK_PRD }}
         run: |
           if [ -n "$VERCEL_DEPLOY_HOOK_PRD" ]; then
-            echo "Calling production deploy hook..."
+            echo "Calling prod deploy hook..."
             curl -X POST "$VERCEL_DEPLOY_HOOK_PRD"
           else
-            echo "No production deploy hook secret set, skipping"
+            echo "VERCEL_DEPLOY_HOOK_PRD secret missing — skipping prod deploy"
           fi

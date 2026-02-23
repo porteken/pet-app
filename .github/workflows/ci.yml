@@ -13,34 +13,37 @@ on:
 ##############################
 jobs:
   vitest-unit:
-    name: Vitest Unit (shard ${{ matrix.shard_index }}/5)
+    name: Vitest Unit (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
         shard_index: [1, 2, 3, 4, 5]
+        shard_total: [5]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Run Vitest Unit Shard
-        # Vitest writes blob reports into .vitest-reports
-        run: npx vitest run --shard=${{ matrix.shard_index }}/5 --reporter=blob
-        continue-on-error: true
+      - name: Run Vitest unit shard
+        run: npm run test:unit -- --reporter=blob --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
 
-      - name: Upload Vitest Unit Reports
+      - name: Upload Vitest unit blob report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vitest-unit-blob-${{ matrix.shard_index }}
-          path: .vitest-reports/**/*
+          path: .vitest-reports/
+          include-hidden-files: true
 
   ##############################
   # Merge Vitest Unit
@@ -51,58 +54,63 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Download All Unit Blob Reports
-        uses: actions/download-artifact@v4
+      - name: Download Vitest unit blob reports
+        uses: actions/download-artifact@v5
         with:
-          path: .vitest-reports
+          path: all-vitest-unit-blob-reports
           pattern: vitest-unit-blob-*
+          merge-multiple: true
 
-      - name: Merge Vitest Unit Reports
+      - name: Merge Vitest unit reports
         run: |
-          # Vitest will look into .vitest-reports for blob files
-          npx vitest run --merge-reports --reporter=junit
+          npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=junit
         shell: bash
 
   ##############################
   # Vitest Integration Shards
   ##############################
   vitest-integration:
-    name: Vitest Integration (shard ${{ matrix.shard_index }}/2)
+    name: Vitest Integration (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
         shard_index: [1, 2]
+        shard_total: [2]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Run Vitest Integration Shard
-        run: npx vitest run --shard=${{ matrix.shard_index }}/2 --reporter=blob
-        continue-on-error: true
+      - name: Run Vitest integration shard
+        run: npm run test:integration -- --reporter=blob --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
 
-      - name: Upload Vitest Integration Reports
+      - name: Upload Vitest integration blob report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vitest-integration-blob-${{ matrix.shard_index }}
-          path: .vitest-reports/**/*
+          path: .vitest-reports/
+          include-hidden-files: true
 
   ##############################
   # Merge Vitest Integration
@@ -113,24 +121,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Download All Integration Blob Reports
-        uses: actions/download-artifact@v4
+      - name: Download Vitest integration blob reports
+        uses: actions/download-artifact@v5
         with:
-          path: .vitest-reports
+          path: all-vitest-integration-blob-reports
           pattern: vitest-integration-blob-*
+          merge-multiple: true
 
-      - name: Merge Vitest Integration Reports
+      - name: Merge Vitest integration reports
         run: |
-          npx vitest run --merge-reports --reporter=junit
+          npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=junit
         shell: bash
 
   ##############################
@@ -224,7 +234,7 @@ jobs:
         shell: bash
 
   ##############################
-  # Build (runs in parallel)
+  # Build
   ##############################
   build:
     name: Build
@@ -242,7 +252,7 @@ jobs:
       - run: npm run build
 
   ##############################
-  # Deploy (after merges + build)
+  # Deploy
   ##############################
   deploy:
     name: Trigger Vercel Deploy
@@ -260,11 +270,9 @@ jobs:
       - name: Trigger Vercel Preview Deploy
         if: steps.branch.outputs.branch == 'dev'
         run: |
-          echo "Triggering Vercel preview deploy for dev"
           curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_DEV }}"
 
       - name: Trigger Vercel Prod Deploy
         if: steps.branch.outputs.branch == 'prd'
         run: |
-          echo "Triggering Vercel production deploy for prd"
           curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_PRD }}"

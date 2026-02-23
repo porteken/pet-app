@@ -232,7 +232,7 @@ jobs:
   deploy:
     name: Deploy to Vercel
     if: github.event_name == 'push' && (github.ref_name == 'dev' || github.ref_name == 'prd')
-    needs: [build, vitest-unit, vitest-integration, playwright-e2e]
+    needs: [vitest-unit, vitest-integration, playwright-e2e]
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Vercel Deploy Hook

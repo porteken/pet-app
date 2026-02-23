@@ -111,12 +111,34 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard_index: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+        shard_index:
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+          ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set HOME for Playwright
         run: echo "HOME=/root" >> $GITHUB_ENV
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -124,7 +146,7 @@ jobs:
       - run: npx playwright install --with-deps
       - run: npx playwright test --shard=${{ matrix.shard_index }}/20 --reporter=list,blob
         continue-on-error: true
-      - name: Upload Playwright Blob
+      - name: Upload Playwright result
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -136,19 +158,13 @@ jobs:
     needs: playwright-e2e
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Download All Playwright Blobs
-        uses: actions/download-artifact@v4
-        with:
-          path: playwright-blobs
-          pattern: playwright-blob-*
-          merge-multiple: true
-      - name: Merge Playwright (line)
+      - name: Merge Blobs
         run: |
           npx playwright merge-reports --reporter=line ./playwright-blobs
 
@@ -160,8 +176,8 @@ jobs:
       - merge-playwright
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -169,43 +185,38 @@ jobs:
       - run: npm run build
 
   deploy:
-    name: Trigger Vercel Deploy
-    needs:
-      - build
+    name: Deploy to Vercel
+    needs: build
     runs-on: ubuntu-latest
     steps:
-
-      # Extract actual branch name for push + PR
       - name: Extract branch
         id: branch
         run: |
           echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> "$GITHUB_OUTPUT"
 
-      - name: Debug branch
-        run: echo "Resolved branch: ${{ steps.branch.outputs.branch }}"
+      - name: Debug resolved branch
+        run: echo "Resolved branch is ${{ steps.branch.outputs.branch }}"
 
-      # Preview deploy on dev
       - name: Trigger Vercel Preview Deploy
         if: ${{ steps.branch.outputs.branch == 'dev' }}
         env:
           VERCEL_DEPLOY_HOOK_DEV: ${{ secrets.VERCEL_DEPLOY_HOOK_DEV }}
         run: |
           if [ -n "$VERCEL_DEPLOY_HOOK_DEV" ]; then
-            echo "Triggering Vercel preview deploy"
+            echo "Calling preview deploy hook..."
             curl -X POST "$VERCEL_DEPLOY_HOOK_DEV"
           else
-            echo "VERCEL_DEPLOY_HOOK_DEV secret missing — skipping preview deploy"
+            echo "No preview deploy hook secret set, skipping"
           fi
 
-      # Prod deploy on prd
       - name: Trigger Vercel Prod Deploy
         if: ${{ steps.branch.outputs.branch == 'prd' }}
         env:
           VERCEL_DEPLOY_HOOK_PRD: ${{ secrets.VERCEL_DEPLOY_HOOK_PRD }}
         run: |
           if [ -n "$VERCEL_DEPLOY_HOOK_PRD" ]; then
-            echo "Triggering Vercel production deploy"
+            echo "Calling production deploy hook..."
             curl -X POST "$VERCEL_DEPLOY_HOOK_PRD"
           else
-            echo "VERCEL_DEPLOY_HOOK_PRD secret missing — skipping prod deploy"
+            echo "No production deploy hook secret set, skipping"
           fi

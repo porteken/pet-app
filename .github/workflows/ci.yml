@@ -10,13 +10,11 @@ on:
 
 jobs:
   ##################
-  # Vitest Unit
+  # Vitest Jobs (Unit & Integration)
   ##################
   vitest-unit:
     name: Vitest Unit (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -56,17 +54,11 @@ jobs:
           pattern: vitest-unit-blob-*
           merge-multiple: true
       - name: Merge Vitest unit reports
-        run: |
-          npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=junit
+        run: npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=junit
 
-  ##################
-  # Vitest Integration
-  ##################
   vitest-integration:
     name: Vitest Integration (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -106,8 +98,7 @@ jobs:
           pattern: vitest-integration-blob-*
           merge-multiple: true
       - name: Merge Vitest integration reports
-        run: |
-          npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=junit
+        run: npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=junit
 
   ##################
   # Playwright E2E
@@ -143,20 +134,18 @@ jobs:
             19,
             20,
           ]
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Set HOME for Playwright
         run: echo "HOME=/root" >> $GITHUB_ENV
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
       - run: npm ci
-      - run: npx playwright install --with-deps
+
+      # SPEED FIX: Removed 'npx playwright install'.
+      # Browsers are already in the mcr.microsoft.com/playwright image.
 
       - name: Run Playwright Shard
         run: npx playwright test --shard=${{ matrix.shard_index }}/20 --reporter=list,blob
@@ -169,7 +158,7 @@ jobs:
           name: playwright-blob-${{ matrix.shard_index }}
           path: blob-report/*.zip
 
-  merge-playwright:
+   merge-playwright:
     name: Merge Playwright Reports
     needs: playwright-e2e
     runs-on: ubuntu-latest
@@ -196,8 +185,9 @@ jobs:
           npx playwright merge-reports --reporter=line ./playwright-blobs
         shell: bash
 
+
   ##################
-  # Build (Parallel with Tests)
+  # Build
   ##################
   build:
     name: Build
@@ -212,48 +202,26 @@ jobs:
       - run: npm run build
 
   ##################
-  # Deploy (After Build + Tests)
+  # Deploy to Vercel
   ##################
   deploy:
     name: Deploy to Vercel
-    # Only run the deploy step if we're pushing to dev or prd directly
-    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/prd'
+    # Only deploy on pushes to dev or prd
+    if: github.event_name == 'push' && (github.ref_name == 'dev' || github.ref_name == 'prd')
     needs:
-      - build
-      - merge-vitest-unit
-      - merge-vitest-integration
-      - merge-playwright
+      [build, merge-vitest-unit, merge-vitest-integration, merge-playwright]
     runs-on: ubuntu-latest
     steps:
-      - name: Extract branch
-        id: branch
-        run: |
-          echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> "$GITHUB_OUTPUT"
-
-      - name: Debug resolved branch
-        run: echo "Resolved branch is ${{ steps.branch.outputs.branch }}"
-
-      # Reverted to repository secrets approach
-      - name: Trigger Vercel Preview Deploy (Dev)
-        if: ${{ steps.branch.outputs.branch == 'dev' }}
+      - name: Trigger Vercel Deploy Hook
+        shell: bash
         env:
-          VERCEL_DEPLOY_HOOK_DEV: ${{ secrets.VERCEL_DEPLOY_HOOK_DEV }}
+          # Match Repository Secrets based on branch name
+          VERCEL_DEPLOY_HOOK: ${{ github.ref_name == 'prd' && secrets.VERCEL_DEPLOY_HOOK_PRD || secrets.VERCEL_DEPLOY_HOOK_DEV }}
         run: |
-          if [ -n "$VERCEL_DEPLOY_HOOK_DEV" ]; then
-            echo "Calling preview deploy hook..."
-            curl -X POST "$VERCEL_DEPLOY_HOOK_DEV"
-          else
-            echo "VERCEL_DEPLOY_HOOK_DEV secret missing — skipping preview deploy"
+          if [ -z "$VERCEL_DEPLOY_HOOK" ]; then
+            echo "Error: VERCEL_DEPLOY_HOOK for ${{ github.ref_name }} is not set in Repository Secrets."
+            exit 1
           fi
 
-      - name: Trigger Vercel Prod Deploy (Prd)
-        if: ${{ steps.branch.outputs.branch == 'prd' }}
-        env:
-          VERCEL_DEPLOY_HOOK_PRD: ${{ secrets.VERCEL_DEPLOY_HOOK_PRD }}
-        run: |
-          if [ -n "$VERCEL_DEPLOY_HOOK_PRD" ]; then
-            echo "Calling prod deploy hook..."
-            curl -X POST "$VERCEL_DEPLOY_HOOK_PRD"
-          else
-            echo "VERCEL_DEPLOY_HOOK_PRD secret missing — skipping prod deploy"
-          fi
+          echo "Triggering Vercel deployment for branch: ${{ github.ref_name }}"
+          curl -X POST "$VERCEL_DEPLOY_HOOK"

@@ -14,7 +14,7 @@ const handleMeasureChange = async (measure: string): Promise<void> => {
   try {
     await setGraphMeasure(measure);
   } catch {
-    // Keep the UI responsive even if persisting the preference fails.
+    // Ignore persistence failures; the UI can continue with the selected value.
   }
 };
 

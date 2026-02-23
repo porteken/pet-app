@@ -121,7 +121,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       try {
         await onMeasureChange(option);
       } catch {
-        // Keep optimistic selection if saving preferences fails.
+        // Ignore persistence failures and keep the local selection.
       }
     },
     [onMeasureChange]
@@ -143,9 +143,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const handleForecastToggle = React.useCallback(
     (enabled: boolean) => {
       setForecastEnabled(enabled);
-      void setForecastPreferences(enabled, forecastYearsAhead).catch(() => {
-        // Ignore persistence failures to avoid unhandled rejections in UI events.
-      });
+      void setForecastPreferences(enabled, forecastYearsAhead).catch(() => {});
     },
     [forecastYearsAhead]
   );
@@ -153,9 +151,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const handleForecastYearsChange = React.useCallback(
     (yearsAhead: number) => {
       setForecastYearsAhead(yearsAhead);
-      void setForecastPreferences(forecastEnabled, yearsAhead).catch(() => {
-        // Ignore persistence failures to avoid unhandled rejections in UI events.
-      });
+      void setForecastPreferences(forecastEnabled, yearsAhead).catch(() => {});
     },
     [forecastEnabled]
   );

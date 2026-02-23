@@ -114,7 +114,6 @@ test.describe("Rankings Page", () => {
     const stateSelect = page.getByLabel("State");
     await expect(stateSelect).toBeVisible({ timeout: 10_000 });
 
-    // Get the first available state option (states are full names like "Arizona", not abbreviations)
     const firstStateOption = stateSelect.locator("option").nth(1);
     const stateValue = await firstStateOption.getAttribute("value");
     await stateSelect.selectOption(stateValue);
@@ -134,7 +133,6 @@ test.describe("Rankings Page", () => {
     const heatStressSelect = page.getByLabel("Avg Heat Stress Level");
     await expect(heatStressSelect).toBeVisible({ timeout: 10_000 });
 
-    // Get the first available heat stress level option (dynamically filtered based on data)
     const firstOption = heatStressSelect.locator("option").nth(1);
     const optionValue = await firstOption.getAttribute("value");
     await heatStressSelect.selectOption(optionValue);

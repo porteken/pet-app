@@ -20,10 +20,8 @@ test.describe("Smoke Tests", () => {
       page.getByRole("button", { name: "View Full Details" })
     ).toBeVisible({ timeout: 10_000 });
 
-    // Close the modal first
     await page.keyboard.press("Escape");
 
-    // Navigate via header dropdown for reliable location selection
     await page.locator("input[data-testid='city-selector']").click();
     await expect(page.getByRole("listbox")).toBeVisible({ timeout: 5000 });
     await page.getByRole("option", { name: "Phoenix" }).click();
@@ -116,7 +114,6 @@ test.describe("Smoke Tests", () => {
     await expect(viewDetailsButton).toBeVisible({ timeout: 10_000 });
     await expect(viewDetailsButton).toBeEnabled();
 
-    // Close the modal and navigate via header dropdown for reliable location selection
     await page.setViewportSize({ height: 667, width: 375 });
     await page.keyboard.press("Escape");
     await page.locator("input[data-testid='city-selector']").click();

@@ -19,7 +19,7 @@ export async function clickClickableMarker(page: Page): Promise<void> {
       await marker.click();
       return;
     } catch {
-      // Try the next marker if this one is covered by another element.
+      // Try the next marker if this one is not interactable.
     }
   }
 

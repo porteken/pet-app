@@ -3,11 +3,9 @@
  * This data is returned when NEXT_PUBLIC_E2E_TEST=true
  */
 
-// Generate years 2000-2024 for trend data
 const generateYears = () =>
   Array.from({ length: 25 }, (_, index) => 2000 + index);
 
-// Generate realistic PET values with a slight upward trend
 /* eslint-disable sonarjs/pseudo-random -- Random values are acceptable for test mock data */
 const generatePetValues = (baseValue: number, trend: number) => {
   const years = generateYears();
@@ -20,7 +18,6 @@ const generatePetValues = (baseValue: number, trend: number) => {
 };
 /* eslint-enable sonarjs/pseudo-random */
 
-// Mock locations data
 export const mockLocations = [
   {
     city: "Phoenix",
@@ -80,13 +77,10 @@ export const mockLocations = [
   },
 ];
 
-// Mock PET year average data
 export const mockPetYearAvg = generatePetValues(35, 0.15);
 
-// Mock PET year max data
 export const mockPetYearMax = generatePetValues(42, 0.2);
 
-// Mock PET percentiles
 export const mockPetPercentiles = generateYears().map((year, index) => ({
   location_id: 1,
   p10: 28 + index * 0.1,
@@ -94,7 +88,6 @@ export const mockPetPercentiles = generateYears().map((year, index) => ({
   year,
 }));
 
-// Mock PET forecast data
 export const mockPetForecast = [
   { location_id: 1, lower: 38, upper: 48, year: 2100 },
   { location_id: 2, lower: 36, upper: 46, year: 2100 },
@@ -106,20 +99,19 @@ export const mockPetForecast = [
   { location_id: 8, lower: 40, upper: 52, year: 2100 },
 ];
 
-// Mock PET change data
 export const mockPetChange = mockLocations.map((loc, index) => ({
   change: 0.15 + index * 0.02,
   location_id: loc.location_id,
 }));
 
-// Mock PET year data (daily data for reference graph)
 export const mockPetYear = Array.from({ length: 365 }, (_, index) => {
   const date = new Date(2024, 0, index + 1);
+  const deterministicVariance = ((index * 17) % 10) / 2;
   return {
     date: date.toISOString().split("T")[0],
     location_id: 1,
-    // eslint-disable-next-line sonarjs/pseudo-random -- Random values are acceptable for test mock data
-    pet: 30 + Math.sin(index / 30) * 10 + Math.random() * 5,
+
+    pet: 30 + Math.sin(index / 30) * 10 + deterministicVariance,
     year: 2024,
   };
 });

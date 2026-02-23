@@ -201,20 +201,24 @@ jobs:
       - merge-vitest-integration
       - merge-playwright
     runs-on: ubuntu-latest
+
     steps:
-      - id: branch
-        run: echo "branch=${GITHUB_REF#refs/heads/}" >> "$GITHUB_OUTPUT"
+      - name: Extract branch
+        id: branch
+        shell: bash
+        run: |
+          # Get branch from either PR or push
+          echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> "$GITHUB_OUTPUT"
+
+      - name: Debug branch output
+        run: echo "Resolved branch = ${{ steps.branch.outputs.branch }}"
 
       - name: Trigger Vercel Preview Deploy
-        if: steps.branch.outputs.branch == 'dev' && env.VERCEL_DEPLOY_HOOK_DEV != ''
-        env:
-          VERCEL_DEPLOY_HOOK_DEV: ${{ secrets.VERCEL_DEPLOY_HOOK_DEV }}
+        if: ${{ steps.branch.outputs.branch == 'dev' && secrets.VERCEL_DEPLOY_HOOK_DEV != '' }}
         run: |
-          curl -X POST "$VERCEL_DEPLOY_HOOK_DEV"
+          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_DEV }}"
 
       - name: Trigger Vercel Prod Deploy
-        if: steps.branch.outputs.branch == 'prd' && env.VERCEL_DEPLOY_HOOK_PRD != ''
-        env:
-          VERCEL_DEPLOY_HOOK_PRD: ${{ secrets.VERCEL_DEPLOY_HOOK_PRD }}
+        if: ${{ steps.branch.outputs.branch == 'prd' && secrets.VERCEL_DEPLOY_HOOK_PRD != '' }}
         run: |
-          curl -X POST "$VERCEL_DEPLOY_HOOK_PRD"
+          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_PRD }}"

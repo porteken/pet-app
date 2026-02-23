@@ -8,9 +8,9 @@ on:
   pull_request:
   workflow_dispatch:
 
-#################################
+###############################
 # Vitest Unit Test Shards
-#################################
+###############################
 jobs:
   vitest-unit:
     name: Vitest Unit (shard ${{ matrix.shard_index }}/5)
@@ -24,12 +24,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: "npm"
       - run: npm ci
 
-      # Explicit blob output folder
-      - name: Run Vitest Unit
-        run: npx vitest run --shard=${{ matrix.shard_index }}/5 --reporter=blob --outputFile=vitest-unit-reports/blob-${{ matrix.shard_index }}.json
+      - name: Run Vitest Unit (blob)
+        run: |
+          mkdir -p vitest-unit-blob
+          npx vitest run --shard=${{ matrix.shard_index }}/5 --reporter=blob --outputFile=vitest-unit-blob/blob-${{ matrix.shard_index }}.json
         continue-on-error: true
 
       - name: Upload Vitest Unit Blob
@@ -37,38 +38,41 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vitest-unit-blob-${{ matrix.shard_index }}
-          path: vitest-unit-reports/*.json
+          path: vitest-unit-blob/*.json
 
-  #################################
+  ###############################
   # Merge Vitest Unit Reports
-  #################################
+  ###############################
   merge-vitest-unit:
-    name: Merge Vitest Unit Reports
+    name: Merge & Validate Vitest Unit
     needs: vitest-unit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+      - run: npm ci
 
-      - name: Download unit blobs
+      - name: Download Vitest Unit Blobs
         uses: actions/download-artifact@v4
         with:
           path: vitest-unit-blobs
           pattern: "vitest-unit-blob-*"
 
-      - name: Combine Vitest Unit Reports
+      - name: Merge Vitest Unit Reports
         run: |
           npx vitest run --merge-reports=vitest-unit-blobs --reporter=junit
         shell: bash
 
-      - name: Enforce Vitest Unit Success
-        run: |
-          # custom script to fail if any test failure
-          node scripts/check-vitest-units.js
+      - name: Check Vitest Unit Failures
+        run: node scripts/check-vitest-units.js
         shell: bash
 
-  #################################
-  # Vitest Integration
-  #################################
+  ###############################
+  # Vitest Integration Test Shards
+  ###############################
   vitest-integration:
     name: Vitest Integration (shard ${{ matrix.shard_index }}/2)
     runs-on: ubuntu-latest
@@ -81,11 +85,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: "npm"
       - run: npm ci
 
-      - name: Run Vitest Integration
-        run: npx vitest run --shard=${{ matrix.shard_index }}/2 --reporter=blob --outputFile=vitest-integration-reports/blob-${{ matrix.shard_index }}.json
+      - name: Run Vitest Integration (blob)
+        run: |
+          mkdir -p vitest-integration-blob
+          npx vitest run --shard=${{ matrix.shard_index }}/2 --reporter=blob --outputFile=vitest-integration-blob/blob-${{ matrix.shard_index }}.json
         continue-on-error: true
 
       - name: Upload Vitest Integration Blob
@@ -93,19 +99,24 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vitest-integration-blob-${{ matrix.shard_index }}
-          path: vitest-integration-reports/*.json
+          path: vitest-integration-blob/*.json
 
-  #################################
+  ###############################
   # Merge Vitest Integration
-  #################################
+  ###############################
   merge-vitest-integration:
-    name: Merge Vitest Integration Reports
+    name: Merge & Validate Vitest Integration
     needs: vitest-integration
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+      - run: npm ci
 
-      - name: Download integration blobs
+      - name: Download Vitest Integration Blobs
         uses: actions/download-artifact@v4
         with:
           path: vitest-integration-blobs
@@ -116,14 +127,13 @@ jobs:
           npx vitest run --merge-reports=vitest-integration-blobs --reporter=junit
         shell: bash
 
-      - name: Enforce Vitest Integration Success
-        run: |
-          node scripts/check-vitest-integration.js
+      - name: Check Vitest Integration Failures
+        run: node scripts/check-vitest-integration.js
         shell: bash
 
-  #################################
+  ###############################
   # Playwright E2E Shards
-  #################################
+  ###############################
   playwright-e2e:
     name: Playwright E2E (shard ${{ matrix.shard_index }}/20)
     runs-on: ubuntu-latest
@@ -157,12 +167,12 @@ jobs:
           ]
     steps:
       - uses: actions/checkout@v4
-      - name: Set HOME
+      - name: Set HOME for Playwright
         run: echo "HOME=/root" >> $GITHUB_ENV
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: "npm"
       - run: npm ci
       - run: npx playwright install --with-deps
 
@@ -177,17 +187,22 @@ jobs:
           name: playwright-blob-${{ matrix.shard_index }}
           path: blob-report/*.zip
 
-  #################################
+  ###############################
   # Merge Playwright Reports
-  #################################
+  ###############################
   merge-playwright:
-    name: Merge Playwright Reports
+    name: Merge & Validate Playwright
     needs: playwright-e2e
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+      - run: npm ci
 
-      - name: Download Playwright blobs
+      - name: Download Playwright Blobs
         uses: actions/download-artifact@v4
         with:
           path: playwright-blobs
@@ -197,15 +212,15 @@ jobs:
       - name: Combine Playwright Reports
         run: |
           npx playwright merge-reports --reporter=html ./playwright-blobs
-
-      - name: Enforce Playwright Success
-        run: |
-          node scripts/check-playwright.js
         shell: bash
 
-  #################################
-  # Build
-  #################################
+      - name: Check Playwright Failures
+        run: node scripts/check-playwright.js
+        shell: bash
+
+  ###############################
+  # Build (runs in parallel)
+  ###############################
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -214,13 +229,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: "npm"
       - run: npm ci
       - run: npm run build
 
-  #################################
-  # Deploy
-  #################################
+  ###############################
+  # Deploy (depends on build + validations)
+  ###############################
   deploy:
     name: Trigger Vercel Deploy
     needs:
@@ -231,10 +246,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: branch
-        run: echo "branch=${GITHUB_REF#refs/heads/}" >> "$GITHUB_OUTPUT"
-      - name: Deploy to Dev
+        run: |
+          echo "branch=${GITHUB_REF#refs/heads/}" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger Vercel Preview Deploy
         if: steps.branch.outputs.branch == 'dev'
-        run: curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_DEV }}"
-      - name: Deploy to Prod
+        run: |
+          echo "Triggering Vercel preview deploy for dev"
+          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_DEV }}"
+
+      - name: Trigger Vercel Prod Deploy
         if: steps.branch.outputs.branch == 'prd'
-        run: curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_PRD }}"
+        run: |
+          echo "Triggering Vercel production deploy for prd"
+          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_PRD }}"

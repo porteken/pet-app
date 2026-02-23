@@ -8,9 +8,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-##############################
-# Vitest Unit Shards
-##############################
 jobs:
   vitest-unit:
     name: Vitest Unit (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
@@ -22,7 +19,6 @@ jobs:
       matrix:
         shard_index: [1, 2, 3, 4, 5]
         shard_total: [5]
-
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -59,7 +55,6 @@ jobs:
       - name: Merge Vitest unit reports
         run: |
           npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=junit
-        shell: bash
 
   vitest-integration:
     name: Vitest Integration (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
@@ -107,7 +102,6 @@ jobs:
       - name: Merge Vitest integration reports
         run: |
           npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=junit
-        shell: bash
 
   playwright-e2e:
     name: Playwright E2E (shard ${{ matrix.shard_index }}/20)
@@ -117,29 +111,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard_index:
-          [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-          ]
+        shard_index: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
     steps:
       - uses: actions/checkout@v4
       - name: Set HOME for Playwright
@@ -179,10 +151,13 @@ jobs:
       - name: Merge Playwright (line)
         run: |
           npx playwright merge-reports --reporter=line ./playwright-blobs
-        shell: bash
 
   build:
     name: Build
+    needs:
+      - merge-vitest-unit
+      - merge-vitest-integration
+      - merge-playwright
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -197,28 +172,40 @@ jobs:
     name: Trigger Vercel Deploy
     needs:
       - build
-      - merge-vitest-unit
-      - merge-vitest-integration
-      - merge-playwright
     runs-on: ubuntu-latest
-
     steps:
+
+      # Extract actual branch name for push + PR
       - name: Extract branch
         id: branch
-        shell: bash
         run: |
-          # Get branch from either PR or push
           echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> "$GITHUB_OUTPUT"
 
-      - name: Debug branch output
-        run: echo "Resolved branch = ${{ steps.branch.outputs.branch }}"
+      - name: Debug branch
+        run: echo "Resolved branch: ${{ steps.branch.outputs.branch }}"
 
+      # Preview deploy on dev
       - name: Trigger Vercel Preview Deploy
-        if: ${{ steps.branch.outputs.branch == 'dev' && secrets.VERCEL_DEPLOY_HOOK_DEV != '' }}
+        if: ${{ steps.branch.outputs.branch == 'dev' }}
+        env:
+          VERCEL_DEPLOY_HOOK_DEV: ${{ secrets.VERCEL_DEPLOY_HOOK_DEV }}
         run: |
-          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_DEV }}"
+          if [ -n "$VERCEL_DEPLOY_HOOK_DEV" ]; then
+            echo "Triggering Vercel preview deploy"
+            curl -X POST "$VERCEL_DEPLOY_HOOK_DEV"
+          else
+            echo "VERCEL_DEPLOY_HOOK_DEV secret missing — skipping preview deploy"
+          fi
 
+      # Prod deploy on prd
       - name: Trigger Vercel Prod Deploy
-        if: ${{ steps.branch.outputs.branch == 'prd' && secrets.VERCEL_DEPLOY_HOOK_PRD != '' }}
+        if: ${{ steps.branch.outputs.branch == 'prd' }}
+        env:
+          VERCEL_DEPLOY_HOOK_PRD: ${{ secrets.VERCEL_DEPLOY_HOOK_PRD }}
         run: |
-          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_PRD }}"
+          if [ -n "$VERCEL_DEPLOY_HOOK_PRD" ]; then
+            echo "Triggering Vercel production deploy"
+            curl -X POST "$VERCEL_DEPLOY_HOOK_PRD"
+          else
+            echo "VERCEL_DEPLOY_HOOK_PRD secret missing — skipping prod deploy"
+          fi

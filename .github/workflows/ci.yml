@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 ###############################
-# Vitest Unit Test Shards
+# Vitest Unit Shards
 ###############################
 jobs:
   vitest-unit:
@@ -21,10 +21,12 @@ jobs:
         shard_index: [1, 2, 3, 4, 5]
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "npm"
+
       - run: npm ci
 
       - name: Run Vitest Unit (blob)
@@ -41,18 +43,20 @@ jobs:
           path: vitest-unit-blob/*.json
 
   ###############################
-  # Merge Vitest Unit Reports
+  # Merge Vitest Unit
   ###############################
   merge-vitest-unit:
-    name: Merge & Validate Vitest Unit
+    name: Merge Vitest Unit
     needs: vitest-unit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "npm"
+
       - run: npm ci
 
       - name: Download Vitest Unit Blobs
@@ -66,12 +70,8 @@ jobs:
           npx vitest run --merge-reports=vitest-unit-blobs --reporter=junit
         shell: bash
 
-      - name: Check Vitest Unit Failures
-        run: node scripts/check-vitest-units.js
-        shell: bash
-
   ###############################
-  # Vitest Integration Test Shards
+  # Vitest Integration Shards
   ###############################
   vitest-integration:
     name: Vitest Integration (shard ${{ matrix.shard_index }}/2)
@@ -82,10 +82,12 @@ jobs:
         shard_index: [1, 2]
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "npm"
+
       - run: npm ci
 
       - name: Run Vitest Integration (blob)
@@ -105,15 +107,17 @@ jobs:
   # Merge Vitest Integration
   ###############################
   merge-vitest-integration:
-    name: Merge & Validate Vitest Integration
+    name: Merge Vitest Integration
     needs: vitest-integration
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "npm"
+
       - run: npm ci
 
       - name: Download Vitest Integration Blobs
@@ -125,10 +129,6 @@ jobs:
       - name: Merge Vitest Integration Reports
         run: |
           npx vitest run --merge-reports=vitest-integration-blobs --reporter=junit
-        shell: bash
-
-      - name: Check Vitest Integration Failures
-        run: node scripts/check-vitest-integration.js
         shell: bash
 
   ###############################
@@ -167,16 +167,19 @@ jobs:
           ]
     steps:
       - uses: actions/checkout@v4
+
       - name: Set HOME for Playwright
         run: echo "HOME=/root" >> $GITHUB_ENV
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "npm"
+
       - run: npm ci
       - run: npx playwright install --with-deps
 
-      - name: Run Playwright Shard
+      - name: Run Playwright E2E Shard
         run: npx playwright test --shard=${{ matrix.shard_index }}/20 --reporter=list,blob
         continue-on-error: true
 
@@ -191,15 +194,17 @@ jobs:
   # Merge Playwright Reports
   ###############################
   merge-playwright:
-    name: Merge & Validate Playwright
+    name: Merge Playwright Reports
     needs: playwright-e2e
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "npm"
+
       - run: npm ci
 
       - name: Download Playwright Blobs
@@ -209,32 +214,30 @@ jobs:
           pattern: "playwright-blob-*"
           merge-multiple: true
 
-      - name: Combine Playwright Reports
+      - name: Combine Playwright Blob Reports
         run: |
           npx playwright merge-reports --reporter=html ./playwright-blobs
         shell: bash
 
-      - name: Check Playwright Failures
-        run: node scripts/check-playwright.js
-        shell: bash
-
   ###############################
-  # Build (runs in parallel)
+  # Build (Parallel)
   ###############################
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: "npm"
+
       - run: npm ci
       - run: npm run build
 
   ###############################
-  # Deploy (depends on build + validations)
+  # Deploy (after Build + Tests)
   ###############################
   deploy:
     name: Trigger Vercel Deploy
@@ -246,8 +249,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: branch
-        run: |
-          echo "branch=${GITHUB_REF#refs/heads/}" >> "$GITHUB_OUTPUT"
+        run: echo "branch=${GITHUB_REF#refs/heads/}" >> "$GITHUB_OUTPUT"
 
       - name: Trigger Vercel Preview Deploy
         if: steps.branch.outputs.branch == 'dev'

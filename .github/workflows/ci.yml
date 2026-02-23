@@ -9,6 +9,9 @@ on:
   workflow_dispatch:
 
 jobs:
+  ##################
+  # Vitest Jobs (Unit & Integration)
+  ##################
   vitest-unit:
     name: Vitest Unit (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
     runs-on: ubuntu-latest
@@ -23,13 +26,16 @@ jobs:
         with:
           node-version: 22
 
+      # CACHE LOGIC: Restore node_modules based on lockfile hash
       - name: Cache node_modules
         id: cache-node-modules
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - name: Install dependencies
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+
+      # INSTALL LOGIC: Only run npm ci if cache missed
+      - name: Install Dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit --no-fund
 
@@ -59,8 +65,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - name: Install dependencies
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit --no-fund
 
@@ -92,8 +99,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - name: Install dependencies
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit --no-fund
 
@@ -123,8 +131,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - name: Install dependencies
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit --no-fund
 
@@ -137,6 +146,9 @@ jobs:
       - name: Merge Vitest integration reports
         run: npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=junit
 
+  ##################
+  # Playwright E2E
+  ##################
   playwright-e2e:
     name: Playwright E2E (shard ${{ matrix.shard_index }}/20)
     runs-on: ubuntu-latest
@@ -176,13 +188,15 @@ jobs:
         with:
           node-version: 22
 
+      # CACHE LOGIC: Note '-pw-' suffix to separate container binaries from ubuntu-latest binaries
       - name: Cache node_modules (Playwright)
         id: cache-node-modules
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: node-modules-pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - name: Install dependencies
+          key: ${{ runner.os }}-node-modules-pw-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit --no-fund
 
@@ -213,8 +227,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - name: Install dependencies
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit --no-fund
 
@@ -229,10 +244,14 @@ jobs:
         run: npx playwright merge-reports --reporter=line ./playwright-blobs
         shell: bash
 
+  ##################
+  # Deploy to Vercel
+  ##################
   deploy:
     name: Deploy to Vercel
     if: github.event_name == 'push' && (github.ref_name == 'dev' || github.ref_name == 'prd')
-    needs: [vitest-unit, vitest-integration, playwright-e2e]
+    # Waits for ALL merge jobs to finish successfully
+    needs: [merge-vitest-unit, merge-vitest-integration, merge-playwright]
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Vercel Deploy Hook

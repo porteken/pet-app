@@ -19,6 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         shard_index: [1, 2, 3, 4, 5]
+
     steps:
       - uses: actions/checkout@v4
 
@@ -29,27 +30,26 @@ jobs:
 
       - run: npm ci
 
-      - name: Run Vitest Unit with Blob
-        run: |
-          npx vitest run --shard=${{ matrix.shard_index }}/5 --reporter=blob
-
-        ### Important: Blob reporter writes to .vitest-reports
+      - name: Run Vitest Unit Shard
+        # Vitest writes blob reports into .vitest-reports
+        run: npx vitest run --shard=${{ matrix.shard_index }}/5 --reporter=blob
         continue-on-error: true
 
-      - name: Upload Unit Blob
+      - name: Upload Vitest Unit Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vitest-unit-blob-${{ matrix.shard_index }}
-          path: .vitest-reports/*.json
+          path: .vitest-reports/**/*
 
   ##############################
-  # Merge Vitest Unit Reports
+  # Merge Vitest Unit
   ##############################
   merge-vitest-unit:
     name: Merge Vitest Unit Reports
     needs: vitest-unit
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -60,10 +60,7 @@ jobs:
 
       - run: npm ci
 
-      - name: Prepare Blob Directory
-        run: mkdir -p .vitest-reports
-
-      - name: Download All Unit Blobs
+      - name: Download All Unit Blob Reports
         uses: actions/download-artifact@v4
         with:
           path: .vitest-reports
@@ -71,7 +68,7 @@ jobs:
 
       - name: Merge Vitest Unit Reports
         run: |
-          # Vitest will scan .vitest-reports for the blob files
+          # Vitest will look into .vitest-reports for blob files
           npx vitest run --merge-reports --reporter=junit
         shell: bash
 
@@ -85,6 +82,7 @@ jobs:
       fail-fast: false
       matrix:
         shard_index: [1, 2]
+
     steps:
       - uses: actions/checkout@v4
 
@@ -95,25 +93,25 @@ jobs:
 
       - run: npm ci
 
-      - name: Run Vitest Integration with Blob
-        run: |
-          npx vitest run --shard=${{ matrix.shard_index }}/2 --reporter=blob
+      - name: Run Vitest Integration Shard
+        run: npx vitest run --shard=${{ matrix.shard_index }}/2 --reporter=blob
         continue-on-error: true
 
-      - name: Upload Integration Blob
+      - name: Upload Vitest Integration Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vitest-integration-blob-${{ matrix.shard_index }}
-          path: .vitest-reports/*.json
+          path: .vitest-reports/**/*
 
   ##############################
-  # Merge Vitest Integration Reports
+  # Merge Vitest Integration
   ##############################
   merge-vitest-integration:
     name: Merge Vitest Integration Reports
     needs: vitest-integration
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -124,10 +122,7 @@ jobs:
 
       - run: npm ci
 
-      - name: Prepare Blob Directory
-        run: mkdir -p .vitest-reports
-
-      - name: Download All Integration Blobs
+      - name: Download All Integration Blob Reports
         uses: actions/download-artifact@v4
         with:
           path: .vitest-reports
@@ -172,6 +167,7 @@ jobs:
             19,
             20,
           ]
+
     steps:
       - uses: actions/checkout@v4
 
@@ -186,7 +182,7 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps
 
-      - name: Run Playwright E2E with Blob
+      - name: Run Playwright Shard
         run: npx playwright test --shard=${{ matrix.shard_index }}/20 --reporter=list,blob
         continue-on-error: true
 
@@ -204,6 +200,7 @@ jobs:
     name: Merge Playwright Reports
     needs: playwright-e2e
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -221,7 +218,7 @@ jobs:
           pattern: playwright-blob-*
           merge-multiple: true
 
-      - name: Merge Playwright with Line Reporter
+      - name: Merge Playwright (line)
         run: |
           npx playwright merge-reports --reporter=line ./playwright-blobs
         shell: bash
@@ -232,6 +229,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -244,7 +242,7 @@ jobs:
       - run: npm run build
 
   ##############################
-  # Deploy (after all merges + build)
+  # Deploy (after merges + build)
   ##############################
   deploy:
     name: Trigger Vercel Deploy
@@ -254,6 +252,7 @@ jobs:
       - merge-vitest-integration
       - merge-playwright
     runs-on: ubuntu-latest
+
     steps:
       - id: branch
         run: echo "branch=${GITHUB_REF#refs/heads/}" >> "$GITHUB_OUTPUT"

@@ -23,8 +23,8 @@ jobs:
         shard_index: [1, 2, 3, 4, 5]
         shard_total: [5]
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
@@ -43,14 +43,14 @@ jobs:
     needs: vitest-unit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
       - name: Download Vitest unit blob reports
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v4
         with:
           path: all-vitest-unit-blob-reports
           pattern: vitest-unit-blob-*
@@ -73,8 +73,8 @@ jobs:
         shard_index: [1, 2]
         shard_total: [2]
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
@@ -93,14 +93,14 @@ jobs:
     needs: vitest-integration
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
       - name: Download Vitest integration blob reports
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v4
         with:
           path: all-vitest-integration-blob-reports
           pattern: vitest-integration-blob-*
@@ -143,19 +143,26 @@ jobs:
             19,
             20,
           ]
+
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
+
       - name: Set HOME for Playwright
         run: echo "HOME=/root" >> $GITHUB_ENV
-      - uses: actions/setup-node@v5
+
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+
       - run: npm ci
       - run: npx playwright install --with-deps
-      - run: npx playwright test --shard=${{ matrix.shard_index }}/20 --reporter=list,blob
+
+      - name: Run Playwright Shard
+        run: npx playwright test --shard=${{ matrix.shard_index }}/20 --reporter=list,blob
         continue-on-error: true
-      - name: Upload Playwright blob results
+
+      - name: Upload Playwright Blob
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -166,16 +173,28 @@ jobs:
     name: Merge Playwright Reports
     needs: playwright-e2e
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+
       - run: npm ci
-      - name: Merge all playwright blobs
+
+      - name: Download All Playwright Blobs
+        uses: actions/download-artifact@v4
+        with:
+          path: playwright-blobs
+          pattern: playwright-blob-*
+          merge-multiple: true
+
+      - name: Merge Playwright (line)
         run: |
           npx playwright merge-reports --reporter=line ./playwright-blobs
+        shell: bash
 
   ##################
   # Build (Parallel with Tests)
@@ -184,8 +203,8 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
@@ -197,6 +216,8 @@ jobs:
   ##################
   deploy:
     name: Deploy to Vercel
+    # Only run the deploy step if we're pushing to dev or prd directly
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/prd'
     needs:
       - build
       - merge-vitest-unit
@@ -212,7 +233,8 @@ jobs:
       - name: Debug resolved branch
         run: echo "Resolved branch is ${{ steps.branch.outputs.branch }}"
 
-      - name: Trigger Vercel Preview Deploy
+      # Reverted to repository secrets approach
+      - name: Trigger Vercel Preview Deploy (Dev)
         if: ${{ steps.branch.outputs.branch == 'dev' }}
         env:
           VERCEL_DEPLOY_HOOK_DEV: ${{ secrets.VERCEL_DEPLOY_HOOK_DEV }}
@@ -224,7 +246,7 @@ jobs:
             echo "VERCEL_DEPLOY_HOOK_DEV secret missing — skipping preview deploy"
           fi
 
-      - name: Trigger Vercel Prod Deploy
+      - name: Trigger Vercel Prod Deploy (Prd)
         if: ${{ steps.branch.outputs.branch == 'prd' }}
         env:
           VERCEL_DEPLOY_HOOK_PRD: ${{ secrets.VERCEL_DEPLOY_HOOK_PRD }}

@@ -144,6 +144,8 @@ jobs:
   playwright-e2e:
     name: Playwright E2E (shard ${{ matrix.shard_index }}/20)
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.58.2-noble
     strategy:
       fail-fast: false
       matrix:
@@ -172,6 +174,8 @@ jobs:
           ]
     steps:
       - uses: actions/checkout@v4
+      - name: Set HOME for Playwright
+        run: echo "HOME=/root" >> $GITHUB_ENV
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -186,16 +190,6 @@ jobs:
       - name: Install Dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit --no-fund
-
-      - name: Cache Playwright Browsers
-        id: cache-playwright
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Playwright Browsers and OS Deps
-        run: npx playwright install --with-deps
 
       - name: Run Playwright Shard
         run: npx playwright test --shard=${{ matrix.shard_index }}/20 --reporter=list,blob

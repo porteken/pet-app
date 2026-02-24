@@ -2,14 +2,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createBrowserClient } from "@supabase/ssr";
 
-import { createMockSupabaseClient } from "@/testing/mocks";
+import { createRuntimeMockSupabaseClient } from "@/testing/runtime-mocks";
 
 const isE2ETestRun = process.env.NEXT_PUBLIC_E2E_TEST === "true";
 
 export const createClient = (): SupabaseClient => {
   // Return mock client for E2E tests
   if (isE2ETestRun) {
-    return createMockSupabaseClient() as unknown as SupabaseClient;
+    return createRuntimeMockSupabaseClient() as unknown as SupabaseClient;
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

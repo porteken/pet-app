@@ -3,7 +3,7 @@
 import Link from "next/link";
 import React, { FC } from "react";
 
-import { HeaderBar } from "@/features/header-bar";
+import { HeaderBar } from "@/features/header-bar/header-bar";
 
 import { AboutProperties } from "./types";
 const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => {

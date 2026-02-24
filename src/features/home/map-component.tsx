@@ -13,9 +13,9 @@ import React, {
 } from "react";
 
 import { PageLoader } from "@/components/app/page-loader";
-import { HeatStressLegend } from "@/features/page/components/heat-stress-legend";
+import { HeatStressLegend } from "@/features/page/heat-stress-legend";
 
-import { OptimizedMarker } from "./components/optimized-marker";
+import { OptimizedMarker } from "./optimized-marker";
 
 interface Location {
   city: string;
@@ -116,7 +116,7 @@ export const MapComponent = memo<MapComponentProperties>(
 
     if (!locations || locations.length === 0) {
       return (
-        <div className="flex h-[100dvh] items-center justify-center bg-gray-50">
+        <div className="flex h-dvh items-center justify-center bg-gray-50">
           <div className="mx-auto max-w-md p-6 text-center">
             <div className="mb-6">
               <svg

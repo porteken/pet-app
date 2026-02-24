@@ -3,12 +3,10 @@ import { vi } from "vitest";
 import {
   createMockCookieStore,
   createMockLinearRegression,
-} from "./mocks/next";
-import { createMockSupabaseClient } from "./mocks/supabase";
-import {
+  createMockSupabaseClient,
   createMockValidation,
   setupSuccessfulValidations,
-} from "./mocks/validation";
+} from "./mocks";
 
 export const setupApiClientTest = async () => {
   const mockSupabaseClient = createMockSupabaseClient();

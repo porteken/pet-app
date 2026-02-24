@@ -15,15 +15,19 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
   }),
+  useSearchParams: () => ({
+    get: vi.fn(),
+    toString: () => "",
+  }),
 }));
 
-vi.mock("@/lib/actions/rankings-actions", () => ({
+vi.mock("@/lib/actions/actions", () => ({
   setRankingsHeatStress: vi.fn(),
   setRankingsState: vi.fn(),
   setRankingsYear: vi.fn(),
 }));
 
-vi.mock("@/features/header-bar", () => ({
+vi.mock("@/features/header-bar/header-bar", () => ({
   HeaderBar: vi.fn(({ LocationOptions }) => (
     <div data-testid="header-bar">
       HeaderBar with {LocationOptions?.length || 0} locations
@@ -97,7 +101,7 @@ vi.mock("@/components/ui/pagination", () => ({
   )),
 }));
 
-import { setRankingsYear } from "@/lib/actions/rankings-actions";
+import { setRankingsYear } from "@/lib/actions/actions";
 
 import { RankingsMain } from "../rankings-main";
 

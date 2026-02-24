@@ -2,12 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DatabaseError } from "@/lib/utils/errors";
 import {
-  clearAllMocks,
   mockNextHeaders,
   mockSimpleLinearRegression,
   mockSupabaseServer,
-  setupApiServerTest,
-} from "@/testing";
+} from "@/testing/mocks";
+import { clearAllMocks, setupApiServerTest } from "@/testing/test-utilities";
 
 import {
   FetchCityRankings,
@@ -22,10 +21,10 @@ mockSimpleLinearRegression();
 
 describe("fetch-server", () => {
   let mockSupabaseClient: ReturnType<
-    (typeof import("@/testing"))["createMockSupabaseClient"]
+    (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
   >;
   let mockLinearRegression: ReturnType<
-    (typeof import("@/testing"))["createMockLinearRegression"]
+    (typeof import("@/testing/mocks"))["createMockLinearRegression"]
   >;
 
   beforeEach(async () => {

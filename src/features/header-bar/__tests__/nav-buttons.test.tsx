@@ -4,7 +4,6 @@ import React from "react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { NavButtons } from "../nav-buttons";
-
 interface MockLinkProperties
   extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   children: React.ReactNode;

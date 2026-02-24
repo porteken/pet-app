@@ -256,7 +256,7 @@ describe("Graph Components", () => {
 
       it("should show loading state when Plot component is loading", () => {
         const { container } = render(
-          <div className="flex h-[600px] items-center justify-center text-gray-500">
+          <div className="flex h-150 items-center justify-center text-gray-500">
             Loading chart...
           </div>
         );
@@ -268,7 +268,7 @@ describe("Graph Components", () => {
 
         const loadingDiv = container.firstChild as HTMLElement;
         expect(loadingDiv).toHaveClass("flex");
-        expect(loadingDiv).toHaveClass("h-[600px]");
+        expect(loadingDiv).toHaveClass("h-150");
         expect(loadingDiv).toHaveClass("items-center");
         expect(loadingDiv).toHaveClass("justify-center");
       });

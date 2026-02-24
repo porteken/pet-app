@@ -2,10 +2,10 @@
 
 import React from "react";
 
-import { ForecastControls } from "@/components/forecast/forecast-controls";
-import { GenerateTrendGraph } from "@/features/generate-graph";
+import { GenerateTrendGraph } from "@/features/graph/generate-graph";
 import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
+import { ForecastControls } from "@/lib/utils/forecast-controls";
 import {
   getForecastHeatStressDescription,
   getHeatStressDescription,

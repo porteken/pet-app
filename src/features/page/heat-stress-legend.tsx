@@ -32,8 +32,8 @@ const HeatStressLegendComponent: React.FC = () => {
         Heat Stress Index
       </h3>
       <div className="space-y-2">
-        {LEGEND_ITEMS.map((item, index) => (
-          <div className="flex items-center gap-3" key={index}>
+        {LEGEND_ITEMS.map(item => (
+          <div className="flex items-center gap-3" key={item.label}>
             <div className={`h-4 w-4 rounded ${item.color}`} />
             <div className="flex flex-col">
               <span className="text-xs font-medium text-gray-700">

@@ -5,7 +5,7 @@ import {
   setupActionsTest,
   setupApiClientTest,
   setupApiServerTest,
-} from "@/testing";
+} from "@/testing/test-utilities";
 
 describe("Test Utilities", () => {
   describe("setupApiClientTest", () => {

@@ -1,12 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FetchError } from "@/lib/utils/errors";
-import {
-  clearAllMocks,
-  mockSupabaseClient,
-  mockValidationModule,
-  setupApiClientTest,
-} from "@/testing";
+import { mockSupabaseClient, mockValidationModule } from "@/testing/mocks";
+import { clearAllMocks, setupApiClientTest } from "@/testing/test-utilities";
 
 import { FetchReferenceGraphData } from "../reference-graph-data";
 
@@ -15,10 +11,10 @@ mockValidationModule();
 
 describe("reference-graph-data", () => {
   let mockSupabaseClient: ReturnType<
-    (typeof import("@/testing"))["createMockSupabaseClient"]
+    (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
   >;
   let mockValidation: ReturnType<
-    (typeof import("@/testing"))["createMockValidation"]
+    (typeof import("@/testing/mocks"))["createMockValidation"]
   >;
 
   beforeEach(async () => {

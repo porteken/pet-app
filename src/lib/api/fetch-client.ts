@@ -36,7 +36,7 @@ export async function FetchForecastData(
     throw new FetchError(`Invalid location ID: ${locationId}`);
   }
 
-  if (typeof window === "undefined") {
+  if (globalThis.window == undefined) {
     throw new TypeError(
       "FetchForecastData can only be called in browser environment"
     );
@@ -100,7 +100,7 @@ export async function FetchTrendGraphData(
   option: string,
   locationId: number
 ): Promise<TrendGraphDataProperties> {
-  if (typeof window === "undefined") {
+  if (globalThis.window == undefined) {
     throw new TypeError(
       "FetchTrendGraphData can only be called in browser environment"
     );

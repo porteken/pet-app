@@ -1,13 +1,13 @@
 "use client";
 import React, { FC } from "react";
 
-import { HeaderBar } from "@/features/header-bar";
+import { HeaderBar } from "@/features/header-bar/header-bar";
 import { setGraphMeasure } from "@/lib/actions/actions";
 
-import { HeatStressLegend } from "./components/heat-stress-legend";
-import { PageHeader } from "./components/page-header";
-import { ReferenceData } from "./components/reference-data";
-import { TrendAnalysis } from "./components/trend-analysis";
+import { HeatStressLegend } from "./heat-stress-legend";
+import { PageHeader } from "./page-header";
+import { ReferenceData } from "./reference-data";
+import { TrendAnalysis } from "./trend-analysis";
 import { PageProperties } from "./types";
 
 const handleMeasureChange = async (measure: string): Promise<void> => {

@@ -10,8 +10,8 @@ import React, {
   useState,
 } from "react";
 
-import { GenerateTrendGraph } from "@/features/generate-graph";
-import { HeaderBar } from "@/features/header-bar";
+import { GenerateTrendGraph } from "@/features/graph/generate-graph";
+import { HeaderBar } from "@/features/header-bar/header-bar";
 import { setForecastPreferences, setGraphMeasure } from "@/lib/actions/actions";
 import { FetchForecastData } from "@/lib/api/fetch-client";
 import { getTrendGraphQueryOptions, queryClient } from "@/lib/api/query-client";
@@ -23,8 +23,8 @@ import {
 import { GraphOptions } from "@/lib/utils/select-options";
 import { LocationProperties } from "@/types/types";
 
-import { ErrorGraphDisplay } from "./components/error-graph-display";
-import { GraphSection } from "./components/graph-section";
+import { ErrorGraphDisplay } from "./error-graph-display";
+import { GraphSection } from "./graph-section";
 import { MapComponent } from "./map-component";
 import { MapProperties } from "./types";
 
@@ -216,8 +216,8 @@ const Home: FC<MapProperties> = ({
   );
 
   return (
-    <div className="relative h-[100dvh] w-full">
-      <div className="absolute inset-x-0 top-0 z-[10010]">
+    <div className="relative h-dvh w-full">
+      <div className="absolute inset-x-0 top-0 z-10010">
         <HeaderBar LocationOptions={LocationOptions} />
       </div>
       <div className="absolute inset-0 top-0">

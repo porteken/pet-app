@@ -12,7 +12,7 @@ vi.mock("@/lib/actions/actions", () => ({
   setGraphMeasure: vi.fn().mockResolvedValue({}),
 }));
 
-vi.mock("@/features/generate-graph", () => ({
+vi.mock("@/features/graph/generate-graph", () => ({
   GenerateTrendGraph: vi
     .fn()
     .mockReturnValue(<div data-testid="mock-trend-graph">Trend Graph</div>),
@@ -52,9 +52,13 @@ vi.mock("next/navigation", () => ({
     push: mockPush,
     refresh: vi.fn(),
   }),
+  useSearchParams: () => ({
+    get: vi.fn(),
+    toString: () => "",
+  }),
 }));
 
-vi.mock("@/features/header-bar", () => ({
+vi.mock("@/features/header-bar/header-bar", () => ({
   HeaderBar: vi.fn(({ LocationOptions }) => (
     <div data-testid="header-bar">
       HeaderBar with {LocationOptions?.length || 0} locations
@@ -140,7 +144,7 @@ vi.mock("@/lib/utils/select-options", () => ({
   ],
 }));
 
-vi.mock("@/components/forecast/forecast-controls", () => ({
+vi.mock("@/lib/utils/forecast-controls", () => ({
   ForecastControls: vi.fn(
     ({ enabled, onToggle, onYearsChange, yearsAhead }) => (
       <div data-testid="forecast-controls">
@@ -162,7 +166,7 @@ vi.mock("@/components/forecast/forecast-controls", () => ({
   ),
 }));
 
-import { GenerateTrendGraph } from "@/features/generate-graph";
+import { GenerateTrendGraph } from "@/features/graph/generate-graph";
 import { setGraphMeasure } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 

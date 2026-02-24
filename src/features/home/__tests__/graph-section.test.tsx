@@ -55,7 +55,7 @@ vi.mock("@/components/ui/select", () => ({
   ),
 }));
 
-vi.mock("@/components/forecast/forecast-controls", () => ({
+vi.mock("@/lib/utils/forecast-controls", () => ({
   ForecastControls: vi.fn(
     ({ enabled, onToggle, onYearsChange, yearsAhead }) => (
       <div data-testid="forecast-controls">

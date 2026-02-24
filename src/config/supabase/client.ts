@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createBrowserClient } from "@supabase/ssr";
 
-import { createMockSupabaseClient } from "@/testing/mocks/mock-end-to-end-test-data";
+import { createMockSupabaseClient } from "@/testing/mocks";
 
 const isE2ETestRun = process.env.NEXT_PUBLIC_E2E_TEST === "true";
 

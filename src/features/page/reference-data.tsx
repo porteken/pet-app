@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { GenerateReferenceGraph } from "@/features/generate-graph";
+import { GenerateReferenceGraph } from "@/features/graph/generate-graph";
 import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
 
 interface ReferenceDataProperties {

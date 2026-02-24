@@ -597,9 +597,9 @@ describe("apiRequestWithRetry", () => {
     mockFetch.mockResolvedValue(errorResponse);
 
     const mockError = Object.create(MockedNetworkError.prototype);
-    (mockError as any).message = "Bad request";
-    (mockError as any).statusCode = 400;
-    (mockError as any).name = "NetworkError";
+    mockError.message = "Bad request";
+    mockError.statusCode = 400;
+    mockError.name = "NetworkError";
     mockCreateError.mockReturnValue(mockError);
 
     await expect(

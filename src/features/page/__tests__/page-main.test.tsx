@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/features/generate-graph", () => ({
+vi.mock("@/features/graph/generate-graph", () => ({
   GenerateReferenceGraph: vi
     .fn()
     .mockImplementation(() => <div data-testid="reference-graph" />),
@@ -12,7 +12,7 @@ vi.mock("@/features/generate-graph", () => ({
     .mockImplementation(() => <div data-testid="trend-graph" />),
 }));
 
-vi.mock("@/features/header-bar", () => ({
+vi.mock("@/features/header-bar/header-bar", () => ({
   HeaderBar: vi.fn(({ id, LocationOptions }) => (
     <header
       data-id={id}
@@ -58,7 +58,7 @@ vi.mock("@/lib/api/fetch-client", () => ({
 import {
   GenerateReferenceGraph,
   GenerateTrendGraph,
-} from "@/features/generate-graph";
+} from "@/features/graph/generate-graph";
 import { setGraphMeasure } from "@/lib/actions/actions";
 import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
 

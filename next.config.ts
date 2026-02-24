@@ -25,7 +25,6 @@ const nextConfig: NextConfig = {
     "/*": ["./registry/**/*"],
   },
   turbopack: {
-    // Example: adding an alias and custom file extension
     resolveAlias: {
       underscore: "lodash",
     },

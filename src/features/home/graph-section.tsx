@@ -4,9 +4,9 @@ import React, { memo, useCallback, useMemo } from "react";
 
 import type { HeatStressDescription } from "@/lib/utils/heat-stress";
 
-import { ForecastControls } from "@/components/forecast/forecast-controls";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { ForecastControls } from "@/lib/utils/forecast-controls";
 
 interface GraphSectionProperties {
   forecastEnabled: boolean;

@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-import { createMockSupabaseClient } from "@/testing/mocks/mock-end-to-end-test-data";
+import { createMockSupabaseClient } from "@/testing/mocks";
 
 const isE2ETestRun = process.env.NEXT_PUBLIC_E2E_TEST === "true";
 

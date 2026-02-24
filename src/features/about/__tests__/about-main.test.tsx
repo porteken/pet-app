@@ -10,7 +10,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("@/features/header-bar", () => ({
+vi.mock("@/features/header-bar/header-bar", () => ({
   HeaderBar: vi.fn(({ LocationOptions }) => (
     <div data-testid="header-bar">
       HeaderBar with {LocationOptions?.length || 0} locations

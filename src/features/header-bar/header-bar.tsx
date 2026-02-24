@@ -7,7 +7,7 @@ import { Select } from "@/components/ui/select";
 import { APP_CONFIG } from "@/lib/constants";
 import { NavProperties } from "@/types/types";
 
-import { NavButtons } from "./header-bar/components";
+import { NavButtons } from "./nav-buttons";
 
 interface LocationItem {
   key: number;
@@ -94,7 +94,7 @@ const HeaderBarComponent = ({
         <div className="rounded-md bg-white p-4">
           <div className="flex flex-wrap justify-center gap-3">
             <Select
-              className="w-full sm:w-[300px]"
+              className="w-full sm:w-75"
               clearable
               data={selectData}
               data-testid="city-selector"

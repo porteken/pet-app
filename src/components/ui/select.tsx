@@ -395,4 +395,4 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
 
 Select.displayName = "Select";
 
-export { Select, type SelectGroup, type SelectOption };
+export { Select };

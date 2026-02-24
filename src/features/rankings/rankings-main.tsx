@@ -5,12 +5,12 @@ import React, { useMemo, useState, useTransition } from "react";
 
 import { Pagination } from "@/components/ui/pagination";
 import { Select } from "@/components/ui/select";
-import { HeaderBar } from "@/features/header-bar";
+import { HeaderBar } from "@/features/header-bar/header-bar";
 import {
   setRankingsHeatStress,
   setRankingsState,
   setRankingsYear,
-} from "@/lib/actions/rankings-actions";
+} from "@/lib/actions/actions";
 import {
   getHeatStressInfo,
   type HeatStressLevel,

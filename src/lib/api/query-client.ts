@@ -13,8 +13,6 @@ export const queryClient = new QueryClient({
   },
 });
 
-export const getQueryClient = () => queryClient;
-
 export const queryKeys = {
   trendGraph: (locationId: number, option: string) =>
     ["trend-graph", locationId, option] as const,

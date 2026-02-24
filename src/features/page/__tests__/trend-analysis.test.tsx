@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/features/generate-graph", () => ({
+vi.mock("@/features/graph/generate-graph", () => ({
   GenerateTrendGraph: vi
     .fn()
     .mockReturnValue(<div data-testid="mock-trend-graph">Trend Graph</div>),
@@ -38,7 +38,7 @@ vi.mock("@/lib/utils/heat-stress", () => ({
   })),
 }));
 
-vi.mock("@/components/forecast/forecast-controls", () => ({
+vi.mock("@/lib/utils/forecast-controls", () => ({
   ForecastControls: vi.fn(
     ({ enabled, onToggle, onYearsChange, yearsAhead }) => (
       <div data-testid="forecast-controls">
@@ -64,7 +64,7 @@ vi.mock("@/lib/actions/actions", () => ({
   setForecastPreferences: vi.fn().mockResolvedValue({}),
 }));
 
-import { GenerateTrendGraph } from "@/features/generate-graph";
+import { GenerateTrendGraph } from "@/features/graph/generate-graph";
 import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 import {
@@ -82,26 +82,35 @@ const defaultProps = {
   onMeasureChange: vi.fn().mockResolvedValue(Promise.resolve()),
 };
 
+const waitForInitialTrendAnalysisRender = async () => {
+  await waitFor(() => {
+    expect(GenerateTrendGraph).toHaveBeenCalled();
+  });
+};
+
 describe("TrendAnalysis", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe("Basic Rendering", () => {
-    it("should render trend analysis heading", () => {
+    it("should render trend analysis heading", async () => {
       render(<TrendAnalysis {...defaultProps} />);
+      await waitForInitialTrendAnalysisRender();
 
       expect(screen.getByText("Trend Analysis")).toBeInTheDocument();
     });
 
-    it("should render graph measure select", () => {
+    it("should render graph measure select", async () => {
       render(<TrendAnalysis {...defaultProps} />);
+      await waitForInitialTrendAnalysisRender();
 
       expect(screen.getByLabelText("Graph Measure")).toBeInTheDocument();
     });
 
-    it("should render forecast controls when measure is avg", () => {
+    it("should render forecast controls when measure is avg", async () => {
       render(<TrendAnalysis {...defaultProps} />);
+      await waitForInitialTrendAnalysisRender();
 
       expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
     });
@@ -502,8 +511,9 @@ describe("TrendAnalysis", () => {
       expect(FetchForecastData).not.toHaveBeenCalled();
     });
 
-    it("should have correct select options", () => {
+    it("should have correct select options", async () => {
       render(<TrendAnalysis {...defaultProps} />);
+      await waitForInitialTrendAnalysisRender();
 
       const select = screen.getByLabelText("Graph Measure");
       const options = select.querySelectorAll("option");
@@ -513,8 +523,9 @@ describe("TrendAnalysis", () => {
       expect(options[1]).toHaveValue("max");
     });
 
-    it("should have default measure selected", () => {
+    it("should have default measure selected", async () => {
       render(<TrendAnalysis {...defaultProps} initialGraphMeasure="avg" />);
+      await waitForInitialTrendAnalysisRender();
 
       const select = screen.getByLabelText("Graph Measure");
       expect(select).toHaveValue("avg");

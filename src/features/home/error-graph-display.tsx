@@ -6,7 +6,7 @@ interface ErrorGraphDisplayProperties {
 
 export const ErrorGraphDisplay = memo<ErrorGraphDisplayProperties>(
   ({ message = "Unable to load graph data" }) => (
-    <div className="flex h-[300px] w-full flex-col items-center justify-center">
+    <div className="flex h-75 w-full flex-col items-center justify-center">
       <div className="text-center">
         <div className="mb-4 text-red-500">
           <svg

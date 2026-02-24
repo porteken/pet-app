@@ -2,13 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FetchError } from "@/lib/utils/errors";
 import {
-  clearAllMocks,
   createMockLinearRegression,
   mockSimpleLinearRegression,
   mockSupabaseClient,
   mockValidationModule,
-  setupApiClientTest,
-} from "@/testing";
+} from "@/testing/mocks";
+import { clearAllMocks, setupApiClientTest } from "@/testing/test-utilities";
 
 import { FetchForecastData, FetchTrendGraphData } from "../fetch-client";
 
@@ -29,10 +28,10 @@ describe("FetchTrendGraphData", () => {
     globalThis.window = originalWindow;
   });
   let mockSupabaseClient: ReturnType<
-    (typeof import("@/testing"))["createMockSupabaseClient"]
+    (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
   >;
   let mockValidation: ReturnType<
-    (typeof import("@/testing"))["createMockValidation"]
+    (typeof import("@/testing/mocks"))["createMockValidation"]
   >;
   let mockLinearRegression: ReturnType<typeof createMockLinearRegression>;
 
@@ -209,10 +208,10 @@ describe("FetchTrendGraphData", () => {
 
 describe("FetchForecastData", () => {
   let mockSupabaseClient: ReturnType<
-    (typeof import("@/testing"))["createMockSupabaseClient"]
+    (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
   >;
   let mockValidation: ReturnType<
-    (typeof import("@/testing"))["createMockValidation"]
+    (typeof import("@/testing/mocks"))["createMockValidation"]
   >;
 
   beforeEach(async () => {

@@ -39,11 +39,12 @@ export default defineConfig({
   timeout: 60_000,
   use: {
     actionTimeout: 30_000,
-
     baseURL: "http://localhost:3000",
 
     navigationTimeout: 30_000,
-    trace: "on-first-retry",
+
+    screenshot: "only-on-failure",
+    trace: "retain-on-failure",
   },
 
   webServer: {

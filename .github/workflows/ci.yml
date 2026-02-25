@@ -193,6 +193,10 @@ jobs:
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit --no-fund
 
+      # ADD THIS:
+      - name: Build App
+        run: npm run build
+
       - name: Run Playwright Shard
         run: npx playwright test --shard=${{ matrix.shard_index }}/20 --reporter=list,blob
 
@@ -236,6 +240,12 @@ jobs:
       - name: Merge Playwright (line)
         run: npx playwright merge-reports --reporter=line ./playwright-blobs
         shell: bash
+
+      - name: Check for test failures
+        if: needs.playwright-e2e.result == 'failure'
+        run: |
+          echo "Playwright tests failed in the e2e job. Failing the merge job."
+          exit 1
 
   deploy:
     name: Deploy to Vercel

@@ -48,7 +48,7 @@ jobs:
   merge-vitest-unit:
     name: Merge Vitest Unit Reports
     needs: vitest-unit
-    if: !cancelled()
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -115,7 +115,7 @@ jobs:
   merge-vitest-integration:
     name: Merge Vitest Integration Reports
     needs: vitest-integration
-    if: !cancelled()
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -207,7 +207,7 @@ jobs:
   merge-playwright:
     name: Merge Playwright Reports
     needs: playwright-e2e
-    if: !cancelled()
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

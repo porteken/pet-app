@@ -233,10 +233,21 @@ jobs:
           pattern: playwright-blob-*
           merge-multiple: true
 
-      - name: Merge Playwright (line)
+      # 1. Generate both line and html reports
+      - name: Merge Playwright Reports
         run: npx playwright merge-reports --reporter=line,html ./playwright-blobs
         shell: bash
 
+      # 2. Upload the HTML report directory as an artifact
+      - name: Upload Playwright HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report
+          path: playwright-report/
+          retention-days: 14
+
+      # 3. Fail the job if the upstream tests failed (must be the last step)
       - name: Check for test failures
         if: needs.playwright-e2e.result == 'failure'
         run: |

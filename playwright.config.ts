@@ -34,7 +34,7 @@ export default defineConfig({
     },
   ],
   reporter: process.env.CI ? "html" : "line",
-  retries: process.env.CI ? 2 : 1,
+  retries: process.env.CI ? 0 : 1,
   testDir: "./tests",
   timeout: 60_000,
   use: {

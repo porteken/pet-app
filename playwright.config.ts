@@ -48,7 +48,7 @@ export default defineConfig({
   },
 
   webServer: {
-    command: "npm run dev:e2e",
+    command: "npm run dev",
     cwd: projectRoot,
     env: {
       NEXT_PUBLIC_E2E_TEST: "true",

@@ -54,12 +54,19 @@ test.describe("City Selection", () => {
     await citySearch.click();
     const filteredOptions = page.getByTestId("searchable-select-option");
     await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
+    const firstOptionLabel =
+      (await filteredOptions.first().textContent()) ?? "";
+    const cityQuery = firstOptionLabel.trim().slice(0, 3).toLowerCase();
 
-    await citySearch.focus();
-    await page.keyboard.type("angeles", { delay: 100 });
+    expect(cityQuery.length).toBeGreaterThan(0);
+
+    await citySearch.fill(cityQuery);
 
     await expect(filteredOptions.first()).toBeVisible({ timeout: 15_000 });
     expect(await filteredOptions.count()).toBeGreaterThan(0);
+    await expect(filteredOptions.first()).toContainText(
+      new RegExp(cityQuery, "i")
+    );
   });
 
   test("should allow searching for states", async ({ page }) => {
@@ -71,9 +78,16 @@ test.describe("City Selection", () => {
     await citySearch.click();
     const filteredOptions = page.getByTestId("searchable-select-option");
     await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
+    const firstGroupLabel = page
+      .locator('[role="listbox"] > div > div')
+      .first();
+    const stateQuery = ((await firstGroupLabel.textContent()) ?? "")
+      .trim()
+      .toLowerCase();
 
-    await citySearch.press("Control+a");
-    await citySearch.pressSequentially("california", { delay: 100 });
+    expect(stateQuery.length).toBeGreaterThan(0);
+
+    await citySearch.fill(stateQuery);
 
     await expect(filteredOptions.first()).toBeVisible({ timeout: 15_000 });
     expect(await filteredOptions.count()).toBeGreaterThan(0);

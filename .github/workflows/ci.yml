@@ -148,6 +148,11 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.58.2-noble
+
+    env:
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -233,12 +238,10 @@ jobs:
           pattern: playwright-blob-*
           merge-multiple: true
 
-      # 1. Generate both line and html reports
       - name: Merge Playwright Reports
         run: npx playwright merge-reports --reporter=line,html ./playwright-blobs
         shell: bash
 
-      # 2. Upload the HTML report directory as an artifact
       - name: Upload Playwright HTML Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -247,7 +250,6 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
-      # 3. Fail the job if the upstream tests failed (must be the last step)
       - name: Check for test failures
         if: needs.playwright-e2e.result == 'failure'
         run: |

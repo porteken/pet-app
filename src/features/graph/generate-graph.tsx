@@ -9,7 +9,7 @@ import { GRAPH_COLORS } from "@/lib/constants";
 
 interface PlotlyConfig {
   displaylogo: boolean;
-  displayModeBar: boolean;
+  displayModeBar: "hover" | boolean;
   modeBarButtonsToRemove: ("lasso2d" | "pan2d" | "select2d")[];
   responsive: boolean;
 }
@@ -37,7 +37,7 @@ interface PlotlyTrace {
 
 const Plot = dynamic(() => import("react-plotly.js"), {
   loading: () => (
-    <div className="flex h-[clamp(360px,62vh,600px)] items-center justify-center text-gray-500">
+    <div className="flex h-[clamp(280px,50vh,600px)] items-center justify-center text-gray-500 sm:h-[clamp(360px,62vh,600px)]">
       Loading chart...
     </div>
   ),
@@ -84,7 +84,7 @@ export const GenerateTrendGraph = (
     trendline_pets.length === 0
   ) {
     return (
-      <div className="flex h-[clamp(360px,62vh,600px)] items-center justify-center text-gray-500">
+      <div className="flex h-[clamp(280px,50vh,600px)] items-center justify-center text-gray-500 sm:h-[clamp(360px,62vh,600px)]">
         No data available for the selected parameters
       </div>
     );
@@ -212,15 +212,15 @@ export const GenerateTrendGraph = (
 
   const config: PlotlyConfig = {
     displaylogo: false,
-    displayModeBar: true,
+    displayModeBar: "hover",
     modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],
     responsive: true,
   };
 
   return (
     <div
+      className="h-[clamp(280px,50vh,600px)] sm:h-[clamp(360px,62vh,600px)]"
       style={{
-        height: "clamp(360px, 62vh, 600px)",
         margin: "0 auto",
         maxWidth: 900,
         width: "100%",
@@ -252,7 +252,7 @@ export const GenerateReferenceGraph = async (
     currentPets.length === 0
   ) {
     return (
-      <div className="flex h-[clamp(360px,62vh,600px)] items-center justify-center text-gray-500">
+      <div className="flex h-[clamp(280px,50vh,600px)] items-center justify-center text-gray-500 sm:h-[clamp(360px,62vh,600px)]">
         No data available for the selected parameters
       </div>
     );
@@ -323,15 +323,15 @@ export const GenerateReferenceGraph = async (
 
   const config: PlotlyConfig = {
     displaylogo: false,
-    displayModeBar: true,
+    displayModeBar: "hover",
     modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],
     responsive: true,
   };
 
   return (
     <div
+      className="h-[clamp(280px,50vh,600px)] sm:h-[clamp(360px,62vh,600px)]"
       style={{
-        height: "clamp(360px, 62vh, 600px)",
         margin: "0 auto",
         maxWidth: 900,
         width: "100%",

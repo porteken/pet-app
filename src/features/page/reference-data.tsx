@@ -85,7 +85,9 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
             ))}
           </select>
         </div>
-        <div className="h-[clamp(380px,68vh,700px)]">{referenceGraph}</div>
+        <div className="h-[clamp(280px,50vh,600px)] sm:h-[clamp(380px,68vh,700px)]">
+          {referenceGraph}
+        </div>
       </div>
     </div>
   );

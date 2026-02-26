@@ -49,7 +49,9 @@ describe("NavButtons", () => {
 
     expect(screen.getByText("Map")).toBeInTheDocument();
     expect(screen.getByText("About")).toBeInTheDocument();
-    expect(screen.getByText("Github Repository")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("View source code on GitHub")
+    ).toBeInTheDocument();
   });
 
   it("should render buttons with correct links", () => {

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @layer utilities {
   .leaflet-container {
-    height: 100dvh !important;
+    height: 100% !important;
     width: 100% !important;
     z-index: 1;
   }

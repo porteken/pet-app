@@ -76,7 +76,7 @@ describe("HeaderBar", () => {
 
     it("should render GitHub link", () => {
       render(<HeaderBar LocationOptions={mockLocationOptions} />);
-      const githubLink = screen.getByText("Github Repository");
+      const githubLink = screen.getByLabelText("View source code on GitHub");
       expect(githubLink).toBeInTheDocument();
       expect(githubLink.closest("a")).toHaveAttribute(
         "href",

@@ -216,7 +216,9 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
             )}
           </div>
         )}
-        <div className="h-[clamp(380px,68vh,700px)]">{trendGraph}</div>
+        <div className="h-[clamp(280px,50vh,600px)] sm:h-[clamp(380px,68vh,700px)]">
+          {trendGraph}
+        </div>
       </div>
     </div>
   );

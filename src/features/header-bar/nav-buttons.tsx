@@ -31,7 +31,8 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
           rel="noopener noreferrer"
           target="_blank"
         >
-          Github Repository
+          <span className="sm:hidden">GitHub</span>
+          <span className="hidden sm:inline">GitHub Repository</span>
         </a>
       </Button>
     </>

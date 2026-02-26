@@ -216,11 +216,11 @@ const Home: FC<MapProperties> = ({
   );
 
   return (
-    <div className="relative h-dvh w-full">
-      <div className="absolute inset-x-0 top-0 z-10010">
+    <div className="flex h-dvh w-full flex-col">
+      <div className="z-10010 shrink-0">
         <HeaderBar LocationOptions={LocationOptions} />
       </div>
-      <div className="absolute inset-0 top-0">
+      <div className="relative min-h-0 flex-1 overflow-hidden">
         <MapComponent
           locations={locations}
           onMarkerClick={handleMarkerClick}

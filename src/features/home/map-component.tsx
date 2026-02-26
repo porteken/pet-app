@@ -66,16 +66,16 @@ export const MapComponent = memo<MapComponentProperties>(
       const reactLeaflet = await import("react-leaflet");
 
       const L = await import("leaflet");
-      const markerSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="40" viewBox="0 0 28 40" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 11.2 14 26 14 26s14-14.8 14-26C28 6.268 21.732 0 14 0z" fill="#2563EB"/><circle cx="14" cy="14" r="5" fill="white"/></svg>`;
+      const markerSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="52" viewBox="0 0 28 40" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 11.2 14 26 14 26s14-14.8 14-26C28 6.268 21.732 0 14 0z" fill="#2563EB"/><circle cx="14" cy="14" r="5" fill="white"/></svg>`;
       const markerUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(markerSvg)}`;
 
       const customIcon = L.icon({
         className: "pet-map-marker-icon",
-        iconAnchor: [14, 40],
+        iconAnchor: [18, 52],
         iconRetinaUrl: markerUrl,
-        iconSize: [28, 40],
+        iconSize: [36, 52],
         iconUrl: markerUrl,
-        popupAnchor: [0, -34],
+        popupAnchor: [0, -46],
       });
 
       setMapContainer(() => reactLeaflet.MapContainer);
@@ -116,7 +116,7 @@ export const MapComponent = memo<MapComponentProperties>(
 
     if (!locations || locations.length === 0) {
       return (
-        <div className="flex h-dvh items-center justify-center bg-gray-50">
+        <div className="flex h-full items-center justify-center bg-gray-50">
           <div className="mx-auto max-w-md p-6 text-center">
             <div className="mb-6">
               <svg
@@ -157,11 +157,11 @@ export const MapComponent = memo<MapComponentProperties>(
     }
 
     return (
-      <div className="relative h-dvh w-full">
+      <div className="relative h-full w-full">
         <MapContainer
           center={[39.5, -98.35]}
           scrollWheelZoom
-          style={{ height: "100dvh", width: "100%" }}
+          style={{ height: "100%", width: "100%" }}
           zoom={5}
         >
           <TileLayer

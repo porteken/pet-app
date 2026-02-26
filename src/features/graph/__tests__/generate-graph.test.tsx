@@ -428,7 +428,7 @@ describe("Graph Components", () => {
   describe("PlotWrapper Component", () => {
     const mockConfig = {
       displaylogo: false,
-      displayModeBar: true,
+      displayModeBar: "hover",
       modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],
       responsive: true,
     } as const;
@@ -561,7 +561,7 @@ describe("Graph Components", () => {
       const config = JSON.parse(graphConfig.textContent || "{}");
 
       expect(config.displaylogo).toBe(false);
-      expect(config.displayModeBar).toBe(true);
+      expect(config.displayModeBar).toBe("hover");
       expect(config.modeBarButtonsToRemove).toEqual([
         "pan2d",
         "lasso2d",

@@ -197,24 +197,6 @@ jobs:
       - name: Install Dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit --no-fund
-      - name: Debug Secrets (Safe)
-        env:
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-        run: |
-          if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ]; then
-            echo "❌ SUPABASE_URL is EMPTY! GitHub is not passing the secret."
-            exit 1
-          else
-            echo "✅ SUPABASE_URL is present (length: ${#NEXT_PUBLIC_SUPABASE_URL})"
-          fi
-
-          if [ -z "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ]; then
-            echo "❌ SUPABASE_ANON_KEY is EMPTY!"
-            exit 1
-          else
-            echo "✅ SUPABASE_ANON_KEY is present (length: ${#NEXT_PUBLIC_SUPABASE_ANON_KEY})"
-          fi
 
       - name: Run Playwright Shard
         run: npx playwright test --shard=${{ matrix.shard_index }}/20 --reporter=list,blob

@@ -314,6 +314,38 @@ describe("GraphSection", () => {
 
       expect(mockPush).not.toHaveBeenCalled();
     });
+
+    it("should show mobile legend toggle when in mobile viewport", () => {
+      const onToggleMobileGraphLegend = vi.fn();
+      render(
+        <GraphSection
+          {...defaultProps}
+          isMobileViewport={true}
+          onToggleMobileGraphLegend={onToggleMobileGraphLegend}
+        />
+      );
+
+      expect(
+        screen.getByRole("button", { name: "Show Graph Legend" })
+      ).toBeInTheDocument();
+    });
+
+    it("should call onToggleMobileGraphLegend when mobile legend toggle is clicked", () => {
+      const onToggleMobileGraphLegend = vi.fn();
+      render(
+        <GraphSection
+          {...defaultProps}
+          isMobileViewport={true}
+          onToggleMobileGraphLegend={onToggleMobileGraphLegend}
+        />
+      );
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "Show Graph Legend" })
+      );
+
+      expect(onToggleMobileGraphLegend).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("Edge Cases", () => {

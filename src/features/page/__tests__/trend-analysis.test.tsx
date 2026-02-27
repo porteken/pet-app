@@ -91,6 +91,19 @@ const waitForInitialTrendAnalysisRender = async () => {
 describe("TrendAnalysis", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    Object.defineProperty(globalThis, "matchMedia", {
+      value: vi.fn().mockImplementation(() => ({
+        addEventListener: vi.fn(),
+        addListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+        matches: false,
+        media: "(max-width: 639px)",
+        onchange: undefined,
+        removeEventListener: vi.fn(),
+        removeListener: vi.fn(),
+      })),
+      writable: true,
+    });
   });
 
   describe("Basic Rendering", () => {
@@ -151,8 +164,51 @@ describe("TrendAnalysis", () => {
           [20, 22, 24, 26],
           [20, 22, 24, 26],
           0.5,
-          undefined
+          undefined,
+          true,
+          false
         );
+      });
+    });
+
+    it("should keep mobile graph legend collapsed by default and toggle open", async () => {
+      Object.defineProperty(globalThis, "matchMedia", {
+        value: vi.fn().mockImplementation(() => ({
+          addEventListener: vi.fn(),
+          addListener: vi.fn(),
+          dispatchEvent: vi.fn(),
+          matches: true,
+          media: "(max-width: 639px)",
+          onchange: undefined,
+          removeEventListener: vi.fn(),
+          removeListener: vi.fn(),
+        })),
+        writable: true,
+      });
+
+      render(<TrendAnalysis {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("mock-trend-graph")).toBeInTheDocument();
+      });
+
+      const toggle = screen.getByRole("button", {
+        name: "Show Graph Legend",
+      });
+      expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+      await waitFor(() => {
+        const calls = vi.mocked(GenerateTrendGraph).mock.calls;
+        expect(calls.at(-1)?.[6]).toBe(false);
+        expect(calls.at(-1)?.[7]).toBe(true);
+      });
+
+      fireEvent.click(toggle);
+
+      await waitFor(() => {
+        const calls = vi.mocked(GenerateTrendGraph).mock.calls;
+        expect(calls.at(-1)?.[6]).toBe(true);
+        expect(calls.at(-1)?.[7]).toBe(true);
       });
     });
   });
@@ -376,7 +432,9 @@ describe("TrendAnalysis", () => {
           expect.any(Number),
           expect.objectContaining({
             forecastValues: expect.any(Array),
-          })
+          }),
+          true,
+          false
         );
       });
     });
@@ -423,7 +481,16 @@ describe("TrendAnalysis", () => {
       render(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenCalledWith([], "avg", [], [], 0);
+        expect(GenerateTrendGraph).toHaveBeenCalledWith(
+          [],
+          "avg",
+          [],
+          [],
+          0,
+          undefined,
+          true,
+          false
+        );
       });
     });
 

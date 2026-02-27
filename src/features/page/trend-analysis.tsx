@@ -20,6 +20,20 @@ interface TrendAnalysisProperties {
   onMeasureChange: (measure: string) => Promise<void>;
 }
 
+interface TrendGraphSnapshot {
+  forecastData?: {
+    forecastValues: number[];
+    forecastYears: number[];
+    lowerBound10: number[];
+    upperBound90: number[];
+  };
+  increase_per_year: number;
+  option: string;
+  trendline_pets: number[];
+  year_pets: number[];
+  years: number[];
+}
+
 const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   id,
   initialForecastEnabled,
@@ -44,6 +58,36 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const [forecastHeatStress, setForecastHeatStress] = React.useState<
     HeatStressDescription | undefined
   >();
+  const [trendGraphSnapshot, setTrendGraphSnapshot] =
+    React.useState<TrendGraphSnapshot>();
+  const [isMobileViewport, setIsMobileViewport] = React.useState(() => {
+    if (typeof globalThis.matchMedia !== "function") {
+      return false;
+    }
+
+    return globalThis.matchMedia("(max-width: 639px)").matches;
+  });
+  const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
+
+  const showTrendLegend = !isMobileViewport || isMobileLegendOpen;
+
+  React.useEffect(() => {
+    if (typeof globalThis.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQuery = globalThis.matchMedia("(max-width: 639px)");
+    const updateIsMobileViewport = () => {
+      setIsMobileViewport(mediaQuery.matches);
+    };
+
+    updateIsMobileViewport();
+
+    mediaQuery.addEventListener("change", updateIsMobileViewport);
+    return () => {
+      mediaQuery.removeEventListener("change", updateIsMobileViewport);
+    };
+  }, []);
 
   const generatePetTrendGraph = React.useCallback(
     async (option: string, enableForecast: boolean, yearsAhead: number) => {
@@ -61,9 +105,14 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
         if (years.length === 0 || year_pets.length === 0) {
           setCurrentHeatStress(undefined);
           setForecastHeatStress(undefined);
-          setTrendGraph(
-            GenerateTrendGraph([], option, [], [], 0, forecastData)
-          );
+          setTrendGraphSnapshot({
+            forecastData,
+            increase_per_year: 0,
+            option,
+            trendline_pets: [],
+            year_pets: [],
+            years: [],
+          });
           return;
         }
 
@@ -96,17 +145,22 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           setForecastHeatStress(undefined);
         }
 
-        const graph = GenerateTrendGraph(
-          years,
-          option,
-          year_pets,
-          trendline_pets,
+        setTrendGraphSnapshot({
+          forecastData,
           increase_per_year,
-          forecastData
-        );
-        setTrendGraph(graph);
+          option,
+          trendline_pets,
+          year_pets,
+          years,
+        });
       } catch {
-        setTrendGraph(GenerateTrendGraph([], option, [], [], 0));
+        setTrendGraphSnapshot({
+          increase_per_year: 0,
+          option,
+          trendline_pets: [],
+          year_pets: [],
+          years: [],
+        });
         setCurrentHeatStress(undefined);
         setForecastHeatStress(undefined);
       }
@@ -117,6 +171,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const handleGraphMeasureChange = React.useCallback(
     async (event: React.ChangeEvent<HTMLSelectElement>) => {
       const option = event.target.value;
+      setIsMobileLegendOpen(false);
       setSelectedGraphMeasure(option);
       try {
         await onMeasureChange(option);
@@ -156,10 +211,29 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     [forecastEnabled]
   );
 
+  React.useEffect(() => {
+    if (!trendGraphSnapshot) {
+      return;
+    }
+
+    setTrendGraph(
+      GenerateTrendGraph(
+        trendGraphSnapshot.years,
+        trendGraphSnapshot.option,
+        trendGraphSnapshot.year_pets,
+        trendGraphSnapshot.trendline_pets,
+        trendGraphSnapshot.increase_per_year,
+        trendGraphSnapshot.forecastData,
+        showTrendLegend,
+        isMobileViewport
+      )
+    );
+  }, [isMobileViewport, showTrendLegend, trendGraphSnapshot]);
+
   return (
     <div className="space-y-6">
-      <div className="rounded-lg bg-white p-6 shadow-md">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">
+      <div className="rounded-lg bg-white p-3 shadow-md sm:p-6">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">
           Trend Analysis
         </h2>
         <div className="mb-4 space-y-4">
@@ -216,7 +290,21 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
             )}
           </div>
         )}
-        <div className="h-[clamp(280px,50vh,600px)] sm:h-[clamp(380px,68vh,700px)]">
+        <div className="mb-3 sm:hidden">
+          <button
+            aria-controls="trend-analysis-graph"
+            aria-expanded={isMobileLegendOpen}
+            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50"
+            onClick={() => setIsMobileLegendOpen(previous => !previous)}
+            type="button"
+          >
+            {isMobileLegendOpen ? "Hide Graph Legend" : "Show Graph Legend"}
+          </button>
+        </div>
+        <div
+          className="h-[clamp(220px,42vh,520px)] overflow-hidden sm:h-[clamp(380px,68vh,700px)]"
+          id="trend-analysis-graph"
+        >
           {trendGraph}
         </div>
       </div>

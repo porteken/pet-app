@@ -270,7 +270,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
                 placeholder ?? `Search ${label?.toLowerCase() ?? "options"}...`
               }
               role="searchbox"
-              type="search"
+              type="text"
               value={
                 isDropdownOpen ? searchTerm : (selectedOption?.label ?? "")
               }

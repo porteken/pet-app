@@ -154,7 +154,9 @@ describe("PageMain", () => {
         [7, 12, 17],
         [5, 10, 15],
         0.5,
-        undefined
+        undefined,
+        true,
+        false
       );
     });
 

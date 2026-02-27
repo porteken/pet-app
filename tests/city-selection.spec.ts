@@ -48,7 +48,9 @@ test.describe("City Selection", () => {
     const firstCityValue = await firstOption.getAttribute("data-value");
     expect(firstCityValue).not.toBeNull();
     await firstOption.click();
-    await expect(page).toHaveURL(new RegExp(`/${firstCityValue!}(\\?.*)?$`));
+    await expect(page).toHaveURL(
+      new RegExp(String.raw`/${firstCityValue!}(\?.*)?$`)
+    );
   });
 
   test("should allow searching for cities", async ({ page }) => {

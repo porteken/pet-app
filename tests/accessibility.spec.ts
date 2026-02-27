@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+const MARKER_SELECTOR = ".pet-map-marker-icon, .leaflet-marker-icon";
+
 test.describe("Accessibility", () => {
   test("keyboard navigation: complete user journey using only keyboard", async ({
     page,
@@ -84,7 +86,7 @@ test.describe("Accessibility", () => {
 
     await expect(page.locator(".leaflet-container")).toBeVisible();
 
-    const marker = page.locator(".leaflet-marker-icon").first();
+    const marker = page.locator(MARKER_SELECTOR).first();
     await expect(marker).toBeVisible({ timeout: 10_000 });
 
     await page.goto("/1");

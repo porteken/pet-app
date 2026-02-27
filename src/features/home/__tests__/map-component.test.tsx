@@ -133,4 +133,31 @@ describe("MapComponent", () => {
     expect(onMarkerClick).toHaveBeenCalledTimes(1);
     expect(onMarkerClick).toHaveBeenCalledWith(mockLocations[0].location_id);
   });
+
+  it("should keep heat stress legend collapsed by default and toggle open", async () => {
+    render(
+      <MapComponent
+        locations={mockLocations}
+        onMarkerClick={() => {}}
+        selectedGraphMeasure="avg"
+      />
+    );
+
+    await screen.findByTestId("map-container");
+
+    const desktopLegendToggle = screen.getByRole("button", {
+      name: "Show Heat Stress Index",
+    });
+    expect(desktopLegendToggle).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByRole("heading", { name: "Heat Stress Index" })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(desktopLegendToggle);
+
+    expect(desktopLegendToggle).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getAllByRole("heading", { name: "Heat Stress Index" }).length
+    ).toBeGreaterThan(0);
+  });
 });

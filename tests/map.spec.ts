@@ -1,30 +1,6 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-const MARKER_SELECTOR = ".leaflet-marker-icon";
-const MARKER_VISIBILITY_TIMEOUT = 10_000;
-
-export async function clickClickableMarker(page: Page): Promise<void> {
-  const markers = page.locator(MARKER_SELECTOR);
-  await expect(markers.first()).toBeVisible({
-    timeout: MARKER_VISIBILITY_TIMEOUT,
-  });
-
-  const markerCount = await markers.count();
-  for (let index = 0; index < markerCount; index += 1) {
-    const marker = markers.nth(index);
-
-    try {
-      await marker.scrollIntoViewIfNeeded();
-      await marker.click({ timeout: 1500, trial: true });
-      await marker.click();
-      return;
-    } catch {
-      // Try the next marker if this one is not interactable.
-    }
-  }
-
-  throw new Error("Unable to click a map marker without using force.");
-}
+import { clickClickableMarker, MARKER_SELECTOR } from "./utils/map-marker";
 
 test.describe("Map Page", () => {
   test("should display the map and markers", async ({ page }) => {
@@ -33,7 +9,7 @@ test.describe("Map Page", () => {
       timeout: 30_000,
     });
     await expect(page.locator(".leaflet-container")).toBeVisible();
-    const marker = page.locator(".leaflet-marker-icon").first();
+    const marker = page.locator(MARKER_SELECTOR).first();
     await expect(marker).toBeVisible({ timeout: 10_000 });
   });
 
@@ -44,10 +20,7 @@ test.describe("Map Page", () => {
     await expect(page.getByText("Loading map...").first()).toBeHidden({
       timeout: 30_000,
     });
-    const marker = page.locator(".leaflet-marker-icon").first();
-    await expect(marker).toBeVisible({ timeout: 10_000 });
-
-    await marker.dispatchEvent("click");
+    await clickClickableMarker(page);
     await expect(
       page.getByRole("button", { name: "View Full Details" })
     ).toBeVisible({ timeout: 10_000 });
@@ -68,7 +41,7 @@ test.describe("Map Page", () => {
     });
     await expect(viewDetailsButton).toBeVisible({ timeout: 10_000 });
     await expect(viewDetailsButton).toBeEnabled({ timeout: 10_000 });
-    await viewDetailsButton.dispatchEvent("click");
+    await viewDetailsButton.click();
     await expect(page).toHaveURL(/\/\d+(?:\?.*)?$/, { timeout: 30_000 });
 
     await expect(page.getByText("Trend Analysis")).toBeVisible();

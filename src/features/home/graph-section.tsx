@@ -14,9 +14,12 @@ interface GraphSectionProperties {
   forecastYearsAhead: number;
   graphLoading: boolean;
   heatStressDescription?: HeatStressDescription;
+  isMobileGraphLegendOpen?: boolean;
+  isMobileViewport?: boolean;
   onForecastToggle: (enabled: boolean) => void;
   onForecastYearsChange: (years: number) => void;
   onSelectChange: (value: string) => void;
+  onToggleMobileGraphLegend?: () => void;
   petGraph?: React.ReactElement;
   selectedGraphMeasure: string;
   selectedLocation?: {
@@ -34,9 +37,12 @@ export const GraphSection = memo<GraphSectionProperties>(
     forecastYearsAhead,
     graphLoading,
     heatStressDescription,
+    isMobileGraphLegendOpen = false,
+    isMobileViewport = false,
     onForecastToggle,
     onForecastYearsChange,
     onSelectChange,
+    onToggleMobileGraphLegend,
     petGraph,
     selectedGraphMeasure,
     selectedLocation,
@@ -75,15 +81,15 @@ export const GraphSection = memo<GraphSectionProperties>(
 
     const graphContent = useMemo(
       () => (
-        <div className="flex min-h-75 w-full max-w-4xl items-center justify-center">
+        <div className="flex min-h-[clamp(220px,42vh,520px)] w-full max-w-full items-center justify-center sm:min-h-75 sm:max-w-4xl">
           {graphLoading ? loadingUI : petGraph}
         </div>
       ),
       [graphLoading, loadingUI, petGraph]
     );
     return (
-      <div className="flex min-h-85 w-full max-w-[90vw] min-w-[320px] flex-col items-center space-y-4">
-        <div className="w-full max-w-md space-y-4">
+      <div className="flex w-full max-w-full min-w-0 flex-col items-center space-y-3 sm:min-h-85 sm:max-w-[90vw] sm:min-w-[320px] sm:space-y-4">
+        <div className="w-full max-w-md space-y-3 sm:space-y-4">
           <Select
             className="w-full"
             data={selectOptions}
@@ -131,8 +137,25 @@ export const GraphSection = memo<GraphSectionProperties>(
               )}
             </div>
           )}
+          {isMobileViewport && onToggleMobileGraphLegend && (
+            <div className="sm:hidden">
+              <Button
+                aria-controls="mobile-trend-graph"
+                aria-expanded={isMobileGraphLegendOpen}
+                onClick={onToggleMobileGraphLegend}
+                type="button"
+                variant="outline"
+              >
+                {isMobileGraphLegendOpen
+                  ? "Hide Graph Legend"
+                  : "Show Graph Legend"}
+              </Button>
+            </div>
+          )}
         </div>
-        {graphContent}
+        <div className="w-full" id="mobile-trend-graph">
+          {graphContent}
+        </div>
         {detailsButton}
       </div>
     );

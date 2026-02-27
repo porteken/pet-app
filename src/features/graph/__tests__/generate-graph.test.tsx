@@ -212,6 +212,24 @@ describe("Graph Components", () => {
           "Max PET in summer (2000-2025)"
         );
       });
+
+      it("should hide legend when showLegend is false", () => {
+        const result = GenerateTrendGraph(
+          mockYears,
+          "avg",
+          mockYearPets,
+          mockTrendlinePets,
+          mockIncreasePerYear,
+          undefined,
+          false
+        );
+
+        render(result);
+
+        const graphLayout = screen.getByTestId("graph-layout");
+        const layout = JSON.parse(graphLayout.textContent || "{}");
+        expect(layout.showlegend).toBe(false);
+      });
     });
 
     describe("Edge Cases", () => {
@@ -307,6 +325,23 @@ describe("Graph Components", () => {
 
         const { container } = render(result);
         expect(container.firstChild).toBeTruthy();
+      });
+
+      it("should hide reference graph legend when showLegend is false", async () => {
+        const result = await GenerateReferenceGraph(
+          "2018",
+          mockDates,
+          mockReferencePets,
+          mockCurrentPets,
+          false,
+          true
+        );
+
+        render(result);
+
+        const graphLayout = screen.getByTestId("graph-layout");
+        const layout = JSON.parse(graphLayout.textContent || "{}");
+        expect(layout.showlegend).toBe(false);
       });
     });
 

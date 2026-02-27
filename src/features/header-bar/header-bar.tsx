@@ -86,13 +86,13 @@ const HeaderBarComponent = ({
   return (
     <header className="relative z-10 w-full border-b border-gray-200 bg-white">
       <div className="mx-auto max-w-4xl px-4">
-        <div className="py-2 text-center">
-          <h1 className="text-2xl font-extrabold dark:text-white">
+        <div className="py-1.5 text-center">
+          <h1 className="text-xl font-extrabold dark:text-white">
             {APP_CONFIG.NAME}
           </h1>
         </div>
-        <div className="rounded-md bg-white p-4">
-          <div className="flex flex-wrap justify-center gap-3">
+        <div className="rounded-md bg-white p-2 sm:p-3">
+          <div className="flex flex-wrap justify-center gap-2">
             <Select
               className="w-full sm:w-75"
               clearable

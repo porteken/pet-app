@@ -35,9 +35,14 @@ interface PlotlyTrace {
   y: number[];
 }
 
+const GRAPH_HEIGHT_CLASS =
+  "h-[clamp(220px,42vh,520px)] sm:h-[clamp(360px,62vh,600px)]";
+
 const Plot = dynamic(() => import("react-plotly.js"), {
   loading: () => (
-    <div className="flex h-[clamp(280px,50vh,600px)] items-center justify-center text-gray-500 sm:h-[clamp(360px,62vh,600px)]">
+    <div
+      className={`flex items-center justify-center text-gray-500 ${GRAPH_HEIGHT_CLASS}`}
+    >
       Loading chart...
     </div>
   ),
@@ -76,7 +81,9 @@ export const GenerateTrendGraph = (
     forecastYears: number[];
     lowerBound10: number[];
     upperBound90: number[];
-  }
+  },
+  showLegend = true,
+  isMobileViewport = false
 ): React.ReactElement => {
   if (
     years.length === 0 ||
@@ -84,7 +91,9 @@ export const GenerateTrendGraph = (
     trendline_pets.length === 0
   ) {
     return (
-      <div className="flex h-[clamp(280px,50vh,600px)] items-center justify-center text-gray-500 sm:h-[clamp(360px,62vh,600px)]">
+      <div
+        className={`flex items-center justify-center text-gray-500 ${GRAPH_HEIGHT_CLASS}`}
+      >
         No data available for the selected parameters
       </div>
     );
@@ -102,13 +111,14 @@ export const GenerateTrendGraph = (
       color: "#374151",
     },
     margin: {
-      b: 40,
-      l: 40,
-      r: 20,
-      t: 60,
+      b: isMobileViewport ? 34 : 40,
+      l: isMobileViewport ? 34 : 40,
+      r: isMobileViewport ? 10 : 20,
+      t: isMobileViewport ? 52 : 60,
     },
     paper_bgcolor: GRAPH_COLORS.background,
     plot_bgcolor: GRAPH_COLORS.background,
+    showlegend: showLegend,
     title: {
       text: `${graph_type} PET in summer (2000-2025)<br><sub>Increase per year: ${increaseText}°C</sub>`,
     },
@@ -219,7 +229,7 @@ export const GenerateTrendGraph = (
 
   return (
     <div
-      className="h-[clamp(280px,50vh,600px)] sm:h-[clamp(360px,62vh,600px)]"
+      className={GRAPH_HEIGHT_CLASS}
       style={{
         margin: "0 auto",
         maxWidth: 900,
@@ -244,7 +254,9 @@ export const GenerateReferenceGraph = async (
   referenceYear: string,
   dates: Date[],
   referencePets: number[],
-  currentPets: number[]
+  currentPets: number[],
+  showLegend = true,
+  isMobileViewport = false
 ): Promise<React.ReactElement> => {
   if (
     dates.length === 0 ||
@@ -252,7 +264,9 @@ export const GenerateReferenceGraph = async (
     currentPets.length === 0
   ) {
     return (
-      <div className="flex h-[clamp(280px,50vh,600px)] items-center justify-center text-gray-500 sm:h-[clamp(360px,62vh,600px)]">
+      <div
+        className={`flex items-center justify-center text-gray-500 ${GRAPH_HEIGHT_CLASS}`}
+      >
         No data available for the selected parameters
       </div>
     );
@@ -264,13 +278,14 @@ export const GenerateReferenceGraph = async (
       color: "#374151",
     },
     margin: {
-      b: 40,
-      l: 40,
-      r: 20,
-      t: 40,
+      b: isMobileViewport ? 34 : 40,
+      l: isMobileViewport ? 34 : 40,
+      r: isMobileViewport ? 10 : 20,
+      t: isMobileViewport ? 38 : 40,
     },
     paper_bgcolor: GRAPH_COLORS.background,
     plot_bgcolor: GRAPH_COLORS.background,
+    showlegend: showLegend,
     title: { text: `PET in summer 2025 vs ${referenceYear}` },
     xaxis: {
       gridcolor: GRAPH_COLORS.grid,
@@ -330,7 +345,7 @@ export const GenerateReferenceGraph = async (
 
   return (
     <div
-      className="h-[clamp(280px,50vh,600px)] sm:h-[clamp(360px,62vh,600px)]"
+      className={GRAPH_HEIGHT_CLASS}
       style={{
         margin: "0 auto",
         maxWidth: 900,

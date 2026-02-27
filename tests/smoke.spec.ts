@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+const MARKER_SELECTOR = ".pet-map-marker-icon, .leaflet-marker-icon";
+
 test.describe("Smoke Tests", () => {
   test("complete user journey: home → location selection → data analysis", async ({
     page,
@@ -11,16 +13,19 @@ test.describe("Smoke Tests", () => {
     });
     await expect(page.locator(".leaflet-container")).toBeVisible();
 
-    const marker = page.locator(".leaflet-marker-icon").first();
+    const marker = page.locator(MARKER_SELECTOR).first();
     await expect(marker).toBeVisible({ timeout: 10_000 });
 
-    await marker.dispatchEvent("click");
+    await marker.click();
 
     await expect(
       page.getByRole("button", { name: "View Full Details" })
     ).toBeVisible({ timeout: 10_000 });
 
-    await page.keyboard.press("Escape");
+    const modal = page.getByRole("dialog");
+    await expect(modal).toBeVisible({ timeout: 10_000 });
+    await modal.getByRole("button", { name: "Close" }).click();
+    await expect(modal).toBeHidden({ timeout: 10_000 });
 
     await page.locator("input[data-testid='city-selector']").click();
     await expect(page.getByRole("listbox")).toBeVisible({ timeout: 5000 });
@@ -99,14 +104,14 @@ test.describe("Smoke Tests", () => {
       timeout: 10_000,
     });
 
-    const marker = page.locator(".leaflet-marker-icon").first();
+    const marker = page.locator(MARKER_SELECTOR).first();
     await marker.waitFor({ state: "visible", timeout: 10_000 });
 
     await page.setViewportSize({ height: 1024, width: 768 });
 
     await expect(marker).toBeVisible({ timeout: 10_000 });
 
-    await marker.dispatchEvent("click");
+    await marker.click();
 
     const viewDetailsButton = page.getByRole("button", {
       name: "View Full Details",
@@ -115,7 +120,10 @@ test.describe("Smoke Tests", () => {
     await expect(viewDetailsButton).toBeEnabled();
 
     await page.setViewportSize({ height: 667, width: 375 });
-    await page.keyboard.press("Escape");
+    const modal = page.getByRole("dialog");
+    await expect(modal).toBeVisible({ timeout: 10_000 });
+    await modal.getByRole("button", { name: "Close" }).click();
+    await expect(modal).toBeHidden({ timeout: 10_000 });
     await page.locator("input[data-testid='city-selector']").click();
     await expect(page.getByRole("listbox")).toBeVisible({ timeout: 5000 });
     await page.getByRole("option", { name: "Phoenix" }).click();

@@ -55,6 +55,14 @@ const Home: FC<MapProperties> = ({
   const [forecastYearsAhead, setForecastYearsAhead] = useState(
     () => initialForecastYearsAhead
   );
+  const [isMobileViewport, setIsMobileViewport] = useState(() => {
+    if (typeof globalThis.matchMedia !== "function") {
+      return false;
+    }
+
+    return globalThis.matchMedia("(max-width: 639px)").matches;
+  });
+  const [isMobileGraphLegendOpen, setIsMobileGraphLegendOpen] = useState(false);
   const [heatStressDescription, setHeatStressDescription] =
     useState<HeatStressDescription>();
   const [forecastHeatStress, setForecastHeatStress] =
@@ -72,6 +80,26 @@ const Home: FC<MapProperties> = ({
       })),
     []
   );
+
+  useEffect(() => {
+    if (typeof globalThis.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQuery = globalThis.matchMedia("(max-width: 639px)");
+    const updateIsMobileViewport = () => {
+      setIsMobileViewport(mediaQuery.matches);
+    };
+
+    updateIsMobileViewport();
+
+    mediaQuery.addEventListener("change", updateIsMobileViewport);
+    return () => {
+      mediaQuery.removeEventListener("change", updateIsMobileViewport);
+    };
+  }, []);
+
+  const showTrendLegend = !isMobileViewport || isMobileGraphLegendOpen;
 
   const generateGraph = useCallback(
     async (
@@ -148,7 +176,9 @@ const Home: FC<MapProperties> = ({
           year_pets,
           trendline_pets,
           increase_per_year,
-          forecastData
+          forecastData,
+          showTrendLegend,
+          isMobileViewport
         );
         setPetGraph(graph);
       } catch {
@@ -159,7 +189,7 @@ const Home: FC<MapProperties> = ({
         setGraphLoading(false);
       }
     },
-    []
+    [showTrendLegend]
   );
 
   const handleSelectChange = useCallback(
@@ -186,11 +216,13 @@ const Home: FC<MapProperties> = ({
     selectedGraphMeasure,
     forecastEnabled,
     forecastYearsAhead,
+    showTrendLegend,
     generateGraph,
   ]);
 
   const handleMarkerClick = useCallback(
     (locationId: number) => {
+      setIsMobileGraphLegendOpen(false);
       setSelectedLocationId(locationId);
       const location = locationMap.get(locationId);
       setSelectedLocation(location);
@@ -228,6 +260,7 @@ const Home: FC<MapProperties> = ({
         />
       </div>
       <Modal
+        mobileFullscreen
         onClose={() => setModalOpen(false)}
         open={modalOpen}
         title={
@@ -242,9 +275,14 @@ const Home: FC<MapProperties> = ({
           forecastYearsAhead={forecastYearsAhead}
           graphLoading={graphLoading}
           heatStressDescription={heatStressDescription}
+          isMobileGraphLegendOpen={isMobileGraphLegendOpen}
+          isMobileViewport={isMobileViewport}
           onForecastToggle={handleForecastToggle}
           onForecastYearsChange={handleForecastYearsChange}
           onSelectChange={handleSelectChange}
+          onToggleMobileGraphLegend={() =>
+            setIsMobileGraphLegendOpen(previous => !previous)
+          }
           petGraph={petGraph}
           selectedGraphMeasure={selectedGraphMeasure}
           selectedLocation={selectedLocation}

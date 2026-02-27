@@ -1,4 +1,10 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, test } from "@playwright/test";
+
+const getRequiredTextContent = async (locator: Locator): Promise<string> => {
+  const text = await locator.textContent();
+  expect(text).not.toBeNull();
+  return text as string;
+};
 
 test.describe("City Selection", () => {
   test("should keep city selection visible on mobile viewport", async ({
@@ -54,9 +60,10 @@ test.describe("City Selection", () => {
     await citySearch.click();
     const filteredOptions = page.getByTestId("searchable-select-option");
     await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
-    const firstOptionLabel = await filteredOptions.first().textContent();
-    expect(firstOptionLabel).not.toBeNull();
-    const cityQuery = firstOptionLabel!.trim().slice(0, 3).toLowerCase();
+    const firstOptionLabel = await getRequiredTextContent(
+      filteredOptions.first()
+    );
+    const cityQuery = firstOptionLabel.trim().slice(0, 3).toLowerCase();
 
     expect(cityQuery.length).toBeGreaterThan(0);
 
@@ -81,9 +88,8 @@ test.describe("City Selection", () => {
     const firstGroupLabel = page
       .locator('[role="listbox"] > div > div')
       .first();
-    const firstStateLabel = await firstGroupLabel.textContent();
-    expect(firstStateLabel).not.toBeNull();
-    const stateQuery = firstStateLabel!.trim().toLowerCase();
+    const firstStateLabel = await getRequiredTextContent(firstGroupLabel);
+    const stateQuery = firstStateLabel.trim().toLowerCase();
 
     expect(stateQuery.length).toBeGreaterThan(0);
 

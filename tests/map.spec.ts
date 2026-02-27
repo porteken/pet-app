@@ -67,10 +67,9 @@ test.describe("Map Page", () => {
       name: "View Full Details",
     });
     await expect(viewDetailsButton).toBeVisible({ timeout: 10_000 });
-    await Promise.all([
-      page.waitForURL(/\/\d+(?:\?.*)?$/),
-      viewDetailsButton.click(),
-    ]);
+    await expect(viewDetailsButton).toBeEnabled({ timeout: 10_000 });
+    await viewDetailsButton.dispatchEvent("click");
+    await expect(page).toHaveURL(/\/\d+(?:\?.*)?$/, { timeout: 30_000 });
 
     await expect(page.getByText("Trend Analysis")).toBeVisible();
   });

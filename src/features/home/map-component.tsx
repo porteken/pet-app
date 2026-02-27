@@ -61,6 +61,7 @@ export const MapComponent = memo<MapComponentProperties>(
     const [Marker, setMarker] = useState<MarkerType>();
     const [isLoaded, setIsLoaded] = useState(false);
     const [customIcon, setCustomIcon] = useState<Icon>();
+    const [isMobileLegendOpen, setIsMobileLegendOpen] = useState(false);
 
     const loadMap = useCallback(async () => {
       const reactLeaflet = await import("react-leaflet");
@@ -170,9 +171,30 @@ export const MapComponent = memo<MapComponentProperties>(
           />
           {markers}
         </MapContainer>
-        <div className="pointer-events-none absolute bottom-6 left-6 z-1000">
+        <div className="pointer-events-none absolute bottom-6 left-6 z-40 hidden sm:block">
           <div className="pointer-events-auto">
             <HeatStressLegend />
+          </div>
+        </div>
+        <div className="pointer-events-none absolute top-1/2 right-0 z-40 -translate-y-1/2 sm:hidden">
+          <div className="pointer-events-auto flex items-center">
+            {isMobileLegendOpen && (
+              <div
+                className="mr-2 max-w-[78vw] shadow-md"
+                id="mobile-heat-stress-legend"
+              >
+                <HeatStressLegend />
+              </div>
+            )}
+            <button
+              aria-controls="mobile-heat-stress-legend"
+              aria-expanded={isMobileLegendOpen}
+              className="rounded-l-lg border border-r-0 border-gray-200 bg-white px-2 py-3 text-xs font-semibold text-gray-900 shadow-md transition-colors hover:bg-gray-50"
+              onClick={() => setIsMobileLegendOpen(previous => !previous)}
+              type="button"
+            >
+              {isMobileLegendOpen ? "Close" : "Heat Stress"}
+            </button>
           </div>
         </div>
       </div>

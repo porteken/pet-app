@@ -11,15 +11,13 @@ vi.mock("@/lib/api/query-client", () => ({
 }));
 
 const MockMarkerComponent = vi.fn(({ eventHandlers, icon, position }) => (
-  <div
+  <button
     data-icon={JSON.stringify(icon)}
     data-position={JSON.stringify(position)}
     data-testid="marker"
     onClick={eventHandlers?.click}
-    onKeyDown={eventHandlers?.click}
     onMouseEnter={eventHandlers?.mouseover}
-    role="button"
-    tabIndex={0}
+    type="button"
   />
 ));
 

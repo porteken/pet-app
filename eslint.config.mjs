@@ -121,6 +121,7 @@ export default [
       "next-env.d.ts",
       "src/__tests__/utils/*",
       "coverage/*",
+      "src/components/ui/*",
     ],
   },
   {

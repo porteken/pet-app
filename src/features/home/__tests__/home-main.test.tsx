@@ -69,13 +69,13 @@ vi.mock("@/features/header-bar/header-bar", () => ({
 vi.mock("@/components/ui/modal", () => ({
   default: vi.fn(({ children, onClose, open, title }) =>
     open ? (
-      <div data-testid="modal" role="dialog">
+      <dialog data-testid="modal" open>
         <div data-testid="modal-title">{title}</div>
         <button data-testid="modal-close" onClick={onClose} type="button">
           Close
         </button>
         {children}
-      </div>
+      </dialog>
     ) : undefined
   ),
 }));

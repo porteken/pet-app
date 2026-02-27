@@ -111,7 +111,7 @@ describe("MapComponent", () => {
     await screen.findByTestId("map-container");
 
     expect(screen.getByTestId("tile-layer")).toBeInTheDocument();
-    const markers = screen.getAllByRole("button");
+    const markers = screen.getAllByTestId("marker");
     expect(markers).toHaveLength(mockLocations.length);
     expect(screen.queryByText("Loading map...")).not.toBeInTheDocument();
   });
@@ -126,7 +126,7 @@ describe("MapComponent", () => {
       />
     );
 
-    const markers = await screen.findAllByRole("button");
+    const markers = await screen.findAllByTestId("marker");
 
     fireEvent.click(markers[0]);
 

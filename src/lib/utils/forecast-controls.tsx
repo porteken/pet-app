@@ -25,7 +25,7 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
             onChange={event => onToggle(event.target.checked)}
             type="checkbox"
           />
-          Show Forecast
+          <span>Show Forecast</span>
         </label>
       </div>
 

@@ -40,9 +40,9 @@ test.describe("City Selection", () => {
     const firstOption = page.getByTestId("searchable-select-option").first();
     await expect(firstOption).toBeVisible();
     const firstCityValue = await firstOption.getAttribute("data-value");
-    expect(firstCityValue).toBeDefined();
+    expect(firstCityValue).not.toBeNull();
     await firstOption.click();
-    await expect(page).toHaveURL(new RegExp(`/${firstCityValue}(\\?.*)?$`));
+    await expect(page).toHaveURL(new RegExp(`/${firstCityValue!}(\\?.*)?$`));
   });
 
   test("should allow searching for cities", async ({ page }) => {
@@ -54,9 +54,9 @@ test.describe("City Selection", () => {
     await citySearch.click();
     const filteredOptions = page.getByTestId("searchable-select-option");
     await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
-    const firstOptionLabel =
-      (await filteredOptions.first().textContent()) ?? "";
-    const cityQuery = firstOptionLabel.trim().slice(0, 3).toLowerCase();
+    const firstOptionLabel = await filteredOptions.first().textContent();
+    expect(firstOptionLabel).not.toBeNull();
+    const cityQuery = firstOptionLabel!.trim().slice(0, 3).toLowerCase();
 
     expect(cityQuery.length).toBeGreaterThan(0);
 
@@ -81,9 +81,9 @@ test.describe("City Selection", () => {
     const firstGroupLabel = page
       .locator('[role="listbox"] > div > div')
       .first();
-    const stateQuery = ((await firstGroupLabel.textContent()) ?? "")
-      .trim()
-      .toLowerCase();
+    const firstStateLabel = await firstGroupLabel.textContent();
+    expect(firstStateLabel).not.toBeNull();
+    const stateQuery = firstStateLabel!.trim().toLowerCase();
 
     expect(stateQuery.length).toBeGreaterThan(0);
 

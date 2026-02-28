@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const MARKER_SELECTOR = ".pet-map-marker-icon, .leaflet-marker-icon";
+import { clickClickableMarker, MARKER_SELECTOR } from "./utils/map-marker";
 
 test.describe("Smoke Tests", () => {
   test("complete user journey: home → location selection → data analysis", async ({
@@ -13,10 +13,7 @@ test.describe("Smoke Tests", () => {
     });
     await expect(page.locator(".leaflet-container")).toBeVisible();
 
-    const marker = page.locator(MARKER_SELECTOR).first();
-    await expect(marker).toBeVisible({ timeout: 10_000 });
-
-    await marker.click();
+    await clickClickableMarker(page);
 
     await expect(
       page.getByRole("button", { name: "View Full Details" })
@@ -109,9 +106,7 @@ test.describe("Smoke Tests", () => {
 
     await page.setViewportSize({ height: 1024, width: 768 });
 
-    await expect(marker).toBeVisible({ timeout: 10_000 });
-
-    await marker.click();
+    await clickClickableMarker(page);
 
     const viewDetailsButton = page.getByRole("button", {
       name: "View Full Details",

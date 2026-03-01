@@ -124,8 +124,8 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   ]);
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-lg bg-white p-3 shadow-md sm:p-6">
+    <div className="h-full">
+      <div className="flex h-full flex-col rounded-lg bg-white p-3 shadow-md sm:p-6">
         <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">
           Reference Data
         </h2>
@@ -161,7 +161,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
           </button>
         </div>
         <div
-          className="h-[clamp(220px,42vh,520px)] overflow-hidden sm:h-[clamp(380px,68vh,700px)]"
+          className="mt-auto h-[clamp(220px,42vh,520px)] overflow-hidden sm:h-[clamp(450px,70vh,850px)]"
           id="reference-data-graph"
         >
           {referenceGraph}

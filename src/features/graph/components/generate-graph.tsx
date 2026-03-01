@@ -35,13 +35,15 @@ interface PlotlyTrace {
   y: number[];
 }
 
-const GRAPH_HEIGHT_CLASS =
-  "h-[clamp(220px,42vh,520px)] sm:h-[clamp(360px,62vh,600px)]";
+const getGraphFillHeightClass = (useCompactDesktopHeight: boolean): string =>
+  useCompactDesktopHeight
+    ? "h-[clamp(220px,42vh,520px)] sm:h-[clamp(300px,45vh,500px)]"
+    : "h-[clamp(220px,42vh,520px)] sm:h-[clamp(450px,70vh,850px)]";
 
 const Plot = dynamic(() => import("react-plotly.js"), {
   loading: () => (
     <div
-      className={`flex items-center justify-center text-gray-500 ${GRAPH_HEIGHT_CLASS}`}
+      className={`flex items-center justify-center text-gray-500 ${getGraphFillHeightClass(false)}`}
     >
       Loading chart...
     </div>
@@ -83,8 +85,11 @@ export const GenerateTrendGraph = (
     upperBound90: number[];
   },
   showLegend = true,
-  isMobileViewport = false
+  isMobileViewport = false,
+  useCompactDesktopHeight = false
 ): React.ReactElement => {
+  const graphFillHeightClass = getGraphFillHeightClass(useCompactDesktopHeight);
+
   if (
     years.length === 0 ||
     year_pets.length === 0 ||
@@ -92,7 +97,7 @@ export const GenerateTrendGraph = (
   ) {
     return (
       <div
-        className={`flex items-center justify-center text-gray-500 ${GRAPH_HEIGHT_CLASS}`}
+        className={`flex items-center justify-center text-gray-500 ${graphFillHeightClass}`}
       >
         No data available for the selected parameters
       </div>
@@ -229,10 +234,10 @@ export const GenerateTrendGraph = (
 
   return (
     <div
-      className={GRAPH_HEIGHT_CLASS}
+      className={graphFillHeightClass}
       style={{
         margin: "0 auto",
-        maxWidth: 900,
+        maxWidth: 1100,
         width: "100%",
       }}
     >
@@ -258,6 +263,8 @@ export const GenerateReferenceGraph = async (
   showLegend = true,
   isMobileViewport = false
 ): Promise<React.ReactElement> => {
+  const graphFillHeightClass = getGraphFillHeightClass(false);
+
   if (
     dates.length === 0 ||
     referencePets.length === 0 ||
@@ -265,7 +272,7 @@ export const GenerateReferenceGraph = async (
   ) {
     return (
       <div
-        className={`flex items-center justify-center text-gray-500 ${GRAPH_HEIGHT_CLASS}`}
+        className={`flex items-center justify-center text-gray-500 ${graphFillHeightClass}`}
       >
         No data available for the selected parameters
       </div>
@@ -345,7 +352,7 @@ export const GenerateReferenceGraph = async (
 
   return (
     <div
-      className={GRAPH_HEIGHT_CLASS}
+      className={graphFillHeightClass}
       style={{
         margin: "0 auto",
         maxWidth: 900,

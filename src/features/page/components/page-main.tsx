@@ -43,7 +43,7 @@ const Main: FC<PageProperties> = ({
           </div>
 
           <div className="min-w-0 flex-1">
-            <div className="grid gap-8 lg:grid-cols-2">
+            <div className="grid items-stretch gap-8 lg:grid-cols-2">
               <TrendAnalysis
                 id={id}
                 initialForecastEnabled={initialForecastEnabled}

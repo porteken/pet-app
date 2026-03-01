@@ -81,14 +81,14 @@ export const GraphSection = memo<GraphSectionProperties>(
 
     const graphContent = useMemo(
       () => (
-        <div className="flex min-h-[clamp(220px,42vh,520px)] w-full max-w-full items-center justify-center sm:min-h-75 sm:max-w-4xl">
+        <div className="flex min-h-[clamp(220px,42vh,520px)] w-full max-w-full items-center justify-center sm:min-h-[500px] sm:max-w-5xl">
           {graphLoading ? loadingUI : petGraph}
         </div>
       ),
       [graphLoading, loadingUI, petGraph]
     );
     return (
-      <div className="flex w-full max-w-full min-w-0 flex-col items-center space-y-3 sm:min-h-85 sm:max-w-[90vw] sm:min-w-[320px] sm:space-y-4">
+      <div className="flex w-full max-w-full min-w-0 flex-col items-center space-y-3 sm:min-h-0 sm:max-w-[95vw] sm:min-w-[320px] sm:space-y-3">
         <div className="w-full max-w-md space-y-3 sm:space-y-4">
           <Select
             className="w-full"

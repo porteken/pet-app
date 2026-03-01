@@ -135,7 +135,8 @@ const Home: FC<MapProperties> = ({
           snapshot.increase_per_year,
           snapshot.forecastData,
           showTrendLegend,
-          isMobileViewport
+          isMobileViewport,
+          false
         );
         setPetGraph(graph);
       } catch {
@@ -204,6 +205,14 @@ const Home: FC<MapProperties> = ({
     [forecastEnabled]
   );
 
+  const desktopDialogHeightClass = useMemo(() => {
+    if (graphLoading) {
+      return "sm:!top-1/2 sm:!-translate-y-1/2 sm:!max-h-[90dvh] sm:!overflow-y-auto";
+    }
+
+    return "sm:!top-1/2 sm:!-translate-y-1/2 sm:!h-[92dvh] sm:!max-h-[98dvh] sm:!w-[95vw] sm:!max-w-5xl sm:!overflow-y-auto";
+  }, [graphLoading]);
+
   return (
     <div className="flex h-dvh w-full flex-col">
       <div className="z-10010 shrink-0">
@@ -217,6 +226,7 @@ const Home: FC<MapProperties> = ({
         />
       </div>
       <Modal
+        dialogClassName={desktopDialogHeightClass}
         mobileFullscreen
         onClose={() => setModalOpen(false)}
         open={modalOpen}

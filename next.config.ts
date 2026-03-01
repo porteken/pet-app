@@ -2,10 +2,12 @@ import type { NextConfig } from "next";
 
 import initializeBundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
+import { fileURLToPath } from "node:url";
 
 const withBundleAnalyzer = initializeBundleAnalyzer({
   enabled: process.env.BUNDLE_ANALYZER_ENABLED === "true",
 });
+const projectRoot = fileURLToPath(new URL(".", import.meta.url));
 
 const nextConfig: NextConfig = {
   images: {
@@ -29,6 +31,7 @@ const nextConfig: NextConfig = {
       underscore: "lodash",
     },
     resolveExtensions: [".mdx", ".tsx", ".ts", ".jsx", ".js", ".json"],
+    root: projectRoot,
   },
 };
 

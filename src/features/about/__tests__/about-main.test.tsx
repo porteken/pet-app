@@ -10,7 +10,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("@/features/header-bar/header-bar", () => ({
+vi.mock("@/features/header-bar", () => ({
   HeaderBar: vi.fn(({ LocationOptions }) => (
     <div data-testid="header-bar">
       HeaderBar with {LocationOptions?.length || 0} locations
@@ -18,7 +18,7 @@ vi.mock("@/features/header-bar/header-bar", () => ({
   )),
 }));
 
-import AboutMain from "../about-main";
+import AboutMain from "../components/about-main";
 
 const mockLocationOptions = [
   {

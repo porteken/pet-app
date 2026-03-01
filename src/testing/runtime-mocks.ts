@@ -1,3 +1,5 @@
+export type Primitive = number | string;
+
 type FilterOperation = {
   column: string;
   type: "eq" | "gt" | "gte" | "lt" | "lte";
@@ -22,7 +24,6 @@ type MockSupabaseQuery = Promise<MockListResult> & {
   single: () => Promise<MockSingleResult>;
 };
 type OrderOperation = { ascending: boolean; column: string };
-type Primitive = number | string;
 
 const YEARS = Array.from({ length: 26 }, (_, index) => 2000 + index);
 const FORECAST_YEARS = Array.from({ length: 75 }, (_, index) => 2026 + index);
@@ -368,6 +369,9 @@ const createMockSupabaseQuery = (table: string): MockSupabaseQuery => {
 
   return query;
 };
+
+export const getRuntimeMockTableRows = (table: string) =>
+  (MOCK_TABLES[table] ?? []).map(row => ({ ...row }));
 
 export const createRuntimeMockSupabaseClient = () => ({
   from: createNoopFunction((table: string) => createMockSupabaseQuery(table)),

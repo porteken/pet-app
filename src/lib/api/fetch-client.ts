@@ -4,17 +4,18 @@ import type { TrendGraphDataProperties } from "@/types/types";
 
 import { createClient } from "@/config/supabase/client";
 import { mapTrendRowsToGraphData } from "@/lib/api/graph-data";
+import {
+  formatSchemaValidationError,
+  isSchemaValidationError,
+  parseForecastRows,
+  parseHistoricalYearRows,
+  parseTrendGraphRows,
+} from "@/lib/api/schemas";
 import { FetchError } from "@/lib/utils/errors";
 import {
   validateLocationId,
   validateTrendOption,
 } from "@/lib/utils/validation";
-
-interface PetYearAvgMaxData {
-  location_id: number;
-  pet: number;
-  year: number;
-}
 
 import { apiRequest, hasError } from "./api-client";
 
@@ -48,13 +49,21 @@ export async function FetchForecastData(
       .select("year")
       .eq("location_id", locationId)
       .order("year", { ascending: false })
-      .limit(1)) as { data: null | Pick<PetYearAvgMaxData, "year">[] };
+      .limit(1)) as {
+      data: Array<{ year: number | string }> | null;
+    };
 
-    if (!historicalData || historicalData.length === 0) {
+    const validatedHistoricalData = parseWithFetchError(
+      "Historical year",
+      parseHistoricalYearRows,
+      historicalData ?? []
+    );
+
+    if (validatedHistoricalData.length === 0) {
       return;
     }
 
-    const lastHistoricalYear = historicalData[0].year;
+    const lastHistoricalYear = validatedHistoricalData[0].year;
     const targetYear = lastHistoricalYear + yearsAhead;
 
     const { data, error } = await supabase
@@ -69,15 +78,21 @@ export async function FetchForecastData(
       throw new FetchError("Database error fetching forecast data", error);
     }
 
-    if (!data || data.length === 0) {
+    const validatedForecastData = parseWithFetchError(
+      "Forecast",
+      parseForecastRows,
+      data ?? []
+    );
+
+    if (validatedForecastData.length === 0) {
       return;
     }
 
     return {
-      forecastValues: data.map(d => Number(d.pet)),
-      forecastYears: data.map(d => d.year),
-      lowerBound10: data.map(d => Number(d.lower)),
-      upperBound90: data.map(d => Number(d.upper)),
+      forecastValues: validatedForecastData.map(({ pet }) => pet),
+      forecastYears: validatedForecastData.map(({ year }) => year),
+      lowerBound10: validatedForecastData.map(({ lower }) => lower),
+      upperBound90: validatedForecastData.map(({ upper }) => upper),
     };
   });
 
@@ -139,7 +154,13 @@ async function fetchTrendData(
   supabase: SupabaseClient,
   tableName: string,
   locationId: number
-): Promise<PetYearAvgMaxData[]> {
+): Promise<
+  Array<{
+    location_id: number;
+    pet: number;
+    year: number;
+  }>
+> {
   const { data, error } = await supabase
     .from(tableName)
     .select("year, pet, location_id")
@@ -150,5 +171,21 @@ async function fetchTrendData(
     throw new FetchError("Database error fetching trend data", error);
   }
 
-  return data || [];
+  return parseWithFetchError("Trend graph", parseTrendGraphRows, data ?? []);
 }
+
+const parseWithFetchError = <T>(
+  resource: string,
+  parser: (payload: unknown) => T,
+  payload: unknown
+): T => {
+  try {
+    return parser(payload);
+  } catch (error) {
+    if (isSchemaValidationError(error)) {
+      throw new FetchError(formatSchemaValidationError(resource, error), error);
+    }
+
+    throw error;
+  }
+};

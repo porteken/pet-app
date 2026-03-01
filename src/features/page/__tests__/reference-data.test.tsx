@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/features/graph/generate-graph", () => ({
+vi.mock("@/features/graph", () => ({
   GenerateReferenceGraph: vi
     .fn()
     .mockResolvedValue(
@@ -18,10 +18,10 @@ vi.mock("@/lib/api/fetch-client", () => ({
   }),
 }));
 
-import { GenerateReferenceGraph } from "@/features/graph/generate-graph";
+import { GenerateReferenceGraph } from "@/features/graph";
 import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
 
-import { ReferenceData } from "../reference-data";
+import { ReferenceData } from "../components/reference-data";
 
 const defaultProps = {
   CurrentDates: [new Date("2023-06-01"), new Date("2023-06-02")],

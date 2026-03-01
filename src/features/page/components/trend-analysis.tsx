@@ -2,15 +2,15 @@
 
 import React from "react";
 
-import { GenerateTrendGraph } from "@/features/graph/generate-graph";
+import { GenerateTrendGraph } from "@/features/graph";
 import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { ForecastControls } from "@/lib/utils/forecast-controls";
+import { type HeatStressDescription } from "@/lib/utils/heat-stress";
 import {
-  getForecastHeatStressDescription,
-  getHeatStressDescription,
-  type HeatStressDescription,
-} from "@/lib/utils/heat-stress";
+  buildTrendAnalysisResult,
+  type TrendGraphSnapshot,
+} from "@/lib/utils/trend-analysis";
 
 interface TrendAnalysisProperties {
   id: number;
@@ -18,20 +18,6 @@ interface TrendAnalysisProperties {
   initialForecastYearsAhead: number;
   initialGraphMeasure: string;
   onMeasureChange: (measure: string) => Promise<void>;
-}
-
-interface TrendGraphSnapshot {
-  forecastData?: {
-    forecastValues: number[];
-    forecastYears: number[];
-    lowerBound10: number[];
-    upperBound90: number[];
-  };
-  increase_per_year: number;
-  option: string;
-  trendline_pets: number[];
-  year_pets: number[];
-  years: number[];
 }
 
 const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
@@ -92,69 +78,20 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const generatePetTrendGraph = React.useCallback(
     async (option: string, enableForecast: boolean, yearsAhead: number) => {
       try {
-        const trendGraphDataPromise = FetchTrendGraphData(option, id);
-        const forecastDataPromise = enableForecast
-          ? FetchForecastData(id, yearsAhead)
-          : undefined;
-        const { increase_per_year, trendline_pets, year_pets, years } =
-          await trendGraphDataPromise;
-        const forecastData = forecastDataPromise
-          ? await forecastDataPromise
-          : undefined;
-
-        if (years.length === 0 || year_pets.length === 0) {
-          setCurrentHeatStress(undefined);
-          setForecastHeatStress(undefined);
-          setTrendGraphSnapshot({
-            forecastData,
-            increase_per_year: 0,
+        const { forecastHeatStress, heatStressDescription, snapshot } =
+          await buildTrendAnalysisResult({
+            enableForecast,
+            fetchForecastData: () => FetchForecastData(id, yearsAhead),
+            fetchTrendGraphData: () => FetchTrendGraphData(option, id),
             option,
-            trendline_pets: [],
-            year_pets: [],
-            years: [],
           });
-          return;
-        }
 
-        const currentYear = years.at(-1)!;
-        const currentYearIndex = years.length - 1;
-        const currentPetValue = year_pets[currentYearIndex];
-
-        setCurrentHeatStress(
-          getHeatStressDescription(currentPetValue, option, currentYear)
-        );
-
-        if (
-          enableForecast &&
-          forecastData &&
-          forecastData.forecastValues.length > 0
-        ) {
-          const finalForecastYear = forecastData.forecastYears.at(-1)!;
-          const finalForecastValue = forecastData.forecastValues.at(-1)!;
-          const finalLowerBound25 = forecastData.lowerBound10.at(-1)!;
-          const finalUpperBound75 = forecastData.upperBound90.at(-1)!;
-          setForecastHeatStress(
-            getForecastHeatStressDescription(
-              finalForecastValue,
-              finalForecastYear,
-              finalLowerBound25,
-              finalUpperBound75
-            )
-          );
-        } else {
-          setForecastHeatStress(undefined);
-        }
-
-        setTrendGraphSnapshot({
-          forecastData,
-          increase_per_year,
-          option,
-          trendline_pets,
-          year_pets,
-          years,
-        });
+        setCurrentHeatStress(heatStressDescription);
+        setForecastHeatStress(forecastHeatStress);
+        setTrendGraphSnapshot(snapshot);
       } catch {
         setTrendGraphSnapshot({
+          forecastData: undefined,
           increase_per_year: 0,
           option,
           trendline_pets: [],

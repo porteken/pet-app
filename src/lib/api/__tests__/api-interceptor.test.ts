@@ -1,4 +1,15 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+
+import { server } from "@/testing/server";
 
 import {
   apiRequest,
@@ -21,6 +32,14 @@ vi.mock("@/lib/utils/errors", () => ({
 
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch;
+
+beforeAll(() => {
+  server.close();
+});
+
+afterAll(() => {
+  server.listen({ onUnhandledRequest: "bypass" });
+});
 
 describe("handleApiResponse", () => {
   let mockCreateError: any;

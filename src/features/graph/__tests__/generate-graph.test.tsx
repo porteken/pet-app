@@ -3,7 +3,10 @@ import "@testing-library/jest-dom";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { GenerateReferenceGraph, GenerateTrendGraph } from "../generate-graph";
+import {
+  GenerateReferenceGraph,
+  GenerateTrendGraph,
+} from "../components/generate-graph";
 
 const MockPlot = ({ config, data, layout }: any) => (
   <div data-testid="plotly-graph">

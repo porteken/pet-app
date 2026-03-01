@@ -6,6 +6,18 @@ import {
   mapReferenceRowsToGraphData,
   mapTrendRowsToGraphData,
 } from "@/lib/api/graph-data";
+import {
+  formatSchemaValidationError,
+  isSchemaValidationError,
+  parseLocationRows,
+  parseRankingChangeRows,
+  parseRankingForecastRows,
+  parseRankingLocationRows,
+  parseRankingPercentileRows,
+  parseRankingPetRows,
+  parseReferenceGraphRows,
+  parseTrendGraphRows,
+} from "@/lib/api/schemas";
 import { DatabaseError } from "@/lib/utils/errors";
 import {
   FetchLocationProperties,
@@ -94,11 +106,37 @@ export async function FetchCityRankings(year: number): Promise<
     );
   }
 
+  const validatedPetAvg = parseWithDatabaseError(
+    "City rankings PET average",
+    parseRankingPetRows,
+    petAvg
+  );
+  const validatedPetMax = parseWithDatabaseError(
+    "City rankings PET max",
+    parseRankingPetRows,
+    petMax
+  );
+  const validatedLocations = parseWithDatabaseError(
+    "City rankings locations",
+    parseRankingLocationRows,
+    locations
+  );
+  const validatedPercentiles = parseWithDatabaseError(
+    "City rankings percentiles",
+    parseRankingPercentileRows,
+    percentiles_data
+  );
+  const validatedFuturePetData = parseWithDatabaseError(
+    "City rankings forecast",
+    parseRankingForecastRows,
+    futurePetData
+  );
+
   const futurePetMap = new Map<number, { lower: number; upper: number }>();
-  for (const { location_id, lower, upper } of futurePetData) {
+  for (const { location_id, lower, upper } of validatedFuturePetData) {
     futurePetMap.set(location_id, {
-      lower: Number(lower),
-      upper: Number(upper),
+      lower,
+      upper,
     });
   }
 
@@ -109,14 +147,17 @@ export async function FetchCityRankings(year: number): Promise<
     );
   }
 
+  const validatedPetChanges = parseWithDatabaseError(
+    "City rankings PET change",
+    parseRankingChangeRows,
+    petChangeData
+  );
+
   const changePerDecadeMap = new Map<number, number>(
-    petChangeData.map(({ change, location_id }) => [
-      location_id,
-      Number(change),
-    ])
+    validatedPetChanges.map(({ change, location_id }) => [location_id, change])
   );
   const petMaxMap = new Map<number, number>(
-    petMax.map(({ location_id, pet }) => [location_id, Number(pet)])
+    validatedPetMax.map(({ location_id, pet }) => [location_id, pet])
   );
   const locationMap = new Map<
     number,
@@ -125,19 +166,19 @@ export async function FetchCityRankings(year: number): Promise<
       state: string;
     }
   >(
-    locations.map(({ city, location_id, state }) => [
+    validatedLocations.map(({ city, location_id, state }) => [
       location_id,
       { city, state },
     ])
   );
   const percentileMap = new Map<number, { p10: number; p90: number }>(
-    percentiles_data.map(({ location_id, p10, p90 }) => [
+    validatedPercentiles.map(({ location_id, p10, p90 }) => [
       location_id,
-      { p10: Number(p10), p90: Number(p90) },
+      { p10, p90 },
     ])
   );
 
-  const combinedData = petAvg.flatMap(({ location_id, pet }) => {
+  const combinedData = validatedPetAvg.flatMap(({ location_id, pet }) => {
     const location = locationMap.get(location_id);
     const maxPet = petMaxMap.get(location_id);
     const percentiles = percentileMap.get(location_id);
@@ -150,7 +191,7 @@ export async function FetchCityRankings(year: number): Promise<
 
     return [
       {
-        avg_pet: Number(pet),
+        avg_pet: pet,
         changePerDecade: changePerDecadeMap.get(location_id) ?? undefined,
         city: location.city,
         FutureValueLower: futurePet?.lower ?? undefined,
@@ -187,11 +228,17 @@ export async function FetchLocations(): Promise<FetchLocationProperties> {
     );
   }
 
+  const validatedLocations = parseWithDatabaseError(
+    "Locations",
+    parseLocationRows,
+    locations
+  );
+
   const groupedByState = new Map<
     string,
     Array<{ key: number; title: string }>
   >();
-  for (const { city, location_id, state } of locations) {
+  for (const { city, location_id, state } of validatedLocations) {
     const stateLocations = groupedByState.get(state);
     if (stateLocations) {
       stateLocations.push({ key: location_id, title: city });
@@ -207,7 +254,7 @@ export async function FetchLocations(): Promise<FetchLocationProperties> {
       title: state,
     }));
 
-  return { LocationOptions, locations };
+  return { LocationOptions, locations: validatedLocations };
 }
 
 export async function FetchReferenceGraphData(
@@ -241,7 +288,13 @@ export async function FetchReferenceGraphData(
     );
   }
 
-  return mapReferenceRowsToGraphData(data);
+  const validatedRows = parseWithDatabaseError(
+    "Reference graph",
+    parseReferenceGraphRows,
+    data
+  );
+
+  return mapReferenceRowsToGraphData(validatedRows);
 }
 
 export async function FetchTrendGraphData(
@@ -274,7 +327,13 @@ export async function FetchTrendGraphData(
     );
   }
 
-  return mapTrendRowsToGraphData(data);
+  const validatedRows = parseWithDatabaseError(
+    "Trend graph",
+    parseTrendGraphRows,
+    data
+  );
+
+  return mapTrendRowsToGraphData(validatedRows);
 }
 
 function isValidLocationId(locationId: number): boolean {
@@ -288,3 +347,22 @@ function isValidTrendOption(option: string): boolean {
 function isValidYear(year: string): boolean {
   return /^\d{4}$/.test(year);
 }
+
+const parseWithDatabaseError = <T>(
+  resource: string,
+  parser: (payload: unknown) => T,
+  payload: unknown
+): T => {
+  try {
+    return parser(payload);
+  } catch (error) {
+    if (isSchemaValidationError(error)) {
+      throw new DatabaseError(
+        formatSchemaValidationError(resource, error),
+        error
+      );
+    }
+
+    throw error;
+  }
+};

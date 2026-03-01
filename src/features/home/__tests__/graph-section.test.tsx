@@ -77,7 +77,7 @@ vi.mock("@/lib/utils/forecast-controls", () => ({
   ),
 }));
 
-import { GraphSection } from "../graph-section";
+import { GraphSection } from "../components/graph-section";
 
 const defaultProps = {
   forecastEnabled: false,

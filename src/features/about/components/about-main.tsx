@@ -3,9 +3,9 @@
 import Link from "next/link";
 import React, { FC } from "react";
 
-import { HeaderBar } from "@/features/header-bar/header-bar";
+import { HeaderBar } from "@/features/header-bar";
 
-import { AboutProperties } from "./types";
+import { AboutProperties } from "../model/types";
 const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => {
   return (
     <>

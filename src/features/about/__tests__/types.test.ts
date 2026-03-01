@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { AboutProperties } from "../types";
+import type { AboutProperties } from "../model/types";
 
 describe("About Types", () => {
   describe("AboutProperties", () => {

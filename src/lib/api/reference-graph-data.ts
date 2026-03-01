@@ -4,15 +4,13 @@ import type { ReferenceGraphDataProperties } from "@/types/types";
 
 import { createClient } from "@/config/supabase/client";
 import { mapReferenceRowsToGraphData } from "@/lib/api/graph-data";
+import {
+  formatSchemaValidationError,
+  isSchemaValidationError,
+  parseReferenceGraphRows,
+} from "@/lib/api/schemas";
 import { FetchError } from "@/lib/utils/errors";
 import { validateLocationId, validateYear } from "@/lib/utils/validation";
-
-interface PetYearReferenceData {
-  date: string;
-  location_id: number;
-  pet: number;
-  year: string;
-}
 
 export async function FetchReferenceGraphData(
   year: string,
@@ -36,7 +34,14 @@ async function fetchData(
   supabase: SupabaseClient,
   locationId: number,
   year: string
-): Promise<PetYearReferenceData[]> {
+): Promise<
+  Array<{
+    date: string;
+    location_id: number;
+    pet: number;
+    year?: string;
+  }>
+> {
   const { data, error } = await supabase
     .from("pet_year")
     .select()
@@ -51,5 +56,16 @@ async function fetchData(
     );
   }
 
-  return data || [];
+  try {
+    return parseReferenceGraphRows(data ?? []);
+  } catch (validationError) {
+    if (isSchemaValidationError(validationError)) {
+      throw new FetchError(
+        formatSchemaValidationError("Reference graph", validationError),
+        validationError
+      );
+    }
+
+    throw validationError;
+  }
 }

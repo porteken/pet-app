@@ -1,50 +1,58 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import Page from "../page";
+const {
+  mockGetForecastPreferencesFromCookies,
+  mockGetGraphMeasureFromCookies,
+  mockGetLocationData,
+  mockHome,
+  mockLocationErrorHandler,
+  mockPageLoader,
+} = vi.hoisted(() => ({
+  mockGetForecastPreferencesFromCookies: vi.fn(),
+  mockGetGraphMeasureFromCookies: vi.fn(),
+  mockGetLocationData: vi.fn(),
+  mockHome: vi.fn((_properties?: any) => (
+    <div data-testid="home-component">Home Component</div>
+  )),
+  mockLocationErrorHandler: vi.fn((_properties?: any) => (
+    <div data-testid="error-handler">Error Handler</div>
+  )),
+  mockPageLoader: vi.fn(() => <div data-testid="page-loader">Loading...</div>),
+}));
 
-const mockHome = vi.fn(() => (
-  <div data-testid="home-component">Home Component</div>
-));
-vi.mock("@/features/home/home-main", () => ({
+vi.mock("@/features/home", () => ({
   default: mockHome,
 }));
 
-const mockGetGraphMeasureFromCookies = vi.fn();
-const mockGetForecastPreferencesFromCookies = vi.fn();
-const mockGetLocationData = vi.fn();
 vi.mock("@/lib/utils/app/page-helpers", () => ({
   getForecastPreferencesFromCookies: mockGetForecastPreferencesFromCookies,
   getGraphMeasureFromCookies: mockGetGraphMeasureFromCookies,
   getLocationData: mockGetLocationData,
 }));
 
-const mockLocationErrorHandler = vi.fn(() => (
-  <div data-testid="error-handler">Error Handler</div>
-));
 vi.mock("@/components/app/error-handlers", () => ({
   LocationErrorHandler: mockLocationErrorHandler,
 }));
 
-const mockPageLoader = vi.fn(() => (
-  <div data-testid="page-loader">Loading...</div>
-));
 vi.mock("@/components/app/page-loader", () => ({
   PageLoader: mockPageLoader,
 }));
 
 vi.mock("next/dynamic", () => ({
   default: vi.fn((_importFunction, options) => {
-    const DynamicComponent = (_properties: any) => {
+    const DynamicComponent = (properties: any) => {
       if (options?.loading) {
-        return mockHome();
+        return mockHome(properties);
       }
-      return mockHome();
+      return mockHome(properties);
     };
     DynamicComponent.displayName = "DynamicHome";
     return DynamicComponent;
   }),
 }));
+
+import Page from "../page";
 
 describe("Page Component", () => {
   beforeEach(() => {
@@ -73,7 +81,7 @@ describe("Page Component", () => {
     render(await Page());
 
     expect(screen.getByTestId("home-component")).toBeInTheDocument();
-    expect(mockHome).toHaveBeenCalledWith({
+    expect(mockHome.mock.calls.at(-1)?.[0]).toEqual({
       initialForecastEnabled: false,
       initialForecastYearsAhead: 10,
       initialGraphMeasure: "temperature",
@@ -95,7 +103,7 @@ describe("Page Component", () => {
     render(await Page());
 
     expect(screen.getByTestId("error-handler")).toBeInTheDocument();
-    expect(mockLocationErrorHandler).toHaveBeenCalledWith({ error });
+    expect(mockLocationErrorHandler.mock.calls.at(-1)?.[0]).toEqual({ error });
     expect(mockHome).not.toHaveBeenCalled();
   });
 
@@ -115,7 +123,7 @@ describe("Page Component", () => {
     render(await Page());
 
     expect(screen.getByTestId("error-handler")).toBeInTheDocument();
-    expect(mockLocationErrorHandler).toHaveBeenCalledWith({ error });
+    expect(mockLocationErrorHandler.mock.calls.at(-1)?.[0]).toEqual({ error });
     expect(mockHome).not.toHaveBeenCalled();
   });
 
@@ -160,7 +168,7 @@ describe("Page Component", () => {
 
       render(await Page());
 
-      expect(mockHome).toHaveBeenCalledWith({
+      expect(mockHome.mock.calls.at(-1)?.[0]).toEqual({
         initialForecastEnabled: false,
         initialForecastYearsAhead: 10,
         initialGraphMeasure: graphMeasure,
@@ -186,7 +194,7 @@ describe("Page Component", () => {
     render(await Page());
 
     expect(screen.getByTestId("home-component")).toBeInTheDocument();
-    expect(mockHome).toHaveBeenCalledWith({
+    expect(mockHome.mock.calls.at(-1)?.[0]).toEqual({
       initialForecastEnabled: false,
       initialForecastYearsAhead: 10,
       initialGraphMeasure: "temperature",
@@ -214,8 +222,10 @@ describe("Page Component", () => {
 
       render(await Page());
 
-      expect(screen.getByTestId("error-handler")).toBeInTheDocument();
-      expect(mockLocationErrorHandler).toHaveBeenCalledWith({ error });
+      expect(screen.getAllByTestId("error-handler").length).toBeGreaterThan(0);
+      expect(mockLocationErrorHandler.mock.calls.at(-1)?.[0]).toEqual({
+        error,
+      });
       expect(mockHome).not.toHaveBeenCalled();
     }
   });
@@ -233,7 +243,7 @@ describe("Page Component", () => {
 
     render(await Page());
 
-    expect(mockLocationErrorHandler).toHaveBeenCalledWith({
+    expect(mockLocationErrorHandler.mock.calls.at(-1)?.[0]).toEqual({
       error: expect.objectContaining({
         message: "Custom error",
         name: "CustomError",
@@ -270,7 +280,7 @@ describe("Page Component", () => {
     render(await pagePromise);
 
     expect(screen.getByTestId("home-component")).toBeInTheDocument();
-    expect(mockHome).toHaveBeenCalledWith({
+    expect(mockHome.mock.calls.at(-1)?.[0]).toEqual({
       initialForecastEnabled: true,
       initialForecastYearsAhead: 25,
       initialGraphMeasure: "humidity",
@@ -307,7 +317,7 @@ describe("Page Component", () => {
     render(await Page());
 
     expect(screen.getByTestId("home-component")).toBeInTheDocument();
-    expect(mockHome).toHaveBeenCalledWith({
+    expect(mockHome.mock.calls.at(-1)?.[0]).toEqual({
       initialForecastEnabled: false,
       initialForecastYearsAhead: 10,
       initialGraphMeasure: "temperature",

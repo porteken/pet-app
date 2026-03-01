@@ -3,7 +3,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useTrendGraphData } from "../use-trend-graph-data";
+import { useTrendGraphData } from "../hooks/use-trend-graph-data";
 
 vi.mock("@/lib/api/fetch-client", () => ({
   FetchTrendGraphData: vi.fn(),

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { cookies } from "next/headers";
 
-import { RankingsMain } from "@/features/rankings/rankings-main";
+import { RankingsMain } from "@/features/rankings";
 import { FetchCityRankings, FetchLocations } from "@/lib/api/fetch-server";
 import {
   RANKINGS_HEAT_STRESS_COOKIE_NAME,

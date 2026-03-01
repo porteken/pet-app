@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { HeaderBar } from "../header-bar";
+import { HeaderBar } from "../components/header-bar";
 
 Object.defineProperty(globalThis, "matchMedia", {
   value: vi.fn().mockImplementation(query => ({

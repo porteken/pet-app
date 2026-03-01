@@ -408,10 +408,34 @@ describe("fetch-server", () => {
   describe("FetchLocations", () => {
     it("should fetch and format location data successfully", async () => {
       const mockLocations = [
-        { city: "Boston", location_id: 1, state: "Massachusetts" },
-        { city: "Cambridge", location_id: 2, state: "Massachusetts" },
-        { city: "Austin", location_id: 3, state: "Texas" },
-        { city: "Dallas", location_id: 4, state: "Texas" },
+        {
+          city: "Boston",
+          lat: 42.3601,
+          lng: -71.0589,
+          location_id: 1,
+          state: "Massachusetts",
+        },
+        {
+          city: "Cambridge",
+          lat: 42.3736,
+          lng: -71.1097,
+          location_id: 2,
+          state: "Massachusetts",
+        },
+        {
+          city: "Austin",
+          lat: 30.2672,
+          lng: -97.7431,
+          location_id: 3,
+          state: "Texas",
+        },
+        {
+          city: "Dallas",
+          lat: 32.7767,
+          lng: -96.797,
+          location_id: 4,
+          state: "Texas",
+        },
       ];
 
       const mockQuery = {
@@ -511,8 +535,8 @@ describe("fetch-server", () => {
     });
     it("should fetch trend data successfully", async () => {
       const mockData = [
-        { date: "2020-01-01", pet: 25.5 },
-        { date: "2021-01-01", pet: 26.2 },
+        { date: "2020-01-01", location_id: 5, pet: 25.5, year: "2023" },
+        { date: "2021-01-01", location_id: 5, pet: 26.2, year: "2023" },
       ];
 
       const mockQuery = {
@@ -559,8 +583,8 @@ describe("fetch-server", () => {
   describe("FetchTrendGraphData", () => {
     it("should fetch trend data successfully", async () => {
       const mockData = [
-        { pet: 25.5, year: 2020 },
-        { pet: 26.2, year: 2021 },
+        { location_id: 1, pet: 25.5, year: 2020 },
+        { location_id: 1, pet: 26.2, year: 2021 },
       ];
 
       const mockQuery = {
@@ -647,7 +671,7 @@ describe("fetch-server", () => {
     });
 
     it("should handle both avg and max options", async () => {
-      const mockData = [{ pet: 25.5, year: 2020 }];
+      const mockData = [{ location_id: 1, pet: 25.5, year: 2020 }];
       const mockQuery = {
         eq: vi.fn().mockReturnThis(),
         order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),

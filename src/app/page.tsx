@@ -8,7 +8,7 @@ import {
   getLocationData,
 } from "@/lib/utils/app/page-helpers";
 
-const Home = dynamic(() => import("@/features/home/home-main"), {
+const Home = dynamic(() => import("@/features/home"), {
   loading: PageLoader,
 });
 

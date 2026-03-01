@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/features/graph/generate-graph", () => ({
+vi.mock("@/features/graph", () => ({
   GenerateTrendGraph: vi
     .fn()
     .mockReturnValue(<div data-testid="mock-trend-graph">Trend Graph</div>),
@@ -64,7 +64,7 @@ vi.mock("@/lib/actions/actions", () => ({
   setForecastPreferences: vi.fn().mockResolvedValue({}),
 }));
 
-import { GenerateTrendGraph } from "@/features/graph/generate-graph";
+import { GenerateTrendGraph } from "@/features/graph";
 import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 import {
@@ -72,7 +72,7 @@ import {
   getHeatStressDescription,
 } from "@/lib/utils/heat-stress";
 
-import { TrendAnalysis } from "../trend-analysis";
+import { TrendAnalysis } from "../components/trend-analysis";
 
 const defaultProps = {
   id: 1,

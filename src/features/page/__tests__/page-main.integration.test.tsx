@@ -6,11 +6,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { setGraphMeasure } from "@/lib/actions/actions";
 import { database, resetDatabase } from "@/testing/mocks";
 
-import type { PageProperties } from "../types";
+import type { PageProperties } from "../model/types";
 
-import { PageMain } from "../page-main";
+import { PageMain } from "../components/page-main";
 
-vi.mock("@/features/graph/generate-graph", () => ({
+vi.mock("@/features/graph", () => ({
   GenerateReferenceGraph: vi
     .fn()
     .mockImplementation(() => (
@@ -21,7 +21,7 @@ vi.mock("@/features/graph/generate-graph", () => ({
     .mockImplementation(() => <div data-testid="trend-graph">Trend Graph</div>),
 }));
 
-vi.mock("@/features/header-bar/header-bar", () => ({
+vi.mock("@/features/header-bar", () => ({
   HeaderBar: vi.fn(({ id, LocationOptions }) => (
     <header
       data-id={id}
@@ -33,7 +33,7 @@ vi.mock("@/features/header-bar/header-bar", () => ({
   )),
 }));
 
-vi.mock("@/features/page/trend-analysis", () => ({
+vi.mock("@/features/page/components/trend-analysis", () => ({
   TrendAnalysis: vi.fn(({ initialGraphMeasure, onMeasureChange }) => (
     <div data-testid="trend-analysis">
       <h2>Trend Analysis</h2>
@@ -53,7 +53,7 @@ vi.mock("@/features/page/trend-analysis", () => ({
   )),
 }));
 
-vi.mock("@/features/page/reference-data", () => ({
+vi.mock("@/features/page/components/reference-data", () => ({
   ReferenceData: vi.fn(() => (
     <div data-testid="reference-data">
       <h2>Reference Data</h2>

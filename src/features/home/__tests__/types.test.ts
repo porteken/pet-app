@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { MapProperties } from "../types";
+import type { MapProperties } from "../model/types";
 
 describe("Home Types", () => {
   describe("MapProperties", () => {

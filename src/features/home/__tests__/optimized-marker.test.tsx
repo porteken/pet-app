@@ -4,7 +4,7 @@ import { Icon } from "leaflet";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { OptimizedMarker } from "../optimized-marker";
+import { OptimizedMarker } from "../components/optimized-marker";
 
 const mockQueryClient = {
   prefetchQuery: vi.fn(),

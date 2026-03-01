@@ -1,14 +1,14 @@
 "use client";
 import React, { FC } from "react";
 
-import { HeaderBar } from "@/features/header-bar/header-bar";
+import { HeatStressLegend } from "@/components/app/heat-stress-legend";
+import { HeaderBar } from "@/features/header-bar";
 import { setGraphMeasure } from "@/lib/actions/actions";
 
-import { HeatStressLegend } from "./heat-stress-legend";
+import { PageProperties } from "../model/types";
 import { PageHeader } from "./page-header";
 import { ReferenceData } from "./reference-data";
 import { TrendAnalysis } from "./trend-analysis";
-import { PageProperties } from "./types";
 
 const handleMeasureChange = async (measure: string): Promise<void> => {
   try {
@@ -67,4 +67,3 @@ const Main: FC<PageProperties> = ({
 };
 
 export { Main as PageMain };
-export default Main;

@@ -12,8 +12,8 @@ import React, {
   useState,
 } from "react";
 
+import { HeatStressLegend } from "@/components/app/heat-stress-legend";
 import { PageLoader } from "@/components/app/page-loader";
-import { HeatStressLegend } from "@/features/page/heat-stress-legend";
 
 import { OptimizedMarker } from "./optimized-marker";
 

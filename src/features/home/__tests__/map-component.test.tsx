@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { MapComponent } from "../map-component";
+import { MapComponent } from "../components/map-component";
 
 vi.mock("react-leaflet", () => {
   interface MockComponentProperties {

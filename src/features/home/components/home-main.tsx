@@ -11,23 +11,20 @@ import React, {
   useState,
 } from "react";
 
-import { GenerateTrendGraph } from "@/features/graph/generate-graph";
-import { HeaderBar } from "@/features/header-bar/header-bar";
+import { GenerateTrendGraph } from "@/features/graph";
+import { HeaderBar } from "@/features/header-bar";
 import { setForecastPreferences, setGraphMeasure } from "@/lib/actions/actions";
 import { FetchForecastData } from "@/lib/api/fetch-client";
 import { getTrendGraphQueryOptions } from "@/lib/api/query-client";
-import {
-  getForecastHeatStressDescription,
-  getHeatStressDescription,
-  type HeatStressDescription,
-} from "@/lib/utils/heat-stress";
+import { type HeatStressDescription } from "@/lib/utils/heat-stress";
 import { GraphOptions } from "@/lib/utils/select-options";
+import { buildTrendAnalysisResult } from "@/lib/utils/trend-analysis";
 import { LocationProperties } from "@/types/types";
 
+import { MapProperties } from "../model/types";
 import { ErrorGraphDisplay } from "./error-graph-display";
 import { GraphSection } from "./graph-section";
 import { MapComponent } from "./map-component";
-import { MapProperties } from "./types";
 
 const Modal = dynamic(() => import("@/components/ui/modal"), {
   ssr: false,
@@ -112,73 +109,31 @@ const Home: FC<MapProperties> = ({
     ) => {
       setGraphLoading(true);
       try {
-        const trendGraphDataPromise = queryClient.fetchQuery(
-          getTrendGraphQueryOptions(locationId, option)
-        );
-        const forecastDataPromise = enableForecast
-          ? FetchForecastData(locationId, yearsAhead)
-          : undefined;
-        const { increase_per_year, trendline_pets, year_pets, years } =
-          await trendGraphDataPromise;
-        const forecastData = forecastDataPromise
-          ? await forecastDataPromise
-          : undefined;
+        const { forecastHeatStress, heatStressDescription, snapshot } =
+          await buildTrendAnalysisResult({
+            enableForecast,
+            fetchForecastData: () => FetchForecastData(locationId, yearsAhead),
+            fetchTrendGraphData: () =>
+              queryClient.fetchQuery(
+                getTrendGraphQueryOptions(locationId, option)
+              ),
+            option,
+          });
 
-        if (years.length === 0 || year_pets.length === 0) {
+        setHeatStressDescription(heatStressDescription);
+        setForecastHeatStress(forecastHeatStress);
+
+        if (snapshot.years.length === 0 || snapshot.year_pets.length === 0) {
           throw new Error("No trend data available");
         }
 
-        const currentYear = years.at(-1)!;
-        const currentYearIndex = years.length - 1;
-        const currentPetValue = year_pets[currentYearIndex];
-        const heatStress = getHeatStressDescription(
-          currentPetValue,
-          option,
-          currentYear
-        );
-        setHeatStressDescription(heatStress);
-
-        if (
-          enableForecast &&
-          forecastData &&
-          forecastData.forecastValues.length > 0 &&
-          forecastData.lowerBound10.length > 0 &&
-          forecastData.upperBound90.length > 0
-        ) {
-          const finalForecastYear = forecastData.forecastYears.at(-1);
-          const finalForecastValue = forecastData.forecastValues.at(-1);
-          const finalLowerBound25 = forecastData.lowerBound10.at(-1);
-          const finalUpperBound75 = forecastData.upperBound90.at(-1);
-
-          if (
-            finalForecastYear !== undefined &&
-            finalForecastValue !== undefined &&
-            finalLowerBound25 !== undefined &&
-            finalUpperBound75 !== undefined &&
-            !Number.isNaN(finalLowerBound25) &&
-            !Number.isNaN(finalUpperBound75)
-          ) {
-            const forecastHeatStress = getForecastHeatStressDescription(
-              finalForecastValue,
-              finalForecastYear,
-              finalLowerBound25,
-              finalUpperBound75
-            );
-            setForecastHeatStress(forecastHeatStress);
-          } else {
-            setForecastHeatStress(undefined);
-          }
-        } else {
-          setForecastHeatStress(undefined);
-        }
-
         const graph = GenerateTrendGraph(
-          years,
-          option,
-          year_pets,
-          trendline_pets,
-          increase_per_year,
-          forecastData,
+          snapshot.years,
+          snapshot.option,
+          snapshot.year_pets,
+          snapshot.trendline_pets,
+          snapshot.increase_per_year,
+          snapshot.forecastData,
           showTrendLegend,
           isMobileViewport
         );

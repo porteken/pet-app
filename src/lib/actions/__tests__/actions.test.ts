@@ -61,7 +61,7 @@ describe("setGraphMeasure", () => {
     const expirationDate = cookieOptions.expires;
     const afterCall = Date.now();
 
-    const oneYearMs = 365 * 24 * 60 * 1000;
+    const oneYearMs = 365 * 24 * 60 * 60 * 1000;
     const expectedExpiration = beforeCall + oneYearMs;
     const actualExpiration = expirationDate.getTime();
 

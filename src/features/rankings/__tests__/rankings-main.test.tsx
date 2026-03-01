@@ -27,7 +27,7 @@ vi.mock("@/lib/actions/actions", () => ({
   setRankingsYear: vi.fn(),
 }));
 
-vi.mock("@/features/header-bar/header-bar", () => ({
+vi.mock("@/features/header-bar", () => ({
   HeaderBar: vi.fn(({ LocationOptions }) => (
     <div data-testid="header-bar">
       HeaderBar with {LocationOptions?.length || 0} locations
@@ -103,7 +103,7 @@ vi.mock("@/components/ui/pagination", () => ({
 
 import { setRankingsYear } from "@/lib/actions/actions";
 
-import { RankingsMain } from "../rankings-main";
+import { RankingsMain } from "../components/rankings-main";
 
 const mockLocationOptions = [
   {

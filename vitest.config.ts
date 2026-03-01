@@ -21,6 +21,7 @@ export default defineConfig({
         "**/constants.ts",
       ],
       include: [
+        "src/app/**/*.{ts,tsx}",
         "src/features/**/*.{ts,tsx}",
         "src/lib/**/*.{ts,tsx}",
         "src/utils/**/*.{ts,tsx}",
@@ -35,13 +36,11 @@ export default defineConfig({
       ".next/**",
       "tests/**",
       "src/utils/__tests__/test-utilities.ts",
-      "src/app/**",
     ],
     globals: true,
     include: [
       "src/**/__tests__/**/*.test.{js,jsx,ts,tsx}",
       "src/**/*.test.{js,jsx,ts,tsx}",
-      "!src/app/**",
     ],
     setupFiles: ["./vitest.setup.ts"],
   },

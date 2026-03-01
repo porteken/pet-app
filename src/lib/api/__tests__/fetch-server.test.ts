@@ -102,6 +102,65 @@ describe("fetch-server", () => {
       expect(result[1].rank).toBe(2);
     });
 
+    it("should ignore locations with non-positive location_id", async () => {
+      const mockPetAvg = [
+        { location_id: 0, pet: 999.9 },
+        { location_id: 1, pet: 35.5 },
+        { location_id: 2, pet: 30.2 },
+      ];
+      const mockPetMax = [
+        { location_id: 0, pet: 999.9 },
+        { location_id: 1, pet: 40.5 },
+        { location_id: 2, pet: 38.2 },
+      ];
+      const mockLocations = [
+        { city: "Invalid City", location_id: 0, state: "Nowhere" },
+        { city: "Phoenix", location_id: 1, state: "Arizona" },
+        { city: "Austin", location_id: 2, state: "Texas" },
+      ];
+      const mockPercentiles = [
+        { location_id: 0, p10: 999, p90: 1000, year: 2024 },
+        { location_id: 1, p10: 32, p90: 38, year: 2024 },
+        { location_id: 2, p10: 28, p90: 34, year: 2024 },
+      ];
+      const mockForecast = [
+        { location_id: 0, lower: 999, upper: 1000 },
+        { location_id: 1, lower: 38, upper: 42 },
+        { location_id: 2, lower: 33, upper: 37 },
+      ];
+      const mockChange = [
+        { change: 99, location_id: 0 },
+        { change: 1.5, location_id: 1 },
+        { change: 1.2, location_id: 2 },
+      ];
+
+      const createMockQuery = (data: any) => ({
+        eq: vi.fn().mockResolvedValue({ data, error: undefined }),
+        select: vi.fn().mockReturnThis(),
+      });
+
+      mockSupabaseClient.from
+        .mockReturnValueOnce(createMockQuery(mockPetAvg))
+        .mockReturnValueOnce(createMockQuery(mockPetMax))
+        .mockReturnValueOnce({
+          select: vi
+            .fn()
+            .mockResolvedValue({ data: mockLocations, error: undefined }),
+        })
+        .mockReturnValueOnce(createMockQuery(mockPercentiles))
+        .mockReturnValueOnce(createMockQuery(mockForecast))
+        .mockReturnValueOnce({
+          select: vi
+            .fn()
+            .mockResolvedValue({ data: mockChange, error: undefined }),
+        });
+
+      const result = await FetchCityRankings(2024);
+
+      expect(result).toHaveLength(2);
+      expect(result.some(row => row.location_id === 0)).toBe(false);
+    });
+
     it("should throw error for invalid year", async () => {
       await expect(FetchCityRankings(1999)).rejects.toThrow(
         new DatabaseError("Invalid year: 1999. Must be between 2000 and 2100.")
@@ -465,6 +524,69 @@ describe("fetch-server", () => {
             { key: 3, title: "Austin" },
             { key: 4, title: "Dallas" },
           ],
+          title: "Texas",
+        },
+      ]);
+    });
+
+    it("should ignore locations with non-positive location_id", async () => {
+      const mockLocations = [
+        {
+          city: "Invalid City",
+          lat: 0,
+          lng: 0,
+          location_id: 0,
+          state: "Nowhere",
+        },
+        {
+          city: "Boston",
+          lat: 42.3601,
+          lng: -71.0589,
+          location_id: 1,
+          state: "Massachusetts",
+        },
+        {
+          city: "Austin",
+          lat: 30.2672,
+          lng: -97.7431,
+          location_id: 3,
+          state: "Texas",
+        },
+      ];
+
+      const mockQuery = {
+        select: vi
+          .fn()
+          .mockResolvedValue({ data: mockLocations, error: undefined }),
+      };
+
+      mockSupabaseClient.from.mockReturnValue(mockQuery);
+
+      const result = await FetchLocations();
+
+      expect(result.locations).toEqual([
+        {
+          city: "Boston",
+          lat: 42.3601,
+          lng: -71.0589,
+          location_id: 1,
+          state: "Massachusetts",
+        },
+        {
+          city: "Austin",
+          lat: 30.2672,
+          lng: -97.7431,
+          location_id: 3,
+          state: "Texas",
+        },
+      ]);
+      expect(result.LocationOptions).toEqual([
+        {
+          items: [{ key: 1, title: "Boston" }],
+          title: "Massachusetts",
+        },
+        {
+          items: [{ key: 3, title: "Austin" }],
           title: "Texas",
         },
       ]);

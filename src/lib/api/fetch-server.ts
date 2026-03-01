@@ -106,30 +106,38 @@ export async function FetchCityRankings(year: number): Promise<
     );
   }
 
+  const sanitizedPetAvg = filterRowsWithPositiveLocationId(petAvg);
+  const sanitizedPetMax = filterRowsWithPositiveLocationId(petMax);
+  const sanitizedLocations = filterRowsWithPositiveLocationId(locations);
+  const sanitizedPercentiles =
+    filterRowsWithPositiveLocationId(percentiles_data);
+  const sanitizedFuturePetData =
+    filterRowsWithPositiveLocationId(futurePetData);
+
   const validatedPetAvg = parseWithDatabaseError(
     "City rankings PET average",
     parseRankingPetRows,
-    petAvg
+    sanitizedPetAvg
   );
   const validatedPetMax = parseWithDatabaseError(
     "City rankings PET max",
     parseRankingPetRows,
-    petMax
+    sanitizedPetMax
   );
   const validatedLocations = parseWithDatabaseError(
     "City rankings locations",
     parseRankingLocationRows,
-    locations
+    sanitizedLocations
   );
   const validatedPercentiles = parseWithDatabaseError(
     "City rankings percentiles",
     parseRankingPercentileRows,
-    percentiles_data
+    sanitizedPercentiles
   );
   const validatedFuturePetData = parseWithDatabaseError(
     "City rankings forecast",
     parseRankingForecastRows,
-    futurePetData
+    sanitizedFuturePetData
   );
 
   const futurePetMap = new Map<number, { lower: number; upper: number }>();
@@ -147,10 +155,12 @@ export async function FetchCityRankings(year: number): Promise<
     );
   }
 
+  const sanitizedPetChangeData =
+    filterRowsWithPositiveLocationId(petChangeData);
   const validatedPetChanges = parseWithDatabaseError(
     "City rankings PET change",
     parseRankingChangeRows,
-    petChangeData
+    sanitizedPetChangeData
   );
 
   const changePerDecadeMap = new Map<number, number>(
@@ -228,10 +238,11 @@ export async function FetchLocations(): Promise<FetchLocationProperties> {
     );
   }
 
+  const sanitizedLocations = filterRowsWithPositiveLocationId(locations);
   const validatedLocations = parseWithDatabaseError(
     "Locations",
     parseLocationRows,
-    locations
+    sanitizedLocations
   );
 
   const groupedByState = new Map<
@@ -334,6 +345,17 @@ export async function FetchTrendGraphData(
   );
 
   return mapTrendRowsToGraphData(validatedRows);
+}
+
+function filterRowsWithPositiveLocationId<
+  T extends {
+    location_id?: unknown;
+  },
+>(rows: T[]): T[] {
+  return rows.filter(row => {
+    const locationId = Number(row.location_id);
+    return Number.isInteger(locationId) && locationId > 0;
+  });
 }
 
 function isValidLocationId(locationId: number): boolean {

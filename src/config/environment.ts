@@ -25,7 +25,11 @@ export const getPublicEnvironment = (): PublicEnvironment => {
     return cachedPublicEnvironment;
   }
 
-  const parsed = publicEnvironmentSchema.safeParse(process.env);
+  const parsed = publicEnvironmentSchema.safeParse({
+    NEXT_PUBLIC_E2E_TEST: process.env.NEXT_PUBLIC_E2E_TEST,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  });
   if (!parsed.success) {
     throw new Error(
       `Invalid public environment variables: ${formatEnvironmentIssues(

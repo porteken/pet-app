@@ -6,6 +6,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { OptimizedMarker } from "../optimized-marker";
 
+const mockQueryClient = {
+  prefetchQuery: vi.fn(),
+};
+
+vi.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => mockQueryClient,
+}));
+
 vi.mock("@/lib/api/query-client", () => ({
   prefetchTrendGraphData: vi.fn(),
 }));
@@ -74,6 +82,7 @@ describe("OptimizedMarker", () => {
     await user.hover(marker);
 
     expect(mockPrefetchTrendGraphData).toHaveBeenCalledWith(
+      mockQueryClient,
       mockProperties.locationId,
       mockProperties.selectedGraphMeasure
     );
@@ -93,6 +102,7 @@ describe("OptimizedMarker", () => {
 
     expect(mockPrefetchTrendGraphData).toHaveBeenCalledTimes(3);
     expect(mockPrefetchTrendGraphData).toHaveBeenCalledWith(
+      mockQueryClient,
       mockProperties.locationId,
       mockProperties.selectedGraphMeasure
     );

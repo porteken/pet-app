@@ -80,7 +80,7 @@ describe("reference-graph-data", () => {
       expect(mockValidation.validateLocationId).toHaveBeenCalledWith(-1);
     });
 
-    it("should throw error when no data found", async () => {
+    it("should return empty arrays when no data is found", async () => {
       const mockQuery = {
         eq: vi.fn().mockReturnThis(),
         order: vi.fn().mockResolvedValue({ data: [], error: undefined }),
@@ -89,9 +89,10 @@ describe("reference-graph-data", () => {
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
-      await expect(FetchReferenceGraphData("2023", 1)).rejects.toThrow(
-        "No data found for location 1 in year 2023"
-      );
+      await expect(FetchReferenceGraphData("2023", 1)).resolves.toEqual({
+        dates: [],
+        pets: [],
+      });
     });
 
     it("should handle database errors", async () => {
@@ -121,9 +122,10 @@ describe("reference-graph-data", () => {
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
-      await expect(FetchReferenceGraphData("2023", 1)).rejects.toThrow(
-        "No data found for location 1 in year 2023"
-      );
+      await expect(FetchReferenceGraphData("2023", 1)).resolves.toEqual({
+        dates: [],
+        pets: [],
+      });
     });
 
     it("should handle unexpected errors during data fetching", async () => {

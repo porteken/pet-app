@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -56,6 +57,20 @@ vi.mock("leaflet", () => {
 });
 
 describe("MapComponent", () => {
+  const renderWithQueryClient = (ui: React.ReactElement) => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
+
+    return render(
+      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+    );
+  };
+
   const mockLocations = [
     {
       city: "New York",
@@ -74,7 +89,7 @@ describe("MapComponent", () => {
   ];
 
   it("should display a loading message on initial render", () => {
-    render(
+    renderWithQueryClient(
       <MapComponent
         locations={[]}
         onMarkerClick={() => {}}
@@ -85,7 +100,7 @@ describe("MapComponent", () => {
   });
 
   it('should display "No Map Data Available" when no locations are provided', async () => {
-    render(
+    renderWithQueryClient(
       <MapComponent
         locations={[]}
         onMarkerClick={() => {}}
@@ -100,7 +115,7 @@ describe("MapComponent", () => {
   });
 
   it("should render the map and markers when locations are provided", async () => {
-    render(
+    renderWithQueryClient(
       <MapComponent
         locations={mockLocations}
         onMarkerClick={() => {}}
@@ -118,7 +133,7 @@ describe("MapComponent", () => {
 
   it("should call onMarkerClick with the correct location_id when a marker is clicked", async () => {
     const onMarkerClick = vi.fn();
-    render(
+    renderWithQueryClient(
       <MapComponent
         locations={mockLocations}
         onMarkerClick={onMarkerClick}
@@ -135,7 +150,7 @@ describe("MapComponent", () => {
   });
 
   it("should keep heat stress legend collapsed by default and toggle open", async () => {
-    render(
+    renderWithQueryClient(
       <MapComponent
         locations={mockLocations}
         onMarkerClick={() => {}}

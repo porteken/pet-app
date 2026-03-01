@@ -6,6 +6,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const createDelay = (ms: number) =>
   new Promise(resolve => setTimeout(resolve, ms));
 const mockPush = vi.fn();
+const mockQueryClient = {
+  fetchQuery: vi.fn(async options => {
+    return options.queryFn();
+  }),
+};
+
+vi.mock("@tanstack/react-query", async importOriginal => {
+  const actual = await importOriginal<typeof import("@tanstack/react-query")>();
+  return {
+    ...actual,
+    useQueryClient: () => mockQueryClient,
+  };
+});
 
 vi.mock("@/lib/actions/actions", () => ({
   setForecastPreferences: vi.fn().mockResolvedValue({}),
@@ -32,20 +45,6 @@ vi.mock("@/lib/api/fetch-client", () => ({
     years: [2000, 2001, 2002],
   }),
 }));
-
-vi.mock("@/lib/api/query-client", async importOriginal => {
-  const actual =
-    await importOriginal<typeof import("@/lib/api/query-client")>();
-  return {
-    ...actual,
-    queryClient: {
-      fetchQuery: vi.fn(async options => {
-        return options.queryFn();
-      }),
-      prefetchQuery: vi.fn(),
-    },
-  };
-});
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({

@@ -2,8 +2,11 @@
 import { cookies } from "next/headers";
 
 import { createClient } from "@/config/supabase/server";
+import {
+  mapReferenceRowsToGraphData,
+  mapTrendRowsToGraphData,
+} from "@/lib/api/graph-data";
 import { DatabaseError } from "@/lib/utils/errors";
-import { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
 import {
   FetchLocationProperties,
   LocationOptionSection,
@@ -211,11 +214,11 @@ export async function FetchReferenceGraphData(
   year: string,
   locationId: number
 ): Promise<ReferenceGraphDataProperties> {
-  if (!locationId || Number.isNaN(locationId) || locationId <= 0) {
+  if (!isValidLocationId(locationId)) {
     throw new DatabaseError(`Invalid locationId: ${locationId}`);
   }
 
-  if (!year || !/^\d{4}$/.test(year)) {
+  if (!isValidYear(year)) {
     throw new DatabaseError(
       `Invalid year format: ${year}. Must be a 4-digit year.`
     );
@@ -228,7 +231,8 @@ export async function FetchReferenceGraphData(
     .from("pet_year")
     .select()
     .eq("location_id", locationId)
-    .eq("year", year);
+    .eq("year", year)
+    .order("date", { ascending: true });
 
   if (error || !data) {
     throw new DatabaseError(
@@ -237,26 +241,18 @@ export async function FetchReferenceGraphData(
     );
   }
 
-  const dates = data.map(({ date }: { date: string }) => new Date(date));
-  const pets = data.map(({ pet }: { pet: number }) => Number(pet));
-
-  return { dates, pets };
+  return mapReferenceRowsToGraphData(data);
 }
 
 export async function FetchTrendGraphData(
   option: string,
   locationId: number
 ): Promise<TrendGraphDataProperties> {
-  if (!locationId || Number.isNaN(locationId) || locationId <= 0) {
-    return {
-      increase_per_year: 0,
-      trendline_pets: [],
-      year_pets: [],
-      years: [],
-    };
+  if (!isValidLocationId(locationId)) {
+    throw new DatabaseError(`Invalid locationId: ${locationId}`);
   }
 
-  if (!option || !["avg", "max"].includes(option)) {
+  if (!isValidTrendOption(option)) {
     throw new DatabaseError(
       `Invalid option: ${option}. Must be 'avg' or 'max'`
     );
@@ -268,7 +264,8 @@ export async function FetchTrendGraphData(
   const { data, error } = await supabase
     .from(`pet_year_${option}`)
     .select()
-    .eq("location_id", locationId);
+    .eq("location_id", locationId)
+    .order("year", { ascending: true });
 
   if (error || !data) {
     throw new DatabaseError(
@@ -277,22 +274,17 @@ export async function FetchTrendGraphData(
     );
   }
 
-  const years = data.map(({ year }: { year: number }) => year);
-  const year_pets = data.map(({ pet }: { pet: number }) => Number(pet));
+  return mapTrendRowsToGraphData(data);
+}
 
-  if (years.length === 0 || year_pets.length === 0) {
-    return {
-      increase_per_year: 0,
-      trendline_pets: [],
-      year_pets: [],
-      years: [],
-    };
-  }
+function isValidLocationId(locationId: number): boolean {
+  return Number.isInteger(locationId) && locationId > 0;
+}
 
-  const reg = new SimpleLinearRegression(years, year_pets);
-  const trendline_pets = years.map(
-    (year: number) => Math.round(reg.predict(year) * 100) / 100
-  );
+function isValidTrendOption(option: string): boolean {
+  return option === "avg" || option === "max";
+}
 
-  return { increase_per_year: reg.slope, trendline_pets, year_pets, years };
+function isValidYear(year: string): boolean {
+  return /^\d{4}$/.test(year);
 }

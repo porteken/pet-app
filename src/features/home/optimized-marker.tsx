@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Icon } from "leaflet";
 import React, { memo, useCallback } from "react";
 
@@ -31,9 +32,15 @@ export const OptimizedMarker = memo<OptimizedMarkerProperties>(
     position,
     selectedGraphMeasure,
   }) => {
+    const queryClient = useQueryClient();
+
     const handleMouseEnter = useCallback(() => {
-      void prefetchTrendGraphData(locationId, selectedGraphMeasure);
-    }, [locationId, selectedGraphMeasure]);
+      void prefetchTrendGraphData(
+        queryClient,
+        locationId,
+        selectedGraphMeasure
+      );
+    }, [locationId, queryClient, selectedGraphMeasure]);
 
     const handleClick = useCallback(() => {
       onClick(locationId);

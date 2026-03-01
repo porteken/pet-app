@@ -4,14 +4,15 @@ import { QueryClient } from "@tanstack/react-query";
 
 import { FetchTrendGraphData } from "./fetch-client";
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 1000 * 60 * 5,
+export const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 1,
+        staleTime: 1000 * 60 * 5,
+      },
     },
-  },
-});
+  });
 
 export const queryKeys = {
   trendGraph: (locationId: number, option: string) =>
@@ -26,13 +27,17 @@ export const getTrendGraphQueryOptions = (
   queryKey: queryKeys.trendGraph(locationId, option),
 });
 
-export const prefetchTrendGraphData = (locationId: number, option: string) => {
+export const prefetchTrendGraphData = (
+  queryClient: QueryClient,
+  locationId: number,
+  option: string
+) => {
   return queryClient.prefetchQuery({
     ...getTrendGraphQueryOptions(locationId, option),
   });
 };
 
-export const invalidateTrendGraphData = () => {
+export const invalidateTrendGraphData = (queryClient: QueryClient) => {
   return queryClient.invalidateQueries({
     queryKey: ["trend-graph"],
   });

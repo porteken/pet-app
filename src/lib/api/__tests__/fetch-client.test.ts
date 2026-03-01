@@ -123,7 +123,7 @@ describe("FetchTrendGraphData", () => {
     expect(result.trendline_pets[1]).toBeCloseTo(1443.7, 1);
   });
 
-  it("should throw error when no data found", async () => {
+  it("should return empty graph data when no rows are found", async () => {
     const mockQuery = {
       eq: vi.fn().mockReturnThis(),
       order: vi.fn().mockResolvedValue({ data: [], error: undefined }),
@@ -132,9 +132,12 @@ describe("FetchTrendGraphData", () => {
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
 
-    await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
-      "No data found for location 1"
-    );
+    await expect(FetchTrendGraphData("avg", 1)).resolves.toEqual({
+      increase_per_year: 0,
+      trendline_pets: [],
+      year_pets: [],
+      years: [],
+    });
   });
 
   it("should handle database errors", async () => {
@@ -200,9 +203,12 @@ describe("FetchTrendGraphData", () => {
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
 
-    await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
-      "No data found for location 1"
-    );
+    await expect(FetchTrendGraphData("avg", 1)).resolves.toEqual({
+      increase_per_year: 0,
+      trendline_pets: [],
+      year_pets: [],
+      years: [],
+    });
   });
 });
 

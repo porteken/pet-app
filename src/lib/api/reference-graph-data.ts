@@ -3,13 +3,9 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import type { ReferenceGraphDataProperties } from "@/types/types";
 
 import { createClient } from "@/config/supabase/client";
+import { mapReferenceRowsToGraphData } from "@/lib/api/graph-data";
 import { FetchError } from "@/lib/utils/errors";
-import {
-  validateDates,
-  validateLocationId,
-  validatePets,
-  validateYear,
-} from "@/lib/utils/validation";
+import { validateLocationId, validateYear } from "@/lib/utils/validation";
 
 interface PetYearReferenceData {
   date: string;
@@ -33,12 +29,7 @@ export async function FetchReferenceGraphData(
   }
 
   const data = await fetchData(supabase, locationId, year);
-
-  if (data.length === 0) {
-    throw new Error(`No data found for location ${locationId} in year ${year}`);
-  }
-
-  return processData(data);
+  return mapReferenceRowsToGraphData(data);
 }
 
 async function fetchData(
@@ -61,16 +52,4 @@ async function fetchData(
   }
 
   return data || [];
-}
-
-function processData(
-  data: PetYearReferenceData[]
-): ReferenceGraphDataProperties {
-  const dates = data.map(({ date }) => new Date(date));
-  const pets = data.map(({ pet }) => Number(pet));
-
-  validateDates(dates);
-  validatePets(pets);
-
-  return { dates, pets };
 }

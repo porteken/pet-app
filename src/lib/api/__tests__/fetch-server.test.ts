@@ -517,13 +517,9 @@ describe("fetch-server", () => {
 
       const mockQuery = {
         eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
         select: vi.fn().mockReturnThis(),
       };
-      mockQuery.eq
-        .mockImplementationOnce(() => mockQuery)
-        .mockImplementationOnce(() =>
-          Promise.resolve({ data: mockData, error: undefined })
-        );
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
@@ -532,6 +528,7 @@ describe("fetch-server", () => {
       expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year");
       expect(mockQuery.select).toHaveBeenCalled();
       expect(mockQuery.eq).toHaveBeenCalledWith("location_id", 5);
+      expect(mockQuery.order).toHaveBeenCalledWith("date", { ascending: true });
 
       expect(result.pets).toEqual([25.5, 26.2]);
       expect(result.dates).toEqual([
@@ -544,11 +541,9 @@ describe("fetch-server", () => {
       const mockError = new Error("Database connection failed");
       const mockQuery = {
         eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
         select: vi.fn().mockReturnThis(),
       };
-      mockQuery.eq
-        .mockReturnValueOnce(mockQuery)
-        .mockResolvedValueOnce({ data: undefined, error: mockError });
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
@@ -569,7 +564,8 @@ describe("fetch-server", () => {
       ];
 
       const mockQuery = {
-        eq: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
         select: vi.fn().mockReturnThis(),
       };
 
@@ -583,6 +579,7 @@ describe("fetch-server", () => {
       expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year_avg");
       expect(mockQuery.select).toHaveBeenCalled();
       expect(mockQuery.eq).toHaveBeenCalledWith("location_id", 1);
+      expect(mockQuery.order).toHaveBeenCalledWith("year", { ascending: true });
 
       expect(result.years).toEqual([2020, 2021]);
       expect(result.year_pets).toEqual([25.5, 26.2]);
@@ -590,29 +587,16 @@ describe("fetch-server", () => {
       expect(result.trendline_pets[1]).toBeCloseTo(1438.7, 0);
     });
 
-    it("should return empty arrays for invalid location ID", async () => {
-      const result1 = await FetchTrendGraphData("avg", 0);
-      const result2 = await FetchTrendGraphData("avg", -1);
-      const result3 = await FetchTrendGraphData("avg", Number.NaN);
-
-      expect(result1).toEqual({
-        increase_per_year: 0,
-        trendline_pets: [],
-        year_pets: [],
-        years: [],
-      });
-      expect(result2).toEqual({
-        increase_per_year: 0,
-        trendline_pets: [],
-        year_pets: [],
-        years: [],
-      });
-      expect(result3).toEqual({
-        increase_per_year: 0,
-        trendline_pets: [],
-        year_pets: [],
-        years: [],
-      });
+    it("should throw error for invalid location ID", async () => {
+      await expect(FetchTrendGraphData("avg", 0)).rejects.toThrow(
+        new DatabaseError("Invalid locationId: 0")
+      );
+      await expect(FetchTrendGraphData("avg", -1)).rejects.toThrow(
+        new DatabaseError("Invalid locationId: -1")
+      );
+      await expect(FetchTrendGraphData("avg", Number.NaN)).rejects.toThrow(
+        new DatabaseError("Invalid locationId: NaN")
+      );
     });
 
     it("should throw error for invalid option", async () => {
@@ -627,7 +611,8 @@ describe("fetch-server", () => {
 
     it("should return empty arrays when no data found", async () => {
       const mockQuery = {
-        eq: vi.fn().mockResolvedValue({ data: [], error: undefined }),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({ data: [], error: undefined }),
         select: vi.fn().mockReturnThis(),
       };
 
@@ -646,7 +631,8 @@ describe("fetch-server", () => {
     it("should handle database errors", async () => {
       const mockError = new Error("Database connection failed");
       const mockQuery = {
-        eq: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
         select: vi.fn().mockReturnThis(),
       };
 
@@ -663,7 +649,8 @@ describe("fetch-server", () => {
     it("should handle both avg and max options", async () => {
       const mockData = [{ pet: 25.5, year: 2020 }];
       const mockQuery = {
-        eq: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
         select: vi.fn().mockReturnThis(),
       };
 

@@ -3,13 +3,11 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import type { TrendGraphDataProperties } from "@/types/types";
 
 import { createClient } from "@/config/supabase/client";
+import { mapTrendRowsToGraphData } from "@/lib/api/graph-data";
 import { FetchError } from "@/lib/utils/errors";
-import { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
 import {
   validateLocationId,
   validateTrendOption,
-  validateYearPets,
-  validateYears,
 } from "@/lib/utils/validation";
 
 interface PetYearAvgMaxData {
@@ -119,21 +117,7 @@ export async function FetchTrendGraphData(
     const tableName = option === "avg" ? "pet_year_avg" : "pet_year_max";
 
     const data = await fetchTrendData(supabase, tableName, locationId);
-
-    if (data.length === 0) {
-      throw new Error(`No data found for location ${locationId}`);
-    }
-
-    const { yearPets, years } = processTrendData(data);
-    const reg = new SimpleLinearRegression(years, yearPets);
-    const trendlinePets = years.map(year => reg.predict(year));
-
-    return {
-      increase_per_year: reg.slope,
-      trendline_pets: trendlinePets,
-      year_pets: yearPets,
-      years,
-    };
+    return mapTrendRowsToGraphData(data);
   });
 
   if (hasError(response)) {
@@ -167,17 +151,4 @@ async function fetchTrendData(
   }
 
   return data || [];
-}
-
-function processTrendData(data: PetYearAvgMaxData[]): {
-  yearPets: number[];
-  years: number[];
-} {
-  const years = data.map(({ year }) => year);
-  const yearPets = data.map(({ pet }) => Number(pet));
-
-  validateYears(years);
-  validateYearPets(yearPets);
-
-  return { yearPets, years };
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import React, {
   FC,
@@ -14,7 +15,7 @@ import { GenerateTrendGraph } from "@/features/graph/generate-graph";
 import { HeaderBar } from "@/features/header-bar/header-bar";
 import { setForecastPreferences, setGraphMeasure } from "@/lib/actions/actions";
 import { FetchForecastData } from "@/lib/api/fetch-client";
-import { getTrendGraphQueryOptions, queryClient } from "@/lib/api/query-client";
+import { getTrendGraphQueryOptions } from "@/lib/api/query-client";
 import {
   getForecastHeatStressDescription,
   getHeatStressDescription,
@@ -39,6 +40,7 @@ const Home: FC<MapProperties> = ({
   LocationOptions,
   locations,
 }: MapProperties) => {
+  const queryClient = useQueryClient();
   const [selectedGraphMeasure, setSelectedGraphMeasure] = useState(
     () => initialGraphMeasure
   );
@@ -189,7 +191,7 @@ const Home: FC<MapProperties> = ({
         setGraphLoading(false);
       }
     },
-    [showTrendLegend]
+    [queryClient, showTrendLegend]
   );
 
   const handleSelectChange = useCallback(

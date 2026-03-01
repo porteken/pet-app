@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import "leaflet/dist/leaflet.css";
 import * as React from "react";
 
+import { AppProviders } from "@/components/app/providers";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <AppProviders>{children}</AppProviders>
+      </body>
     </html>
   );
 }

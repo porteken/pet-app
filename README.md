@@ -2,6 +2,8 @@
 
 A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) that visualizes Physiological Equivalent Temperature (PET) data for the top 500 largest cities in the United States from 2000 to 2025.
 
+The Git repository containing the Python data pipeline that collects CDS data for the application is available [here](https://github.com/porteken/pet-data)
+
 ## Features
 
 - **US City Map**: View PET data across 500+ cities.

@@ -307,7 +307,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_HOST_URL: https://sonarqube.us
     steps:
       - uses: actions/checkout@v4
         with:
@@ -317,6 +316,59 @@ jobs:
         run: |
           if [ -z "$SONAR_TOKEN" ]; then
             echo "SONAR_TOKEN is empty. Configure repository/org secret SONAR_TOKEN for this workflow context."
+            exit 1
+          fi
+
+      - name: Detect SonarQube Cloud region for this token/project
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          detect_host() {
+            local host="$1"
+            local http_code
+
+            http_code=$(curl -sS -u "${SONAR_TOKEN}:" -o /tmp/sonar-projects.json -w "%{http_code}" \
+              "${host}/api/projects/search?organization=porteken&projects=pet-app")
+
+            if [ "$http_code" = "200" ] && jq -e '(.components // []) | length > 0' /tmp/sonar-projects.json >/dev/null; then
+              echo "$host"
+              return 0
+            fi
+
+            return 1
+          }
+
+          if host=$(detect_host "https://sonarqube.us"); then
+            echo "Detected SonarQube Cloud US region"
+          elif host=$(detect_host "https://sonarcloud.io"); then
+            echo "Detected SonarQube Cloud EU region"
+          else
+            echo "Unable to find project 'pet-app' in organization 'porteken' with provided SONAR_TOKEN on US or EU endpoints."
+            echo "Check token permissions and that org/project keys are correct for this token."
+            exit 1
+          fi
+
+          echo "SONAR_HOST_URL=$host" >> "$GITHUB_ENV"
+
+      - name: Debug Sonar auth + JRE metadata endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          auth_code=$(curl -sS -u "${SONAR_TOKEN}:" -o /tmp/sonar-auth.json -w "%{http_code}" \
+            "${SONAR_HOST_URL}/api/authentication/validate")
+
+          api_host="https://api.${SONAR_HOST_URL#https://}"
+          jre_code=$(curl -sS -u "${SONAR_TOKEN}:" -o /tmp/sonar-jres.json -w "%{http_code}" \
+            "${api_host}/analysis/jres?os=linux&arch=x86_64")
+
+          echo "SONAR_HOST_URL=${SONAR_HOST_URL}"
+          echo "auth validate HTTP ${auth_code}"
+          echo "jres metadata HTTP ${jre_code} (${api_host})"
+
+          if [ "$auth_code" != "200" ] || [ "$jre_code" != "200" ]; then
+            echo "Sonar token or endpoint mismatch detected."
             exit 1
           fi
 

@@ -8,7 +8,6 @@ import perfectionist from "eslint-plugin-perfectionist";
 import playwright from "eslint-plugin-playwright";
 import pluginPromise from "eslint-plugin-promise";
 import pluginReact from "eslint-plugin-react";
-import sonarjs from "eslint-plugin-sonarjs";
 import tailwind from "eslint-plugin-tailwindcss";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import globals from "globals";
@@ -34,7 +33,6 @@ export default [
     },
   },
   pluginJs.configs.recommended,
-  sonarjs.configs.recommended,
   importPlugin.flatConfigs.recommended,
   ...tseslint.configs.recommended,
   {

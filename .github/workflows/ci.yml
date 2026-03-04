@@ -8,6 +8,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  pull-requests: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -301,7 +304,7 @@ jobs:
           exit 1
 
   sonarqube:
-    name: SonarQube Quality Gate
+    name: SonarCloud analysis
     # Forked PRs do not receive repository secrets, which causes 401/403 token errors.
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
     runs-on: ubuntu-latest
@@ -320,29 +323,14 @@ jobs:
             exit 1
           fi
 
-      - name: Debug Sonar US auth + JRE metadata endpoint
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          auth_code=$(curl -sS -u "${SONAR_TOKEN}:" -o /tmp/sonar-auth.json -w "%{http_code}" \
-            "${SONAR_HOST_URL}/api/authentication/validate")
-
-          api_host="https://api.sonarqube.us"
-          jre_code=$(curl -sS -u "${SONAR_TOKEN}:" -o /tmp/sonar-jres.json -w "%{http_code}" \
-            "${api_host}/analysis/jres?os=linux&arch=x86_64")
-
-          echo "SONAR_HOST_URL=${SONAR_HOST_URL}"
-          echo "auth validate HTTP ${auth_code}"
-          echo "jres metadata HTTP ${jre_code} (${api_host})"
-
-          if [ "$auth_code" != "200" ] || [ "$jre_code" != "200" ]; then
-            echo "Sonar token or endpoint mismatch detected."
-            exit 1
-          fi
-
-      - name: SonarQube Scan
+      - name: Analyze with SonarCloud
         uses: sonarsource/sonarqube-scan-action@v5
+        with:
+          args: >
+            -Dsonar.projectKey=pet-app
+            -Dsonar.organization=porteken
+            -Dsonar.region=us
+          projectBaseDir: .
 
       - name: SonarQube Quality Gate Check
         id: sonarqube-quality-gate-check

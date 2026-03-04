@@ -127,18 +127,11 @@ jobs:
 
   sonarqube:
     name: SonarQube Quality Gate
-    needs: [merge-vitest-unit]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
-        with:
-          name: merged-unit-coverage
-          path: coverage/
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master

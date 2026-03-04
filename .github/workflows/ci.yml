@@ -304,38 +304,17 @@ jobs:
           exit 1
 
   sonarqube:
-    name: SonarCloud analysis
-    # Forked PRs do not receive repository secrets, which causes 401/403 token errors.
-    if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
+    name: SonarQube
     runs-on: ubuntu-latest
-    env:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_HOST_URL: https://sonarqube.us
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Validate Sonar token availability
-        run: |
-          if [ -z "$SONAR_TOKEN" ]; then
-            echo "SONAR_TOKEN is empty. Configure repository/org secret SONAR_TOKEN for this workflow context."
-            exit 1
-          fi
-
-      - name: Analyze with SonarCloud
-        uses: sonarsource/sonarqube-scan-action@v5
-        with:
-          args: >
-            -Dsonar.projectKey=pet-app
-            -Dsonar.organization=porteken
-            -Dsonar.region=us
-          projectBaseDir: .
-
-      - name: SonarQube Quality Gate Check
-        id: sonarqube-quality-gate-check
-        uses: sonarsource/sonarqube-quality-gate-action@v1.2.0
-        timeout-minutes: 5
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   deploy:
     name: Deploy to Vercel

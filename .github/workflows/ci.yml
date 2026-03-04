@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality-checks:
-    name: Lint and Typecheck
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +29,24 @@ jobs:
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit --no-fund
       - run: npm run lint
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+      - name: Install Dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline --no-audit --no-fund
       - run: npm run tsc
 
   vitest-unit:
@@ -101,7 +119,7 @@ jobs:
 
   sonarqube:
     name: SonarQube Quality Gate
-    needs: [merge-vitest-unit, quality-checks] # Add merge-vitest-integration if applicable
+    needs: [merge-vitest-unit] # Add merge-vitest-integration if applicable
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -133,7 +151,8 @@ jobs:
     # ADDED 'sonarqube' to needs. Deployment will fail if SonarQube fails.
     needs:
       [
-        quality-checks,
+        lint,
+        typecheck,
         vitest-unit,
         sonarqube,
       ]

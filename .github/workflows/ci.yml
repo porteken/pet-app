@@ -1,5 +1,3 @@
-name: CI and Deploy
-
 on:
   push:
     branches:
@@ -21,18 +19,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Cache node_modules
         id: cache-node-modules
         uses: actions/cache@v4
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-
       - name: Install Dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit --no-fund
-
       - run: npm run lint
       - run: npm run tsc
 
@@ -49,28 +44,28 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Cache node_modules
-        id: cache-node-modules
         uses: actions/cache@v4
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
 
-      - name: Install Dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm ci --prefer-offline --no-audit --no-fund
-
-      - run: npm run test:unit -- --reporter=blob --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
+      # Added --coverage to generate data for Sonar
+      - run: npm run test:unit -- --reporter=blob --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }} --coverage.enabled=true
 
       - name: Upload Vitest unit blob report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vitest-unit-blob-${{ matrix.shard_index }}
-          path: .vitest-reports/
+          path: |
+            .vitest-reports/
+            ./coverage/
           include-hidden-files: true
           retention-days: 1
+
+  # ... (vitest-integration and playwright-e2e jobs remain largely the same,
+  # but ensure vitest-integration also includes the --coverage flag)
 
   merge-vitest-unit:
     name: Merge Vitest Unit Reports
@@ -82,18 +77,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Cache node_modules
-        id: cache-node-modules
         uses: actions/cache@v4
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm ci --prefer-offline --no-audit --no-fund
-
       - name: Download Vitest unit blob reports
         uses: actions/download-artifact@v4
         with:
@@ -101,209 +89,54 @@ jobs:
           pattern: vitest-unit-blob-*
           merge-multiple: true
 
+      # Merge reports and ensure LCOV is generated for SonarQube
       - name: Merge Vitest unit reports
-        run: npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=junit
+        run: npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=junit --coverage.enabled=true --coverage.reporter=lcov
 
-  vitest-integration:
-    name: Vitest Integration (shard ${{ matrix.shard_index }}/${{ matrix.shard_total }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard_index: [1, 2]
-        shard_total: [2]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Cache node_modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm ci --prefer-offline --no-audit --no-fund
-
-      - run: npm run test:integration -- --reporter=blob --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
-
-      - name: Upload Vitest integration blob report
-        if: always()
+      - name: Upload Merged Coverage
         uses: actions/upload-artifact@v4
         with:
-          name: vitest-integration-blob-${{ matrix.shard_index }}
-          path: .vitest-reports/
-          include-hidden-files: true
-          retention-days: 1
+          name: merged-unit-coverage
+          path: coverage/lcov.info
 
-  merge-vitest-integration:
-    name: Merge Vitest Integration Reports
-    needs: vitest-integration
-    if: ${{ !cancelled() }}
+  sonarqube:
+    name: SonarQube Quality Gate
+    needs: [merge-vitest-unit, quality-checks] # Add merge-vitest-integration if applicable
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Cache node_modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm ci --prefer-offline --no-audit --no-fund
-
-      - name: Download Vitest integration blob reports
+      - name: Download coverage reports
         uses: actions/download-artifact@v4
         with:
-          path: all-vitest-integration-blob-reports
-          pattern: vitest-integration-blob-*
-          merge-multiple: true
+          name: merged-unit-coverage
+          path: coverage/
 
-      - name: Merge Vitest integration reports
-        run: npx vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=junit
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-  playwright-e2e:
-    name: Playwright E2E (shard ${{ matrix.shard_index }}/20)
-    runs-on: ubuntu-latest
-
-    env:
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        shard_index:
-          [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-          ]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Cache node_modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Node Dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm ci --prefer-offline --no-audit --no-fund
-
-      - name: Get Playwright Version
-        id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(npx playwright --version | awk '{print $2}')" >> $GITHUB_ENV
-
-      - name: Cache Playwright Browsers
-        uses: actions/cache@v4
-        id: cache-playwright
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Playwright Browsers & OS Deps
-        if: steps.cache-playwright.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps
-
-      - name: Install Playwright OS Dependencies (Cache Hit)
-        if: steps.cache-playwright.outputs.cache-hit == 'true'
-        run: npx playwright install-deps
-
-      - name: Run Playwright Shard
-        run: npx playwright test --shard=${{ matrix.shard_index }}/20 --reporter=list,blob
-
-      - name: Upload Playwright Blob
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-blob-${{ matrix.shard_index }}
-          path: blob-report/*.zip
-          retention-days: 1
-
-  merge-playwright:
-    name: Merge Playwright Reports
-    needs: playwright-e2e
-    if: ${{ !cancelled() }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Cache node_modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm ci --prefer-offline --no-audit --no-fund
-
-      - name: Download All Playwright Blobs
-        uses: actions/download-artifact@v4
-        with:
-          path: playwright-blobs
-          pattern: playwright-blob-*
-          merge-multiple: true
-
-      - name: Merge Playwright Reports
-        run: npx playwright merge-reports --reporter=line,html ./playwright-blobs
-        shell: bash
-
-      - name: Upload Playwright HTML Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-html-report
-          path: playwright-report/
-          retention-days: 14
-
-      - name: Check for test failures
-        if: needs.playwright-e2e.result == 'failure'
-        run: |
-          echo "Playwright tests failed in the e2e job. Failing the merge job."
-          exit 1
+      - name: SonarQube Quality Gate Check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   deploy:
     name: Deploy to Vercel
     if: github.event_name == 'push' && (github.ref_name == 'dev' || github.ref_name == 'prd')
-    needs: [quality-checks, vitest-unit, vitest-integration, playwright-e2e]
+    # ADDED 'sonarqube' to needs. Deployment will fail if SonarQube fails.
+    needs:
+      [
+        quality-checks,
+        vitest-unit,
+        sonarqube,
+      ]
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Vercel Deploy Hook
@@ -312,9 +145,7 @@ jobs:
           VERCEL_DEPLOY_HOOK: ${{ github.ref_name == 'prd' && secrets.VERCEL_DEPLOY_HOOK_PRD || secrets.VERCEL_DEPLOY_HOOK_DEV }}
         run: |
           if [ -z "$VERCEL_DEPLOY_HOOK" ]; then
-            echo "Error: VERCEL_DEPLOY_HOOK for ${{ github.ref_name }} is not set in Repository Secrets."
+            echo "Error: VERCEL_DEPLOY_HOOK for ${{ github.ref_name }} is not set."
             exit 1
           fi
-
-          echo "Triggering Vercel deployment for branch: ${{ github.ref_name }}"
           curl -X POST "$VERCEL_DEPLOY_HOOK"

@@ -125,24 +125,32 @@ jobs:
 
   sonarqube:
     name: SonarQube Quality Gate
-    if: ${{ secrets.SONAR_TOKEN != '' }}
     runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
+      - name: Skip SonarQube (missing token)
+        if: ${{ env.SONAR_TOKEN == '' }}
+        run: echo "SONAR_TOKEN is not set, skipping SonarQube steps."
+
       - uses: actions/checkout@v4
+        if: ${{ env.SONAR_TOKEN != '' }}
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: SonarQube Scan
+        if: ${{ env.SONAR_TOKEN != '' }}
         uses: sonarsource/sonarqube-scan-action@master
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
 
       - name: SonarQube Quality Gate Check
+        if: ${{ env.SONAR_TOKEN != '' }}
         id: sonarqube-quality-gate-check
         uses: sonarsource/sonarqube-quality-gate-action@master
         timeout-minutes: 5
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
 
   deploy:
     name: Deploy to Vercel

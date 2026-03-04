@@ -80,8 +80,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vitest-unit-blob-${{ matrix.shard_index }}
-          path: |
-            .vitest-reports/
+          path: .vitest-reports/*
           include-hidden-files: true
           retention-days: 1
 
@@ -116,7 +115,7 @@ jobs:
 
       # Merge reports and ensure LCOV is generated for SonarQube
       - name: Merge Vitest unit reports
-        run: npx vitest --merge-reports=./all-vitest-unit-blob-reports/.vitest-reports --reporter=junit --coverage.enabled=true --coverage.reporter=lcov
+        run: npx vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=junit --coverage.enabled=true --coverage.reporter=lcov
 
       - name: Upload Merged Coverage
         uses: actions/upload-artifact@v4
@@ -126,6 +125,7 @@ jobs:
 
   sonarqube:
     name: SonarQube Quality Gate
+    if: ${{ secrets.SONAR_TOKEN != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

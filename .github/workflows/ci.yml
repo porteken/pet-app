@@ -27,7 +27,7 @@ jobs:
           cache: npm
 
       - name: Install Dependencies
-        run: npm ci --prefer-offline --no-audit --no-fund
+        run: npm ci --prefer-offline --no-audit --no-fund --ignore-scripts
 
       - run: npm run lint
       - run: npm run tsc
@@ -47,7 +47,7 @@ jobs:
           cache: npm
 
       - name: Install Dependencies
-        run: npm ci --prefer-offline --no-audit --no-fund
+        run: npm ci --prefer-offline --no-audit --no-fund --ignore-scripts
 
       - run: npm run test:unit -- --reporter=blob --shard=${{ matrix.shard_index }}/5
 
@@ -73,7 +73,7 @@ jobs:
           cache: npm
 
       - name: Install Dependencies
-        run: npm ci --prefer-offline --no-audit --no-fund
+        run: npm ci --prefer-offline --no-audit --no-fund --ignore-scripts
 
       - name: Download Vitest unit blob reports
         uses: actions/download-artifact@v4
@@ -100,7 +100,7 @@ jobs:
           cache: npm
 
       - name: Install Dependencies
-        run: npm ci --prefer-offline --no-audit --no-fund
+        run: npm ci --prefer-offline --no-audit --no-fund --ignore-scripts
 
       - run: npm run test:integration -- --reporter=blob --shard=${{ matrix.shard_index }}/2
 
@@ -126,7 +126,7 @@ jobs:
           cache: npm
 
       - name: Install Dependencies
-        run: npm ci --prefer-offline --no-audit --no-fund
+        run: npm ci --prefer-offline --no-audit --no-fund --ignore-scripts
 
       - name: Download Vitest integration blob reports
         uses: actions/download-artifact@v4
@@ -180,7 +180,7 @@ jobs:
           cache: npm
 
       - name: Install Node Dependencies
-        run: npm ci --prefer-offline --no-audit --no-fund
+        run: npm ci --prefer-offline --no-audit --no-fund --ignore-scripts
 
       - name: Get Playwright Version
         id: playwright-version
@@ -225,7 +225,7 @@ jobs:
           cache: npm
 
       - name: Install Dependencies
-        run: npm ci --prefer-offline --no-audit --no-fund
+        run: npm ci --prefer-offline --no-audit --no-fund --ignore-scripts
 
       - name: Download All Playwright Blobs
         uses: actions/download-artifact@v4
@@ -263,7 +263,7 @@ jobs:
           cache: npm
 
       - name: Install Dependencies
-        run: npm ci --prefer-offline --no-audit --no-fund
+        run: npm ci --prefer-offline --no-audit --no-fund --ignore-scripts
 
       - name: Run Vitest with coverage
         run: |

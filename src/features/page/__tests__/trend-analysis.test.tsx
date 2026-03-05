@@ -159,14 +159,16 @@ describe("TrendAnalysis", () => {
 
       await waitFor(() => {
         expect(GenerateTrendGraph).toHaveBeenCalledWith(
-          [2020, 2021, 2022, 2023],
-          "avg",
-          [20, 22, 24, 26],
-          [20, 22, 24, 26],
-          0.5,
-          undefined,
-          true,
-          false
+          expect.objectContaining({
+            forecastData: undefined,
+            increasePerYear: 0.5,
+            isMobileViewport: false,
+            option: "avg",
+            showLegend: true,
+            trendlinePets: [20, 22, 24, 26],
+            yearPets: [20, 22, 24, 26],
+            years: [2020, 2021, 2022, 2023],
+          })
         );
       });
     });
@@ -198,17 +200,23 @@ describe("TrendAnalysis", () => {
       expect(toggle).toHaveAttribute("aria-expanded", "false");
 
       await waitFor(() => {
-        const calls = vi.mocked(GenerateTrendGraph).mock.calls;
-        expect(calls.at(-1)?.[6]).toBe(false);
-        expect(calls.at(-1)?.[7]).toBe(true);
+        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            isMobileViewport: true,
+            showLegend: false,
+          })
+        );
       });
 
       fireEvent.click(toggle);
 
       await waitFor(() => {
-        const calls = vi.mocked(GenerateTrendGraph).mock.calls;
-        expect(calls.at(-1)?.[6]).toBe(true);
-        expect(calls.at(-1)?.[7]).toBe(true);
+        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            isMobileViewport: true,
+            showLegend: true,
+          })
+        );
       });
     });
   });
@@ -425,16 +433,18 @@ describe("TrendAnalysis", () => {
 
       await waitFor(() => {
         expect(GenerateTrendGraph).toHaveBeenCalledWith(
-          expect.any(Array),
-          "avg",
-          expect.any(Array),
-          expect.any(Array),
-          expect.any(Number),
           expect.objectContaining({
-            forecastValues: expect.any(Array),
-          }),
-          true,
-          false
+            forecastData: expect.objectContaining({
+              forecastValues: expect.any(Array),
+            }),
+            increasePerYear: expect.any(Number),
+            isMobileViewport: false,
+            option: "avg",
+            showLegend: true,
+            trendlinePets: expect.any(Array),
+            yearPets: expect.any(Array),
+            years: expect.any(Array),
+          })
         );
       });
     });
@@ -482,14 +492,16 @@ describe("TrendAnalysis", () => {
 
       await waitFor(() => {
         expect(GenerateTrendGraph).toHaveBeenCalledWith(
-          [],
-          "avg",
-          [],
-          [],
-          0,
-          undefined,
-          true,
-          false
+          expect.objectContaining({
+            forecastData: undefined,
+            increasePerYear: 0,
+            isMobileViewport: false,
+            option: "avg",
+            showLegend: true,
+            trendlinePets: [],
+            yearPets: [],
+            years: [],
+          })
         );
       });
     });

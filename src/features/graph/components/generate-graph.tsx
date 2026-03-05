@@ -7,6 +7,40 @@ import React from "react";
 
 import { GRAPH_COLORS } from "@/lib/constants";
 
+type GenerateTrendGraphLegacyArguments = [
+  years: number[],
+  option: string,
+  year_pets: number[],
+  trendline_pets: number[],
+  increase_per_year: number,
+  forecastData?: TrendForecastData,
+  showLegend?: boolean,
+  isMobileViewport?: boolean,
+  useCompactDesktopHeight?: boolean,
+];
+
+interface GenerateTrendGraphOptions {
+  forecastData?: TrendForecastData;
+  increasePerYear: number;
+  isMobileViewport?: boolean;
+  option: string;
+  showLegend?: boolean;
+  trendlinePets: number[];
+  useCompactDesktopHeight?: boolean;
+  yearPets: number[];
+  years: number[];
+}
+
+interface NormalizedGenerateTrendGraphOptions
+  extends Omit<
+    GenerateTrendGraphOptions,
+    "isMobileViewport" | "showLegend" | "useCompactDesktopHeight"
+  > {
+  isMobileViewport: boolean;
+  showLegend: boolean;
+  useCompactDesktopHeight: boolean;
+}
+
 interface PlotlyConfig {
   displaylogo: boolean;
   displayModeBar: "hover" | boolean;
@@ -34,6 +68,74 @@ interface PlotlyTrace {
   x: Date[] | number[];
   y: number[];
 }
+
+interface TrendForecastData {
+  forecastValues: number[];
+  forecastYears: number[];
+  lowerBound10: number[];
+  upperBound90: number[];
+}
+
+const normalizeGenerateTrendGraphOptions = (
+  input: [GenerateTrendGraphOptions] | GenerateTrendGraphLegacyArguments
+): NormalizedGenerateTrendGraphOptions => {
+  const [firstInput] = input;
+
+  if (
+    input.length === 1 &&
+    typeof firstInput === "object" &&
+    firstInput !== null &&
+    !Array.isArray(firstInput)
+  ) {
+    const {
+      forecastData,
+      increasePerYear,
+      isMobileViewport = false,
+      option,
+      showLegend = true,
+      trendlinePets,
+      useCompactDesktopHeight = false,
+      yearPets,
+      years,
+    } = firstInput;
+
+    return {
+      forecastData,
+      increasePerYear,
+      isMobileViewport,
+      option,
+      showLegend,
+      trendlinePets,
+      useCompactDesktopHeight,
+      yearPets,
+      years,
+    };
+  }
+
+  const [
+    years,
+    option,
+    yearPets,
+    trendlinePets,
+    increasePerYear,
+    forecastData,
+    showLegend = true,
+    isMobileViewport = false,
+    useCompactDesktopHeight = false,
+  ] = input as GenerateTrendGraphLegacyArguments;
+
+  return {
+    forecastData,
+    increasePerYear,
+    isMobileViewport,
+    option,
+    showLegend,
+    trendlinePets,
+    useCompactDesktopHeight,
+    yearPets,
+    years,
+  };
+};
 
 const getGraphFillHeightClass = (useCompactDesktopHeight: boolean): string =>
   useCompactDesktopHeight
@@ -73,27 +175,26 @@ const PlotWrapper: React.FC<{
 };
 
 export const GenerateTrendGraph = (
-  years: number[],
-  option: string,
-  year_pets: number[],
-  trendline_pets: number[],
-  increase_per_year: number,
-  forecastData?: {
-    forecastValues: number[];
-    forecastYears: number[];
-    lowerBound10: number[];
-    upperBound90: number[];
-  },
-  showLegend = true,
-  isMobileViewport = false,
-  useCompactDesktopHeight = false
+  ...input: [GenerateTrendGraphOptions] | GenerateTrendGraphLegacyArguments
 ): React.ReactElement => {
+  const {
+    forecastData,
+    increasePerYear,
+    isMobileViewport,
+    option,
+    showLegend,
+    trendlinePets,
+    useCompactDesktopHeight,
+    yearPets,
+    years,
+  } = normalizeGenerateTrendGraphOptions(input);
+
   const graphFillHeightClass = getGraphFillHeightClass(useCompactDesktopHeight);
 
   if (
     years.length === 0 ||
-    year_pets.length === 0 ||
-    trendline_pets.length === 0
+    yearPets.length === 0 ||
+    trendlinePets.length === 0
   ) {
     return (
       <div
@@ -104,11 +205,11 @@ export const GenerateTrendGraph = (
     );
   }
 
-  const graph_type = option === "avg" ? "Average" : "Max";
+  const graphType = option === "avg" ? "Average" : "Max";
   const increaseText =
-    increase_per_year >= 0
-      ? `+${increase_per_year.toFixed(2)}`
-      : increase_per_year.toFixed(2);
+    increasePerYear >= 0
+      ? `+${increasePerYear.toFixed(2)}`
+      : increasePerYear.toFixed(2);
 
   const layout: Partial<Layout> = {
     autosize: true,
@@ -125,7 +226,7 @@ export const GenerateTrendGraph = (
     plot_bgcolor: GRAPH_COLORS.background,
     showlegend: showLegend,
     title: {
-      text: `${graph_type} PET in summer (2000-2025)<br><sub>Increase per year: ${increaseText}°C</sub>`,
+      text: `${graphType} PET in summer (2000-2025)<br><sub>Increase per year: ${increaseText}°C</sub>`,
     },
     xaxis: {
       gridcolor: GRAPH_COLORS.grid,
@@ -154,7 +255,7 @@ export const GenerateTrendGraph = (
       name: "PET",
       type: "scatter",
       x: years,
-      y: year_pets,
+      y: yearPets,
     },
     {
       hovertemplate: "Year: %{x}<br>Trendline: %{y:.2f}<extra></extra>",
@@ -167,13 +268,13 @@ export const GenerateTrendGraph = (
       name: "Trendline of PET",
       type: "scatter",
       x: years,
-      y: trendline_pets,
+      y: trendlinePets,
     },
   ];
 
   if (forecastData && forecastData.forecastYears.length > 0) {
     const lastYear = years.at(-1)!;
-    const lastPetValue = year_pets.at(-1)!;
+    const lastPetValue = yearPets.at(-1)!;
     const lastLowerBound = lastPetValue;
     const lastUpperBound = lastPetValue;
 

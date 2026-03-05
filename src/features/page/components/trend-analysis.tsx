@@ -154,16 +154,16 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     }
 
     setTrendGraph(
-      GenerateTrendGraph(
-        trendGraphSnapshot.years,
-        trendGraphSnapshot.option,
-        trendGraphSnapshot.year_pets,
-        trendGraphSnapshot.trendline_pets,
-        trendGraphSnapshot.increase_per_year,
-        trendGraphSnapshot.forecastData,
-        showTrendLegend,
-        isMobileViewport
-      )
+      GenerateTrendGraph({
+        forecastData: trendGraphSnapshot.forecastData,
+        increasePerYear: trendGraphSnapshot.increase_per_year,
+        isMobileViewport,
+        option: trendGraphSnapshot.option,
+        showLegend: showTrendLegend,
+        trendlinePets: trendGraphSnapshot.trendline_pets,
+        yearPets: trendGraphSnapshot.year_pets,
+        years: trendGraphSnapshot.years,
+      })
     );
   }, [isMobileViewport, showTrendLegend, trendGraphSnapshot]);
 

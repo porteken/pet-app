@@ -35,11 +35,11 @@ export const OptimizedMarker = memo<OptimizedMarkerProperties>(
     const queryClient = useQueryClient();
 
     const handleMouseEnter = useCallback(() => {
-      void prefetchTrendGraphData(
-        queryClient,
-        locationId,
-        selectedGraphMeasure
-      );
+      void Promise.resolve()
+        .then(() =>
+          prefetchTrendGraphData(queryClient, locationId, selectedGraphMeasure)
+        )
+        .catch(() => {});
     }, [locationId, queryClient, selectedGraphMeasure]);
 
     const handleClick = useCallback(() => {

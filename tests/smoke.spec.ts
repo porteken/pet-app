@@ -25,8 +25,12 @@ test.describe("Smoke Tests", () => {
     await expect(modal).toBeHidden({ timeout: 10_000 });
 
     await page.locator("input[data-testid='city-selector']").click();
-    await expect(page.getByRole("listbox")).toBeVisible({ timeout: 5000 });
-    await page.getByRole("option", { name: "Phoenix" }).click();
+    const phoenixOption = page
+      .getByTestId("searchable-select-option")
+      .filter({ hasText: "Phoenix" })
+      .first();
+    await expect(phoenixOption).toBeVisible({ timeout: 5000 });
+    await phoenixOption.click();
 
     await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({
       timeout: 10_000,
@@ -120,8 +124,12 @@ test.describe("Smoke Tests", () => {
     await modal.getByRole("button", { name: "Close" }).click();
     await expect(modal).toBeHidden({ timeout: 10_000 });
     await page.locator("input[data-testid='city-selector']").click();
-    await expect(page.getByRole("listbox")).toBeVisible({ timeout: 5000 });
-    await page.getByRole("option", { name: "Phoenix" }).click();
+    const phoenixOption = page
+      .getByTestId("searchable-select-option")
+      .filter({ hasText: "Phoenix" })
+      .first();
+    await expect(phoenixOption).toBeVisible({ timeout: 5000 });
+    await phoenixOption.click();
 
     await expect(page.getByText("Trend Analysis")).toBeVisible({
       timeout: 10_000,

@@ -28,7 +28,7 @@ export default defineConfig({
         "src/types/**/*.{ts,tsx}",
       ],
       provider: "v8",
-      reporter: ["text", "json", "html"],
+      reporter: ["text", "json", "html", "lcov"],
     },
     environment: "jsdom",
     exclude: [

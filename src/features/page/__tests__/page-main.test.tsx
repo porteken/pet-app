@@ -146,14 +146,16 @@ describe("PageMain", () => {
         expect(GenerateTrendGraph).toHaveBeenCalled();
       });
       expect(GenerateTrendGraph).toHaveBeenCalledWith(
-        [2020, 2021, 2022],
-        "avg",
-        [7, 12, 17],
-        [5, 10, 15],
-        0.5,
-        undefined,
-        true,
-        false
+        expect.objectContaining({
+          forecastData: undefined,
+          increasePerYear: 0.5,
+          isMobileViewport: false,
+          option: "avg",
+          showLegend: true,
+          trendlinePets: [5, 10, 15],
+          yearPets: [7, 12, 17],
+          years: [2020, 2021, 2022],
+        })
       );
     });
 

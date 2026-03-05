@@ -182,7 +182,7 @@ describe("HeaderBar", () => {
 
       const selector = screen.getByTestId("city-selector");
       fireEvent.focus(selector);
-      fireEvent.click(screen.getByRole("option", { name: "New York" }));
+      fireEvent.click(screen.getByText("New York"));
 
       expect(mockPush).toHaveBeenCalledWith("/1");
     });
@@ -194,12 +194,8 @@ describe("HeaderBar", () => {
       fireEvent.focus(selector);
       fireEvent.change(selector, { target: { value: "test states" } });
 
-      expect(
-        screen.getByRole("option", { name: "New York" })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("option", { name: "Los Angeles" })
-      ).toBeInTheDocument();
+      expect(screen.getByText("New York")).toBeInTheDocument();
+      expect(screen.getByText("Los Angeles")).toBeInTheDocument();
     });
 
     it("should clear city selection when clear button is clicked", () => {

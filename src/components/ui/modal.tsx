@@ -31,30 +31,33 @@ const Modal = memo<ModalProperties>(
       return null;
     }
 
+    let overlayPositionClass = "fixed inset-0";
+    if (constrainToParent) {
+      overlayPositionClass = mobileFullscreen
+        ? "fixed inset-0 sm:absolute sm:inset-0"
+        : "absolute inset-0";
+    }
+
+    let dialogPositionClass = "fixed";
+    if (constrainToParent) {
+      dialogPositionClass = mobileFullscreen ? "fixed sm:absolute" : "absolute";
+    }
+
     return (
-      <div
-        className={cn(
-          "z-[11000] bg-black/60",
-          constrainToParent
-            ? mobileFullscreen
-              ? "fixed inset-0 sm:absolute sm:inset-0"
-              : "absolute inset-0"
-            : "fixed inset-0"
-        )}
-        onClick={onClose}
-        role="presentation"
-      >
+      <div className={cn("z-[11000] bg-black/60", overlayPositionClass)}>
+        <button
+          aria-label="Close dialog"
+          className="absolute inset-0 cursor-default focus:outline-none"
+          onClick={onClose}
+          type="button"
+        />
         <dialog
           aria-labelledby={titleId}
           className={cn(
             mobileFullscreen
               ? "inset-0 h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 overflow-y-auto rounded-none border-0 bg-white p-3 shadow-lg sm:top-1/2 sm:left-1/2 sm:h-auto sm:max-h-[95dvh] sm:w-[calc(100%-2rem)] sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg sm:border sm:border-gray-200 sm:p-4 lg:p-5"
               : "top-1/2 left-1/2 max-h-[86dvh] w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 shadow-lg sm:max-h-[90dvh] sm:w-[calc(100%-2rem)] sm:p-6",
-            constrainToParent
-              ? mobileFullscreen
-                ? "fixed sm:absolute"
-                : "absolute"
-              : "fixed",
+            dialogPositionClass,
             dialogClassName
           )}
           onCancel={event => {

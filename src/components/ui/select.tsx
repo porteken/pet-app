@@ -72,7 +72,6 @@ const SearchableOptionButton = ({
       data-value={option.value}
       onClick={handleClick}
       onMouseDown={preventInputBlur}
-      role="option"
       type="button"
     >
       {option.label}
@@ -201,7 +200,10 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
     } else if (groupedData) {
       searchableOptionsContent = filteredGroupedData.map(group => (
         <div key={group.group}>
-          <div className="px-3 py-1 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+          <div
+            className="px-3 py-1 text-xs font-semibold tracking-wide text-gray-500 uppercase"
+            data-testid="searchable-select-group-label"
+          >
             {group.group}
           </div>
           {group.items.map(option => (
@@ -237,8 +239,6 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
         {searchable ? (
           <div className="relative" ref={searchableContainerReference}>
             <input
-              aria-expanded={isDropdownOpen}
-              aria-haspopup="listbox"
               autoComplete="off"
               className={cn(
                 "w-full rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500",
@@ -269,7 +269,6 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
               placeholder={
                 placeholder ?? `Search ${label?.toLowerCase() ?? "options"}...`
               }
-              role="searchbox"
               type="text"
               value={
                 isDropdownOpen ? searchTerm : (selectedOption?.label ?? "")
@@ -308,10 +307,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
             )}
 
             {isDropdownOpen && (
-              <div
-                className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-md border border-gray-200 bg-white py-1 shadow-lg"
-                role="listbox"
-              >
+              <div className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-md border border-gray-200 bg-white py-1 shadow-lg">
                 {searchableOptionsContent}
               </div>
             )}

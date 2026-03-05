@@ -317,6 +317,11 @@ const defaultProps = {
   rankings: mockRankings,
 };
 
+const requireElement = <T extends Element>(element: null | T): T => {
+  expect(element).not.toBeNull();
+  return element as T;
+};
+
 describe("RankingsMain", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -352,15 +357,15 @@ describe("RankingsMain", () => {
       render(<RankingsMain {...defaultProps} />);
 
       expect(screen.getByText("Heat Stress Levels")).toBeInTheDocument();
-      const legendSection = screen
-        .getByText("Heat Stress Levels")
-        .closest("div");
+      const legendSection = requireElement(
+        screen.getByText("Heat Stress Levels").closest("div")
+      );
       expect(
-        within(legendSection!).getByText("None to Slight")
+        within(legendSection).getByText("None to Slight")
       ).toBeInTheDocument();
-      expect(within(legendSection!).getByText("Moderate")).toBeInTheDocument();
-      expect(within(legendSection!).getByText("Strong")).toBeInTheDocument();
-      expect(within(legendSection!).getByText("Extreme")).toBeInTheDocument();
+      expect(within(legendSection).getByText("Moderate")).toBeInTheDocument();
+      expect(within(legendSection).getByText("Strong")).toBeInTheDocument();
+      expect(within(legendSection).getByText("Extreme")).toBeInTheDocument();
     });
 
     it("should render table headers", () => {
@@ -455,8 +460,10 @@ describe("RankingsMain", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const table = screen.getByRole("table");
-      const cityHeader = within(table).getByText("City").closest("th");
-      fireEvent.click(cityHeader!);
+      const cityHeader = requireElement(
+        within(table).getByText("City").closest("th")
+      );
+      fireEvent.click(cityHeader);
 
       const rows = screen.getAllByRole("row");
       expect(rows[1]).toHaveTextContent("Austin");
@@ -466,18 +473,22 @@ describe("RankingsMain", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const table = screen.getByRole("table");
-      const cityHeader = within(table).getByText("City").closest("th");
-      fireEvent.click(cityHeader!);
+      const cityHeader = requireElement(
+        within(table).getByText("City").closest("th")
+      );
+      fireEvent.click(cityHeader);
 
-      expect(within(cityHeader!).getByText("↑")).toBeInTheDocument();
+      expect(within(cityHeader).getByText("↑")).toBeInTheDocument();
     });
 
     it("should sort by avg_pet when Avg PET header is clicked", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const table = screen.getByRole("table");
-      const avgPetHeader = within(table).getByText("Avg PET").closest("th");
-      fireEvent.click(avgPetHeader!);
+      const avgPetHeader = requireElement(
+        within(table).getByText("Avg PET").closest("th")
+      );
+      fireEvent.click(avgPetHeader);
 
       const rows = screen.getAllByRole("row");
       expect(rows[1]).toHaveTextContent("Eugene");
@@ -487,8 +498,10 @@ describe("RankingsMain", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const table = screen.getByRole("table");
-      const stateHeader = within(table).getByText("State").closest("th");
-      fireEvent.click(stateHeader!);
+      const stateHeader = requireElement(
+        within(table).getByText("State").closest("th")
+      );
+      fireEvent.click(stateHeader);
 
       const rows = screen.getAllByRole("row");
       expect(rows[1]).toHaveTextContent("AZ");
@@ -498,10 +511,10 @@ describe("RankingsMain", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const table = screen.getByRole("table");
-      const changeHeader = within(table)
-        .getByText("Change per Decade")
-        .closest("th");
-      fireEvent.click(changeHeader!);
+      const changeHeader = requireElement(
+        within(table).getByText("Change per Decade").closest("th")
+      );
+      fireEvent.click(changeHeader);
 
       expect(changeHeader).toBeInTheDocument();
     });
@@ -561,8 +574,8 @@ describe("RankingsMain", () => {
     it("should navigate to location page when row is clicked", () => {
       render(<RankingsMain {...defaultProps} />);
 
-      const row = screen.getByText("Austin").closest("tr");
-      fireEvent.click(row!);
+      const row = requireElement(screen.getByText("Austin").closest("tr"));
+      fireEvent.click(row);
 
       expect(mockPush).toHaveBeenCalledWith("/1");
     });
@@ -747,8 +760,10 @@ describe("RankingsMain", () => {
       expect(currentPages[0]).toHaveTextContent("2");
 
       const table = screen.getByRole("table");
-      const cityHeader = within(table).getByText("City").closest("th");
-      fireEvent.click(cityHeader!);
+      const cityHeader = requireElement(
+        within(table).getByText("City").closest("th")
+      );
+      fireEvent.click(cityHeader);
 
       const updatedCurrentPages = screen.getAllByTestId("current-page");
       expect(updatedCurrentPages[0]).toHaveTextContent("1");

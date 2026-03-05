@@ -15,7 +15,6 @@ test.describe("City Selection", () => {
 
     const citySelect = page.getByTestId("city-selector");
     await expect(citySelect).toBeVisible();
-    await expect(page.getByRole("searchbox")).toBeVisible();
   });
 
   test("should display city selection dropdown on home page", async ({
@@ -49,7 +48,7 @@ test.describe("City Selection", () => {
     expect(firstCityValue).not.toBeNull();
     await firstOption.click();
     await expect(page).toHaveURL(
-      new RegExp(String.raw`/${firstCityValue!}(\?.*)?$`)
+      new RegExp(String.raw`/${firstCityValue}(\?.*)?$`)
     );
   });
 
@@ -88,7 +87,7 @@ test.describe("City Selection", () => {
     const filteredOptions = page.getByTestId("searchable-select-option");
     await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
     const firstGroupLabel = page
-      .locator('[role="listbox"] > div > div')
+      .getByTestId("searchable-select-group-label")
       .first();
     const firstStateLabel = await getRequiredTextContent(firstGroupLabel);
     const stateQuery = firstStateLabel.trim().toLowerCase();

@@ -127,17 +127,17 @@ const Home: FC<MapProperties> = ({
           throw new Error("No trend data available");
         }
 
-        const graph = GenerateTrendGraph(
-          snapshot.years,
-          snapshot.option,
-          snapshot.year_pets,
-          snapshot.trendline_pets,
-          snapshot.increase_per_year,
-          snapshot.forecastData,
-          showTrendLegend,
+        const graph = GenerateTrendGraph({
+          forecastData: snapshot.forecastData,
+          increasePerYear: snapshot.increase_per_year,
           isMobileViewport,
-          false
-        );
+          option: snapshot.option,
+          showLegend: showTrendLegend,
+          trendlinePets: snapshot.trendline_pets,
+          useCompactDesktopHeight: false,
+          yearPets: snapshot.year_pets,
+          years: snapshot.years,
+        });
         setPetGraph(graph);
       } catch {
         setPetGraph(<ErrorGraphDisplay />);

@@ -1,19 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FetchError } from "@/lib/utils/errors";
-import {
-  createMockLinearRegression,
-  mockSimpleLinearRegression,
-  mockSupabaseClient,
-  mockValidationModule,
-} from "@/testing/mocks";
+import { createMockLinearRegression } from "@/testing/mocks";
 import { clearAllMocks, setupApiClientTest } from "@/testing/test-utilities";
 
 import { FetchForecastData, FetchTrendGraphData } from "../fetch-client";
-
-mockSupabaseClient();
-mockValidationModule();
-mockSimpleLinearRegression();
 
 describe("FetchTrendGraphData", () => {
   it("should throw error when called in non-browser environment", async () => {

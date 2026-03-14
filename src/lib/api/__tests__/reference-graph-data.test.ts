@@ -1,13 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FetchError } from "@/lib/utils/errors";
-import { mockSupabaseClient, mockValidationModule } from "@/testing/mocks";
 import { clearAllMocks, setupApiClientTest } from "@/testing/test-utilities";
 
 import { FetchReferenceGraphData } from "../reference-graph-data";
-
-mockSupabaseClient();
-mockValidationModule();
 
 describe("reference-graph-data", () => {
   let mockSupabaseClient: ReturnType<

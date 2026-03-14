@@ -19,15 +19,26 @@ import {
 
 vi.mock("@/lib/utils/errors", () => ({
   createError: vi.fn(),
-  NetworkError: vi
-    .fn()
-    .mockImplementation((message, statusCode, originalError, context) => {
-      const error = new Error(message);
-      (error as any).statusCode = statusCode;
-      (error as any).originalError = originalError;
-      (error as any).context = context;
-      return error;
-    }),
+  NetworkError: vi.fn(
+    class MockNetworkError extends Error {
+      context: unknown;
+      originalError: unknown;
+      statusCode: number;
+
+      constructor(
+        message: string,
+        statusCode: number,
+        originalError?: unknown,
+        context?: unknown
+      ) {
+        super(message);
+        this.name = "NetworkError";
+        this.statusCode = statusCode;
+        this.originalError = originalError;
+        this.context = context;
+      }
+    }
+  ),
 }));
 
 const mockFetch = vi.fn();

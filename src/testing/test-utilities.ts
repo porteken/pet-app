@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 
+import "./module-mocks";
 import {
   createMockCookieStore,
   createMockLinearRegression,

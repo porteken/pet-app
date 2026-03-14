@@ -1,11 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DatabaseError } from "@/lib/utils/errors";
-import {
-  mockNextHeaders,
-  mockSimpleLinearRegression,
-  mockSupabaseServer,
-} from "@/testing/mocks";
 import { clearAllMocks, setupApiServerTest } from "@/testing/test-utilities";
 
 import {
@@ -14,10 +9,6 @@ import {
   FetchReferenceGraphData,
   FetchTrendGraphData,
 } from "../fetch-server";
-
-mockNextHeaders();
-mockSupabaseServer();
-mockSimpleLinearRegression();
 
 describe("fetch-server", () => {
   let mockSupabaseClient: ReturnType<

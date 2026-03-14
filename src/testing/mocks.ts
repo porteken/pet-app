@@ -66,34 +66,10 @@ export const createMockCookieStore = () => ({
   set: vi.fn(),
 });
 
-export const mockNextHeaders = () => {
-  vi.mock("next/headers", () => ({
-    cookies: vi.fn(),
-  }));
-};
-
 export const createMockLinearRegression = () => ({
   predict: vi.fn(),
   slope: 0,
 });
-
-export const mockSimpleLinearRegression = () => {
-  vi.mock("@/lib/utils/simple-linear-regression", () => ({
-    SimpleLinearRegression: vi.fn(),
-  }));
-};
-
-export const mockSupabaseClient = () => {
-  vi.mock("@/config/supabase/client", () => ({
-    createClient: vi.fn(),
-  }));
-};
-
-export const mockSupabaseServer = () => {
-  vi.mock("@/config/supabase/server", () => ({
-    createClient: vi.fn(),
-  }));
-};
 export const createMockValidation = () => ({
   validateDates: vi.fn(),
   validateLocationId: vi.fn(),
@@ -114,16 +90,4 @@ export const setupSuccessfulValidations = (
   mockValidation.validateYear.mockReturnValue(true);
   mockValidation.validateYearPets.mockReturnValue(true);
   mockValidation.validateYears.mockReturnValue(true);
-};
-
-export const mockValidationModule = () => {
-  vi.mock("@/lib/utils/validation", () => ({
-    validateDates: vi.fn(),
-    validateLocationId: vi.fn(),
-    validatePets: vi.fn(),
-    validateTrendOption: vi.fn(),
-    validateYear: vi.fn(),
-    validateYearPets: vi.fn(),
-    validateYears: vi.fn(),
-  }));
 };

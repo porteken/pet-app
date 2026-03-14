@@ -4,7 +4,7 @@ import nextPlugin from "@next/eslint-plugin-next";
 import vitest from "@vitest/eslint-plugin";
 import eslintConfigPrettier from "eslint-config-prettier";
 import importPlugin from "eslint-plugin-import";
-import perfectionist from "eslint-plugin-perfectionist";
+import { configs as perfectionistConfigs } from "eslint-plugin-perfectionist";
 import playwright from "eslint-plugin-playwright";
 import pluginPromise from "eslint-plugin-promise";
 import pluginReact from "eslint-plugin-react";
@@ -61,7 +61,7 @@ export default [
     },
   },
   eslintPluginUnicorn.configs.recommended,
-  perfectionist.configs["recommended-natural"],
+  perfectionistConfigs["recommended-natural"],
   {
     rules: {
       "@typescript-eslint/no-unused-vars": [

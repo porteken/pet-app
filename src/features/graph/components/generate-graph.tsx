@@ -31,11 +31,10 @@ interface GenerateTrendGraphOptions {
   years: number[];
 }
 
-interface NormalizedGenerateTrendGraphOptions
-  extends Omit<
-    GenerateTrendGraphOptions,
-    "isMobileViewport" | "showLegend" | "useCompactDesktopHeight"
-  > {
+interface NormalizedGenerateTrendGraphOptions extends Omit<
+  GenerateTrendGraphOptions,
+  "isMobileViewport" | "showLegend" | "useCompactDesktopHeight"
+> {
   isMobileViewport: boolean;
   showLegend: boolean;
   useCompactDesktopHeight: boolean;
@@ -84,7 +83,6 @@ const normalizeGenerateTrendGraphOptions = (
   if (
     input.length === 1 &&
     typeof firstInput === "object" &&
-    firstInput !== null &&
     !Array.isArray(firstInput)
   ) {
     const {

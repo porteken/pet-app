@@ -217,13 +217,17 @@ describe("api-client", () => {
         },
       };
 
-      if (hasError(errorResponse)) {
-        expect(errorResponse.data).toBeUndefined();
-        expect(errorResponse.error).toBeDefined();
-        expect(errorResponse.error.message).toBe("Test error message");
-        expect(errorResponse.error.code).toBe("TEST_ERROR");
-        expect(errorResponse.error.status).toBe(400);
+      expect(hasError(errorResponse)).toBe(true);
+
+      if (!hasError(errorResponse)) {
+        throw new Error("Expected an error response");
       }
+
+      expect(errorResponse.data).toBeUndefined();
+      expect(errorResponse.error).toBeDefined();
+      expect(errorResponse.error.message).toBe("Test error message");
+      expect(errorResponse.error.code).toBe("TEST_ERROR");
+      expect(errorResponse.error.status).toBe(400);
     });
 
     it("should correctly narrow types for success response", () => {
@@ -232,11 +236,15 @@ describe("api-client", () => {
         error: undefined,
       };
 
-      if (!hasError(successResponse)) {
-        expect(successResponse.data).toBeDefined();
-        expect(successResponse.data.name).toBe("Test Data");
-        expect(successResponse.error).toBeUndefined();
+      expect(hasError(successResponse)).toBe(false);
+
+      if (hasError(successResponse)) {
+        throw new Error("Expected a successful response");
       }
+
+      expect(successResponse.data).toBeDefined();
+      expect(successResponse.data.name).toBe("Test Data");
+      expect(successResponse.error).toBeUndefined();
     });
 
     it("should work with different error configurations", () => {
@@ -295,11 +303,15 @@ describe("api-client", () => {
       const mockRequestFunction = vi.fn().mockResolvedValue(mockUser);
       const result: ApiResponse<User> = await apiRequest(mockRequestFunction);
 
-      if (!hasError(result)) {
-        expect(result.data.id).toBe(1);
-        expect(result.data.name).toBe("John Doe");
-        expect(result.data.email).toBe("john@example.com");
+      expect(hasError(result)).toBe(false);
+
+      if (hasError(result)) {
+        throw new Error("Expected a successful response");
       }
+
+      expect(result.data.id).toBe(1);
+      expect(result.data.name).toBe("John Doe");
+      expect(result.data.email).toBe("john@example.com");
     });
 
     it("should handle generic array types", async () => {
@@ -308,11 +320,15 @@ describe("api-client", () => {
       const result: ApiResponse<number[]> =
         await apiRequest(mockRequestFunction);
 
-      if (!hasError(result)) {
-        expect(Array.isArray(result.data)).toBe(true);
-        expect(result.data.length).toBe(5);
-        expect(result.data[0]).toBe(1);
+      expect(hasError(result)).toBe(false);
+
+      if (hasError(result)) {
+        throw new Error("Expected a successful response");
       }
+
+      expect(Array.isArray(result.data)).toBe(true);
+      expect(result.data.length).toBe(5);
+      expect(result.data[0]).toBe(1);
     });
 
     it("should handle complex nested types", async () => {
@@ -339,10 +355,14 @@ describe("api-client", () => {
       const result: ApiResponse<ComplexData> =
         await apiRequest(mockRequestFunction);
 
-      if (!hasError(result)) {
-        expect(result.data.users.length).toBe(2);
-        expect(result.data.metadata.total).toBe(100);
+      expect(hasError(result)).toBe(false);
+
+      if (hasError(result)) {
+        throw new Error("Expected a successful response");
       }
+
+      expect(result.data.users.length).toBe(2);
+      expect(result.data.metadata.total).toBe(100);
     });
   });
 

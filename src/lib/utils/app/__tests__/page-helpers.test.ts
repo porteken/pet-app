@@ -503,13 +503,16 @@ describe("page-helpers", () => {
       expect(cookieResult.status).toBe("rejected");
       expect(locationResult.status).toBe("rejected");
 
-      if (cookieResult.status === "rejected") {
-        expect(cookieResult.reason.message).toBe("Cookie error");
+      if (cookieResult.status !== "rejected") {
+        throw new Error("Expected cookie request to be rejected");
       }
 
-      if (locationResult.status === "rejected") {
-        expect(locationResult.reason.message).toBe("Fetch error");
+      if (locationResult.status !== "rejected") {
+        throw new Error("Expected location request to be rejected");
       }
+
+      expect(cookieResult.reason.message).toBe("Cookie error");
+      expect(locationResult.reason.message).toBe("Fetch error");
     });
   });
 });

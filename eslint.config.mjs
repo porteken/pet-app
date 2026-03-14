@@ -8,6 +8,7 @@ import perfectionist from "eslint-plugin-perfectionist";
 import playwright from "eslint-plugin-playwright";
 import pluginPromise from "eslint-plugin-promise";
 import pluginReact from "eslint-plugin-react";
+import sonarjs from 'eslint-plugin-sonarjs';
 import tailwind from "eslint-plugin-tailwindcss";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import globals from "globals";
@@ -16,6 +17,7 @@ export default [
   {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
   },
+  sonarjs.configs.recommended,
   {
     languageOptions: {
       ecmaVersion: "latest",

@@ -74,6 +74,7 @@ export const mockNextHeaders = () => {
 
 export const createMockLinearRegression = () => ({
   predict: vi.fn(),
+  slope: 0,
 });
 
 export const mockSimpleLinearRegression = () => {

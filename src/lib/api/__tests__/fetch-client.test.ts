@@ -43,11 +43,12 @@ describe("FetchTrendGraphData", () => {
     mockValidation = setup.mockValidation;
 
     mockLinearRegression = createMockLinearRegression();
-    const { SimpleLinearRegression } = await import(
-      "@/lib/utils/simple-linear-regression"
-    );
+    const { SimpleLinearRegression } =
+      await import("@/lib/utils/simple-linear-regression");
     vi.mocked(SimpleLinearRegression).mockImplementation(
-      () => mockLinearRegression as any
+      function MockSimpleLinearRegression() {
+        return mockLinearRegression as any;
+      }
     );
   });
 

@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { gotoAndWaitForMapPage, waitForMapPage } from "./utils/map-page";
+
 function getPerformanceThresholds(browserName: string) {
   if (browserName === "webkit") {
     return {
@@ -32,12 +34,7 @@ async function gotoWithRetry(page: Page, url: string): Promise<void> {
 
 test.describe("Cross-Browser Compatibility", () => {
   test("core functionality works across browsers", async ({ page }) => {
-    await page.goto("/");
-
-    await expect(page.getByText("Loading map...").first()).toBeHidden({
-      timeout: 10_000,
-    });
-    await expect(page.locator(".leaflet-container")).toBeVisible();
+    await gotoAndWaitForMapPage(page, "/");
 
     await page.goto("/1");
     await expect(page.getByText("Trend Analysis")).toBeVisible();
@@ -147,9 +144,7 @@ test.describe("Cross-Browser Compatibility", () => {
     const thresholds = getPerformanceThresholds(browserName);
     const initialLoadStart = Date.now();
     await gotoWithRetry(page, "/");
-    await expect(page.getByText("Loading map...").first()).toBeHidden({
-      timeout: 15_000,
-    });
+    await waitForMapPage(page);
     const initialLoadTime = Date.now() - initialLoadStart;
 
     expect(initialLoadTime).toBeLessThan(thresholds.initialLoadMs);

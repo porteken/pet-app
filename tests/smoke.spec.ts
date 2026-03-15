@@ -1,26 +1,19 @@
 import { expect, test } from "@playwright/test";
 
-import { clickClickableMarker, MARKER_SELECTOR } from "./utils/map-marker";
+import { MARKER_SELECTOR } from "./utils/map-marker";
+import {
+  gotoAndWaitForMapPage,
+  openLocationDetailsModal,
+  waitForMapPage,
+} from "./utils/map-page";
 
 test.describe("Smoke Tests", () => {
   test("complete user journey: home → location selection → data analysis", async ({
     page,
   }) => {
-    await page.goto("/");
+    await gotoAndWaitForMapPage(page, "/");
 
-    await expect(page.getByText("Loading map...").first()).toBeHidden({
-      timeout: 10_000,
-    });
-    await expect(page.locator(".leaflet-container")).toBeVisible();
-
-    await clickClickableMarker(page);
-
-    await expect(
-      page.getByRole("button", { name: "View Full Details" })
-    ).toBeVisible({ timeout: 10_000 });
-
-    const modal = page.getByRole("dialog");
-    await expect(modal).toBeVisible({ timeout: 10_000 });
+    const { modal } = await openLocationDetailsModal(page);
     await modal.getByRole("button", { name: "Close" }).click();
     await expect(modal).toBeHidden({ timeout: 10_000 });
 
@@ -51,7 +44,7 @@ test.describe("Smoke Tests", () => {
     });
 
     await page.goBack();
-    await expect(page.locator(".leaflet-container")).toBeVisible();
+    await waitForMapPage(page);
   });
 
   test("navigation workflow: direct URL access → data interaction", async ({
@@ -95,32 +88,17 @@ test.describe("Smoke Tests", () => {
   test("responsive design: mobile user journey", async ({ page }) => {
     await page.setViewportSize({ height: 667, width: 375 });
 
-    await page.goto("/");
-
-    await expect(page.locator(".leaflet-container")).toBeVisible({
-      timeout: 10_000,
-    });
-
-    await expect(page.getByText("Loading map...").first()).toBeHidden({
-      timeout: 10_000,
-    });
+    await gotoAndWaitForMapPage(page, "/");
 
     const marker = page.locator(MARKER_SELECTOR).first();
     await marker.waitFor({ state: "visible", timeout: 10_000 });
 
     await page.setViewportSize({ height: 1024, width: 768 });
 
-    await clickClickableMarker(page);
-
-    const viewDetailsButton = page.getByRole("button", {
-      name: "View Full Details",
-    });
-    await expect(viewDetailsButton).toBeVisible({ timeout: 10_000 });
+    const { modal, viewDetailsButton } = await openLocationDetailsModal(page);
     await expect(viewDetailsButton).toBeEnabled();
 
     await page.setViewportSize({ height: 667, width: 375 });
-    const modal = page.getByRole("dialog");
-    await expect(modal).toBeVisible({ timeout: 10_000 });
     await modal.getByRole("button", { name: "Close" }).click();
     await expect(modal).toBeHidden({ timeout: 10_000 });
     await page.locator("input[data-testid='city-selector']").click();
@@ -142,9 +120,7 @@ test.describe("Smoke Tests", () => {
   test("performance: page loads within acceptable time", async ({ page }) => {
     const startTime = Date.now();
 
-    await page.goto("/");
-
-    await expect(page.locator(".leaflet-container")).toBeVisible();
+    await gotoAndWaitForMapPage(page, "/");
 
     const loadTime = Date.now() - startTime;
 

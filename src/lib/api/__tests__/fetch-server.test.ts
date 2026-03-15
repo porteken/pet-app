@@ -10,10 +10,116 @@ import {
   FetchTrendGraphData,
 } from "../fetch-server";
 
+type CityRankingsFixture = {
+  change: RankingChangeRow[];
+  forecast: RankingForecastRow[];
+  locations: RankingLocationRow[];
+  percentiles: RankingPercentileRow[];
+  petAvg: RankingPetRow[];
+  petMax: RankingPetRow[];
+};
+
+type MockSupabaseClient = ReturnType<
+  (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
+>;
+
+type QueryResponse<T> = {
+  data: T | undefined;
+  error: Error | undefined;
+};
+
+type RankingChangeRow = { change: number; location_id: number };
+type RankingForecastRow = { location_id: number; lower: number; upper: number };
+type RankingLocationRow = { city: string; location_id: number; state: string };
+type RankingPercentileRow = {
+  location_id: number;
+  p10: number;
+  p90: number;
+  year: number;
+};
+type RankingPetRow = { location_id: number; pet: number };
+
+const createSuccessResponse = <T>(data: T): QueryResponse<T> => ({
+  data,
+  error: undefined,
+});
+
+const createMissingResponse = <T>(): QueryResponse<T> => ({
+  data: undefined,
+  error: undefined,
+});
+
+const createFailedResponse = <T>(error: Error): QueryResponse<T> => ({
+  data: undefined,
+  error,
+});
+
+const createEqQuery = <T>({ data, error }: QueryResponse<T>) => ({
+  eq: vi.fn().mockResolvedValue({ data, error }),
+  select: vi.fn().mockReturnThis(),
+});
+
+const createSelectQuery = <T>({ data, error }: QueryResponse<T>) => ({
+  select: vi.fn().mockResolvedValue({ data, error }),
+});
+
+const createCityRankingsFixture = (
+  overrides: Partial<CityRankingsFixture> = {}
+): CityRankingsFixture => ({
+  change: [{ change: 1.5, location_id: 1 }],
+  forecast: [{ location_id: 1, lower: 38, upper: 42 }],
+  locations: [{ city: "Phoenix", location_id: 1, state: "Arizona" }],
+  percentiles: [{ location_id: 1, p10: 32, p90: 38, year: 2024 }],
+  petAvg: [{ location_id: 1, pet: 35.5 }],
+  petMax: [{ location_id: 1, pet: 40.5 }],
+  ...overrides,
+});
+
+const queueCityRankingsResponses = (
+  mockSupabaseClient: MockSupabaseClient,
+  {
+    change,
+    fixture = createCityRankingsFixture(),
+    forecast,
+    locations,
+    percentiles,
+    petAvg,
+    petMax,
+  }: {
+    change?: QueryResponse<CityRankingsFixture["change"]>;
+    fixture?: CityRankingsFixture;
+    forecast?: QueryResponse<CityRankingsFixture["forecast"]>;
+    locations?: QueryResponse<CityRankingsFixture["locations"]>;
+    percentiles?: QueryResponse<CityRankingsFixture["percentiles"]>;
+    petAvg?: QueryResponse<CityRankingsFixture["petAvg"]>;
+    petMax?: QueryResponse<CityRankingsFixture["petMax"]>;
+  } = {}
+) => {
+  mockSupabaseClient.from
+    .mockReturnValueOnce(
+      createEqQuery(petAvg ?? createSuccessResponse(fixture.petAvg))
+    )
+    .mockReturnValueOnce(
+      createEqQuery(petMax ?? createSuccessResponse(fixture.petMax))
+    )
+    .mockReturnValueOnce(
+      createSelectQuery(locations ?? createSuccessResponse(fixture.locations))
+    )
+    .mockReturnValueOnce(
+      createEqQuery(percentiles ?? createSuccessResponse(fixture.percentiles))
+    )
+    .mockReturnValueOnce(
+      createEqQuery(forecast ?? createSuccessResponse(fixture.forecast))
+    )
+    .mockReturnValueOnce(
+      createSelectQuery(change ?? createSuccessResponse(fixture.change))
+    );
+
+  return fixture;
+};
+
 describe("fetch-server", () => {
-  let mockSupabaseClient: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
-  >;
+  let mockSupabaseClient: MockSupabaseClient;
   let mockLinearRegression: ReturnType<
     (typeof import("@/testing/mocks"))["createMockLinearRegression"]
   >;
@@ -28,51 +134,34 @@ describe("fetch-server", () => {
 
   describe("FetchCityRankings", () => {
     it("should fetch and rank city data successfully", async () => {
-      const mockPetAvg = [
-        { location_id: 1, pet: 35.5 },
-        { location_id: 2, pet: 30.2 },
-      ];
-      const mockPetMax = [
-        { location_id: 1, pet: 40.5 },
-        { location_id: 2, pet: 38.2 },
-      ];
-      const mockLocations = [
-        { city: "Phoenix", location_id: 1, state: "Arizona" },
-        { city: "Austin", location_id: 2, state: "Texas" },
-      ];
-      const mockPercentiles = [
-        { location_id: 1, p10: 32, p90: 38, year: 2024 },
-        { location_id: 2, p10: 28, p90: 34, year: 2024 },
-      ];
-      const mockForecast = [
-        { location_id: 1, lower: 38, upper: 42 },
-        { location_id: 2, lower: 33, upper: 37 },
-      ];
-      const mockChange = [
-        { change: 1.5, location_id: 1 },
-        { change: 1.2, location_id: 2 },
-      ];
-
-      const createMockQuery = (data: any) => ({
-        eq: vi.fn().mockResolvedValue({ data, error: undefined }),
-        select: vi.fn().mockReturnThis(),
+      queueCityRankingsResponses(mockSupabaseClient, {
+        fixture: createCityRankingsFixture({
+          change: [
+            { change: 1.5, location_id: 1 },
+            { change: 1.2, location_id: 2 },
+          ],
+          forecast: [
+            { location_id: 1, lower: 38, upper: 42 },
+            { location_id: 2, lower: 33, upper: 37 },
+          ],
+          locations: [
+            { city: "Phoenix", location_id: 1, state: "Arizona" },
+            { city: "Austin", location_id: 2, state: "Texas" },
+          ],
+          percentiles: [
+            { location_id: 1, p10: 32, p90: 38, year: 2024 },
+            { location_id: 2, p10: 28, p90: 34, year: 2024 },
+          ],
+          petAvg: [
+            { location_id: 1, pet: 35.5 },
+            { location_id: 2, pet: 30.2 },
+          ],
+          petMax: [
+            { location_id: 1, pet: 40.5 },
+            { location_id: 2, pet: 38.2 },
+          ],
+        }),
       });
-
-      mockSupabaseClient.from
-        .mockReturnValueOnce(createMockQuery(mockPetAvg))
-        .mockReturnValueOnce(createMockQuery(mockPetMax))
-        .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockResolvedValue({ data: mockLocations, error: undefined }),
-        })
-        .mockReturnValueOnce(createMockQuery(mockPercentiles))
-        .mockReturnValueOnce(createMockQuery(mockForecast))
-        .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockResolvedValue({ data: mockChange, error: undefined }),
-        });
 
       const result = await FetchCityRankings(2024);
 
@@ -94,57 +183,40 @@ describe("fetch-server", () => {
     });
 
     it("should ignore locations with non-positive location_id", async () => {
-      const mockPetAvg = [
-        { location_id: 0, pet: 999.9 },
-        { location_id: 1, pet: 35.5 },
-        { location_id: 2, pet: 30.2 },
-      ];
-      const mockPetMax = [
-        { location_id: 0, pet: 999.9 },
-        { location_id: 1, pet: 40.5 },
-        { location_id: 2, pet: 38.2 },
-      ];
-      const mockLocations = [
-        { city: "Invalid City", location_id: 0, state: "Nowhere" },
-        { city: "Phoenix", location_id: 1, state: "Arizona" },
-        { city: "Austin", location_id: 2, state: "Texas" },
-      ];
-      const mockPercentiles = [
-        { location_id: 0, p10: 999, p90: 1000, year: 2024 },
-        { location_id: 1, p10: 32, p90: 38, year: 2024 },
-        { location_id: 2, p10: 28, p90: 34, year: 2024 },
-      ];
-      const mockForecast = [
-        { location_id: 0, lower: 999, upper: 1000 },
-        { location_id: 1, lower: 38, upper: 42 },
-        { location_id: 2, lower: 33, upper: 37 },
-      ];
-      const mockChange = [
-        { change: 99, location_id: 0 },
-        { change: 1.5, location_id: 1 },
-        { change: 1.2, location_id: 2 },
-      ];
-
-      const createMockQuery = (data: any) => ({
-        eq: vi.fn().mockResolvedValue({ data, error: undefined }),
-        select: vi.fn().mockReturnThis(),
+      queueCityRankingsResponses(mockSupabaseClient, {
+        fixture: createCityRankingsFixture({
+          change: [
+            { change: 99, location_id: 0 },
+            { change: 1.5, location_id: 1 },
+            { change: 1.2, location_id: 2 },
+          ],
+          forecast: [
+            { location_id: 0, lower: 999, upper: 1000 },
+            { location_id: 1, lower: 38, upper: 42 },
+            { location_id: 2, lower: 33, upper: 37 },
+          ],
+          locations: [
+            { city: "Invalid City", location_id: 0, state: "Nowhere" },
+            { city: "Phoenix", location_id: 1, state: "Arizona" },
+            { city: "Austin", location_id: 2, state: "Texas" },
+          ],
+          percentiles: [
+            { location_id: 0, p10: 999, p90: 1000, year: 2024 },
+            { location_id: 1, p10: 32, p90: 38, year: 2024 },
+            { location_id: 2, p10: 28, p90: 34, year: 2024 },
+          ],
+          petAvg: [
+            { location_id: 0, pet: 999.9 },
+            { location_id: 1, pet: 35.5 },
+            { location_id: 2, pet: 30.2 },
+          ],
+          petMax: [
+            { location_id: 0, pet: 999.9 },
+            { location_id: 1, pet: 40.5 },
+            { location_id: 2, pet: 38.2 },
+          ],
+        }),
       });
-
-      mockSupabaseClient.from
-        .mockReturnValueOnce(createMockQuery(mockPetAvg))
-        .mockReturnValueOnce(createMockQuery(mockPetMax))
-        .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockResolvedValue({ data: mockLocations, error: undefined }),
-        })
-        .mockReturnValueOnce(createMockQuery(mockPercentiles))
-        .mockReturnValueOnce(createMockQuery(mockForecast))
-        .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockResolvedValue({ data: mockChange, error: undefined }),
-        });
 
       const result = await FetchCityRankings(2024);
 
@@ -165,12 +237,9 @@ describe("fetch-server", () => {
     });
 
     it("should handle missing petAvg data", async () => {
-      const mockQuery = {
-        eq: vi.fn().mockResolvedValue({ data: undefined, error: undefined }),
-        select: vi.fn().mockReturnThis(),
-      };
-
-      mockSupabaseClient.from.mockReturnValue(mockQuery);
+      queueCityRankingsResponses(mockSupabaseClient, {
+        petAvg: createMissingResponse(),
+      });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
         new DatabaseError("Failed to fetch PET average data from database")
@@ -179,12 +248,9 @@ describe("fetch-server", () => {
 
     it("should handle petAvg database error", async () => {
       const mockError = new Error("Database connection failed");
-      const mockQuery = {
-        eq: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
-        select: vi.fn().mockReturnThis(),
-      };
-
-      mockSupabaseClient.from.mockReturnValue(mockQuery);
+      queueCityRankingsResponses(mockSupabaseClient, {
+        petAvg: createFailedResponse(mockError),
+      });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
         new DatabaseError(
@@ -195,17 +261,9 @@ describe("fetch-server", () => {
     });
 
     it("should handle missing petMax data", async () => {
-      const mockPetAvg = [{ location_id: 1, pet: 35.5 }];
-
-      mockSupabaseClient.from
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: mockPetAvg, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: undefined, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        });
+      queueCityRankingsResponses(mockSupabaseClient, {
+        petMax: createMissingResponse(),
+      });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
         new DatabaseError("Failed to fetch PET max data from database")
@@ -213,23 +271,9 @@ describe("fetch-server", () => {
     });
 
     it("should handle missing locations data", async () => {
-      const mockPetAvg = [{ location_id: 1, pet: 35.5 }];
-      const mockPetMax = [{ location_id: 1, pet: 40.5 }];
-
-      mockSupabaseClient.from
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: mockPetAvg, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: mockPetMax, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockResolvedValue({ data: undefined, error: undefined }),
-        });
+      queueCityRankingsResponses(mockSupabaseClient, {
+        locations: createMissingResponse(),
+      });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
         new DatabaseError("Failed to fetch location data from database")
@@ -237,30 +281,9 @@ describe("fetch-server", () => {
     });
 
     it("should handle missing percentiles data", async () => {
-      const mockPetAvg = [{ location_id: 1, pet: 35.5 }];
-      const mockPetMax = [{ location_id: 1, pet: 40.5 }];
-      const mockLocations = [
-        { city: "Phoenix", location_id: 1, state: "Arizona" },
-      ];
-
-      mockSupabaseClient.from
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: mockPetAvg, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: mockPetMax, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockResolvedValue({ data: mockLocations, error: undefined }),
-        })
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: undefined, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        });
+      queueCityRankingsResponses(mockSupabaseClient, {
+        percentiles: createMissingResponse(),
+      });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
         new DatabaseError("Failed to fetch percentiles from database")
@@ -268,39 +291,9 @@ describe("fetch-server", () => {
     });
 
     it("should handle missing future PET data", async () => {
-      const mockPetAvg = [{ location_id: 1, pet: 35.5 }];
-      const mockPetMax = [{ location_id: 1, pet: 40.5 }];
-      const mockLocations = [
-        { city: "Phoenix", location_id: 1, state: "Arizona" },
-      ];
-      const mockPercentiles = [
-        { location_id: 1, p10: 32, p90: 38, year: 2024 },
-      ];
-
-      mockSupabaseClient.from
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: mockPetAvg, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: mockPetMax, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockResolvedValue({ data: mockLocations, error: undefined }),
-        })
-        .mockReturnValueOnce({
-          eq: vi
-            .fn()
-            .mockResolvedValue({ data: mockPercentiles, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: undefined, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        });
+      queueCityRankingsResponses(mockSupabaseClient, {
+        forecast: createMissingResponse(),
+      });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
         new DatabaseError("Failed to fetch future PET data from database")
@@ -308,47 +301,9 @@ describe("fetch-server", () => {
     });
 
     it("should handle missing pet change data", async () => {
-      const mockPetAvg = [{ location_id: 1, pet: 35.5 }];
-      const mockPetMax = [{ location_id: 1, pet: 40.5 }];
-      const mockLocations = [
-        { city: "Phoenix", location_id: 1, state: "Arizona" },
-      ];
-      const mockPercentiles = [
-        { location_id: 1, p10: 32, p90: 38, year: 2024 },
-      ];
-      const mockForecast = [{ location_id: 1, lower: 38, upper: 42 }];
-
-      mockSupabaseClient.from
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: mockPetAvg, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: mockPetMax, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockResolvedValue({ data: mockLocations, error: undefined }),
-        })
-        .mockReturnValueOnce({
-          eq: vi
-            .fn()
-            .mockResolvedValue({ data: mockPercentiles, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          eq: vi
-            .fn()
-            .mockResolvedValue({ data: mockForecast, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockResolvedValue({ data: undefined, error: undefined }),
-        });
+      queueCityRankingsResponses(mockSupabaseClient, {
+        change: createMissingResponse(),
+      });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
         new DatabaseError("Failed to fetch pet change data from database")
@@ -356,48 +311,11 @@ describe("fetch-server", () => {
     });
 
     it("should handle cities with null forecast values", async () => {
-      const mockPetAvg = [{ location_id: 1, pet: 35.5 }];
-      const mockPetMax = [{ location_id: 1, pet: 40.5 }];
-      const mockLocations = [
-        { city: "Phoenix", location_id: 1, state: "Arizona" },
-      ];
-      const mockPercentiles = [
-        { location_id: 1, p10: 32, p90: 38, year: 2024 },
-      ];
-      const mockForecast: any[] = [];
-      const mockChange = [{ change: 1.5, location_id: 1 }];
-
-      mockSupabaseClient.from
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: mockPetAvg, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: mockPetMax, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockResolvedValue({ data: mockLocations, error: undefined }),
-        })
-        .mockReturnValueOnce({
-          eq: vi
-            .fn()
-            .mockResolvedValue({ data: mockPercentiles, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          eq: vi
-            .fn()
-            .mockResolvedValue({ data: mockForecast, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockResolvedValue({ data: mockChange, error: undefined }),
-        });
+      queueCityRankingsResponses(mockSupabaseClient, {
+        fixture: createCityRankingsFixture({
+          forecast: [],
+        }),
+      });
 
       const result = await FetchCityRankings(2024);
 
@@ -406,48 +324,11 @@ describe("fetch-server", () => {
     });
 
     it("should handle cities with null change values", async () => {
-      const mockPetAvg = [{ location_id: 1, pet: 35.5 }];
-      const mockPetMax = [{ location_id: 1, pet: 40.5 }];
-      const mockLocations = [
-        { city: "Phoenix", location_id: 1, state: "Arizona" },
-      ];
-      const mockPercentiles = [
-        { location_id: 1, p10: 32, p90: 38, year: 2024 },
-      ];
-      const mockForecast = [{ location_id: 1, lower: 38, upper: 42 }];
-      const mockChange: any[] = [];
-
-      mockSupabaseClient.from
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: mockPetAvg, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          eq: vi.fn().mockResolvedValue({ data: mockPetMax, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockResolvedValue({ data: mockLocations, error: undefined }),
-        })
-        .mockReturnValueOnce({
-          eq: vi
-            .fn()
-            .mockResolvedValue({ data: mockPercentiles, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          eq: vi
-            .fn()
-            .mockResolvedValue({ data: mockForecast, error: undefined }),
-          select: vi.fn().mockReturnThis(),
-        })
-        .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockResolvedValue({ data: mockChange, error: undefined }),
-        });
+      queueCityRankingsResponses(mockSupabaseClient, {
+        fixture: createCityRankingsFixture({
+          change: [],
+        }),
+      });
 
       const result = await FetchCityRankings(2024);
 

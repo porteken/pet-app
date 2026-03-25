@@ -1,7 +1,0 @@
-organization=porteken
-projectKey=porteken_pet-app
-serverUrl=https://sonarcloud.io
-serverVersion=8.0.0.82941
-dashboardUrl=https://sonarcloud.io/dashboard?id=porteken_pet-app
-ceTaskId=AZzu82ovOZXTYsZT7lvc
-ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZzu82ovOZXTYsZT7lvc

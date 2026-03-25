@@ -31,6 +31,7 @@ jobs:
 
       - run: npm run lint
       - run: npm run tsc
+      - run: npx knip
 
   vitest-unit:
     name: Vitest Unit (shard ${{ matrix.shard_index }}/5)

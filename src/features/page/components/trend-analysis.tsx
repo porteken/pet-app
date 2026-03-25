@@ -135,7 +135,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const handleForecastToggle = React.useCallback(
     (enabled: boolean) => {
       setForecastEnabled(enabled);
-      void setForecastPreferences(enabled, forecastYearsAhead).catch(() => {});
+      setForecastPreferences(enabled, forecastYearsAhead).catch(() => {});
     },
     [forecastYearsAhead]
   );
@@ -143,7 +143,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const handleForecastYearsChange = React.useCallback(
     (yearsAhead: number) => {
       setForecastYearsAhead(yearsAhead);
-      void setForecastPreferences(forecastEnabled, yearsAhead).catch(() => {});
+      setForecastPreferences(forecastEnabled, yearsAhead).catch(() => {});
     },
     [forecastEnabled]
   );

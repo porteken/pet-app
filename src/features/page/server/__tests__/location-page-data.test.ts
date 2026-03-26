@@ -1,16 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  mockCookies,
-  mockFetchLocations,
-  mockFetchReferenceGraphData,
-  mockFetchTrendGraphData,
-} = vi.hoisted(() => ({
-  mockCookies: vi.fn(),
-  mockFetchLocations: vi.fn(),
-  mockFetchReferenceGraphData: vi.fn(),
-  mockFetchTrendGraphData: vi.fn(),
-}));
+const { mockCookies, mockFetchLocations, mockFetchReferenceGraphData, mockFetchTrendGraphData } =
+  vi.hoisted(() => ({
+    mockCookies: vi.fn(),
+    mockFetchLocations: vi.fn(),
+    mockFetchReferenceGraphData: vi.fn(),
+    mockFetchTrendGraphData: vi.fn(),
+  }));
 
 vi.mock("next/headers", () => ({
   cookies: mockCookies,
@@ -79,8 +75,7 @@ describe("loadLocationPageData", () => {
 
     await expect(loadLocationPageData("7")).resolves.toEqual({
       payload: {
-        message:
-          "Location data could not be loaded. The database may be temporarily unavailable.",
+        message: "Location data could not be loaded. The database may be temporarily unavailable.",
         title: "No Data Available",
       },
       status: "database-error",

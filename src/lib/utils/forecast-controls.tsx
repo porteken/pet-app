@@ -22,7 +22,7 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
           <input
             checked={enabled}
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
-            onChange={event => onToggle(event.target.checked)}
+            onChange={(event) => onToggle(event.target.checked)}
             type="checkbox"
           />
           <span>Show Forecast</span>
@@ -31,10 +31,7 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
 
       {enabled && (
         <div className="space-y-2">
-          <label
-            className="block text-sm font-medium text-gray-700"
-            htmlFor="forecast-years"
-          >
+          <label className="block text-sm font-medium text-gray-700" htmlFor="forecast-years">
             Forecast {yearsAhead} year{yearsAhead === 1 ? "" : "s"} ahead
           </label>
           <input
@@ -42,7 +39,7 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
             id="forecast-years"
             max={75}
             min={5}
-            onChange={event => onYearsChange(Number(event.target.value))}
+            onChange={(event) => onYearsChange(Number(event.target.value))}
             step={1}
             type="range"
             value={yearsAhead}

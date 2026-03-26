@@ -150,29 +150,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard_index:
-          [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-          ]
+        shard_index: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -311,14 +289,7 @@ jobs:
   deploy:
     name: Deploy to Vercel
     if: github.event_name == 'push' && (github.ref_name == 'dev' || github.ref_name == 'prd')
-    needs:
-      [
-        quality-checks,
-        vitest-unit,
-        vitest-integration,
-        playwright-e2e,
-        sonarqube,
-      ]
+    needs: [quality-checks, vitest-unit, vitest-integration, playwright-e2e, sonarqube]
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Vercel Deploy Hook

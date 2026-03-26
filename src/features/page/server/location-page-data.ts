@@ -1,7 +1,5 @@
 import { cookies } from "next/headers";
 
-import type { LocationOptionSection, LocationProperties } from "@/types/types";
-
 import {
   FetchLocations,
   FetchReferenceGraphData,
@@ -17,6 +15,7 @@ import {
   MAX_FORECAST_YEARS_AHEAD,
   MIN_FORECAST_YEARS_AHEAD,
 } from "@/lib/constants";
+import type { LocationOptionSection, LocationProperties } from "@/types/types";
 
 import type { PageProperties } from "../model/types";
 
@@ -63,39 +62,34 @@ const parseLocationId = (id: string): number | undefined => {
   return locationId;
 };
 
-const getPreferencesFromCookies =
-  async (): Promise<LocationPagePreferences> => {
-    const cookieStore = await cookies();
-    const initialGraphMeasure =
-      cookieStore.get(GRAPH_MEASURE_COOKIE_NAME)?.value ||
-      DEFAULT_GRAPH_MEASURE;
-    const initialForecastEnabled =
-      cookieStore.get(FORECAST_ENABLED_COOKIE_NAME)?.value === "true"
-        ? true
-        : DEFAULT_FORECAST_ENABLED;
+const getPreferencesFromCookies = async (): Promise<LocationPagePreferences> => {
+  const cookieStore = await cookies();
+  const initialGraphMeasure =
+    cookieStore.get(GRAPH_MEASURE_COOKIE_NAME)?.value || DEFAULT_GRAPH_MEASURE;
+  const initialForecastEnabled =
+    cookieStore.get(FORECAST_ENABLED_COOKIE_NAME)?.value === "true"
+      ? true
+      : DEFAULT_FORECAST_ENABLED;
 
-    const rawForecastYearsAhead = Number(
-      cookieStore.get(FORECAST_YEARS_AHEAD_COOKIE_NAME)?.value
-    );
-    const initialForecastYearsAhead =
-      Number.isInteger(rawForecastYearsAhead) &&
-      rawForecastYearsAhead >= MIN_FORECAST_YEARS_AHEAD &&
-      rawForecastYearsAhead <= MAX_FORECAST_YEARS_AHEAD
-        ? rawForecastYearsAhead
-        : DEFAULT_FORECAST_YEARS_AHEAD;
+  const rawForecastYearsAhead = Number(cookieStore.get(FORECAST_YEARS_AHEAD_COOKIE_NAME)?.value);
+  const initialForecastYearsAhead =
+    Number.isInteger(rawForecastYearsAhead) &&
+    rawForecastYearsAhead >= MIN_FORECAST_YEARS_AHEAD &&
+    rawForecastYearsAhead <= MAX_FORECAST_YEARS_AHEAD
+      ? rawForecastYearsAhead
+      : DEFAULT_FORECAST_YEARS_AHEAD;
 
-    return {
-      initialForecastEnabled,
-      initialForecastYearsAhead,
-      initialGraphMeasure,
-    };
+  return {
+    initialForecastEnabled,
+    initialForecastYearsAhead,
+    initialGraphMeasure,
   };
+};
 
 const fetchGraphData = async (locationId: number): Promise<GraphData> => {
   const trendData = await FetchTrendGraphData("avg", locationId);
 
-  const latestYear =
-    trendData.years.length > 0 ? String(trendData.years.at(-1)) : "2024";
+  const latestYear = trendData.years.length > 0 ? String(trendData.years.at(-1)) : "2024";
 
   const [currentData, referenceData] = await Promise.all([
     FetchReferenceGraphData(latestYear, locationId),
@@ -178,9 +172,7 @@ export const loadLocationPageData = async (
     };
   }
 
-  const selectedLocation = locations.find(
-    location => location.location_id === locationId
-  );
+  const selectedLocation = locations.find((location) => location.location_id === locationId);
   if (!selectedLocation) {
     return {
       payload: createInvalidLocationError(

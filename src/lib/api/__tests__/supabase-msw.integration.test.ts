@@ -28,8 +28,6 @@ describe("Supabase MSW integration", () => {
       )
     );
 
-    await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
-      "response validation failed"
-    );
+    await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow("response validation failed");
   });
 });

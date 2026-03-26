@@ -43,12 +43,7 @@ describe("Error Classes", () => {
 
     it("should create an AppError with original error", () => {
       const originalError = new Error("Original error");
-      const error = new AppError(
-        "Wrapped error",
-        "WRAP_ERROR",
-        500,
-        originalError
-      );
+      const error = new AppError("Wrapped error", "WRAP_ERROR", 500, originalError);
 
       expect(error.message).toBe("Wrapped error");
       expect(error.code).toBe("WRAP_ERROR");
@@ -116,10 +111,7 @@ describe("Error Classes", () => {
 
     it("should create an AuthenticationError with original error", () => {
       const originalError = new Error("Token expired");
-      const error = new AuthenticationError(
-        "Authentication failed",
-        originalError
-      );
+      const error = new AuthenticationError("Authentication failed", originalError);
 
       expect(error.message).toBe("Authentication failed");
       expect(error.originalError).toBe(originalError);
@@ -186,12 +178,7 @@ describe("Error Classes", () => {
     it("should create a NetworkError with original error and context", () => {
       const originalError = new Error("Connection timeout");
       const context = { timeout: 5000, url: "https://api.example.com" };
-      const error = new NetworkError(
-        "Network error",
-        504,
-        originalError,
-        context
-      );
+      const error = new NetworkError("Network error", 504, originalError, context);
 
       expect(error.message).toBe("Network error");
       expect(error.statusCode).toBe(504);
@@ -254,11 +241,7 @@ describe("Error Classes", () => {
 
     it("should create a ValidationError with field and original error", () => {
       const originalError = new Error("Invalid email format");
-      const error = new ValidationError(
-        "Email is invalid",
-        "email",
-        originalError
-      );
+      const error = new ValidationError("Email is invalid", "email", originalError);
 
       expect(error.message).toBe("Email is invalid");
       expect(error.code).toBe("VALIDATION_ERROR");
@@ -279,13 +262,7 @@ describe("Error Classes", () => {
   describe("AppError with context", () => {
     it("should create an AppError with context", () => {
       const context = { action: "delete", userId: 123 };
-      const error = new AppError(
-        "Context test",
-        "TEST_CODE",
-        500,
-        undefined,
-        context
-      );
+      const error = new AppError("Context test", "TEST_CODE", 500, undefined, context);
 
       expect(error.message).toBe("Context test");
       expect(error.code).toBe("TEST_CODE");
@@ -295,11 +272,7 @@ describe("Error Classes", () => {
     it("should create a DatabaseError with context", () => {
       const originalError = new Error("Query failed");
       const context = { query: "SELECT * FROM users", table: "users" };
-      const error = new DatabaseError(
-        "Database query failed",
-        originalError,
-        context
-      );
+      const error = new DatabaseError("Database query failed", originalError, context);
 
       expect(error.message).toBe("Database query failed");
       expect(error.originalError).toBe(originalError);

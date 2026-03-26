@@ -24,21 +24,12 @@ interface OptimizedMarkerProperties {
 }
 
 export const OptimizedMarker = memo<OptimizedMarkerProperties>(
-  ({
-    icon,
-    locationId,
-    MarkerComponent: Marker,
-    onClick,
-    position,
-    selectedGraphMeasure,
-  }) => {
+  ({ icon, locationId, MarkerComponent: Marker, onClick, position, selectedGraphMeasure }) => {
     const queryClient = useQueryClient();
 
     const handleMouseEnter = useCallback(() => {
       Promise.resolve()
-        .then(() =>
-          prefetchTrendGraphData(queryClient, locationId, selectedGraphMeasure)
-        )
+        .then(() => prefetchTrendGraphData(queryClient, locationId, selectedGraphMeasure))
         .catch(() => {});
     }, [locationId, queryClient, selectedGraphMeasure]);
 

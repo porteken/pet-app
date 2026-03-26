@@ -27,8 +27,7 @@ export class SimpleLinearRegression {
     this.standardError = this.calculateStandardError(x, y);
     const n = this.xData.length;
     this.xMean = this.xData.reduce((sum, value) => sum + value, 0) / n;
-    this.xVariance =
-      this.xData.reduce((sum, value) => sum + (value - this.xMean) ** 2, 0) / n;
+    this.xVariance = this.xData.reduce((sum, value) => sum + (value - this.xMean) ** 2, 0) / n;
   }
 
   predict(x: number): number {
@@ -43,8 +42,7 @@ export class SimpleLinearRegression {
     const n = this.xData.length;
 
     const predictionError =
-      this.standardError *
-      Math.sqrt(1 + 1 / n + (x - this.xMean) ** 2 / (n * this.xVariance));
+      this.standardError * Math.sqrt(1 + 1 / n + (x - this.xMean) ** 2 / (n * this.xVariance));
 
     const tValueMap: Record<number, number> = {
       0.5: 0.674,

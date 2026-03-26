@@ -24,9 +24,7 @@ test.describe("Navigation", () => {
     await rankingsButton.click();
 
     await expect(page).toHaveURL("/rankings");
-    await expect(
-      page.getByRole("heading", { name: "Cities ranked by Average PET" })
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Cities ranked by Average PET" })).toBeVisible();
   });
 
   test("should navigate to About page from nav button", async ({ page }) => {
@@ -41,9 +39,7 @@ test.describe("Navigation", () => {
     await expect(page.getByText("Purpose of the Application")).toBeVisible();
   });
 
-  test("should display GitHub link with correct attributes", async ({
-    page,
-  }) => {
+  test("should display GitHub link with correct attributes", async ({ page }) => {
     await page.goto("/");
 
     const githubLink = page.getByRole("link", { name: /github/i });
@@ -62,9 +58,7 @@ test.describe("Navigation", () => {
 
     await page.getByRole("link", { name: /rankings/i }).click();
     await expect(page).toHaveURL("/rankings");
-    await expect(
-      page.getByRole("heading", { name: "Cities ranked by Average PET" })
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Cities ranked by Average PET" })).toBeVisible();
 
     await page.getByRole("link", { name: "Map" }).click();
     await expect(page).toHaveURL("/");
@@ -88,18 +82,14 @@ test.describe("Navigation", () => {
       timeout: 10_000,
     });
     await expect(page.getByText("What is PET?")).toBeVisible();
-    await expect(
-      page.locator("text=Physiological Equivalent Temperature").first()
-    ).toBeVisible();
+    await expect(page.locator("text=Physiological Equivalent Temperature").first()).toBeVisible();
   });
 
   test("should have a link to the PET study", async ({ page }) => {
     await page.goto("/about");
     const link = page.getByRole("link", { name: "this" });
-    await expect(link).toHaveAttribute(
-      "href",
-      "https://bjsm.bmj.com/content/55/15/825",
-      { timeout: 10_000 }
-    );
+    await expect(link).toHaveAttribute("href", "https://bjsm.bmj.com/content/55/15/825", {
+      timeout: 10_000,
+    });
   });
 });

@@ -26,11 +26,7 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
       </Button>
 
       <Button aria-label="View source code on GitHub" asChild variant="ghost">
-        <a
-          href={APP_CONFIG.GITHUB_URL}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
+        <a href={APP_CONFIG.GITHUB_URL} rel="noopener noreferrer" target="_blank">
           <span className="sm:hidden">GitHub</span>
           <span className="hidden sm:inline">GitHub Repository</span>
         </a>

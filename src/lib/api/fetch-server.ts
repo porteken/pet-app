@@ -2,10 +2,7 @@
 import { cookies } from "next/headers";
 
 import { createClient } from "@/config/supabase/server";
-import {
-  mapReferenceRowsToGraphData,
-  mapTrendRowsToGraphData,
-} from "@/lib/api/graph-data";
+import { mapReferenceRowsToGraphData, mapTrendRowsToGraphData } from "@/lib/api/graph-data";
 import {
   formatSchemaValidationError,
   isSchemaValidationError,
@@ -42,9 +39,7 @@ export async function FetchCityRankings(year: number): Promise<
   }>
 > {
   if (!year || Number.isNaN(year) || year < 2000 || year > 2100) {
-    throw new DatabaseError(
-      `Invalid year: ${year}. Must be between 2000 and 2100.`
-    );
+    throw new DatabaseError(`Invalid year: ${year}. Must be between 2000 and 2100.`);
   }
 
   const cookieStore = cookies();
@@ -61,58 +56,35 @@ export async function FetchCityRankings(year: number): Promise<
     supabase.from("pet_year_avg").select("location_id, pet").eq("year", year),
     supabase.from("pet_year_max").select("location_id, pet").eq("year", year),
     supabase.from("locations").select("location_id, city, state"),
-    supabase
-      .from("pet_percentiles")
-      .select("location_id,year,p10,p90")
-      .eq("year", year),
-    supabase
-      .from("pet_forecast")
-      .select("location_id, lower, upper")
-      .eq("year", 2100),
+    supabase.from("pet_percentiles").select("location_id,year,p10,p90").eq("year", year),
+    supabase.from("pet_forecast").select("location_id, lower, upper").eq("year", 2100),
     supabase.from("pet_change").select("location_id, change"),
   ]);
 
   if (petAvgError || !petAvg) {
-    throw new DatabaseError(
-      "Failed to fetch PET average data from database",
-      petAvgError
-    );
+    throw new DatabaseError("Failed to fetch PET average data from database", petAvgError);
   }
   if (petMaxError || !petMax) {
-    throw new DatabaseError(
-      "Failed to fetch PET max data from database",
-      petMaxError
-    );
+    throw new DatabaseError("Failed to fetch PET max data from database", petMaxError);
   }
 
   if (locError || !locations) {
-    throw new DatabaseError(
-      "Failed to fetch location data from database",
-      locError
-    );
+    throw new DatabaseError("Failed to fetch location data from database", locError);
   }
 
   if (percentileError || !percentiles_data) {
-    throw new DatabaseError(
-      "Failed to fetch percentiles from database",
-      percentileError
-    );
+    throw new DatabaseError("Failed to fetch percentiles from database", percentileError);
   }
 
   if (futurePetError || !futurePetData) {
-    throw new DatabaseError(
-      "Failed to fetch future PET data from database",
-      futurePetError
-    );
+    throw new DatabaseError("Failed to fetch future PET data from database", futurePetError);
   }
 
   const sanitizedPetAvg = filterRowsWithPositiveLocationId(petAvg);
   const sanitizedPetMax = filterRowsWithPositiveLocationId(petMax);
   const sanitizedLocations = filterRowsWithPositiveLocationId(locations);
-  const sanitizedPercentiles =
-    filterRowsWithPositiveLocationId(percentiles_data);
-  const sanitizedFuturePetData =
-    filterRowsWithPositiveLocationId(futurePetData);
+  const sanitizedPercentiles = filterRowsWithPositiveLocationId(percentiles_data);
+  const sanitizedFuturePetData = filterRowsWithPositiveLocationId(futurePetData);
 
   const validatedPetAvg = parseWithDatabaseError(
     "City rankings PET average",
@@ -149,14 +121,10 @@ export async function FetchCityRankings(year: number): Promise<
   }
 
   if (petChangeError || !petChangeData) {
-    throw new DatabaseError(
-      "Failed to fetch pet change data from database",
-      petChangeError
-    );
+    throw new DatabaseError("Failed to fetch pet change data from database", petChangeError);
   }
 
-  const sanitizedPetChangeData =
-    filterRowsWithPositiveLocationId(petChangeData);
+  const sanitizedPetChangeData = filterRowsWithPositiveLocationId(petChangeData);
   const validatedPetChanges = parseWithDatabaseError(
     "City rankings PET change",
     parseRankingChangeRows,
@@ -175,17 +143,9 @@ export async function FetchCityRankings(year: number): Promise<
       city: string;
       state: string;
     }
-  >(
-    validatedLocations.map(({ city, location_id, state }) => [
-      location_id,
-      { city, state },
-    ])
-  );
+  >(validatedLocations.map(({ city, location_id, state }) => [location_id, { city, state }]));
   const percentileMap = new Map<number, { p10: number; p90: number }>(
-    validatedPercentiles.map(({ location_id, p10, p90 }) => [
-      location_id,
-      { p10, p90 },
-    ])
+    validatedPercentiles.map(({ location_id, p10, p90 }) => [location_id, { p10, p90 }])
   );
 
   const combinedData = validatedPetAvg.flatMap(({ location_id, pet }) => {
@@ -232,10 +192,7 @@ export async function FetchLocations(): Promise<FetchLocationProperties> {
   const { data: locations, error } = await supabase.from("locations").select();
 
   if (error || !locations) {
-    throw new DatabaseError(
-      "Failed to fetch location data from database",
-      error
-    );
+    throw new DatabaseError("Failed to fetch location data from database", error);
   }
 
   const sanitizedLocations = filterRowsWithPositiveLocationId(locations);
@@ -245,10 +202,7 @@ export async function FetchLocations(): Promise<FetchLocationProperties> {
     sanitizedLocations
   );
 
-  const groupedByState = new Map<
-    string,
-    Array<{ key: number; title: string }>
-  >();
+  const groupedByState = new Map<string, Array<{ key: number; title: string }>>();
   for (const { city, location_id, state } of validatedLocations) {
     const stateLocations = groupedByState.get(state);
     if (stateLocations) {
@@ -277,9 +231,7 @@ export async function FetchReferenceGraphData(
   }
 
   if (!isValidYear(year)) {
-    throw new DatabaseError(
-      `Invalid year format: ${year}. Must be a 4-digit year.`
-    );
+    throw new DatabaseError(`Invalid year format: ${year}. Must be a 4-digit year.`);
   }
 
   const cookieStore = cookies();
@@ -293,17 +245,10 @@ export async function FetchReferenceGraphData(
     .order("date", { ascending: true });
 
   if (error || !data) {
-    throw new DatabaseError(
-      "Failed to fetch reference graph data from database",
-      error
-    );
+    throw new DatabaseError("Failed to fetch reference graph data from database", error);
   }
 
-  const validatedRows = parseWithDatabaseError(
-    "Reference graph",
-    parseReferenceGraphRows,
-    data
-  );
+  const validatedRows = parseWithDatabaseError("Reference graph", parseReferenceGraphRows, data);
 
   return mapReferenceRowsToGraphData(validatedRows);
 }
@@ -317,9 +262,7 @@ export async function FetchTrendGraphData(
   }
 
   if (!isValidTrendOption(option)) {
-    throw new DatabaseError(
-      `Invalid option: ${option}. Must be 'avg' or 'max'`
-    );
+    throw new DatabaseError(`Invalid option: ${option}. Must be 'avg' or 'max'`);
   }
 
   const cookieStore = cookies();
@@ -332,17 +275,10 @@ export async function FetchTrendGraphData(
     .order("year", { ascending: true });
 
   if (error || !data) {
-    throw new DatabaseError(
-      "Failed to fetch trend graph data from database",
-      error
-    );
+    throw new DatabaseError("Failed to fetch trend graph data from database", error);
   }
 
-  const validatedRows = parseWithDatabaseError(
-    "Trend graph",
-    parseTrendGraphRows,
-    data
-  );
+  const validatedRows = parseWithDatabaseError("Trend graph", parseTrendGraphRows, data);
 
   return mapTrendRowsToGraphData(validatedRows);
 }
@@ -352,7 +288,7 @@ function filterRowsWithPositiveLocationId<
     location_id?: unknown;
   },
 >(rows: T[]): T[] {
-  return rows.filter(row => {
+  return rows.filter((row) => {
     const locationId = Number(row.location_id);
     return Number.isInteger(locationId) && locationId > 0;
   });
@@ -379,10 +315,7 @@ const parseWithDatabaseError = <T>(
     return parser(payload);
   } catch (error) {
     if (isSchemaValidationError(error)) {
-      throw new DatabaseError(
-        formatSchemaValidationError(resource, error),
-        error
-      );
+      throw new DatabaseError(formatSchemaValidationError(resource, error), error);
     }
 
     throw error;

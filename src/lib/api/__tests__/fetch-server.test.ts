@@ -96,24 +96,12 @@ const queueCityRankingsResponses = (
   } = {}
 ) => {
   mockSupabaseClient.from
-    .mockReturnValueOnce(
-      createEqQuery(petAvg ?? createSuccessResponse(fixture.petAvg))
-    )
-    .mockReturnValueOnce(
-      createEqQuery(petMax ?? createSuccessResponse(fixture.petMax))
-    )
-    .mockReturnValueOnce(
-      createSelectQuery(locations ?? createSuccessResponse(fixture.locations))
-    )
-    .mockReturnValueOnce(
-      createEqQuery(percentiles ?? createSuccessResponse(fixture.percentiles))
-    )
-    .mockReturnValueOnce(
-      createEqQuery(forecast ?? createSuccessResponse(fixture.forecast))
-    )
-    .mockReturnValueOnce(
-      createSelectQuery(change ?? createSuccessResponse(fixture.change))
-    );
+    .mockReturnValueOnce(createEqQuery(petAvg ?? createSuccessResponse(fixture.petAvg)))
+    .mockReturnValueOnce(createEqQuery(petMax ?? createSuccessResponse(fixture.petMax)))
+    .mockReturnValueOnce(createSelectQuery(locations ?? createSuccessResponse(fixture.locations)))
+    .mockReturnValueOnce(createEqQuery(percentiles ?? createSuccessResponse(fixture.percentiles)))
+    .mockReturnValueOnce(createEqQuery(forecast ?? createSuccessResponse(fixture.forecast)))
+    .mockReturnValueOnce(createSelectQuery(change ?? createSuccessResponse(fixture.change)));
 
   return fixture;
 };
@@ -221,7 +209,7 @@ describe("fetch-server", () => {
       const result = await FetchCityRankings(2024);
 
       expect(result).toHaveLength(2);
-      expect(result.some(row => row.location_id === 0)).toBe(false);
+      expect(result.some((row) => row.location_id === 0)).toBe(false);
     });
 
     it("should throw error for invalid year", async () => {
@@ -253,10 +241,7 @@ describe("fetch-server", () => {
       });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError(
-          "Failed to fetch PET average data from database",
-          mockError
-        )
+        new DatabaseError("Failed to fetch PET average data from database", mockError)
       );
     });
 
@@ -370,9 +355,7 @@ describe("fetch-server", () => {
       ];
 
       const mockQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: mockLocations, error: undefined }),
+        select: vi.fn().mockResolvedValue({ data: mockLocations, error: undefined }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -427,9 +410,7 @@ describe("fetch-server", () => {
       ];
 
       const mockQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: mockLocations, error: undefined }),
+        select: vi.fn().mockResolvedValue({ data: mockLocations, error: undefined }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -465,30 +446,21 @@ describe("fetch-server", () => {
     });
 
     it("should handle database errors", async () => {
-      const mockError = new Error(
-        "Failed to fetch location data from database"
-      );
+      const mockError = new Error("Failed to fetch location data from database");
       const mockQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: undefined, error: mockError }),
+        select: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
       await expect(FetchLocations()).rejects.toThrow(
-        new DatabaseError(
-          "Failed to fetch location data from database",
-          mockError
-        )
+        new DatabaseError("Failed to fetch location data from database", mockError)
       );
     });
 
     it("should handle null data response", async () => {
       const mockQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: undefined, error: undefined }),
+        select: vi.fn().mockResolvedValue({ data: undefined, error: undefined }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -549,10 +521,7 @@ describe("fetch-server", () => {
       expect(mockQuery.order).toHaveBeenCalledWith("date", { ascending: true });
 
       expect(result.pets).toEqual([25.5, 26.2]);
-      expect(result.dates).toEqual([
-        new Date("2020-01-01"),
-        new Date("2021-01-01"),
-      ]);
+      expect(result.dates).toEqual([new Date("2020-01-01"), new Date("2021-01-01")]);
     });
 
     it("should handle database errors", async () => {
@@ -566,10 +535,7 @@ describe("fetch-server", () => {
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
       await expect(FetchReferenceGraphData("2023", 1)).rejects.toThrow(
-        new DatabaseError(
-          "Failed to fetch reference graph data from database",
-          mockError
-        )
+        new DatabaseError("Failed to fetch reference graph data from database", mockError)
       );
     });
   });
@@ -588,9 +554,7 @@ describe("fetch-server", () => {
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
-      mockLinearRegression.predict.mockImplementation(
-        (year: number) => year * 0.7 + 24
-      );
+      mockLinearRegression.predict.mockImplementation((year: number) => year * 0.7 + 24);
 
       const result = await FetchTrendGraphData("avg", 1);
 
@@ -657,10 +621,7 @@ describe("fetch-server", () => {
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
       await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
-        new DatabaseError(
-          "Failed to fetch trend graph data from database",
-          mockError
-        )
+        new DatabaseError("Failed to fetch trend graph data from database", mockError)
       );
     });
 
@@ -676,16 +637,10 @@ describe("fetch-server", () => {
       mockLinearRegression.predict.mockReturnValue(1438);
 
       await FetchTrendGraphData("avg", 1);
-      expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(
-        1,
-        "pet_year_avg"
-      );
+      expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(1, "pet_year_avg");
 
       await FetchTrendGraphData("max", 1);
-      expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(
-        2,
-        "pet_year_max"
-      );
+      expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(2, "pet_year_max");
     });
   });
 });

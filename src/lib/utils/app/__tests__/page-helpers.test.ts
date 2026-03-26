@@ -105,9 +105,7 @@ describe("page-helpers", () => {
       const error = new Error("Cookies unavailable");
       mockCookies.mockRejectedValue(error);
 
-      await expect(getGraphMeasureFromCookies()).rejects.toThrow(
-        "Cookies unavailable"
-      );
+      await expect(getGraphMeasureFromCookies()).rejects.toThrow("Cookies unavailable");
       expect(mockCookies).toHaveBeenCalled();
     });
 
@@ -119,9 +117,7 @@ describe("page-helpers", () => {
       };
       mockCookies.mockResolvedValue(mockCookieStore);
 
-      await expect(getGraphMeasureFromCookies()).rejects.toThrow(
-        "Cookie access error"
-      );
+      await expect(getGraphMeasureFromCookies()).rejects.toThrow("Cookie access error");
       expect(mockCookies).toHaveBeenCalled();
       expect(mockCookieStore.get).toHaveBeenCalledWith("graph-measure");
     });
@@ -130,9 +126,7 @@ describe("page-helpers", () => {
   describe("getForecastPreferencesFromCookies", () => {
     it("returns defaults when cookies are missing", async () => {
       const mockCookieStore = {
-        get: vi.fn(
-          (name: string) => (({}) as Record<string, { value: string }>)[name]
-        ),
+        get: vi.fn((name: string) => (({}) as Record<string, { value: string }>)[name]),
       };
       mockCookies.mockResolvedValue(mockCookieStore);
 
@@ -261,9 +255,7 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(mockLocationData);
 
-      await expect(getLocationData()).rejects.toThrow(
-        "No location data available"
-      );
+      await expect(getLocationData()).rejects.toThrow("No location data available");
       expect(mockFetchLocations).toHaveBeenCalled();
     });
 
@@ -281,9 +273,7 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(mockLocationData);
 
-      await expect(getLocationData()).rejects.toThrow(
-        "No location data available"
-      );
+      await expect(getLocationData()).rejects.toThrow("No location data available");
       expect(mockFetchLocations).toHaveBeenCalled();
     });
 
@@ -301,9 +291,7 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(mockLocationData);
 
-      await expect(getLocationData()).rejects.toThrow(
-        "No location data available"
-      );
+      await expect(getLocationData()).rejects.toThrow("No location data available");
       expect(mockFetchLocations).toHaveBeenCalled();
     });
 
@@ -432,9 +420,7 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(malformedData);
 
-      await expect(getLocationData()).rejects.toThrow(
-        "No location data available"
-      );
+      await expect(getLocationData()).rejects.toThrow("No location data available");
       expect(mockFetchLocations).toHaveBeenCalled();
     });
 
@@ -472,9 +458,7 @@ describe("page-helpers", () => {
             title: "Location Group 1",
           },
         ],
-        locations: [
-          { city: "Location 1", lat: 0, lng: 0, location_id: 1, state: "ST" },
-        ],
+        locations: [{ city: "Location 1", lat: 0, lng: 0, location_id: 1, state: "ST" }],
       };
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(mockLocationData);

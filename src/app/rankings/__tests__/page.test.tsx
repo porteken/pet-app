@@ -1,19 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  mockCookies,
-  mockFetchCityRankings,
-  mockFetchLocations,
-  mockRankingsMain,
-} = vi.hoisted(() => ({
-  mockCookies: vi.fn(),
-  mockFetchCityRankings: vi.fn(),
-  mockFetchLocations: vi.fn(),
-  mockRankingsMain: vi.fn((_properties?: unknown) => (
-    <div data-testid="rankings-main">Rankings</div>
-  )),
-}));
+const { mockCookies, mockFetchCityRankings, mockFetchLocations, mockRankingsMain } = vi.hoisted(
+  () => ({
+    mockCookies: vi.fn(),
+    mockFetchCityRankings: vi.fn(),
+    mockFetchLocations: vi.fn(),
+    mockRankingsMain: vi.fn((_properties?: unknown) => (
+      <div data-testid="rankings-main">Rankings</div>
+    )),
+  })
+);
 
 vi.mock("next/headers", () => ({
   cookies: mockCookies,

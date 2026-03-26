@@ -1,6 +1,7 @@
+import "./module-mocks";
+
 import { vi } from "vitest";
 
-import "./module-mocks";
 import {
   createMockCookieStore,
   createMockLinearRegression,
@@ -35,13 +36,10 @@ export const setupApiServerTest = async () => {
   const { createClient } = await import("@/config/supabase/server");
   vi.mocked(createClient).mockResolvedValue(mockSupabaseClient as any);
 
-  const { SimpleLinearRegression } =
-    await import("@/lib/utils/simple-linear-regression");
-  vi.mocked(SimpleLinearRegression).mockImplementation(
-    function MockSimpleLinearRegression() {
-      return mockLinearRegression as any;
-    }
-  );
+  const { SimpleLinearRegression } = await import("@/lib/utils/simple-linear-regression");
+  vi.mocked(SimpleLinearRegression).mockImplementation(function MockSimpleLinearRegression() {
+    return mockLinearRegression as any;
+  });
 
   return { mockCookieStore, mockLinearRegression, mockSupabaseClient };
 };

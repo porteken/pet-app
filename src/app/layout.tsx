@@ -1,11 +1,10 @@
-import type { Metadata } from "next";
-
 import "leaflet/dist/leaflet.css";
+import "./globals.css";
+
+import type { Metadata } from "next";
 import * as React from "react";
 
 import { AppProviders } from "@/components/app/providers";
-
-import "./globals.css";
 
 export const metadata: Metadata = {
   description: "Physiological Equivalent Temperature data for US cities",

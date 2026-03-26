@@ -5,12 +5,8 @@ import * as React from "react";
 
 import { createQueryClient } from "@/lib/api/query-client";
 
-export const AppProviders = ({
-  children,
-}: Readonly<{ children: React.ReactNode }>) => {
+export const AppProviders = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   const [queryClient] = React.useState(createQueryClient);
 
-  return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };

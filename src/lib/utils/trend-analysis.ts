@@ -1,10 +1,9 @@
-import type { TrendGraphDataProperties } from "@/types/types";
-
 import {
   getForecastHeatStressDescription,
   getHeatStressDescription,
   type HeatStressDescription,
 } from "@/lib/utils/heat-stress";
+import type { TrendGraphDataProperties } from "@/types/types";
 
 export interface TrendGraphSnapshot {
   forecastData?: ForecastGraphData;
@@ -44,11 +43,8 @@ export const buildTrendAnalysisResult = async ({
   const trendDataPromise = fetchTrendGraphData();
   const forecastDataPromise = enableForecast ? fetchForecastData() : undefined;
 
-  const { increase_per_year, trendline_pets, year_pets, years } =
-    await trendDataPromise;
-  const forecastData = forecastDataPromise
-    ? await forecastDataPromise
-    : undefined;
+  const { increase_per_year, trendline_pets, year_pets, years } = await trendDataPromise;
+  const forecastData = forecastDataPromise ? await forecastDataPromise : undefined;
 
   if (years.length === 0 || year_pets.length === 0) {
     return {
@@ -100,11 +96,7 @@ export const buildTrendAnalysisResult = async ({
 
   return {
     forecastHeatStress,
-    heatStressDescription: getHeatStressDescription(
-      currentPetValue,
-      option,
-      currentYear
-    ),
+    heatStressDescription: getHeatStressDescription(currentPetValue, option, currentYear),
     snapshot: {
       forecastData,
       increase_per_year,

@@ -1,7 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
-import type { TrendGraphDataProperties } from "@/types/types";
-
 import { createClient } from "@/config/supabase/client";
 import { mapTrendRowsToGraphData } from "@/lib/api/graph-data";
 import {
@@ -12,10 +10,8 @@ import {
   parseTrendGraphRows,
 } from "@/lib/api/schemas";
 import { FetchError } from "@/lib/utils/errors";
-import {
-  validateLocationId,
-  validateTrendOption,
-} from "@/lib/utils/validation";
+import { validateLocationId, validateTrendOption } from "@/lib/utils/validation";
+import type { TrendGraphDataProperties } from "@/types/types";
 
 import { apiRequest, hasError } from "./api-client";
 
@@ -36,9 +32,7 @@ export async function FetchForecastData(
   }
 
   if (globalThis.window == undefined) {
-    throw new TypeError(
-      "FetchForecastData can only be called in browser environment"
-    );
+    throw new TypeError("FetchForecastData can only be called in browser environment");
   }
 
   const response = await apiRequest(async () => {
@@ -78,11 +72,7 @@ export async function FetchForecastData(
       throw new FetchError("Database error fetching forecast data", error);
     }
 
-    const validatedForecastData = parseWithFetchError(
-      "Forecast",
-      parseForecastRows,
-      data ?? []
-    );
+    const validatedForecastData = parseWithFetchError("Forecast", parseForecastRows, data ?? []);
 
     if (validatedForecastData.length === 0) {
       return;
@@ -114,9 +104,7 @@ export async function FetchTrendGraphData(
   locationId: number
 ): Promise<TrendGraphDataProperties> {
   if (globalThis.window == undefined) {
-    throw new TypeError(
-      "FetchTrendGraphData can only be called in browser environment"
-    );
+    throw new TypeError("FetchTrendGraphData can only be called in browser environment");
   }
 
   if (!validateTrendOption(option)) {

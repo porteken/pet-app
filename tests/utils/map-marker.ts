@@ -32,7 +32,7 @@ async function getCandidateMarkerIndices(page: Page): Promise<number[]> {
   const markers = page.locator(MARKER_SELECTOR);
   const markerCount = await markers.count();
 
-  const prioritizedIndices = await markers.evaluateAll(elements => {
+  const prioritizedIndices = await markers.evaluateAll((elements) => {
     const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
 
@@ -56,11 +56,7 @@ async function getCandidateMarkerIndices(page: Page): Promise<number[]> {
 
         if (
           !topElement ||
-          !(
-            topElement === element ||
-            topElement.contains(element) ||
-            element.contains(topElement)
-          )
+          !(topElement === element || topElement.contains(element) || element.contains(topElement))
         ) {
           return;
         }
@@ -70,20 +66,16 @@ async function getCandidateMarkerIndices(page: Page): Promise<number[]> {
           visibleArea: visibleWidth * visibleHeight,
         };
       })
-      .filter(
-        (value): value is { index: number; visibleArea: number } =>
-          value !== undefined
-      )
+      .filter((value): value is { index: number; visibleArea: number } => value !== undefined)
       .toSorted((a, b) => b.visibleArea - a.visibleArea);
 
-    return candidates.map(candidate => candidate.index);
+    return candidates.map((candidate) => candidate.index);
   });
 
   const prioritizedIndexSet = new Set(prioritizedIndices);
-  const fallbackIndices = Array.from(
-    { length: markerCount },
-    (_, index) => index
-  ).filter(index => !prioritizedIndexSet.has(index));
+  const fallbackIndices = Array.from({ length: markerCount }, (_, index) => index).filter(
+    (index) => !prioritizedIndexSet.has(index)
+  );
 
   return [...prioritizedIndices, ...fallbackIndices];
 }

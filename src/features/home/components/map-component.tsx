@@ -98,7 +98,7 @@ export const MapComponent = memo<MapComponentProperties>(
         return;
       }
 
-      return locations.map(loc => (
+      return locations.map((loc) => (
         <OptimizedMarker
           icon={customIcon}
           key={loc.location_id}
@@ -134,12 +134,9 @@ export const MapComponent = memo<MapComponentProperties>(
                 />
               </svg>
             </div>
-            <h1 className="mb-4 text-2xl font-bold text-gray-900">
-              No Map Data Available
-            </h1>
+            <h1 className="mb-4 text-2xl font-bold text-gray-900">No Map Data Available</h1>
             <p className="mb-6 text-gray-600">
-              Unable to load location data for the map. The database may be
-              temporarily unavailable.
+              Unable to load location data for the map. The database may be temporarily unavailable.
             </p>
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
               <p className="text-sm text-blue-800">
@@ -177,12 +174,10 @@ export const MapComponent = memo<MapComponentProperties>(
               aria-controls="desktop-heat-stress-legend"
               aria-expanded={isLegendOpen}
               className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-md transition-colors hover:bg-gray-50"
-              onClick={() => setIsLegendOpen(previous => !previous)}
+              onClick={() => setIsLegendOpen((previous) => !previous)}
               type="button"
             >
-              {isLegendOpen
-                ? "Hide Heat Stress Index"
-                : "Show Heat Stress Index"}
+              {isLegendOpen ? "Hide Heat Stress Index" : "Show Heat Stress Index"}
             </button>
             {isLegendOpen && (
               <div id="desktop-heat-stress-legend">
@@ -194,10 +189,7 @@ export const MapComponent = memo<MapComponentProperties>(
         <div className="pointer-events-none absolute top-1/2 right-0 z-40 -translate-y-1/2 sm:hidden">
           <div className="pointer-events-auto flex items-center">
             {isLegendOpen && (
-              <div
-                className="mr-2 max-w-[78vw] shadow-md"
-                id="mobile-heat-stress-legend"
-              >
+              <div className="mr-2 max-w-[78vw] shadow-md" id="mobile-heat-stress-legend">
                 <HeatStressLegend />
               </div>
             )}
@@ -205,7 +197,7 @@ export const MapComponent = memo<MapComponentProperties>(
               aria-controls="mobile-heat-stress-legend"
               aria-expanded={isLegendOpen}
               className="rounded-l-lg border border-r-0 border-gray-200 bg-white px-2 py-3 text-xs font-semibold text-gray-900 shadow-md transition-colors hover:bg-gray-50"
-              onClick={() => setIsLegendOpen(previous => !previous)}
+              onClick={() => setIsLegendOpen((previous) => !previous)}
               type="button"
             >
               {isLegendOpen ? "Close" : "Heat Stress"}

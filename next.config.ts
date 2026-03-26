@@ -1,8 +1,8 @@
-import type { NextConfig } from "next";
+import { fileURLToPath } from "node:url";
 
 import initializeBundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
-import { fileURLToPath } from "node:url";
+import type { NextConfig } from "next";
 
 const withBundleAnalyzer = initializeBundleAnalyzer({
   enabled: process.env.BUNDLE_ANALYZER_ENABLED === "true",

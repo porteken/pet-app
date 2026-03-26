@@ -1,5 +1,6 @@
 /// <reference types="vitest" />
 import { fileURLToPath, URL } from "node:url";
+
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -31,17 +32,9 @@ export default defineConfig({
       reporter: ["text", "json", "html", "lcov"],
     },
     environment: "jsdom",
-    exclude: [
-      "node_modules/**",
-      ".next/**",
-      "tests/**",
-      "src/utils/__tests__/test-utilities.ts",
-    ],
+    exclude: ["node_modules/**", ".next/**", "tests/**", "src/utils/__tests__/test-utilities.ts"],
     globals: true,
-    include: [
-      "src/**/__tests__/**/*.test.{js,jsx,ts,tsx}",
-      "src/**/*.test.{js,jsx,ts,tsx}",
-    ],
+    include: ["src/**/__tests__/**/*.test.{js,jsx,ts,tsx}", "src/**/*.test.{js,jsx,ts,tsx}"],
     setupFiles: ["./vitest.setup.ts"],
   },
 });

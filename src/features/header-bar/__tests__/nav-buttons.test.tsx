@@ -1,18 +1,18 @@
-import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+
+import { render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { NavButtons } from "../components/nav-buttons";
-interface MockLinkProperties
-  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+interface MockLinkProperties extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   children: React.ReactNode;
   href: string;
 }
 
 beforeAll(() => {
   Object.defineProperty(globalThis, "matchMedia", {
-    value: vi.fn().mockImplementation(query => ({
+    value: vi.fn().mockImplementation((query) => ({
       addEventListener: vi.fn(),
       addListener: vi.fn(),
       dispatchEvent: vi.fn(),
@@ -42,29 +42,21 @@ vi.mock("next/link", () => ({
 }));
 
 describe("NavButtons", () => {
-  const mockBuildUrl = vi.fn().mockImplementation(path => path);
+  const mockBuildUrl = vi.fn().mockImplementation((path) => path);
 
   it("should render all navigation buttons", () => {
     render(<NavButtons buildUrl={mockBuildUrl} />);
 
     expect(screen.getByText("Map")).toBeInTheDocument();
     expect(screen.getByText("About")).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("View source code on GitHub")
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("View source code on GitHub")).toBeInTheDocument();
   });
 
   it("should render buttons with correct links", () => {
     render(<NavButtons buildUrl={mockBuildUrl} />);
 
-    expect(screen.getByLabelText("Navigate to map view")).toHaveAttribute(
-      "href",
-      "/"
-    );
-    expect(screen.getByLabelText("Navigate to about page")).toHaveAttribute(
-      "href",
-      "/about"
-    );
+    expect(screen.getByLabelText("Navigate to map view")).toHaveAttribute("href", "/");
+    expect(screen.getByLabelText("Navigate to about page")).toHaveAttribute("href", "/about");
     expect(screen.getByLabelText("View source code on GitHub")).toHaveAttribute(
       "href",
       "https://github.com/porteken/pet-app"
@@ -75,10 +67,7 @@ describe("NavButtons", () => {
     mockBuildUrl.mockReturnValueOnce("/with-params");
     render(<NavButtons buildUrl={mockBuildUrl} />);
 
-    expect(screen.getByLabelText("Navigate to map view")).toHaveAttribute(
-      "href",
-      "/with-params"
-    );
+    expect(screen.getByLabelText("Navigate to map view")).toHaveAttribute("href", "/with-params");
     expect(mockBuildUrl).toHaveBeenCalledWith("/");
   });
 });

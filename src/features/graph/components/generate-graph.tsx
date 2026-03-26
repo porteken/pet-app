@@ -1,8 +1,7 @@
 "use client";
 
-import type { Layout } from "plotly.js";
-
 import dynamic from "next/dynamic";
+import type { Layout } from "plotly.js";
 import React from "react";
 
 import { GRAPH_COLORS } from "@/lib/constants";
@@ -80,11 +79,7 @@ const normalizeGenerateTrendGraphOptions = (
 ): NormalizedGenerateTrendGraphOptions => {
   const [firstInput] = input;
 
-  if (
-    input.length === 1 &&
-    typeof firstInput === "object" &&
-    !Array.isArray(firstInput)
-  ) {
+  if (input.length === 1 && typeof firstInput === "object" && !Array.isArray(firstInput)) {
     const {
       forecastData,
       increasePerYear,
@@ -189,15 +184,9 @@ export const GenerateTrendGraph = (
 
   const graphFillHeightClass = getGraphFillHeightClass(useCompactDesktopHeight);
 
-  if (
-    years.length === 0 ||
-    yearPets.length === 0 ||
-    trendlinePets.length === 0
-  ) {
+  if (years.length === 0 || yearPets.length === 0 || trendlinePets.length === 0) {
     return (
-      <div
-        className={`flex items-center justify-center text-gray-500 ${graphFillHeightClass}`}
-      >
+      <div className={`flex items-center justify-center text-gray-500 ${graphFillHeightClass}`}>
         No data available for the selected parameters
       </div>
     );
@@ -205,9 +194,7 @@ export const GenerateTrendGraph = (
 
   const graphType = option === "avg" ? "Average" : "Max";
   const increaseText =
-    increasePerYear >= 0
-      ? `+${increasePerYear.toFixed(2)}`
-      : increasePerYear.toFixed(2);
+    increasePerYear >= 0 ? `+${increasePerYear.toFixed(2)}` : increasePerYear.toFixed(2);
 
   const layout: Partial<Layout> = {
     autosize: true,
@@ -279,8 +266,7 @@ export const GenerateTrendGraph = (
     data.push(
       {
         fill: "none",
-        hovertemplate:
-          "Year: %{x}<br>Upper Bound (90%): %{y:.2f}°C<extra></extra>",
+        hovertemplate: "Year: %{x}<br>Upper Bound (90%): %{y:.2f}°C<extra></extra>",
         line: {
           color: "rgba(99, 102, 241, 0.2)",
           width: 0,
@@ -295,8 +281,7 @@ export const GenerateTrendGraph = (
       {
         fill: "tonexty",
         fillcolor: "rgba(99, 102, 241, 0.2)",
-        hovertemplate:
-          "Year: %{x}<br>Lower Bound (10%): %{y:.2f}°C<extra></extra>",
+        hovertemplate: "Year: %{x}<br>Lower Bound (10%): %{y:.2f}°C<extra></extra>",
         line: {
           color: "rgba(99, 102, 241, 0.2)",
           width: 0,
@@ -364,15 +349,9 @@ export const GenerateReferenceGraph = async (
 ): Promise<React.ReactElement> => {
   const graphFillHeightClass = getGraphFillHeightClass(false);
 
-  if (
-    dates.length === 0 ||
-    referencePets.length === 0 ||
-    currentPets.length === 0
-  ) {
+  if (dates.length === 0 || referencePets.length === 0 || currentPets.length === 0) {
     return (
-      <div
-        className={`flex items-center justify-center text-gray-500 ${graphFillHeightClass}`}
-      >
+      <div className={`flex items-center justify-center text-gray-500 ${graphFillHeightClass}`}>
         No data available for the selected parameters
       </div>
     );

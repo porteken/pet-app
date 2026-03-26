@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -21,9 +22,7 @@ describe("DatabaseError", () => {
 
     expect(screen.getByText("Database Connection Error")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Unable to connect to the database. Please try again later."
-      )
+      screen.getByText("Unable to connect to the database. Please try again later.")
     ).toBeInTheDocument();
     expect(screen.getByText(/Need help\?/)).toBeInTheDocument();
     expect(screen.getByText(/Contact Kenneth Porter/)).toBeInTheDocument();
@@ -47,9 +46,7 @@ describe("DatabaseError", () => {
     render(<DatabaseError showContactInfo={false} />);
 
     expect(screen.queryByText(/Need help\?/)).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(/Contact Kenneth Porter/)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/Contact Kenneth Porter/)).not.toBeInTheDocument();
   });
 
   it("shows contact info when showContactInfo is true", () => {

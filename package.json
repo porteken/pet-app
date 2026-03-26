@@ -1,12 +1,12 @@
 {
   "name": "pet-app",
   "version": "0.1.0",
-  "type": "module",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "format": "oxfmt . && prettier --write .",
+    "format": "oxfmt .",
     "format:check": "oxfmt --check .",
     "start": "node .next/standalone/server.js",
     "lint": "oxlint .",
@@ -21,10 +21,6 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "knip": "knip"
-  },
-  "peerDependencies": {
-    "react": "^17.0.0 || ^18.0.0 || ^19.0.0",
-    "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0"
   },
   "dependencies": {
     "@mswjs/data": "^0.16.2",
@@ -42,7 +38,6 @@
     "next": "^16.2.1",
     "postcss": "^8.5.8",
     "postcss-load-config": "^6.0.1",
-    "prettier": "^3.8.1",
     "react": "^17.0.0 || ^18.0.0 || ^19.0.0",
     "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0",
     "react-leaflet": "^5.0.0",
@@ -72,23 +67,25 @@
     "lint-staged": "^16.4.0",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
-    "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4.2.2",
     "tsc-files": "^1.1.4",
     "typescript": "^6.0.2",
     "vitest": "^4.1.1"
   },
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0 || ^19.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0"
+  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "oxlint --fix",
-      "oxfmt",
-      "prettier --write"
+      "oxfmt"
     ],
     "*.{ts,tsx}": [
       "tsc-files --noEmit"
     ],
     "*.{json,css,md}": [
-      "prettier --write"
+      "oxfmt"
     ]
   },
   "engines": {

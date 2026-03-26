@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -13,12 +14,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/components/ui/button", () => ({
   Button: vi.fn(({ children, disabled, onClick }) => (
-    <button
-      data-testid="view-details-button"
-      disabled={disabled}
-      onClick={onClick}
-      type="button"
-    >
+    <button data-testid="view-details-button" disabled={disabled} onClick={onClick} type="button">
       {children}
     </button>
   )),
@@ -41,10 +37,10 @@ vi.mock("@/components/ui/select", () => ({
         {label && <label>{label}</label>}
         <select
           data-testid="measure-select"
-          onChange={event => onChange?.(event.target.value)}
+          onChange={(event) => onChange?.(event.target.value)}
           value={value}
         >
-          {data.map(option => (
+          {data.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
@@ -56,25 +52,19 @@ vi.mock("@/components/ui/select", () => ({
 }));
 
 vi.mock("@/lib/utils/forecast-controls", () => ({
-  ForecastControls: vi.fn(
-    ({ enabled, onToggle, onYearsChange, yearsAhead }) => (
-      <div data-testid="forecast-controls">
-        <button
-          data-testid="forecast-toggle"
-          onClick={() => onToggle(!enabled)}
-          type="button"
-        >
-          {enabled ? "Disable" : "Enable"} Forecast
-        </button>
-        <input
-          data-testid="forecast-years"
-          onChange={event_ => onYearsChange(Number(event_.target.value))}
-          type="number"
-          value={yearsAhead}
-        />
-      </div>
-    )
-  ),
+  ForecastControls: vi.fn(({ enabled, onToggle, onYearsChange, yearsAhead }) => (
+    <div data-testid="forecast-controls">
+      <button data-testid="forecast-toggle" onClick={() => onToggle(!enabled)} type="button">
+        {enabled ? "Disable" : "Enable"} Forecast
+      </button>
+      <input
+        data-testid="forecast-years"
+        onChange={(event_) => onYearsChange(Number(event_.target.value))}
+        type="number"
+        value={yearsAhead}
+      />
+    </div>
+  )),
 }));
 
 import { GraphSection } from "../components/graph-section";
@@ -145,12 +135,7 @@ describe("GraphSection", () => {
         value: "High",
       };
 
-      render(
-        <GraphSection
-          {...defaultProps}
-          heatStressDescription={heatStressDescription}
-        />
-      );
+      render(<GraphSection {...defaultProps} heatStressDescription={heatStressDescription} />);
 
       expect(screen.getByText("Current heat stress:")).toBeInTheDocument();
       expect(screen.getByText("High")).toBeInTheDocument();
@@ -158,13 +143,9 @@ describe("GraphSection", () => {
     });
 
     it("should not display heat stress section when not provided", () => {
-      render(
-        <GraphSection {...defaultProps} heatStressDescription={undefined} />
-      );
+      render(<GraphSection {...defaultProps} heatStressDescription={undefined} />);
 
-      expect(
-        screen.queryByText("Current heat stress:")
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Current heat stress:")).not.toBeInTheDocument();
     });
 
     it("should display forecast heat stress when enabled and provided", () => {
@@ -239,9 +220,7 @@ describe("GraphSection", () => {
   describe("Interactions", () => {
     it("should call onSelectChange when measure is changed", () => {
       const onSelectChange = vi.fn();
-      render(
-        <GraphSection {...defaultProps} onSelectChange={onSelectChange} />
-      );
+      render(<GraphSection {...defaultProps} onSelectChange={onSelectChange} />);
 
       const select = screen.getByTestId("measure-select");
       fireEvent.change(select, { target: { value: "max" } });
@@ -251,9 +230,7 @@ describe("GraphSection", () => {
 
     it("should not call onSelectChange when value is empty", () => {
       const onSelectChange = vi.fn();
-      render(
-        <GraphSection {...defaultProps} onSelectChange={onSelectChange} />
-      );
+      render(<GraphSection {...defaultProps} onSelectChange={onSelectChange} />);
 
       const select = screen.getByTestId("measure-select");
       fireEvent.change(select, { target: { value: "" } });
@@ -325,9 +302,7 @@ describe("GraphSection", () => {
         />
       );
 
-      expect(
-        screen.getByRole("button", { name: "Show Graph Legend" })
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Show Graph Legend" })).toBeInTheDocument();
     });
 
     it("should call onToggleMobileGraphLegend when mobile legend toggle is clicked", () => {
@@ -340,9 +315,7 @@ describe("GraphSection", () => {
         />
       );
 
-      fireEvent.click(
-        screen.getByRole("button", { name: "Show Graph Legend" })
-      );
+      fireEvent.click(screen.getByRole("button", { name: "Show Graph Legend" }));
 
       expect(onToggleMobileGraphLegend).toHaveBeenCalledTimes(1);
     });

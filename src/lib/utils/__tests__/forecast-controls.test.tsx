@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -16,9 +17,7 @@ describe("ForecastControls", () => {
       />
     );
 
-    expect(
-      screen.getByRole("checkbox", { name: "Show Forecast" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Show Forecast" })).toBeInTheDocument();
   });
 
   it("hides years controls when forecast is disabled", () => {
@@ -31,25 +30,16 @@ describe("ForecastControls", () => {
       />
     );
 
-    expect(
-      screen.queryByLabelText(/forecast .* year/i)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/forecast .* year/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("slider")).not.toBeInTheDocument();
   });
 
   it("shows years controls when forecast is enabled", () => {
     render(
-      <ForecastControls
-        enabled={true}
-        onToggle={vi.fn()}
-        onYearsChange={vi.fn()}
-        yearsAhead={10}
-      />
+      <ForecastControls enabled={true} onToggle={vi.fn()} onYearsChange={vi.fn()} yearsAhead={10} />
     );
 
-    expect(
-      screen.getByLabelText("Forecast 10 years ahead")
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Forecast 10 years ahead")).toBeInTheDocument();
 
     const slider = screen.getByRole("slider");
     expect(slider).toHaveAttribute("min", "5");
@@ -94,12 +84,7 @@ describe("ForecastControls", () => {
 
   it("uses singular year label when yearsAhead is 1", () => {
     render(
-      <ForecastControls
-        enabled={true}
-        onToggle={vi.fn()}
-        onYearsChange={vi.fn()}
-        yearsAhead={1}
-      />
+      <ForecastControls enabled={true} onToggle={vi.fn()} onYearsChange={vi.fn()} yearsAhead={1} />
     );
 
     expect(screen.getByLabelText("Forecast 1 year ahead")).toBeInTheDocument();

@@ -12,15 +12,15 @@ describe("SimpleLinearRegression", () => {
     });
 
     it("should throw TypeError when x is not an array", () => {
-      expect(
-        () => new SimpleLinearRegression(undefined as any, [1, 2, 3])
-      ).toThrow("x and y must be arrays");
+      expect(() => new SimpleLinearRegression(undefined as any, [1, 2, 3])).toThrow(
+        "x and y must be arrays"
+      );
     });
 
     it("should throw TypeError when y is not an array", () => {
-      expect(
-        () => new SimpleLinearRegression([1, 2, 3], undefined as any)
-      ).toThrow("x and y must be arrays");
+      expect(() => new SimpleLinearRegression([1, 2, 3], undefined as any)).toThrow(
+        "x and y must be arrays"
+      );
     });
 
     it("should throw Error when arrays have different lengths", () => {
@@ -30,9 +30,7 @@ describe("SimpleLinearRegression", () => {
     });
 
     it("should throw Error when arrays are empty", () => {
-      expect(() => new SimpleLinearRegression([], [])).toThrow(
-        "x and y must not be empty"
-      );
+      expect(() => new SimpleLinearRegression([], [])).toThrow("x and y must not be empty");
     });
   });
 

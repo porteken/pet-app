@@ -16,10 +16,7 @@ type MockSupabaseQuery = Promise<MockListResult> & {
   lt: (column: string, value: Primitive) => MockSupabaseQuery;
   lte: (column: string, value: Primitive) => MockSupabaseQuery;
   maybeSingle: () => Promise<MockSingleResult>;
-  order: (
-    column: string,
-    options?: { ascending?: boolean }
-  ) => MockSupabaseQuery;
+  order: (column: string, options?: { ascending?: boolean }) => MockSupabaseQuery;
   select: (columns?: string) => MockSupabaseQuery;
   single: () => Promise<MockSingleResult>;
 };
@@ -88,7 +85,7 @@ const LOCATIONS = [
 const round = (value: number) => Math.round(value * 100) / 100;
 
 const getAveragePet = (locationId: number, year: number) => {
-  const location = LOCATIONS.find(item => item.location_id === locationId)!;
+  const location = LOCATIONS.find((item) => item.location_id === locationId)!;
   const delta = year - 2000;
   return round(location.year2000Avg + delta * location.trendPerYear);
 };
@@ -132,22 +129,17 @@ const MOCK_TABLES: Record<string, MockRow[]> = {
     location_id,
     state,
   })),
-  pet_change: LOCATIONS.map(location => ({
+  pet_change: LOCATIONS.map((location) => ({
     change: round(location.trendPerYear * 10),
     location_id: location.location_id,
   })),
-  pet_forecast: LOCATIONS.flatMap(location => {
+  pet_forecast: LOCATIONS.flatMap((location) => {
     const lastHistoricalYear = 2025;
-    const lastHistoricalAvg = getAveragePet(
-      location.location_id,
-      lastHistoricalYear
-    );
+    const lastHistoricalAvg = getAveragePet(location.location_id, lastHistoricalYear);
 
-    return FORECAST_YEARS.map(year => {
+    return FORECAST_YEARS.map((year) => {
       const yearsAhead = year - lastHistoricalYear;
-      const forecastPet = round(
-        lastHistoricalAvg + yearsAhead * location.trendPerYear
-      );
+      const forecastPet = round(lastHistoricalAvg + yearsAhead * location.trendPerYear);
 
       return {
         location_id: location.location_id,
@@ -158,8 +150,8 @@ const MOCK_TABLES: Record<string, MockRow[]> = {
       };
     });
   }),
-  pet_percentiles: LOCATIONS.flatMap(location =>
-    YEARS.map(year => {
+  pet_percentiles: LOCATIONS.flatMap((location) =>
+    YEARS.map((year) => {
       const avg = getAveragePet(location.location_id, year);
       return {
         location_id: location.location_id,
@@ -170,15 +162,15 @@ const MOCK_TABLES: Record<string, MockRow[]> = {
     })
   ),
   pet_year: petYearRows,
-  pet_year_avg: LOCATIONS.flatMap(location =>
-    YEARS.map(year => ({
+  pet_year_avg: LOCATIONS.flatMap((location) =>
+    YEARS.map((year) => ({
       location_id: location.location_id,
       pet: getAveragePet(location.location_id, year),
       year,
     }))
   ),
-  pet_year_max: LOCATIONS.flatMap(location =>
-    YEARS.map(year => ({
+  pet_year_max: LOCATIONS.flatMap((location) =>
+    YEARS.map((year) => ({
       location_id: location.location_id,
       pet: getMaxPet(location.location_id, year),
       year,
@@ -211,14 +203,11 @@ const compareNumeric = (
   return comparator(rowValue, filterValue);
 };
 
-const compareGreaterThan = (rowValue: number, filterValue: number) =>
-  rowValue > filterValue;
+const compareGreaterThan = (rowValue: number, filterValue: number) => rowValue > filterValue;
 const compareGreaterThanOrEqual = (rowValue: number, filterValue: number) =>
   rowValue >= filterValue;
-const compareLessThan = (rowValue: number, filterValue: number) =>
-  rowValue < filterValue;
-const compareLessThanOrEqual = (rowValue: number, filterValue: number) =>
-  rowValue <= filterValue;
+const compareLessThan = (rowValue: number, filterValue: number) => rowValue < filterValue;
+const compareLessThanOrEqual = (rowValue: number, filterValue: number) => rowValue <= filterValue;
 
 const matchesFilterOperation = (row: MockRow, filter: FilterOperation) => {
   const cell = row[filter.column];
@@ -243,22 +232,20 @@ const matchesFilterOperation = (row: MockRow, filter: FilterOperation) => {
 };
 
 const applyFilters = (rows: MockRow[], filters: FilterOperation[]) =>
-  rows.filter(row =>
-    filters.every(filter => matchesFilterOperation(row, filter))
-  );
+  rows.filter((row) => filters.every((filter) => matchesFilterOperation(row, filter)));
 
 const applyColumnSelection = (rows: MockRow[], columns?: string) => {
   if (!columns || columns.trim() === "*" || columns.trim() === "") {
-    return rows.map(row => ({ ...row }));
+    return rows.map((row) => ({ ...row }));
   }
 
   const selectedColumns = columns
     .split(",")
-    .map(column => column.trim())
+    .map((column) => column.trim())
     .filter(Boolean);
 
-  return rows.map(row =>
-    Object.fromEntries(selectedColumns.map(column => [column, row[column]]))
+  return rows.map((row) =>
+    Object.fromEntries(selectedColumns.map((column) => [column, row[column]]))
   );
 };
 
@@ -281,9 +268,7 @@ const applyOrdering = (rows: MockRow[], orderOperation?: OrderOperation) => {
       return ascending ? a - b : b - a;
     }
 
-    return ascending
-      ? String(a).localeCompare(String(b))
-      : String(b).localeCompare(String(a));
+    return ascending ? String(a).localeCompare(String(b)) : String(b).localeCompare(String(a));
   });
 };
 
@@ -315,7 +300,7 @@ const createMockSupabaseQuery = (table: string): MockSupabaseQuery => {
     error: undefined,
   });
 
-  const query = new Promise<MockListResult>(resolve => {
+  const query = new Promise<MockListResult>((resolve) => {
     queueMicrotask(() => {
       resolve(asResult());
     });
@@ -345,15 +330,13 @@ const createMockSupabaseQuery = (table: string): MockSupabaseQuery => {
     filters.push({ column, type: "lte", value });
     return query;
   });
-  query.order = createNoopFunction(
-    (column: string, options?: { ascending?: boolean }) => {
-      orderOperation = {
-        ascending: options?.ascending ?? true,
-        column,
-      };
-      return query;
-    }
-  );
+  query.order = createNoopFunction((column: string, options?: { ascending?: boolean }) => {
+    orderOperation = {
+      ascending: options?.ascending ?? true,
+      column,
+    };
+    return query;
+  });
   query.limit = createNoopFunction((count: number) => {
     limitValue = count;
     return query;
@@ -371,11 +354,9 @@ const createMockSupabaseQuery = (table: string): MockSupabaseQuery => {
 };
 
 export const getRuntimeMockTableRows = (table: string) =>
-  (MOCK_TABLES[table] ?? []).map(row => ({ ...row }));
+  (MOCK_TABLES[table] ?? []).map((row) => ({ ...row }));
 
 export const createRuntimeMockSupabaseClient = () => ({
   from: createNoopFunction((table: string) => createMockSupabaseQuery(table)),
-  rpc: createNoopFunction((_name: string) =>
-    createMockSupabaseQuery("__rpc__")
-  ),
+  rpc: createNoopFunction((_name: string) => createMockSupabaseQuery("__rpc__")),
 });

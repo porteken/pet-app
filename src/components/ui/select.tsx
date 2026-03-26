@@ -19,11 +19,10 @@ interface SelectOption {
   value: string;
 }
 
-interface SelectProperties
-  extends Omit<
-    React.SelectHTMLAttributes<HTMLSelectElement>,
-    "onChange" | "size" | "value"
-  > {
+interface SelectProperties extends Omit<
+  React.SelectHTMLAttributes<HTMLSelectElement>,
+  "onChange" | "size" | "value"
+> {
   clearable?: boolean;
   data: SelectData;
   label?: string;
@@ -57,10 +56,7 @@ const preventInputBlur = (event: React.MouseEvent<HTMLButtonElement>) => {
   event.preventDefault();
 };
 
-const SearchableOptionButton = ({
-  onSelect,
-  option,
-}: SearchableOptionButtonProperties) => {
+const SearchableOptionButton = ({ onSelect, option }: SearchableOptionButtonProperties) => {
   const handleClick = () => {
     onSelect(option.value);
   };
@@ -113,7 +109,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
 
       if (groupedData) {
         for (const group of data) {
-          const option = group.items.find(item => item.value === value);
+          const option = group.items.find((item) => item.value === value);
           if (option) {
             return { ...option, group: group.group };
           }
@@ -121,7 +117,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
         return;
       }
 
-      return data.find(option => option.value === value);
+      return data.find((option) => option.value === value);
     }, [data, groupedData, value]);
 
     const filteredGroupedData = React.useMemo(() => {
@@ -134,15 +130,13 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
       }
 
       return data
-        .map(group => ({
+        .map((group) => ({
           ...group,
           items: group.group.toLowerCase().includes(normalizedSearch)
             ? group.items
-            : group.items.filter(option =>
-                option.label.toLowerCase().includes(normalizedSearch)
-              ),
+            : group.items.filter((option) => option.label.toLowerCase().includes(normalizedSearch)),
         }))
-        .filter(group => group.items.length > 0);
+        .filter((group) => group.items.length > 0);
     }, [data, groupedData, normalizedSearch]);
 
     const filteredUngroupedData = React.useMemo(() => {
@@ -154,14 +148,11 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
         return data;
       }
 
-      return data.filter(option =>
-        option.label.toLowerCase().includes(normalizedSearch)
-      );
+      return data.filter((option) => option.label.toLowerCase().includes(normalizedSearch));
     }, [data, groupedData, normalizedSearch]);
 
     const showClearButton = clearable && value && value !== "";
-    const hasSearchResults =
-      filteredGroupedData.length + filteredUngroupedData.length > 0;
+    const hasSearchResults = filteredGroupedData.length + filteredUngroupedData.length > 0;
 
     React.useEffect(() => {
       if (!searchable || !isDropdownOpen) {
@@ -198,7 +189,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
         <div className="px-3 py-2 text-sm text-gray-500">No results found</div>
       );
     } else if (groupedData) {
-      searchableOptionsContent = filteredGroupedData.map(group => (
+      searchableOptionsContent = filteredGroupedData.map((group) => (
         <div key={group.group}>
           <div
             className="px-3 py-1 text-xs font-semibold tracking-wide text-gray-500 uppercase"
@@ -206,7 +197,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
           >
             {group.group}
           </div>
-          {group.items.map(option => (
+          {group.items.map((option) => (
             <SearchableOptionButton
               key={option.value}
               onSelect={handleSearchableOptionSelection}
@@ -216,7 +207,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
         </div>
       ));
     } else {
-      searchableOptionsContent = filteredUngroupedData.map(option => (
+      searchableOptionsContent = filteredUngroupedData.map((option) => (
         <SearchableOptionButton
           key={option.value}
           onSelect={handleSearchableOptionSelection}
@@ -228,10 +219,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
     return (
       <div className={cn("space-y-2", className)} style={{ width: w }}>
         {label && (
-          <label
-            className="text-sm font-medium text-gray-700"
-            htmlFor={selectId}
-          >
+          <label className="text-sm font-medium text-gray-700" htmlFor={selectId}>
             {label}
           </label>
         )}
@@ -250,7 +238,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
               data-searchable="true"
               disabled={disabled}
               id={selectId}
-              onChange={event => {
+              onChange={(event) => {
                 if (!isDropdownOpen) {
                   setIsDropdownOpen(true);
                 }
@@ -260,19 +248,15 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
                 setSearchTerm("");
                 setIsDropdownOpen(true);
               }}
-              onKeyDown={event => {
+              onKeyDown={(event) => {
                 if (event.key === "Escape") {
                   setIsDropdownOpen(false);
                   setSearchTerm("");
                 }
               }}
-              placeholder={
-                placeholder ?? `Search ${label?.toLowerCase() ?? "options"}...`
-              }
+              placeholder={placeholder ?? `Search ${label?.toLowerCase() ?? "options"}...`}
               type="text"
-              value={
-                isDropdownOpen ? searchTerm : (selectedOption?.label ?? "")
-              }
+              value={isDropdownOpen ? searchTerm : (selectedOption?.label ?? "")}
               {...(properties as unknown as React.InputHTMLAttributes<HTMLInputElement>)}
             />
 
@@ -281,7 +265,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
                 aria-label="Clear selection"
                 className="absolute top-1/2 right-2 z-30 -translate-y-1/2 rounded p-1 text-gray-400 hover:text-gray-600"
                 disabled={disabled}
-                onClick={event_ => {
+                onClick={(event_) => {
                   event_.preventDefault();
                   event_.stopPropagation();
                   setSearchTerm("");
@@ -297,11 +281,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
                   strokeWidth={2}
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    d="M6 18L18 6M6 6l12 12"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+                  <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             )}
@@ -325,7 +305,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
               data-searchable={searchable ? "true" : "false"}
               disabled={disabled}
               id={selectId}
-              onChange={event => {
+              onChange={(event) => {
                 onChange?.(event.target.value);
               }}
               ref={reference}
@@ -335,16 +315,16 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
               {placeholder && <option value="">{placeholder}</option>}
 
               {groupedData
-                ? filteredGroupedData.map(group => (
+                ? filteredGroupedData.map((group) => (
                     <optgroup key={group.group} label={group.group}>
-                      {group.items.map(option => (
+                      {group.items.map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
                       ))}
                     </optgroup>
                   ))
-                : filteredUngroupedData.map(option => (
+                : filteredUngroupedData.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -360,7 +340,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
                 aria-label="Clear selection"
                 className="absolute top-1/2 right-2 -translate-y-1/2 rounded p-1 text-gray-400 hover:text-gray-600"
                 disabled={disabled}
-                onClick={event_ => {
+                onClick={(event_) => {
                   event_.preventDefault();
                   event_.stopPropagation();
                   onClear?.();
@@ -374,11 +354,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
                   strokeWidth={2}
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    d="M6 18L18 6M6 6l12 12"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+                  <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             )}

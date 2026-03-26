@@ -1,21 +1,8 @@
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { server } from "@/testing/server";
 
-import {
-  apiRequest,
-  apiRequestWithRetry,
-  handleApiResponse,
-} from "../api-interceptor";
+import { apiRequest, apiRequestWithRetry, handleApiResponse } from "../api-interceptor";
 
 vi.mock("@/lib/utils/errors", () => ({
   createError: vi.fn(),
@@ -25,12 +12,7 @@ vi.mock("@/lib/utils/errors", () => ({
       originalError: unknown;
       statusCode: number;
 
-      constructor(
-        message: string,
-        statusCode: number,
-        originalError?: unknown,
-        context?: unknown
-      ) {
+      constructor(message: string, statusCode: number, originalError?: unknown, context?: unknown) {
         super(message);
         this.name = "NetworkError";
         this.statusCode = statusCode;
@@ -90,13 +72,9 @@ describe("handleApiResponse", () => {
 
     await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
 
-    expect(mockCreateError).toHaveBeenCalledWith(
-      errorMessage,
-      404,
-      undefined,
-      undefined,
-      { url: "https://api.example.com/test" }
-    );
+    expect(mockCreateError).toHaveBeenCalledWith(errorMessage, 404, undefined, undefined, {
+      url: "https://api.example.com/test",
+    });
   });
 
   it("includes context in error creation", async () => {
@@ -110,17 +88,12 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(
-      handleApiResponse(mockResponse as any, context)
-    ).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any, context)).rejects.toThrow();
 
-    expect(mockCreateError).toHaveBeenCalledWith(
-      "Server error",
-      500,
-      undefined,
-      undefined,
-      { ...context, url: "https://api.example.com/test" }
-    );
+    expect(mockCreateError).toHaveBeenCalledWith("Server error", 500, undefined, undefined, {
+      ...context,
+      url: "https://api.example.com/test",
+    });
   });
 
   it("handles JSON parsing errors", async () => {
@@ -544,9 +517,7 @@ describe("apiRequest", () => {
     const customError = new Error("Custom error");
     mockFetch.mockRejectedValue(customError);
 
-    await expect(apiRequest("https://api.example.com/test")).rejects.toThrow(
-      customError
-    );
+    await expect(apiRequest("https://api.example.com/test")).rejects.toThrow(customError);
   });
 });
 
@@ -632,9 +603,7 @@ describe("apiRequestWithRetry", () => {
     mockError.name = "NetworkError";
     mockCreateError.mockReturnValue(mockError);
 
-    await expect(
-      apiRequestWithRetry("https://api.example.com/test")
-    ).rejects.toThrow();
+    await expect(apiRequestWithRetry("https://api.example.com/test")).rejects.toThrow();
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
@@ -654,9 +623,7 @@ describe("apiRequestWithRetry", () => {
       url: "https://api.example.com/test",
     };
 
-    mockFetch
-      .mockResolvedValueOnce(rateLimitResponse)
-      .mockResolvedValueOnce(successResponse);
+    mockFetch.mockResolvedValueOnce(rateLimitResponse).mockResolvedValueOnce(successResponse);
 
     const mockError = new Error("Rate limited");
     (mockError as any).statusCode = 429;

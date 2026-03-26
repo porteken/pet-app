@@ -1,7 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
-import type { ReferenceGraphDataProperties } from "@/types/types";
-
 import { createClient } from "@/config/supabase/client";
 import { mapReferenceRowsToGraphData } from "@/lib/api/graph-data";
 import {
@@ -11,6 +9,7 @@ import {
 } from "@/lib/api/schemas";
 import { FetchError } from "@/lib/utils/errors";
 import { validateLocationId, validateYear } from "@/lib/utils/validation";
+import type { ReferenceGraphDataProperties } from "@/types/types";
 
 export async function FetchReferenceGraphData(
   year: string,

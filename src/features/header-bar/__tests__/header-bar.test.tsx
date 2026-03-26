@@ -1,12 +1,13 @@
-import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { HeaderBar } from "../components/header-bar";
 
 Object.defineProperty(globalThis, "matchMedia", {
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     addEventListener: vi.fn(),
     addListener: vi.fn(),
     dispatchEvent: vi.fn(),
@@ -229,9 +230,7 @@ describe("HeaderBar", () => {
     });
 
     it("should handle ID with no current city gracefully", () => {
-      render(
-        <HeaderBar id={undefined} LocationOptions={mockLocationOptions} />
-      );
+      render(<HeaderBar id={undefined} LocationOptions={mockLocationOptions} />);
       expect(screen.getByTestId("city-selector")).toBeInTheDocument();
     });
 

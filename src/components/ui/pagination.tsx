@@ -20,9 +20,7 @@ const getPageItems = (currentPage: number, totalPages: number) => {
   pages.add(currentPage - 1);
   pages.add(currentPage + 1);
 
-  return [...pages]
-    .filter(page => page >= 1 && page <= totalPages)
-    .toSorted((a, b) => a - b);
+  return [...pages].filter((page) => page >= 1 && page <= totalPages).toSorted((a, b) => a - b);
 };
 
 export const Pagination: React.FC<PaginationProperties> = ({
@@ -55,9 +53,7 @@ export const Pagination: React.FC<PaginationProperties> = ({
 
         return (
           <React.Fragment key={page}>
-            {shouldShowGap && (
-              <span className="px-1 text-sm text-gray-500">...</span>
-            )}
+            {shouldShowGap && <span className="px-1 text-sm text-gray-500">...</span>}
             <Button
               onClick={() => onChange(page)}
               size="sm"

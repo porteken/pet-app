@@ -15,9 +15,7 @@ import {
 
 export const getGraphMeasureFromCookies = async (): Promise<string> => {
   const cookieStore = await cookies();
-  return (
-    cookieStore.get(GRAPH_MEASURE_COOKIE_NAME)?.value || DEFAULT_GRAPH_MEASURE
-  );
+  return cookieStore.get(GRAPH_MEASURE_COOKIE_NAME)?.value || DEFAULT_GRAPH_MEASURE;
 };
 
 export const getForecastPreferencesFromCookies = async (): Promise<{
@@ -25,17 +23,11 @@ export const getForecastPreferencesFromCookies = async (): Promise<{
   yearsAhead: number;
 }> => {
   const cookieStore = await cookies();
-  const forecastEnabledRaw = cookieStore.get(
-    FORECAST_ENABLED_COOKIE_NAME
-  )?.value;
-  const forecastYearsAheadRaw = cookieStore.get(
-    FORECAST_YEARS_AHEAD_COOKIE_NAME
-  )?.value;
+  const forecastEnabledRaw = cookieStore.get(FORECAST_ENABLED_COOKIE_NAME)?.value;
+  const forecastYearsAheadRaw = cookieStore.get(FORECAST_YEARS_AHEAD_COOKIE_NAME)?.value;
 
   const enabled =
-    forecastEnabledRaw === undefined
-      ? DEFAULT_FORECAST_ENABLED
-      : forecastEnabledRaw === "true";
+    forecastEnabledRaw === undefined ? DEFAULT_FORECAST_ENABLED : forecastEnabledRaw === "true";
 
   const parsedYearsAhead = Number(forecastYearsAheadRaw);
   const yearsAhead =

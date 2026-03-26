@@ -1,5 +1,5 @@
 export function validateDates(dates: Date[]): void {
-  if (dates.some(date => Number.isNaN(date.getTime()))) {
+  if (dates.some((date) => Number.isNaN(date.getTime()))) {
     throw new Error("Invalid date data detected");
   }
 }
@@ -9,7 +9,7 @@ export function validateLocationId(locationId: number): boolean {
 }
 
 export function validatePets(pets: number[]): void {
-  if (pets.some(pet => Number.isNaN(pet))) {
+  if (pets.some((pet) => Number.isNaN(pet))) {
     throw new Error("Invalid pet count data detected");
   }
 }
@@ -23,15 +23,13 @@ export function validateYear(year: string): boolean {
 }
 
 export function validateYearPets(yearPets: number[]): void {
-  if (yearPets.some(pet => Number.isNaN(pet) || pet < 0)) {
+  if (yearPets.some((pet) => Number.isNaN(pet) || pet < 0)) {
     throw new Error("Invalid pet count data detected");
   }
 }
 
 export function validateYears(years: number[]): void {
-  if (
-    years.some(year => !Number.isInteger(year) || year < 1900 || year > 2100)
-  ) {
+  if (years.some((year) => !Number.isInteger(year) || year < 1900 || year > 2100)) {
     throw new Error("Invalid year data detected");
   }
 }

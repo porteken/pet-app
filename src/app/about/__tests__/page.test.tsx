@@ -5,13 +5,11 @@ const { mockAbout, mockDatabaseError, mockFetchLocations } = vi.hoisted(() => ({
   mockAbout: vi.fn(({ LocationOptions }: { LocationOptions: unknown[] }) => (
     <div data-count={LocationOptions.length} data-testid="about-page" />
   )),
-  mockDatabaseError: vi.fn(
-    ({ message, title }: { message: string; title: string }) => (
-      <div data-testid="database-error">
-        {title}:{message}
-      </div>
-    )
-  ),
+  mockDatabaseError: vi.fn(({ message, title }: { message: string; title: string }) => (
+    <div data-testid="database-error">
+      {title}:{message}
+    </div>
+  )),
   mockFetchLocations: vi.fn(),
 }));
 

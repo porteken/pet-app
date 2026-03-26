@@ -16,9 +16,7 @@ export async function register() {
   }
 }
 
-export const onRequestError: typeof Sentry.captureRequestError = (
-  ...arguments_
-) => {
+export const onRequestError: typeof Sentry.captureRequestError = (...arguments_) => {
   if (isE2ETestRun) {
     return;
   }

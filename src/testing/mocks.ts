@@ -42,7 +42,7 @@ export const resetDatabase = () => {
 };
 
 export const createMockSupabaseClient = () => ({
-  from: vi.fn().mockImplementation(_table => {
+  from: vi.fn().mockImplementation((_table) => {
     return createMockSupabaseQuery();
   }),
   rpc: vi.fn().mockImplementation(() => createMockSupabaseQuery()),

@@ -1,8 +1,3 @@
-import type {
-  ReferenceGraphDataProperties,
-  TrendGraphDataProperties,
-} from "@/types/types";
-
 import { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
 import {
   validateDates,
@@ -10,6 +5,7 @@ import {
   validateYearPets,
   validateYears,
 } from "@/lib/utils/validation";
+import type { ReferenceGraphDataProperties, TrendGraphDataProperties } from "@/types/types";
 
 interface ReferenceGraphRow {
   date: string;
@@ -33,9 +29,7 @@ export const mapReferenceRowsToGraphData = (
   return { dates, pets };
 };
 
-export const mapTrendRowsToGraphData = (
-  rows: TrendGraphRow[]
-): TrendGraphDataProperties => {
+export const mapTrendRowsToGraphData = (rows: TrendGraphRow[]): TrendGraphDataProperties => {
   const years = rows.map(({ year }) => year);
   const year_pets = rows.map(({ pet }) => Number(pet));
 
@@ -55,7 +49,7 @@ export const mapTrendRowsToGraphData = (
 
   return {
     increase_per_year: regression.slope,
-    trendline_pets: years.map(year => regression.predict(year)),
+    trendline_pets: years.map((year) => regression.predict(year)),
     year_pets,
     years,
   };

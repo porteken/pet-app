@@ -12,9 +12,7 @@ const {
   mockGetForecastPreferencesFromCookies: vi.fn(),
   mockGetGraphMeasureFromCookies: vi.fn(),
   mockGetLocationData: vi.fn(),
-  mockHome: vi.fn((_properties?: any) => (
-    <div data-testid="home-component">Home Component</div>
-  )),
+  mockHome: vi.fn((_properties?: any) => <div data-testid="home-component">Home Component</div>),
   mockLocationErrorHandler: vi.fn((_properties?: any) => (
     <div data-testid="error-handler">Error Handler</div>
   )),
@@ -142,9 +140,7 @@ describe("Page Component", () => {
 
     render(await Page());
 
-    expect(mockGetGraphMeasureFromCookies).toHaveBeenCalledBefore(
-      mockGetLocationData as any
-    );
+    expect(mockGetGraphMeasureFromCookies).toHaveBeenCalledBefore(mockGetLocationData as any);
     expect(mockGetGraphMeasureFromCookies).toHaveBeenCalledTimes(1);
     expect(mockGetForecastPreferencesFromCookies).toHaveBeenCalledTimes(1);
     expect(mockGetLocationData).toHaveBeenCalledTimes(1);
@@ -255,10 +251,10 @@ describe("Page Component", () => {
     let resolveGraphMeasure: (value: string) => void;
     let resolveLocationData: (value: any) => void;
 
-    const graphMeasurePromise = new Promise<string>(resolve => {
+    const graphMeasurePromise = new Promise<string>((resolve) => {
       resolveGraphMeasure = resolve;
     });
-    const locationDataPromise = new Promise(resolve => {
+    const locationDataPromise = new Promise((resolve) => {
       resolveLocationData = resolve;
     });
 
@@ -297,7 +293,7 @@ describe("Page Component", () => {
       name: `Location ${index + 1}`,
     }));
 
-    const manyLocationOptions = manyLocations.map(loc => ({
+    const manyLocationOptions = manyLocations.map((loc) => ({
       label: loc.name,
       value: loc.id.toString(),
     }));

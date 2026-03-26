@@ -1,12 +1,10 @@
-import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+
+import { render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  GenerateReferenceGraph,
-  GenerateTrendGraph,
-} from "../components/generate-graph";
+import { GenerateReferenceGraph, GenerateTrendGraph } from "../components/generate-graph";
 
 const MockPlot = ({ config, data, layout }: any) => (
   <div data-testid="plotly-graph">
@@ -44,13 +42,7 @@ describe("Graph Components", () => {
 
     describe("Basic Rendering", () => {
       it("should render graph with average option", () => {
-        const result = GenerateTrendGraph(
-          [2000, 2001],
-          "avg",
-          [25, 26],
-          [25.1, 25.9],
-          0.45
-        );
+        const result = GenerateTrendGraph([2000, 2001], "avg", [25, 26], [25.1, 25.9], 0.45);
 
         render(result);
 
@@ -112,13 +104,7 @@ describe("Graph Components", () => {
       });
 
       it("should handle empty trendline_pets array", () => {
-        const result = GenerateTrendGraph(
-          mockYears,
-          "avg",
-          mockYearPets,
-          [],
-          mockIncreasePerYear
-        );
+        const result = GenerateTrendGraph(mockYears, "avg", mockYearPets, [], mockIncreasePerYear);
 
         render(result);
 
@@ -128,13 +114,7 @@ describe("Graph Components", () => {
       });
 
       it("should handle all empty arrays", () => {
-        const result = GenerateTrendGraph(
-          [],
-          "avg",
-          [],
-          [],
-          mockIncreasePerYear
-        );
+        const result = GenerateTrendGraph([], "avg", [], [], mockIncreasePerYear);
 
         render(result);
 
@@ -283,9 +263,7 @@ describe("Graph Components", () => {
         );
 
         expect(screen.getByText("Loading chart...")).toBeInTheDocument();
-        expect(screen.getByText("Loading chart...")).toHaveClass(
-          "text-gray-500"
-        );
+        expect(screen.getByText("Loading chart...")).toHaveClass("text-gray-500");
 
         const loadingDiv = container.firstChild as HTMLElement;
         expect(loadingDiv).toHaveClass("flex");
@@ -297,11 +275,7 @@ describe("Graph Components", () => {
   });
 
   describe("GenerateReferenceGraph", () => {
-    const mockDates = [
-      new Date("2023-06-01"),
-      new Date("2023-06-02"),
-      new Date("2023-06-03"),
-    ];
+    const mockDates = [new Date("2023-06-01"), new Date("2023-06-02"), new Date("2023-06-03")];
     const mockReferencePets = [25.5, 26, 24.8];
     const mockCurrentPets = [28.2, 29.1, 27.5];
 
@@ -350,45 +324,24 @@ describe("Graph Components", () => {
 
     describe("Error Handling", () => {
       it("should display no data message when dates array is empty", async () => {
-        const result = await GenerateReferenceGraph(
-          "2020",
-          [],
-          mockReferencePets,
-          mockCurrentPets
-        );
+        const result = await GenerateReferenceGraph("2020", [], mockReferencePets, mockCurrentPets);
 
         const { getByText } = render(result);
-        expect(
-          getByText("No data available for the selected parameters")
-        ).toBeInTheDocument();
+        expect(getByText("No data available for the selected parameters")).toBeInTheDocument();
       });
 
       it("should display no data message when reference pets array is empty", async () => {
-        const result = await GenerateReferenceGraph(
-          "2020",
-          mockDates,
-          [],
-          mockCurrentPets
-        );
+        const result = await GenerateReferenceGraph("2020", mockDates, [], mockCurrentPets);
 
         const { getByText } = render(result);
-        expect(
-          getByText("No data available for the selected parameters")
-        ).toBeInTheDocument();
+        expect(getByText("No data available for the selected parameters")).toBeInTheDocument();
       });
 
       it("should display no data message when current pets array is empty", async () => {
-        const result = await GenerateReferenceGraph(
-          "2020",
-          mockDates,
-          mockReferencePets,
-          []
-        );
+        const result = await GenerateReferenceGraph("2020", mockDates, mockReferencePets, []);
 
         const { getByText } = render(result);
-        expect(
-          getByText("No data available for the selected parameters")
-        ).toBeInTheDocument();
+        expect(getByText("No data available for the selected parameters")).toBeInTheDocument();
       });
     });
 
@@ -492,9 +445,7 @@ describe("Graph Components", () => {
 
     it("should render server-side loading state initially", () => {
       const { container } = render(
-        <div className="flex h-64 items-center justify-center text-gray-500">
-          Loading chart...
-        </div>
+        <div className="flex h-64 items-center justify-center text-gray-500">Loading chart...</div>
       );
 
       expect(screen.getByText("Loading chart...")).toBeInTheDocument();
@@ -518,36 +469,18 @@ describe("Graph Components", () => {
         </div>
       );
 
-      render(
-        <TestPlotWrapper
-          config={mockConfig}
-          data={mockData}
-          layout={mockLayout}
-        />
-      );
+      render(<TestPlotWrapper config={mockConfig} data={mockData} layout={mockLayout} />);
 
       expect(screen.getByTestId("plot-wrapper")).toBeInTheDocument();
-      expect(screen.getByTestId("config")).toHaveTextContent(
-        JSON.stringify(mockConfig)
-      );
-      expect(screen.getByTestId("data")).toHaveTextContent(
-        JSON.stringify(mockData)
-      );
-      expect(screen.getByTestId("layout")).toHaveTextContent(
-        JSON.stringify(mockLayout)
-      );
+      expect(screen.getByTestId("config")).toHaveTextContent(JSON.stringify(mockConfig));
+      expect(screen.getByTestId("data")).toHaveTextContent(JSON.stringify(mockData));
+      expect(screen.getByTestId("layout")).toHaveTextContent(JSON.stringify(mockLayout));
     });
   });
 
   describe("Graph Configuration", () => {
     it("should use correct colors for trend graph", () => {
-      const result = GenerateTrendGraph(
-        [2020, 2021],
-        "avg",
-        [25, 26],
-        [25.1, 25.9],
-        0.45
-      );
+      const result = GenerateTrendGraph([2020, 2021], "avg", [25, 26], [25.1, 25.9], 0.45);
 
       render(result);
 
@@ -562,13 +495,7 @@ describe("Graph Components", () => {
     });
 
     it("should configure graph layout correctly for trend graph", () => {
-      const result = GenerateTrendGraph(
-        [2020, 2021],
-        "max",
-        [30, 31],
-        [29.5, 30.5],
-        0.5
-      );
+      const result = GenerateTrendGraph([2020, 2021], "max", [30, 31], [29.5, 30.5], 0.5);
 
       render(result);
 
@@ -585,13 +512,7 @@ describe("Graph Components", () => {
     });
 
     it("should configure mode bar buttons correctly", () => {
-      const result = GenerateTrendGraph(
-        [2020, 2021],
-        "avg",
-        [25, 26],
-        [25.1, 25.9],
-        0.45
-      );
+      const result = GenerateTrendGraph([2020, 2021], "avg", [25, 26], [25.1, 25.9], 0.45);
 
       render(result);
 
@@ -600,34 +521,20 @@ describe("Graph Components", () => {
 
       expect(config.displaylogo).toBe(false);
       expect(config.displayModeBar).toBe("hover");
-      expect(config.modeBarButtonsToRemove).toEqual([
-        "pan2d",
-        "lasso2d",
-        "select2d",
-      ]);
+      expect(config.modeBarButtonsToRemove).toEqual(["pan2d", "lasso2d", "select2d"]);
       expect(config.responsive).toBe(true);
     });
 
     it("should handle hover templates correctly", () => {
-      const result = GenerateTrendGraph(
-        [2020, 2021],
-        "avg",
-        [25, 26],
-        [25.1, 25.9],
-        0.45
-      );
+      const result = GenerateTrendGraph([2020, 2021], "avg", [25, 26], [25.1, 25.9], 0.45);
 
       render(result);
 
       const graphData = screen.getByTestId("graph-data");
       const data = JSON.parse(graphData.textContent || "[]");
 
-      expect(data[0].hovertemplate).toBe(
-        "Year: %{x}<br>PET: %{y:.2f}<extra></extra>"
-      );
-      expect(data[1].hovertemplate).toBe(
-        "Year: %{x}<br>Trendline: %{y:.2f}<extra></extra>"
-      );
+      expect(data[0].hovertemplate).toBe("Year: %{x}<br>PET: %{y:.2f}<extra></extra>");
+      expect(data[1].hovertemplate).toBe("Year: %{x}<br>Trendline: %{y:.2f}<extra></extra>");
     });
   });
 
@@ -665,18 +572,9 @@ describe("Graph Components", () => {
     });
 
     it("should handle date formatting in reference graph", async () => {
-      const testDates = [
-        new Date("2023-01-15"),
-        new Date("2023-07-04"),
-        new Date("2023-12-25"),
-      ];
+      const testDates = [new Date("2023-01-15"), new Date("2023-07-04"), new Date("2023-12-25")];
 
-      const result = await GenerateReferenceGraph(
-        "2020",
-        testDates,
-        [20, 25, 18],
-        [22, 27, 20]
-      );
+      const result = await GenerateReferenceGraph("2020", testDates, [20, 25, 18], [22, 27, 20]);
 
       const { container } = render(result);
       expect(container.firstChild).toBeTruthy();
@@ -685,26 +583,11 @@ describe("Graph Components", () => {
 
   describe("Comprehensive Edge Cases", () => {
     it("should handle very large datasets", () => {
-      const largeYears = Array.from(
-        { length: 100 },
-        (_, index) => 2000 + index
-      );
-      const largeYearPets = Array.from(
-        { length: 100 },
-        (_, index) => 20 + index * 0.1
-      );
-      const largeTrendlinePets = Array.from(
-        { length: 100 },
-        (_, index) => 19 + index * 0.15
-      );
+      const largeYears = Array.from({ length: 100 }, (_, index) => 2000 + index);
+      const largeYearPets = Array.from({ length: 100 }, (_, index) => 20 + index * 0.1);
+      const largeTrendlinePets = Array.from({ length: 100 }, (_, index) => 19 + index * 0.15);
 
-      const result = GenerateTrendGraph(
-        largeYears,
-        "avg",
-        largeYearPets,
-        largeTrendlinePets,
-        0.1
-      );
+      const result = GenerateTrendGraph(largeYears, "avg", largeYearPets, largeTrendlinePets, 0.1);
 
       render(result);
       expect(screen.getByTestId("plotly-graph")).toBeInTheDocument();
@@ -729,13 +612,7 @@ describe("Graph Components", () => {
     });
 
     it("should handle mismatched array lengths gracefully", () => {
-      const result = GenerateTrendGraph(
-        [2020, 2021, 2022],
-        "avg",
-        [25, 26],
-        [25.1],
-        0.5
-      );
+      const result = GenerateTrendGraph([2020, 2021, 2022], "avg", [25, 26], [25.1], 0.5);
 
       render(result);
       expect(screen.getByTestId("plotly-graph")).toBeInTheDocument();
@@ -752,9 +629,7 @@ describe("Graph Components", () => {
 
       render(unknownResult);
 
-      expect(screen.getByTestId("graph-title")).toHaveTextContent(
-        "Max PET in summer (2000-2025)"
-      );
+      expect(screen.getByTestId("graph-title")).toHaveTextContent("Max PET in summer (2000-2025)");
     });
   });
 
@@ -893,13 +768,7 @@ describe("Graph Components", () => {
     });
 
     it("should handle negative increase per year", () => {
-      const result = GenerateTrendGraph(
-        mockYears,
-        "avg",
-        mockYearPets,
-        mockTrendlinePets,
-        -0.35
-      );
+      const result = GenerateTrendGraph(mockYears, "avg", mockYearPets, mockTrendlinePets, -0.35);
 
       render(result);
 
@@ -907,13 +776,7 @@ describe("Graph Components", () => {
     });
 
     it("should format positive increase per year with plus sign", () => {
-      const result = GenerateTrendGraph(
-        mockYears,
-        "avg",
-        mockYearPets,
-        mockTrendlinePets,
-        0.42
-      );
+      const result = GenerateTrendGraph(mockYears, "avg", mockYearPets, mockTrendlinePets, 0.42);
 
       render(result);
 

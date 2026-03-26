@@ -6,16 +6,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { setGraphMeasure } from "@/lib/actions/actions";
 import { database, resetDatabase } from "@/testing/mocks";
 
-import type { PageProperties } from "../model/types";
-
 import { PageMain } from "../components/page-main";
+import type { PageProperties } from "../model/types";
 
 vi.mock("@/features/graph", () => ({
   GenerateReferenceGraph: vi
     .fn()
-    .mockImplementation(() => (
-      <div data-testid="reference-graph">Reference Graph</div>
-    )),
+    .mockImplementation(() => <div data-testid="reference-graph">Reference Graph</div>),
   GenerateTrendGraph: vi
     .fn()
     .mockImplementation(() => <div data-testid="trend-graph">Trend Graph</div>),
@@ -23,11 +20,7 @@ vi.mock("@/features/graph", () => ({
 
 vi.mock("@/features/header-bar", () => ({
   HeaderBar: vi.fn(({ id, LocationOptions }) => (
-    <header
-      data-id={id}
-      data-options={JSON.stringify(LocationOptions)}
-      data-testid="header-bar"
-    >
+    <header data-id={id} data-options={JSON.stringify(LocationOptions)} data-testid="header-bar">
       HeaderBar
     </header>
   )),
@@ -41,7 +34,7 @@ vi.mock("@/features/page/components/trend-analysis", () => ({
       <select
         defaultValue={initialGraphMeasure}
         id="graph-measure"
-        onChange={event => {
+        onChange={(event) => {
           onMeasureChange(event.currentTarget.value);
         }}
       >
@@ -59,7 +52,7 @@ vi.mock("@/features/page/components/reference-data", () => ({
       <h2>Reference Data</h2>
       <label htmlFor="reference-year">Reference Year</label>
       <select defaultValue="2000" id="reference-year">
-        {Array.from({ length: 23 }, (_, index) => 2000 + index).map(year => (
+        {Array.from({ length: 23 }, (_, index) => 2000 + index).map((year) => (
           <option key={year} value={year.toString()}>
             {year}
           </option>
@@ -236,9 +229,7 @@ describe("PageMain Integration Tests", () => {
     it("should handle server action errors gracefully", async () => {
       const user = userEvent.setup();
 
-      vi.mocked(setGraphMeasure).mockRejectedValueOnce(
-        new Error("Server error")
-      );
+      vi.mocked(setGraphMeasure).mockRejectedValueOnce(new Error("Server error"));
 
       render(<PageMain {...defaultProps} />);
 

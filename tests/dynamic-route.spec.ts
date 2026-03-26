@@ -14,9 +14,7 @@ test.describe("Location Page", () => {
     await expect(page.locator(".js-plotly-plot").first()).toBeVisible();
   });
 
-  test("should show not found error for non-existent location", async ({
-    page,
-  }) => {
+  test("should show not found error for non-existent location", async ({ page }) => {
     await page.goto("/999999", {
       timeout: 20_000,
       waitUntil: "domcontentloaded",
@@ -40,9 +38,7 @@ test.describe("Location Page", () => {
     await expect(page.locator(".js-plotly-plot").first()).toBeVisible();
   });
 
-  test("should update reference graph when year is changed", async ({
-    page,
-  }) => {
+  test("should update reference graph when year is changed", async ({ page }) => {
     await page.goto("/1");
     const referenceYear = page.locator("select#reference-year");
     await referenceYear.selectOption("2005");

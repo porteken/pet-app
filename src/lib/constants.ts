@@ -17,11 +17,9 @@ export const MIN_FORECAST_YEARS_AHEAD = 5 as const;
 export const MAX_FORECAST_YEARS_AHEAD = 75 as const;
 
 export const ERROR_MESSAGES = {
-  DATABASE_CONNECTION:
-    "Unable to connect to the database. Please try again later.",
+  DATABASE_CONNECTION: "Unable to connect to the database. Please try again later.",
   NO_DATA: "No location data available",
-  NO_DATA_UI:
-    "Unable to load location data. The database may be temporarily unavailable.",
+  NO_DATA_UI: "Unable to load location data. The database may be temporarily unavailable.",
 } as const;
 
 export const ERROR_TITLES = {

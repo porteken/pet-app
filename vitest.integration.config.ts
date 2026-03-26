@@ -1,5 +1,6 @@
 /// <reference types="vitest" />
 import { fileURLToPath, URL } from "node:url";
+
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -10,12 +11,7 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
-    exclude: [
-      "node_modules/**",
-      ".next/**",
-      "tests/**",
-      "src/utils/__tests__/test-utilities.ts",
-    ],
+    exclude: ["node_modules/**", ".next/**", "tests/**", "src/utils/__tests__/test-utilities.ts"],
     globals: true,
     include: [
       "src/**/*.integration.test.{js,jsx,ts,tsx}",

@@ -7,10 +7,7 @@ import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { ForecastControls } from "@/lib/utils/forecast-controls";
 import { type HeatStressDescription } from "@/lib/utils/heat-stress";
-import {
-  buildTrendAnalysisResult,
-  type TrendGraphSnapshot,
-} from "@/lib/utils/trend-analysis";
+import { buildTrendAnalysisResult, type TrendGraphSnapshot } from "@/lib/utils/trend-analysis";
 
 interface TrendAnalysisProperties {
   id: number;
@@ -27,14 +24,9 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   initialGraphMeasure,
   onMeasureChange,
 }) => {
-  const [selectedGraphMeasure, setSelectedGraphMeasure] =
-    React.useState(initialGraphMeasure);
-  const [trendGraph, setTrendGraph] = React.useState<
-    React.ReactElement | undefined
-  >();
-  const [forecastEnabled, setForecastEnabled] = React.useState(
-    () => initialForecastEnabled
-  );
+  const [selectedGraphMeasure, setSelectedGraphMeasure] = React.useState(initialGraphMeasure);
+  const [trendGraph, setTrendGraph] = React.useState<React.ReactElement | undefined>();
+  const [forecastEnabled, setForecastEnabled] = React.useState(() => initialForecastEnabled);
   const [forecastYearsAhead, setForecastYearsAhead] = React.useState(
     () => initialForecastYearsAhead
   );
@@ -44,8 +36,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const [forecastHeatStress, setForecastHeatStress] = React.useState<
     HeatStressDescription | undefined
   >();
-  const [trendGraphSnapshot, setTrendGraphSnapshot] =
-    React.useState<TrendGraphSnapshot>();
+  const [trendGraphSnapshot, setTrendGraphSnapshot] = React.useState<TrendGraphSnapshot>();
   const [isMobileViewport, setIsMobileViewport] = React.useState(() => {
     if (typeof globalThis.matchMedia !== "function") {
       return false;
@@ -125,12 +116,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       forecastEnabled && selectedGraphMeasure === "avg",
       forecastYearsAhead
     );
-  }, [
-    generatePetTrendGraph,
-    selectedGraphMeasure,
-    forecastEnabled,
-    forecastYearsAhead,
-  ]);
+  }, [generatePetTrendGraph, selectedGraphMeasure, forecastEnabled, forecastYearsAhead]);
 
   const handleForecastToggle = React.useCallback(
     (enabled: boolean) => {
@@ -170,15 +156,10 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   return (
     <div className="h-full">
       <div className="flex h-full flex-col rounded-lg bg-white p-3 shadow-md sm:p-6">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">
-          Trend Analysis
-        </h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">Trend Analysis</h2>
         <div className="mb-4 space-y-4">
           <div>
-            <label
-              className="mb-2 block text-sm font-medium text-gray-700"
-              htmlFor="graph-measure"
-            >
+            <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="graph-measure">
               Graph Measure
             </label>
             <select
@@ -232,7 +213,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
             aria-controls="trend-analysis-graph"
             aria-expanded={isMobileLegendOpen}
             className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50"
-            onClick={() => setIsMobileLegendOpen(previous => !previous)}
+            onClick={() => setIsMobileLegendOpen((previous) => !previous)}
             type="button"
           >
             {isMobileLegendOpen ? "Hide Graph Legend" : "Show Graph Legend"}

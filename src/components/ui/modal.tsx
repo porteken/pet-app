@@ -60,21 +60,17 @@ const Modal = memo<ModalProperties>(
             dialogPositionClass,
             dialogClassName
           )}
-          onCancel={event => {
+          onCancel={(event) => {
             event.preventDefault();
             onClose();
           }}
-          onClick={event => {
+          onClick={(event) => {
             event.stopPropagation();
           }}
           open
         >
           <h2
-            className={
-              title
-                ? "text-base leading-none font-semibold sm:text-lg"
-                : "sr-only"
-            }
+            className={title ? "text-base leading-none font-semibold sm:text-lg" : "sr-only"}
             id={titleId}
           >
             {title ?? "Details"}

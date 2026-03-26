@@ -20,10 +20,7 @@ async function gotoWithRetry(page: Page, url: string): Promise<void> {
   try {
     await page.goto(url);
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message.includes("interrupted by another navigation")
-    ) {
+    if (error instanceof Error && error.message.includes("interrupted by another navigation")) {
       await page.goto(url);
       return;
     }
@@ -54,7 +51,7 @@ test.describe("Cross-Browser Compatibility", () => {
     await expect(gridContainer).toBeVisible();
 
     const displayValue = await gridContainer.evaluate(
-      element => globalThis.getComputedStyle(element).display
+      (element) => globalThis.getComputedStyle(element).display
     );
 
     expect(displayValue).toContain("grid");
@@ -137,10 +134,7 @@ test.describe("Cross-Browser Compatibility", () => {
     });
   });
 
-  test("performance characteristics across browsers", async ({
-    browserName,
-    page,
-  }) => {
+  test("performance characteristics across browsers", async ({ browserName, page }) => {
     const thresholds = getPerformanceThresholds(browserName);
     const initialLoadStart = Date.now();
     await gotoWithRetry(page, "/");
@@ -177,8 +171,6 @@ test.describe("Cross-Browser Compatibility", () => {
     });
 
     expect(typeof metrics.memory).toBe("number");
-    expect(["navigate", "reload", "back_forward", "prerender"]).toContain(
-      metrics.navigationType
-    );
+    expect(["navigate", "reload", "back_forward", "prerender"]).toContain(metrics.navigationType);
   });
 });

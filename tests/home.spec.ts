@@ -12,18 +12,14 @@ test.describe("Home Page", () => {
     await expect(page.locator(".leaflet-container")).toBeVisible();
   });
 
-  test("should open modal with details when a marker is clicked", async ({
-    page,
-  }) => {
+  test("should open modal with details when a marker is clicked", async ({ page }) => {
     await gotoAndWaitForMapPage(page, "/");
     const { modal, viewDetailsButton } = await openLocationDetailsModal(page);
     await expect(modal).toBeVisible();
     await expect(viewDetailsButton).toBeVisible();
   });
 
-  test("should navigate to location details from modal action", async ({
-    page,
-  }) => {
+  test("should navigate to location details from modal action", async ({ page }) => {
     await navigateToLocationDetailsFromMap(page, "/");
     await expect(page.getByText("Trend Analysis")).toBeVisible();
   });

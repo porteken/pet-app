@@ -2,11 +2,10 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { memo, useCallback, useMemo } from "react";
 
-import type { HeatStressDescription } from "@/lib/utils/heat-stress";
-
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { ForecastControls } from "@/lib/utils/forecast-controls";
+import type { HeatStressDescription } from "@/lib/utils/heat-stress";
 
 interface GraphSectionProperties {
   forecastEnabled: boolean;
@@ -94,7 +93,7 @@ export const GraphSection = memo<GraphSectionProperties>(
             className="w-full"
             data={selectOptions}
             label="Measure"
-            onChange={value => {
+            onChange={(value) => {
               if (value) {
                 onSelectChange(value);
               }
@@ -114,18 +113,14 @@ export const GraphSection = memo<GraphSectionProperties>(
             <div className="rounded-lg bg-blue-50 p-3">
               <p className="text-sm font-medium text-gray-900">
                 {heatStressDescription.prefix}{" "}
-                <span
-                  className={`font-bold ${heatStressDescription.colorClass}`}
-                >
+                <span className={`font-bold ${heatStressDescription.colorClass}`}>
                   {heatStressDescription.value}
                 </span>
               </p>
               {forecastEnabled && forecastHeatStress && (
                 <p className="mt-2 text-sm font-medium text-gray-900">
                   {forecastHeatStress.prefix}{" "}
-                  <span
-                    className={`font-bold ${forecastHeatStress.colorClass}`}
-                  >
+                  <span className={`font-bold ${forecastHeatStress.colorClass}`}>
                     {forecastHeatStress.value}
                   </span>
                   {forecastHeatStress.confidenceRange && (
@@ -146,9 +141,7 @@ export const GraphSection = memo<GraphSectionProperties>(
                 type="button"
                 variant="outline"
               >
-                {isMobileGraphLegendOpen
-                  ? "Hide Graph Legend"
-                  : "Show Graph Legend"}
+                {isMobileGraphLegendOpen ? "Hide Graph Legend" : "Show Graph Legend"}
               </Button>
             </div>
           )}

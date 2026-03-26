@@ -1,7 +1,9 @@
-import { defineConfig, devices } from "@playwright/test";
 import "dotenv/config";
+
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { defineConfig, devices } from "@playwright/test";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 

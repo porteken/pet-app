@@ -7,9 +7,7 @@ const getRequiredTextContent = async (locator: Locator): Promise<string> => {
 };
 
 test.describe("City Selection", () => {
-  test("should keep city selection visible on mobile viewport", async ({
-    page,
-  }) => {
+  test("should keep city selection visible on mobile viewport", async ({ page }) => {
     await page.setViewportSize({ height: 667, width: 375 });
     await page.goto("/");
 
@@ -17,18 +15,14 @@ test.describe("City Selection", () => {
     await expect(citySelect).toBeVisible();
   });
 
-  test("should display city selection dropdown on home page", async ({
-    page,
-  }) => {
+  test("should display city selection dropdown on home page", async ({ page }) => {
     await page.goto("/");
 
     const citySelect = page.getByTestId("city-selector");
     await expect(citySelect).toBeVisible();
   });
 
-  test("should display city selection dropdown on location page", async ({
-    page,
-  }) => {
+  test("should display city selection dropdown on location page", async ({ page }) => {
     await page.goto("/1");
 
     const citySelect = page.getByTestId("city-selector");
@@ -47,9 +41,7 @@ test.describe("City Selection", () => {
     const firstCityValue = await firstOption.getAttribute("data-value");
     expect(firstCityValue).not.toBeNull();
     await firstOption.click();
-    await expect(page).toHaveURL(
-      new RegExp(String.raw`/${firstCityValue}(\?.*)?$`)
-    );
+    await expect(page).toHaveURL(new RegExp(String.raw`/${firstCityValue}(\?.*)?$`));
   });
 
   test("should allow searching for cities", async ({ page }) => {
@@ -61,9 +53,7 @@ test.describe("City Selection", () => {
     await citySearch.click();
     const filteredOptions = page.getByTestId("searchable-select-option");
     await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
-    const firstOptionLabel = await getRequiredTextContent(
-      filteredOptions.first()
-    );
+    const firstOptionLabel = await getRequiredTextContent(filteredOptions.first());
     const cityQuery = firstOptionLabel.trim().slice(0, 3).toLowerCase();
 
     expect(cityQuery.length).toBeGreaterThan(0);
@@ -72,9 +62,7 @@ test.describe("City Selection", () => {
 
     await expect(filteredOptions.first()).toBeVisible({ timeout: 15_000 });
     expect(await filteredOptions.count()).toBeGreaterThan(0);
-    await expect(filteredOptions.first()).toContainText(
-      new RegExp(cityQuery, "i")
-    );
+    await expect(filteredOptions.first()).toContainText(new RegExp(cityQuery, "i"));
   });
 
   test("should allow searching for states", async ({ page }) => {
@@ -86,9 +74,7 @@ test.describe("City Selection", () => {
     await citySearch.click();
     const filteredOptions = page.getByTestId("searchable-select-option");
     await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
-    const firstGroupLabel = page
-      .getByTestId("searchable-select-group-label")
-      .first();
+    const firstGroupLabel = page.getByTestId("searchable-select-group-label").first();
     const firstStateLabel = await getRequiredTextContent(firstGroupLabel);
     const stateQuery = firstStateLabel.trim().toLowerCase();
 

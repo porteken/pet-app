@@ -1,11 +1,6 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
 import "@testing-library/jest-dom";
+
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -29,9 +24,7 @@ vi.mock("@/lib/actions/actions", () => ({
 
 vi.mock("@/features/header-bar", () => ({
   HeaderBar: vi.fn(({ LocationOptions }) => (
-    <div data-testid="header-bar">
-      HeaderBar with {LocationOptions?.length || 0} locations
-    </div>
+    <div data-testid="header-bar">HeaderBar with {LocationOptions?.length || 0} locations</div>
   )),
 }));
 
@@ -60,11 +53,11 @@ vi.mock("@/components/ui/select", () => ({
             data-testid={testId}
             disabled={disabled}
             id={testId}
-            onChange={event => onChange?.(event.target.value)}
+            onChange={(event) => onChange?.(event.target.value)}
             value={value}
           >
             {placeholder && <option value="">{placeholder}</option>}
-            {data.map(option => (
+            {data.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -333,9 +326,7 @@ describe("RankingsMain", () => {
       render(<RankingsMain {...defaultProps} />);
 
       expect(screen.getByTestId("header-bar")).toBeInTheDocument();
-      expect(
-        screen.getByText("Cities ranked by Average PET")
-      ).toBeInTheDocument();
+      expect(screen.getByText("Cities ranked by Average PET")).toBeInTheDocument();
     });
 
     it("should render the year select", () => {
@@ -348,21 +339,15 @@ describe("RankingsMain", () => {
       render(<RankingsMain {...defaultProps} />);
 
       expect(screen.getByTestId("state-select")).toBeInTheDocument();
-      expect(
-        screen.getByTestId("avg-heat-stress-level-select")
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("avg-heat-stress-level-select")).toBeInTheDocument();
     });
 
     it("should render the heat stress legend", () => {
       render(<RankingsMain {...defaultProps} />);
 
       expect(screen.getByText("Heat Stress Levels")).toBeInTheDocument();
-      const legendSection = requireElement(
-        screen.getByText("Heat Stress Levels").closest("div")
-      );
-      expect(
-        within(legendSection).getByText("None to Slight")
-      ).toBeInTheDocument();
+      const legendSection = requireElement(screen.getByText("Heat Stress Levels").closest("div"));
+      expect(within(legendSection).getByText("None to Slight")).toBeInTheDocument();
       expect(within(legendSection).getByText("Moderate")).toBeInTheDocument();
       expect(within(legendSection).getByText("Strong")).toBeInTheDocument();
       expect(within(legendSection).getByText("Extreme")).toBeInTheDocument();
@@ -376,13 +361,9 @@ describe("RankingsMain", () => {
       expect(within(table).getByText("City")).toBeInTheDocument();
       expect(within(table).getByText("Avg PET")).toBeInTheDocument();
       expect(within(table).getByText("Max PET")).toBeInTheDocument();
-      expect(
-        within(table).getByText("PET Range (10th-90th percentile)")
-      ).toBeInTheDocument();
+      expect(within(table).getByText("PET Range (10th-90th percentile)")).toBeInTheDocument();
       expect(within(table).getByText("Change per Decade")).toBeInTheDocument();
-      expect(
-        within(table).getByText("2100 Forecast Range")
-      ).toBeInTheDocument();
+      expect(within(table).getByText("2100 Forecast Range")).toBeInTheDocument();
     });
 
     it("should render ranking items", () => {
@@ -437,9 +418,7 @@ describe("RankingsMain", () => {
     it("should filter rankings by heat stress level", () => {
       render(<RankingsMain {...defaultProps} />);
 
-      const heatStressSelect = screen.getByTestId(
-        "avg-heat-stress-level-select"
-      );
+      const heatStressSelect = screen.getByTestId("avg-heat-stress-level-select");
       fireEvent.change(heatStressSelect, {
         target: { value: "None to Slight" },
       });
@@ -460,9 +439,7 @@ describe("RankingsMain", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const table = screen.getByRole("table");
-      const cityHeader = requireElement(
-        within(table).getByText("City").closest("th")
-      );
+      const cityHeader = requireElement(within(table).getByText("City").closest("th"));
       fireEvent.click(cityHeader);
 
       const rows = screen.getAllByRole("row");
@@ -473,9 +450,7 @@ describe("RankingsMain", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const table = screen.getByRole("table");
-      const cityHeader = requireElement(
-        within(table).getByText("City").closest("th")
-      );
+      const cityHeader = requireElement(within(table).getByText("City").closest("th"));
       fireEvent.click(cityHeader);
 
       expect(within(cityHeader).getByText("↑")).toBeInTheDocument();
@@ -485,9 +460,7 @@ describe("RankingsMain", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const table = screen.getByRole("table");
-      const avgPetHeader = requireElement(
-        within(table).getByText("Avg PET").closest("th")
-      );
+      const avgPetHeader = requireElement(within(table).getByText("Avg PET").closest("th"));
       fireEvent.click(avgPetHeader);
 
       const rows = screen.getAllByRole("row");
@@ -498,9 +471,7 @@ describe("RankingsMain", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const table = screen.getByRole("table");
-      const stateHeader = requireElement(
-        within(table).getByText("State").closest("th")
-      );
+      const stateHeader = requireElement(within(table).getByText("State").closest("th"));
       fireEvent.click(stateHeader);
 
       const rows = screen.getAllByRole("row");
@@ -529,9 +500,7 @@ describe("RankingsMain", () => {
     });
 
     it("should not display pagination when there is only one page", () => {
-      render(
-        <RankingsMain {...defaultProps} rankings={mockRankings.slice(0, 10)} />
-      );
+      render(<RankingsMain {...defaultProps} rankings={mockRankings.slice(0, 10)} />);
 
       expect(screen.queryByTestId("pagination")).not.toBeInTheDocument();
     });
@@ -561,9 +530,7 @@ describe("RankingsMain", () => {
       const currentPages = screen.getAllByTestId("current-page");
       expect(currentPages[0]).toHaveTextContent("2");
 
-      const heatStressSelect = screen.getByTestId(
-        "avg-heat-stress-level-select"
-      );
+      const heatStressSelect = screen.getByTestId("avg-heat-stress-level-select");
       fireEvent.change(heatStressSelect, { target: { value: "Extreme" } });
 
       expect(screen.getByText(/Showing/)).toBeInTheDocument();
@@ -586,9 +553,7 @@ describe("RankingsMain", () => {
       render(
         <RankingsMain
           {...defaultProps}
-          rankings={[
-            createMockRankingItem({ changePerDecade: 1.5, city: "Hot City" }),
-          ]}
+          rankings={[createMockRankingItem({ changePerDecade: 1.5, city: "Hot City" })]}
         />
       );
 
@@ -599,9 +564,7 @@ describe("RankingsMain", () => {
       render(
         <RankingsMain
           {...defaultProps}
-          rankings={[
-            createMockRankingItem({ changePerDecade: -0.5, city: "Cool City" }),
-          ]}
+          rankings={[createMockRankingItem({ changePerDecade: -0.5, city: "Cool City" })]}
         />
       );
 
@@ -629,9 +592,7 @@ describe("RankingsMain", () => {
       render(
         <RankingsMain
           {...defaultProps}
-          rankings={[
-            createMockRankingItem({ city: "Range City", p10: 20.5, p90: 30.5 }),
-          ]}
+          rankings={[createMockRankingItem({ city: "Range City", p10: 20.5, p90: 30.5 })]}
         />
       );
 
@@ -679,16 +640,12 @@ describe("RankingsMain", () => {
     it("should handle empty rankings array", () => {
       render(<RankingsMain {...defaultProps} rankings={[]} />);
 
-      expect(
-        screen.getByText("Cities ranked by Average PET")
-      ).toBeInTheDocument();
+      expect(screen.getByText("Cities ranked by Average PET")).toBeInTheDocument();
       expect(screen.getByText(/Showing 0/)).toBeInTheDocument();
     });
 
     it("should show no results message when filter excludes all", () => {
-      render(
-        <RankingsMain {...defaultProps} rankings={mockRankings.slice(0, 5)} />
-      );
+      render(<RankingsMain {...defaultProps} rankings={mockRankings.slice(0, 5)} />);
 
       expect(screen.getByText(/Showing 1-5 of 5 cities/)).toBeInTheDocument();
     });
@@ -699,9 +656,7 @@ describe("RankingsMain", () => {
       render(
         <RankingsMain
           {...defaultProps}
-          rankings={[
-            createMockRankingItem({ changePerDecade: 1.5, city: "Hot City" }),
-          ]}
+          rankings={[createMockRankingItem({ changePerDecade: 1.5, city: "Hot City" })]}
         />
       );
 
@@ -713,9 +668,7 @@ describe("RankingsMain", () => {
       render(
         <RankingsMain
           {...defaultProps}
-          rankings={[
-            createMockRankingItem({ changePerDecade: -0.5, city: "Cool City" }),
-          ]}
+          rankings={[createMockRankingItem({ changePerDecade: -0.5, city: "Cool City" })]}
         />
       );
 
@@ -727,9 +680,7 @@ describe("RankingsMain", () => {
       render(
         <RankingsMain
           {...defaultProps}
-          rankings={[
-            createMockRankingItem({ changePerDecade: 0, city: "Stable City" }),
-          ]}
+          rankings={[createMockRankingItem({ changePerDecade: 0, city: "Stable City" })]}
         />
       );
 
@@ -760,9 +711,7 @@ describe("RankingsMain", () => {
       expect(currentPages[0]).toHaveTextContent("2");
 
       const table = screen.getByRole("table");
-      const cityHeader = requireElement(
-        within(table).getByText("City").closest("th")
-      );
+      const cityHeader = requireElement(within(table).getByText("City").closest("th"));
       fireEvent.click(cityHeader);
 
       const updatedCurrentPages = screen.getAllByTestId("current-page");

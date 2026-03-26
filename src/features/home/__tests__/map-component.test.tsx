@@ -19,12 +19,7 @@ vi.mock("react-leaflet", () => {
     MapContainer: ({ children }: MockComponentProperties) => (
       <div data-testid="map-container">{children}</div>
     ),
-    Marker: ({
-      children,
-      eventHandlers,
-      key,
-      position,
-    }: MockMarkerProperties) => (
+    Marker: ({ children, eventHandlers, key, position }: MockMarkerProperties) => (
       <button
         data-key={key}
         data-position={position.join(",")}
@@ -66,9 +61,7 @@ describe("MapComponent", () => {
       },
     });
 
-    return render(
-      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-    );
+    return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
   };
 
   const mockLocations = [
@@ -90,22 +83,14 @@ describe("MapComponent", () => {
 
   it("should display a loading message on initial render", () => {
     renderWithQueryClient(
-      <MapComponent
-        locations={[]}
-        onMarkerClick={() => {}}
-        selectedGraphMeasure="avg"
-      />
+      <MapComponent locations={[]} onMarkerClick={() => {}} selectedGraphMeasure="avg" />
     );
     expect(screen.getByText("Loading map...")).toBeInTheDocument();
   });
 
   it('should display "No Map Data Available" when no locations are provided', async () => {
     renderWithQueryClient(
-      <MapComponent
-        locations={[]}
-        onMarkerClick={() => {}}
-        selectedGraphMeasure="avg"
-      />
+      <MapComponent locations={[]} onMarkerClick={() => {}} selectedGraphMeasure="avg" />
     );
 
     const noDataMessage = await screen.findByText(/no map data available/i);
@@ -116,11 +101,7 @@ describe("MapComponent", () => {
 
   it("should render the map and markers when locations are provided", async () => {
     renderWithQueryClient(
-      <MapComponent
-        locations={mockLocations}
-        onMarkerClick={() => {}}
-        selectedGraphMeasure="avg"
-      />
+      <MapComponent locations={mockLocations} onMarkerClick={() => {}} selectedGraphMeasure="avg" />
     );
 
     await screen.findByTestId("map-container");
@@ -151,11 +132,7 @@ describe("MapComponent", () => {
 
   it("should keep heat stress legend collapsed by default and toggle open", async () => {
     renderWithQueryClient(
-      <MapComponent
-        locations={mockLocations}
-        onMarkerClick={() => {}}
-        selectedGraphMeasure="avg"
-      />
+      <MapComponent locations={mockLocations} onMarkerClick={() => {}} selectedGraphMeasure="avg" />
     );
 
     await screen.findByTestId("map-container");
@@ -164,15 +141,11 @@ describe("MapComponent", () => {
       name: "Show Heat Stress Index",
     });
     expect(desktopLegendToggle).toHaveAttribute("aria-expanded", "false");
-    expect(
-      screen.queryByRole("heading", { name: "Heat Stress Index" })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Heat Stress Index" })).not.toBeInTheDocument();
 
     fireEvent.click(desktopLegendToggle);
 
     expect(desktopLegendToggle).toHaveAttribute("aria-expanded", "true");
-    expect(
-      screen.getAllByRole("heading", { name: "Heat Stress Index" }).length
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByRole("heading", { name: "Heat Stress Index" }).length).toBeGreaterThan(0);
   });
 });

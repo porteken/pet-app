@@ -1,8 +1,4 @@
-import {
-  createError,
-  type ErrorContext,
-  NetworkError,
-} from "@/lib/utils/errors";
+import { createError, type ErrorContext, NetworkError } from "@/lib/utils/errors";
 
 export const handleApiResponse = async <T>(
   response: Response,
@@ -19,12 +15,7 @@ export const handleApiResponse = async <T>(
   try {
     return await response.json();
   } catch (parseError) {
-    throw new NetworkError(
-      "Failed to parse server response",
-      500,
-      parseError,
-      context
-    );
+    throw new NetworkError("Failed to parse server response", 500, parseError, context);
   }
 };
 
@@ -137,7 +128,7 @@ export const apiRequestWithRetry = async <T>(
       }
 
       const delay = Math.min(1000 * 2 ** (attempt - 1), 5000);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 

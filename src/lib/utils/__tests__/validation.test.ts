@@ -13,11 +13,7 @@ import {
 describe("validation utilities", () => {
   describe("validateDates", () => {
     it("should not throw for valid dates", () => {
-      const validDates = [
-        new Date("2023-01-01"),
-        new Date("2023-12-31"),
-        new Date(),
-      ];
+      const validDates = [new Date("2023-01-01"), new Date("2023-12-31"), new Date()];
 
       expect(() => validateDates(validDates)).not.toThrow();
     });
@@ -25,21 +21,13 @@ describe("validation utilities", () => {
     it("should throw for invalid dates", () => {
       const invalidDates = [new Date("invalid-date"), new Date("2023-13-01")];
 
-      expect(() => validateDates(invalidDates)).toThrow(
-        "Invalid date data detected"
-      );
+      expect(() => validateDates(invalidDates)).toThrow("Invalid date data detected");
     });
 
     it("should throw if any date in array is invalid", () => {
-      const mixedDates = [
-        new Date("2023-01-01"),
-        new Date("invalid-date"),
-        new Date("2023-12-31"),
-      ];
+      const mixedDates = [new Date("2023-01-01"), new Date("invalid-date"), new Date("2023-12-31")];
 
-      expect(() => validateDates(mixedDates)).toThrow(
-        "Invalid date data detected"
-      );
+      expect(() => validateDates(mixedDates)).toThrow("Invalid date data detected");
     });
 
     it("should handle empty array", () => {
@@ -83,15 +71,11 @@ describe("validation utilities", () => {
     });
 
     it("should throw for arrays containing NaN", () => {
-      expect(() => validatePets([1, 2, Number.NaN, 4])).toThrow(
-        "Invalid pet count data detected"
-      );
+      expect(() => validatePets([1, 2, Number.NaN, 4])).toThrow("Invalid pet count data detected");
     });
 
     it("should throw for arrays containing only NaN", () => {
-      expect(() => validatePets([Number.NaN])).toThrow(
-        "Invalid pet count data detected"
-      );
+      expect(() => validatePets([Number.NaN])).toThrow("Invalid pet count data detected");
     });
 
     it("should handle negative numbers (they are valid pet counts)", () => {
@@ -179,15 +163,11 @@ describe("validation utilities", () => {
     });
 
     it("should throw for arrays containing negative numbers", () => {
-      expect(() => validateYearPets([1, 2, -1, 4])).toThrow(
-        "Invalid pet count data detected"
-      );
+      expect(() => validateYearPets([1, 2, -1, 4])).toThrow("Invalid pet count data detected");
     });
 
     it("should throw for arrays containing only negative numbers", () => {
-      expect(() => validateYearPets([-1, -2, -3])).toThrow(
-        "Invalid pet count data detected"
-      );
+      expect(() => validateYearPets([-1, -2, -3])).toThrow("Invalid pet count data detected");
     });
 
     it("should handle zero (valid pet count)", () => {
@@ -207,21 +187,15 @@ describe("validation utilities", () => {
     });
 
     it("should throw for arrays containing non-integer years", () => {
-      expect(() => validateYears([2020.5, 2021, 2022])).toThrow(
-        "Invalid year data detected"
-      );
+      expect(() => validateYears([2020.5, 2021, 2022])).toThrow("Invalid year data detected");
     });
 
     it("should throw for arrays containing years before 1900", () => {
-      expect(() => validateYears([1899, 2020, 2021])).toThrow(
-        "Invalid year data detected"
-      );
+      expect(() => validateYears([1899, 2020, 2021])).toThrow("Invalid year data detected");
     });
 
     it("should throw for arrays containing years after 2100", () => {
-      expect(() => validateYears([2020, 2021, 2101])).toThrow(
-        "Invalid year data detected"
-      );
+      expect(() => validateYears([2020, 2021, 2101])).toThrow("Invalid year data detected");
     });
 
     it("should handle boundary values correctly", () => {

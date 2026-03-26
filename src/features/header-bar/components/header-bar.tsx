@@ -15,10 +15,7 @@ interface LocationItem {
   title: string;
 }
 
-const HeaderBarComponent = ({
-  id,
-  LocationOptions,
-}: NavProperties): React.ReactElement => {
+const HeaderBarComponent = ({ id, LocationOptions }: NavProperties): React.ReactElement => {
   const router = useRouter();
   const searchParameters = useSearchParams();
 
@@ -34,9 +31,9 @@ const HeaderBarComponent = ({
   const groupedCities = useMemo(() => {
     const options = Array.isArray(LocationOptions) ? LocationOptions : [];
 
-    const allCities = options.flatMap(section =>
+    const allCities = options.flatMap((section) =>
       [...(section.items || [])].map(
-        item =>
+        (item) =>
           ({
             key: item.key,
             state: section.title,
@@ -53,10 +50,8 @@ const HeaderBarComponent = ({
       grouped[city.state].push(city);
     }
 
-    const sortedStates = Object.keys(grouped).toSorted((a, b) =>
-      a.localeCompare(b)
-    );
-    return sortedStates.map(state => ({
+    const sortedStates = Object.keys(grouped).toSorted((a, b) => a.localeCompare(b));
+    return sortedStates.map((state) => ({
       group: state,
       items: grouped[state].toSorted((a, b) => a.title.localeCompare(b.title)),
     }));
@@ -66,15 +61,13 @@ const HeaderBarComponent = ({
     if (!id) {
       return;
     }
-    return groupedCities
-      .flatMap(group => group.items)
-      .find(city => city.key === id);
+    return groupedCities.flatMap((group) => group.items).find((city) => city.key === id);
   }, [id, groupedCities]);
 
   const selectData = useMemo(() => {
-    return groupedCities.map(group => ({
+    return groupedCities.map((group) => ({
       group: group.group,
-      items: group.items.map(city => ({
+      items: group.items.map((city) => ({
         key: `city-${city.key}`,
         label: city.title,
         value: city.key.toString(),
@@ -87,9 +80,7 @@ const HeaderBarComponent = ({
     <header className="relative z-10 w-full border-b border-gray-200 bg-white">
       <div className="mx-auto max-w-4xl px-4">
         <div className="py-1.5 text-center">
-          <h1 className="text-xl font-extrabold dark:text-white">
-            {APP_CONFIG.NAME}
-          </h1>
+          <h1 className="text-xl font-extrabold dark:text-white">{APP_CONFIG.NAME}</h1>
         </div>
         <div className="rounded-md bg-white p-2 sm:p-3">
           <div className="flex flex-wrap justify-center gap-2">
@@ -98,7 +89,7 @@ const HeaderBarComponent = ({
               clearable
               data={selectData}
               data-testid="city-selector"
-              onChange={value => {
+              onChange={(value) => {
                 if (value) {
                   router.push(`/${value}`);
                 }

@@ -1,22 +1,13 @@
 import { http, HttpResponse } from "msw";
 
-import {
-  getRuntimeMockTableRows,
-  type Primitive,
-} from "@/testing/runtime-mocks";
+import { getRuntimeMockTableRows, type Primitive } from "@/testing/runtime-mocks";
 
 type FilterOperator = "eq" | "gt" | "gte" | "lt" | "lte";
 type MockRow = Record<string, Primitive | undefined>;
 
 const RESERVED_QUERY_PARAMS = new Set(["limit", "offset", "order", "select"]);
 
-const filterOperatorSet = new Set<FilterOperator>([
-  "eq",
-  "gt",
-  "gte",
-  "lt",
-  "lte",
-]);
+const filterOperatorSet = new Set<FilterOperator>(["eq", "gt", "gte", "lt", "lte"]);
 
 const toNumber = (value: Primitive | string) => {
   const numberValue = Number(value);
@@ -68,17 +59,14 @@ const applyFilters = (rows: MockRow[], requestUrl: URL) => {
     }
 
     const [operator, ...rest] = rawFilterValue.split(".");
-    if (
-      !filterOperatorSet.has(operator as FilterOperator) ||
-      rest.length === 0
-    ) {
+    if (!filterOperatorSet.has(operator as FilterOperator) || rest.length === 0) {
       continue;
     }
 
     const typedOperator = operator as FilterOperator;
     const filterValue = rest.join(".");
 
-    filteredRows = filteredRows.filter(row =>
+    filteredRows = filteredRows.filter((row) =>
       matchesFilter(row, column, typedOperator, filterValue)
     );
   }
@@ -139,22 +127,17 @@ const applyColumnSelection = (rows: MockRow[], requestUrl: URL) => {
 
   const columns = select
     .split(",")
-    .map(column => column.trim())
+    .map((column) => column.trim())
     .filter(Boolean);
 
-  return rows.map(row =>
-    Object.fromEntries(columns.map(column => [column, row[column]]))
-  );
+  return rows.map((row) => Object.fromEntries(columns.map((column) => [column, row[column]])));
 };
 
 export const handlers = [
   http.get("*/rest/v1/:table", ({ params, request }) => {
     const tableName = params.table;
     if (typeof tableName !== "string") {
-      return HttpResponse.json(
-        { message: "Missing table name" },
-        { status: 400 }
-      );
+      return HttpResponse.json({ message: "Missing table name" }, { status: 400 });
     }
 
     const url = new URL(request.url);

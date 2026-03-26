@@ -9,9 +9,7 @@ describe("reference-graph-data", () => {
   let mockSupabaseClient: ReturnType<
     (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
   >;
-  let mockValidation: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockValidation"]
-  >;
+  let mockValidation: ReturnType<(typeof import("@/testing/mocks"))["createMockValidation"]>;
 
   beforeEach(async () => {
     clearAllMocks();
@@ -43,10 +41,7 @@ describe("reference-graph-data", () => {
       expect(mockQuery.eq).toHaveBeenNthCalledWith(2, "year", "2023");
       expect(mockQuery.order).toHaveBeenCalledWith("date", { ascending: true });
 
-      expect(result.dates).toEqual([
-        new Date("2023-01-01"),
-        new Date("2023-01-02"),
-      ]);
+      expect(result.dates).toEqual([new Date("2023-01-01"), new Date("2023-01-02")]);
       expect(result.pets).toEqual([25.5, 26.2]);
 
       expect(mockValidation.validateDates).toHaveBeenCalledWith([
@@ -133,15 +128,11 @@ describe("reference-graph-data", () => {
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
-      await expect(FetchReferenceGraphData("2023", 1)).rejects.toThrow(
-        new Error("Network error")
-      );
+      await expect(FetchReferenceGraphData("2023", 1)).rejects.toThrow(new Error("Network error"));
     });
 
     it("should handle validation errors during data processing", async () => {
-      const mockData = [
-        { date: "2023-01-01", location_id: 1, pet: 25.5, year: "2023" },
-      ];
+      const mockData = [{ date: "2023-01-01", location_id: 1, pet: 25.5, year: "2023" }];
 
       const mockQuery = {
         eq: vi.fn().mockReturnThis(),
@@ -154,9 +145,7 @@ describe("reference-graph-data", () => {
         throw new Error("Invalid dates");
       });
 
-      await expect(FetchReferenceGraphData("2023", 1)).rejects.toThrow(
-        new Error("Invalid dates")
-      );
+      await expect(FetchReferenceGraphData("2023", 1)).rejects.toThrow(new Error("Invalid dates"));
     });
 
     it("should rethrow FetchErrors from data fetching", async () => {

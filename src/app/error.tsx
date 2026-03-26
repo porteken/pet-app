@@ -12,9 +12,7 @@ export default function ErrorPage({
   return (
     <div className="mx-auto max-w-xl px-4 py-12">
       <div className="flex flex-col items-center gap-6 text-center">
-        <h1 className="text-3xl font-bold text-red-600">
-          Something went wrong!
-        </h1>
+        <h1 className="text-3xl font-bold text-red-600">Something went wrong!</h1>
         <p className="max-w-md text-base text-gray-600">
           {error.message || "An unexpected error occurred"}
         </p>

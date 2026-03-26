@@ -15,7 +15,10 @@ interface LocationItem {
   title: string;
 }
 
-const HeaderBarComponent = ({ id, LocationOptions }: NavProperties): React.ReactElement => {
+const HeaderBarComponent = ({
+  id,
+  LocationOptions,
+}: NavProperties): React.ReactElement => {
   const router = useRouter();
   const searchParameters = useSearchParams();
 
@@ -38,8 +41,8 @@ const HeaderBarComponent = ({ id, LocationOptions }: NavProperties): React.React
             key: item.key,
             state: section.title,
             title: item.title,
-          }) as LocationItem
-      )
+          }) as LocationItem,
+      ),
     );
 
     const grouped: Record<string, LocationItem[]> = {};
@@ -50,7 +53,9 @@ const HeaderBarComponent = ({ id, LocationOptions }: NavProperties): React.React
       grouped[city.state].push(city);
     }
 
-    const sortedStates = Object.keys(grouped).toSorted((a, b) => a.localeCompare(b));
+    const sortedStates = Object.keys(grouped).toSorted((a, b) =>
+      a.localeCompare(b),
+    );
     return sortedStates.map((state) => ({
       group: state,
       items: grouped[state].toSorted((a, b) => a.title.localeCompare(b.title)),
@@ -61,7 +66,9 @@ const HeaderBarComponent = ({ id, LocationOptions }: NavProperties): React.React
     if (!id) {
       return;
     }
-    return groupedCities.flatMap((group) => group.items).find((city) => city.key === id);
+    return groupedCities
+      .flatMap((group) => group.items)
+      .find((city) => city.key === id);
   }, [id, groupedCities]);
 
   const selectData = useMemo(() => {
@@ -80,7 +87,9 @@ const HeaderBarComponent = ({ id, LocationOptions }: NavProperties): React.React
     <header className="relative z-10 w-full border-b border-gray-200 bg-white">
       <div className="mx-auto max-w-4xl px-4">
         <div className="py-1.5 text-center">
-          <h1 className="text-xl font-extrabold dark:text-white">{APP_CONFIG.NAME}</h1>
+          <h1 className="text-xl font-extrabold dark:text-white">
+            {APP_CONFIG.NAME}
+          </h1>
         </div>
         <div className="rounded-md bg-white p-2 sm:p-3">
           <div className="flex flex-wrap justify-center gap-2">

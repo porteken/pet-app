@@ -5,7 +5,10 @@ import {
   validateYearPets,
   validateYears,
 } from "@/lib/utils/validation";
-import type { ReferenceGraphDataProperties, TrendGraphDataProperties } from "@/types/types";
+import type {
+  ReferenceGraphDataProperties,
+  TrendGraphDataProperties,
+} from "@/types/types";
 
 interface ReferenceGraphRow {
   date: string;
@@ -18,7 +21,7 @@ interface TrendGraphRow {
 }
 
 export const mapReferenceRowsToGraphData = (
-  rows: ReferenceGraphRow[]
+  rows: ReferenceGraphRow[],
 ): ReferenceGraphDataProperties => {
   const dates = rows.map(({ date }) => new Date(date));
   const pets = rows.map(({ pet }) => Number(pet));
@@ -29,7 +32,9 @@ export const mapReferenceRowsToGraphData = (
   return { dates, pets };
 };
 
-export const mapTrendRowsToGraphData = (rows: TrendGraphRow[]): TrendGraphDataProperties => {
+export const mapTrendRowsToGraphData = (
+  rows: TrendGraphRow[],
+): TrendGraphDataProperties => {
   const years = rows.map(({ year }) => year);
   const year_pets = rows.map(({ pet }) => Number(pet));
 

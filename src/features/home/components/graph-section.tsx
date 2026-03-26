@@ -59,7 +59,7 @@ export const GraphSection = memo<GraphSectionProperties>(
           <span className="mt-2 text-gray-500">Loading graph...</span>
         </div>
       ),
-      []
+      [],
     );
 
     const handleViewDetails = useCallback(() => {
@@ -84,7 +84,7 @@ export const GraphSection = memo<GraphSectionProperties>(
           {graphLoading ? loadingUI : petGraph}
         </div>
       ),
-      [graphLoading, loadingUI, petGraph]
+      [graphLoading, loadingUI, petGraph],
     );
     return (
       <div className="flex w-full max-w-full min-w-0 flex-col items-center space-y-3 sm:min-h-0 sm:max-w-[95vw] sm:min-w-[320px] sm:space-y-3">
@@ -113,14 +113,18 @@ export const GraphSection = memo<GraphSectionProperties>(
             <div className="rounded-lg bg-blue-50 p-3">
               <p className="text-sm font-medium text-gray-900">
                 {heatStressDescription.prefix}{" "}
-                <span className={`font-bold ${heatStressDescription.colorClass}`}>
+                <span
+                  className={`font-bold ${heatStressDescription.colorClass}`}
+                >
                   {heatStressDescription.value}
                 </span>
               </p>
               {forecastEnabled && forecastHeatStress && (
                 <p className="mt-2 text-sm font-medium text-gray-900">
                   {forecastHeatStress.prefix}{" "}
-                  <span className={`font-bold ${forecastHeatStress.colorClass}`}>
+                  <span
+                    className={`font-bold ${forecastHeatStress.colorClass}`}
+                  >
                     {forecastHeatStress.value}
                   </span>
                   {forecastHeatStress.confidenceRange && (
@@ -141,7 +145,9 @@ export const GraphSection = memo<GraphSectionProperties>(
                 type="button"
                 variant="outline"
               >
-                {isMobileGraphLegendOpen ? "Hide Graph Legend" : "Show Graph Legend"}
+                {isMobileGraphLegendOpen
+                  ? "Hide Graph Legend"
+                  : "Show Graph Legend"}
               </Button>
             </div>
           )}
@@ -152,7 +158,7 @@ export const GraphSection = memo<GraphSectionProperties>(
         {detailsButton}
       </div>
     );
-  }
+  },
 );
 
 GraphSection.displayName = "GraphSection";

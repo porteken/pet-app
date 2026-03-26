@@ -4,7 +4,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const createDelay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const createDelay = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 const mockPush = vi.fn();
 const mockQueryClient = {
   fetchQuery: vi.fn(async (options) => {
@@ -59,7 +60,9 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/features/header-bar", () => ({
   HeaderBar: vi.fn(({ LocationOptions }) => (
-    <div data-testid="header-bar">HeaderBar with {LocationOptions?.length || 0} locations</div>
+    <div data-testid="header-bar">
+      HeaderBar with {LocationOptions?.length || 0} locations
+    </div>
   )),
 }));
 
@@ -73,7 +76,7 @@ vi.mock("@/components/ui/modal", () => ({
         </button>
         {children}
       </dialog>
-    ) : undefined
+    ) : undefined,
   ),
 }));
 
@@ -81,7 +84,11 @@ vi.mock("../components/map-component", () => ({
   MapComponent: vi.fn(({ locations, onMarkerClick }) => (
     <div data-testid="map-component">
       Map with {locations.length} locations
-      <button data-testid="marker-click" onClick={() => onMarkerClick(1)} type="button">
+      <button
+        data-testid="marker-click"
+        onClick={() => onMarkerClick(1)}
+        type="button"
+      >
         Click Marker 1
       </button>
     </div>
@@ -90,7 +97,12 @@ vi.mock("../components/map-component", () => ({
 
 vi.mock("@/components/ui/button", () => ({
   Button: vi.fn(({ children, onClick, variant }) => (
-    <button data-testid="shadcn-button" data-variant={variant} onClick={onClick} type="button">
+    <button
+      data-testid="shadcn-button"
+      data-variant={variant}
+      onClick={onClick}
+      type="button"
+    >
       {children}
     </button>
   )),
@@ -120,7 +132,7 @@ vi.mock("@/components/ui/select", () => ({
           ))}
         </select>
       </div>
-    )
+    ),
   ),
 }));
 
@@ -133,19 +145,25 @@ vi.mock("@/lib/utils/select-options", () => ({
 }));
 
 vi.mock("@/lib/utils/forecast-controls", () => ({
-  ForecastControls: vi.fn(({ enabled, onToggle, onYearsChange, yearsAhead }) => (
-    <div data-testid="forecast-controls">
-      <button data-testid="forecast-toggle" onClick={() => onToggle(!enabled)} type="button">
-        {enabled ? "Disable" : "Enable"} Forecast
-      </button>
-      <input
-        data-testid="forecast-years"
-        onChange={(event_) => onYearsChange(Number(event_.target.value))}
-        type="number"
-        value={yearsAhead}
-      />
-    </div>
-  )),
+  ForecastControls: vi.fn(
+    ({ enabled, onToggle, onYearsChange, yearsAhead }) => (
+      <div data-testid="forecast-controls">
+        <button
+          data-testid="forecast-toggle"
+          onClick={() => onToggle(!enabled)}
+          type="button"
+        >
+          {enabled ? "Disable" : "Enable"} Forecast
+        </button>
+        <input
+          data-testid="forecast-years"
+          onChange={(event_) => onYearsChange(Number(event_.target.value))}
+          type="number"
+          value={yearsAhead}
+        />
+      </div>
+    ),
+  ),
 }));
 
 import { GenerateTrendGraph } from "@/features/graph";
@@ -247,7 +265,9 @@ describe("Home", () => {
 
       await waitFor(() => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
-        expect(screen.getByTestId("modal-title")).toHaveTextContent("New York, NY");
+        expect(screen.getByTestId("modal-title")).toHaveTextContent(
+          "New York, NY",
+        );
       });
     });
 
@@ -321,7 +341,9 @@ describe("Home", () => {
 
       await waitFor(() => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
-        expect(screen.getByTestId("shadcn-button")).toHaveTextContent("View Full Details");
+        expect(screen.getByTestId("shadcn-button")).toHaveTextContent(
+          "View Full Details",
+        );
       });
     });
 
@@ -350,9 +372,13 @@ describe("Home", () => {
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
-        expect(screen.getByText("Unable to load graph data")).toBeInTheDocument();
+        expect(
+          screen.getByText("Unable to load graph data"),
+        ).toBeInTheDocument();
         expect(screen.getByText(/contact kenneth porter/i)).toBeInTheDocument();
-        expect(screen.getByRole("link", { name: /porteken@gmail.com/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: /porteken@gmail.com/i }),
+        ).toBeInTheDocument();
       });
     });
   });
@@ -374,7 +400,9 @@ describe("Home", () => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
       });
 
-      await waitFor(() => expect(FetchForecastData).toHaveBeenCalledWith(1, 10));
+      await waitFor(() =>
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10),
+      );
     });
 
     it("should fetch forecast when toggling forecast on", async () => {
@@ -479,7 +507,11 @@ describe("Home", () => {
 
     it("should initialize with custom forecast years ahead", async () => {
       render(
-        <Home {...defaultProps} initialForecastEnabled={true} initialForecastYearsAhead={20} />
+        <Home
+          {...defaultProps}
+          initialForecastEnabled={true}
+          initialForecastYearsAhead={20}
+        />,
       );
 
       fireEvent.click(screen.getByTestId("marker-click"));
@@ -504,7 +536,9 @@ describe("Home", () => {
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
-        expect(screen.getByText("Unable to load graph data")).toBeInTheDocument();
+        expect(
+          screen.getByText("Unable to load graph data"),
+        ).toBeInTheDocument();
       });
     });
 
@@ -521,7 +555,9 @@ describe("Home", () => {
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
-        expect(screen.getByText("Unable to load graph data")).toBeInTheDocument();
+        expect(
+          screen.getByText("Unable to load graph data"),
+        ).toBeInTheDocument();
       });
     });
   });

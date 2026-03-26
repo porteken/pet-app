@@ -6,7 +6,7 @@ import { queryKeys } from "@/lib/api/query-client";
 export const useTrendGraphData = (
   locationId: number | undefined,
   option: string,
-  enabled = true
+  enabled = true,
 ) => {
   return useQuery({
     enabled: enabled && locationId !== undefined,

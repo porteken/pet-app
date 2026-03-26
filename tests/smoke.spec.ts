@@ -1,10 +1,16 @@
 import { expect, test } from "@playwright/test";
 
 import { MARKER_SELECTOR } from "./utils/map-marker";
-import { gotoAndWaitForMapPage, openLocationDetailsModal, waitForMapPage } from "./utils/map-page";
+import {
+  gotoAndWaitForMapPage,
+  openLocationDetailsModal,
+  waitForMapPage,
+} from "./utils/map-page";
 
 test.describe("Smoke Tests", () => {
-  test("complete user journey: home → location selection → data analysis", async ({ page }) => {
+  test("complete user journey: home → location selection → data analysis", async ({
+    page,
+  }) => {
     await gotoAndWaitForMapPage(page, "/");
 
     const { modal } = await openLocationDetailsModal(page);
@@ -41,7 +47,9 @@ test.describe("Smoke Tests", () => {
     await waitForMapPage(page);
   });
 
-  test("navigation workflow: direct URL access → data interaction", async ({ page }) => {
+  test("navigation workflow: direct URL access → data interaction", async ({
+    page,
+  }) => {
     await page.goto("/1");
 
     await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({
@@ -67,7 +75,9 @@ test.describe("Smoke Tests", () => {
     });
   });
 
-  test("error handling: invalid location → graceful fallback", async ({ page }) => {
+  test("error handling: invalid location → graceful fallback", async ({
+    page,
+  }) => {
     await page.goto("/99999");
 
     await expect(page.locator("body")).toBeVisible();

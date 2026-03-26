@@ -14,10 +14,12 @@ describe("ForecastControls", () => {
         onToggle={vi.fn()}
         onYearsChange={vi.fn()}
         yearsAhead={10}
-      />
+      />,
     );
 
-    expect(screen.getByRole("checkbox", { name: "Show Forecast" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("checkbox", { name: "Show Forecast" }),
+    ).toBeInTheDocument();
   });
 
   it("hides years controls when forecast is disabled", () => {
@@ -27,19 +29,28 @@ describe("ForecastControls", () => {
         onToggle={vi.fn()}
         onYearsChange={vi.fn()}
         yearsAhead={10}
-      />
+      />,
     );
 
-    expect(screen.queryByLabelText(/forecast .* year/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(/forecast .* year/i),
+    ).not.toBeInTheDocument();
     expect(screen.queryByRole("slider")).not.toBeInTheDocument();
   });
 
   it("shows years controls when forecast is enabled", () => {
     render(
-      <ForecastControls enabled={true} onToggle={vi.fn()} onYearsChange={vi.fn()} yearsAhead={10} />
+      <ForecastControls
+        enabled={true}
+        onToggle={vi.fn()}
+        onYearsChange={vi.fn()}
+        yearsAhead={10}
+      />,
     );
 
-    expect(screen.getByLabelText("Forecast 10 years ahead")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Forecast 10 years ahead"),
+    ).toBeInTheDocument();
 
     const slider = screen.getByRole("slider");
     expect(slider).toHaveAttribute("min", "5");
@@ -57,7 +68,7 @@ describe("ForecastControls", () => {
         onToggle={onToggle}
         onYearsChange={vi.fn()}
         yearsAhead={10}
-      />
+      />,
     );
 
     fireEvent.click(screen.getByRole("checkbox", { name: "Show Forecast" }));
@@ -74,7 +85,7 @@ describe("ForecastControls", () => {
         onToggle={vi.fn()}
         onYearsChange={onYearsChange}
         yearsAhead={10}
-      />
+      />,
     );
 
     fireEvent.change(screen.getByRole("slider"), { target: { value: "25" } });
@@ -84,7 +95,12 @@ describe("ForecastControls", () => {
 
   it("uses singular year label when yearsAhead is 1", () => {
     render(
-      <ForecastControls enabled={true} onToggle={vi.fn()} onYearsChange={vi.fn()} yearsAhead={1} />
+      <ForecastControls
+        enabled={true}
+        onToggle={vi.fn()}
+        onYearsChange={vi.fn()}
+        yearsAhead={1}
+      />,
     );
 
     expect(screen.getByLabelText("Forecast 1 year ahead")).toBeInTheDocument();

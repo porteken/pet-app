@@ -13,7 +13,7 @@ import type { ReferenceGraphDataProperties } from "@/types/types";
 
 export async function FetchReferenceGraphData(
   year: string,
-  locationId: number
+  locationId: number,
 ): Promise<ReferenceGraphDataProperties> {
   const supabase = createClient();
 
@@ -32,7 +32,7 @@ export async function FetchReferenceGraphData(
 async function fetchData(
   supabase: SupabaseClient,
   locationId: number,
-  year: string
+  year: string,
 ): Promise<
   Array<{
     date: string;
@@ -51,7 +51,7 @@ async function fetchData(
   if (error) {
     throw new FetchError(
       `Database error fetching reference data for location ${locationId}, year ${year}: ${error.message}`,
-      error
+      error,
     );
   }
 
@@ -61,7 +61,7 @@ async function fetchData(
     if (isSchemaValidationError(validationError)) {
       throw new FetchError(
         formatSchemaValidationError("Reference graph", validationError),
-        validationError
+        validationError,
       );
     }
 

@@ -15,7 +15,8 @@ const Home = dynamic(() => import("@/features/home"), {
 const HomePage = async () => {
   try {
     const initialGraphMeasure = await getGraphMeasureFromCookies();
-    const initialForecastPreferences = await getForecastPreferencesFromCookies();
+    const initialForecastPreferences =
+      await getForecastPreferencesFromCookies();
     const { LocationOptions, locations } = await getLocationData();
 
     return (

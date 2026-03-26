@@ -15,10 +15,14 @@ export const createQueryClient = () =>
   });
 
 export const queryKeys = {
-  trendGraph: (locationId: number, option: string) => ["trend-graph", locationId, option] as const,
+  trendGraph: (locationId: number, option: string) =>
+    ["trend-graph", locationId, option] as const,
 };
 
-export const getTrendGraphQueryOptions = (locationId: number, option: string) => ({
+export const getTrendGraphQueryOptions = (
+  locationId: number,
+  option: string,
+) => ({
   queryFn: () => FetchTrendGraphData(option, locationId),
   queryKey: queryKeys.trendGraph(locationId, option),
 });
@@ -26,7 +30,7 @@ export const getTrendGraphQueryOptions = (locationId: number, option: string) =>
 export const prefetchTrendGraphData = (
   queryClient: QueryClient,
   locationId: number,
-  option: string
+  option: string,
 ) => {
   return queryClient.prefetchQuery({
     ...getTrendGraphQueryOptions(locationId, option),

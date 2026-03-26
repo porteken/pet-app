@@ -81,7 +81,7 @@ export const createMockValidation = () => ({
 });
 
 export const setupSuccessfulValidations = (
-  mockValidation: ReturnType<typeof createMockValidation>
+  mockValidation: ReturnType<typeof createMockValidation>,
 ) => {
   mockValidation.validateDates.mockImplementation(() => {});
   mockValidation.validateLocationId.mockReturnValue(true);

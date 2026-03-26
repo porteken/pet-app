@@ -52,8 +52,14 @@ describe("OptimizedMarker", () => {
 
     const marker = screen.getByTestId("marker");
     expect(marker).toBeInTheDocument();
-    expect(marker).toHaveAttribute("data-position", JSON.stringify(mockProperties.position));
-    expect(marker).toHaveAttribute("data-icon", JSON.stringify(mockProperties.icon));
+    expect(marker).toHaveAttribute(
+      "data-position",
+      JSON.stringify(mockProperties.position),
+    );
+    expect(marker).toHaveAttribute(
+      "data-icon",
+      JSON.stringify(mockProperties.icon),
+    );
   });
 
   it("calls onClick with locationId when marker is clicked", async () => {
@@ -63,7 +69,9 @@ describe("OptimizedMarker", () => {
     const marker = screen.getByTestId("marker");
     await user.click(marker);
 
-    expect(mockProperties.onClick).toHaveBeenCalledWith(mockProperties.locationId);
+    expect(mockProperties.onClick).toHaveBeenCalledWith(
+      mockProperties.locationId,
+    );
   });
 
   it("prefetches data on mouse enter", async () => {
@@ -76,7 +84,7 @@ describe("OptimizedMarker", () => {
     expect(mockPrefetchTrendGraphData).toHaveBeenCalledWith(
       mockQueryClient,
       mockProperties.locationId,
-      mockProperties.selectedGraphMeasure
+      mockProperties.selectedGraphMeasure,
     );
   });
 
@@ -96,7 +104,7 @@ describe("OptimizedMarker", () => {
     expect(mockPrefetchTrendGraphData).toHaveBeenCalledWith(
       mockQueryClient,
       mockProperties.locationId,
-      mockProperties.selectedGraphMeasure
+      mockProperties.selectedGraphMeasure,
     );
   });
 
@@ -105,7 +113,9 @@ describe("OptimizedMarker", () => {
 
     expect(MockMarkerComponent).toHaveBeenCalledTimes(1);
 
-    rerender(<OptimizedMarker {...mockProperties} selectedGraphMeasure="humidity" />);
+    rerender(
+      <OptimizedMarker {...mockProperties} selectedGraphMeasure="humidity" />,
+    );
 
     expect(MockMarkerComponent).toHaveBeenCalledTimes(2);
   });
@@ -152,7 +162,7 @@ describe("OptimizedMarker", () => {
         icon: mockProperties.icon,
         position: mockProperties.position,
       }),
-      undefined
+      undefined,
     );
   });
 
@@ -165,7 +175,9 @@ describe("OptimizedMarker", () => {
     const marker = screen.getByTestId("marker");
     await user.click(marker);
 
-    expect(mockProperties.onClick).toHaveBeenCalledWith(mockProperties.locationId);
+    expect(mockProperties.onClick).toHaveBeenCalledWith(
+      mockProperties.locationId,
+    );
     expect(newOnClick).not.toHaveBeenCalled();
 
     rerender(<OptimizedMarker {...mockProperties} onClick={newOnClick} />);

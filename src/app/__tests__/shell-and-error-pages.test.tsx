@@ -12,7 +12,14 @@ vi.mock("@/components/app/providers", () => ({
 }));
 
 vi.mock("next/link", () => ({
-  default: ({ children, href, ...properties }: { children: React.ReactNode; href: string }) => (
+  default: ({
+    children,
+    href,
+    ...properties
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => (
     <a href={href} {...properties}>
       {children}
     </a>
@@ -35,7 +42,9 @@ describe("app shell and error pages", () => {
 
     expect(screen.getByText("Default Page")).toBeInTheDocument();
     expect(
-      screen.getByText("This is the default fallback page for parallel routes.")
+      screen.getByText(
+        "This is the default fallback page for parallel routes.",
+      ),
     ).toBeInTheDocument();
   });
 
@@ -50,7 +59,9 @@ describe("app shell and error pages", () => {
     render(<NotFound />);
 
     expect(screen.getByText("404 - Not Found")).toBeInTheDocument();
-    expect(screen.getByText("The page you are looking for does not exist.")).toBeInTheDocument();
+    expect(
+      screen.getByText("The page you are looking for does not exist."),
+    ).toBeInTheDocument();
   });
 
   it("renders the root layout metadata and children", () => {
@@ -63,7 +74,9 @@ describe("app shell and error pages", () => {
     expect(layout.props.children.type).toBe("body");
     expect(layout.props.children.props.suppressHydrationWarning).toBe(true);
     expect(layout.props.children.props.children.type).toBe(mockAppProviders);
-    expect(layout.props.children.props.children.props.children).toEqual(<span>Child content</span>);
+    expect(layout.props.children.props.children.props.children).toEqual(
+      <span>Child content</span>,
+    );
     expect(metadata).toEqual({
       description: "Physiological Equivalent Temperature data for US cities",
       title: "Historical PET USA",
@@ -77,10 +90,9 @@ describe("app shell and error pages", () => {
 
     expect(screen.getByText("Something went wrong!")).toBeInTheDocument();
     expect(screen.getByText("Unexpected failure")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "porteken@gmail.com" })).toHaveAttribute(
-      "href",
-      "mailto:porteken@gmail.com"
-    );
+    expect(
+      screen.getByRole("link", { name: "porteken@gmail.com" }),
+    ).toHaveAttribute("href", "mailto:porteken@gmail.com");
 
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
 
@@ -115,7 +127,9 @@ describe("app shell and error pages", () => {
 
     expect(screen.getByText("About Page Error")).toBeInTheDocument();
     expect(screen.getByText("About exploded")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Return to homepage" })).toHaveAttribute("href", "/");
+    expect(
+      screen.getByRole("link", { name: "Return to homepage" }),
+    ).toHaveAttribute("href", "/");
   });
 
   it("renders the map error fallback content", () => {
@@ -126,7 +140,12 @@ describe("app shell and error pages", () => {
   });
 
   it("renders the location error fallback content", () => {
-    render(<LocationError error={new Error("Location data load failed")} reset={vi.fn()} />);
+    render(
+      <LocationError
+        error={new Error("Location data load failed")}
+        reset={vi.fn()}
+      />,
+    );
 
     expect(screen.getByText("Location Data Error")).toBeInTheDocument();
     expect(screen.getByText("Location data load failed")).toBeInTheDocument();

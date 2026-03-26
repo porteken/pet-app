@@ -9,7 +9,7 @@ vi.mock("@sentry/nextjs", () => ({
 }));
 
 vi.mock("@/lib/utils/errors", () => ({
-  FetchError: class FetchError extends Error {
+  FetchError: class MockFetchError extends Error {
     constructor(message: string) {
       super(message);
       this.name = "FetchError";
@@ -17,7 +17,8 @@ vi.mock("@/lib/utils/errors", () => ({
   },
 }));
 
-const createDelay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const createDelay = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 describe("api-client", () => {
   beforeEach(() => {
@@ -316,7 +317,8 @@ describe("api-client", () => {
     it("should handle generic array types", async () => {
       const mockData = [1, 2, 3, 4, 5];
       const mockRequestFunction = vi.fn().mockResolvedValue(mockData);
-      const result: ApiResponse<number[]> = await apiRequest(mockRequestFunction);
+      const result: ApiResponse<number[]> =
+        await apiRequest(mockRequestFunction);
 
       expect(hasError(result)).toBe(false);
 
@@ -350,7 +352,8 @@ describe("api-client", () => {
       };
 
       const mockRequestFunction = vi.fn().mockResolvedValue(mockData);
-      const result: ApiResponse<ComplexData> = await apiRequest(mockRequestFunction);
+      const result: ApiResponse<ComplexData> =
+        await apiRequest(mockRequestFunction);
 
       expect(hasError(result)).toBe(false);
 
@@ -368,14 +371,17 @@ describe("api-client", () => {
       class CustomError extends Error {
         constructor(
           message: string,
-          public code: string
+          public code: string,
         ) {
           super(message);
           this.name = "CustomError";
         }
       }
 
-      const customError = new CustomError("Custom error message", "CUSTOM_CODE");
+      const customError = new CustomError(
+        "Custom error message",
+        "CUSTOM_CODE",
+      );
       const mockRequestFunction = vi.fn().mockRejectedValue(customError);
 
       const result = await apiRequest(mockRequestFunction);
@@ -394,7 +400,9 @@ describe("api-client", () => {
         status: 400,
       };
 
-      const mockRequestFunction = vi.fn().mockRejectedValue(errorWithProperties);
+      const mockRequestFunction = vi
+        .fn()
+        .mockRejectedValue(errorWithProperties);
       const result = await apiRequest(mockRequestFunction);
 
       expect(result.error).toEqual({

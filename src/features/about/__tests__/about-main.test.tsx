@@ -12,7 +12,9 @@ vi.mock("next/link", () => ({
 
 vi.mock("@/features/header-bar", () => ({
   HeaderBar: vi.fn(({ LocationOptions }) => (
-    <div data-testid="header-bar">HeaderBar with {LocationOptions?.length || 0} locations</div>
+    <div data-testid="header-bar">
+      HeaderBar with {LocationOptions?.length || 0} locations
+    </div>
   )),
 }));
 
@@ -44,9 +46,18 @@ describe("AboutMain", () => {
   it("should render the main content container", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    const container = screen.getByText("Purpose of the Application").closest("div.mx-auto");
+    const container = screen
+      .getByText("Purpose of the Application")
+      .closest("div.mx-auto");
     expect(container).toBeInTheDocument();
-    expect(container).toHaveClass("mx-auto", "flex", "flex-col", "gap-5", "p-8", "px-4");
+    expect(container).toHaveClass(
+      "mx-auto",
+      "flex",
+      "flex-col",
+      "gap-5",
+      "p-8",
+      "px-4",
+    );
   });
 
   it("should display the purpose section with correct heading", () => {
@@ -63,7 +74,7 @@ describe("AboutMain", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
     const purposeText = screen.getByText(
-      /this application shows how the physiological equivalent temperature/i
+      /this application shows how the physiological equivalent temperature/i,
     );
     expect(purposeText).toBeInTheDocument();
     expect(purposeText).toHaveTextContent("from 2000 to 2013");
@@ -82,9 +93,13 @@ describe("AboutMain", () => {
   it("should display the PET definition", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    const petDefinition = screen.getByText(/the technical definition of the pet/i);
+    const petDefinition = screen.getByText(
+      /the technical definition of the pet/i,
+    );
     expect(petDefinition).toBeInTheDocument();
-    expect(petDefinition).toHaveTextContent("Physiological Equivalent Temperature");
+    expect(petDefinition).toHaveTextContent(
+      "Physiological Equivalent Temperature",
+    );
     expect(petDefinition).toHaveTextContent("heat budget");
     expect(petDefinition).toHaveTextContent("thermal comfort");
   });
@@ -93,7 +108,7 @@ describe("AboutMain", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
     const factorsText = screen.getByText(
-      /temperature, humidity, wind speed, solar radiation, and clothing/i
+      /temperature, humidity, wind speed, solar radiation, and clothing/i,
     );
     expect(factorsText).toBeInTheDocument();
   });
@@ -103,7 +118,10 @@ describe("AboutMain", () => {
 
     const studyLink = screen.getByRole("link", { name: /this/i });
     expect(studyLink).toBeInTheDocument();
-    expect(studyLink).toHaveAttribute("href", "https://bjsm.bmj.com/content/55/15/825");
+    expect(studyLink).toHaveAttribute(
+      "href",
+      "https://bjsm.bmj.com/content/55/15/825",
+    );
     expect(studyLink).toHaveClass("text-blue-600");
   });
 
@@ -111,7 +129,7 @@ describe("AboutMain", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
     const studyText = screen.getByText(
-      /there is evidence to suggest that the pet may do a better job/i
+      /there is evidence to suggest that the pet may do a better job/i,
     );
     expect(studyText).toBeInTheDocument();
     expect(studyText).toHaveTextContent("WBGT and UTCI");

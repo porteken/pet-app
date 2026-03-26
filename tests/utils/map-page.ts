@@ -5,12 +5,18 @@ import { clickClickableMarker } from "./map-marker";
 const MAP_LOAD_TIMEOUT = 30_000;
 const MODAL_TIMEOUT = 10_000;
 
-export async function gotoAndWaitForMapPage(page: Page, route: string): Promise<void> {
+export async function gotoAndWaitForMapPage(
+  page: Page,
+  route: string,
+): Promise<void> {
   await page.goto(route);
   await waitForMapPage(page);
 }
 
-export async function navigateToLocationDetailsFromMap(page: Page, route: string): Promise<void> {
+export async function navigateToLocationDetailsFromMap(
+  page: Page,
+  route: string,
+): Promise<void> {
   await gotoAndWaitForMapPage(page, route);
 
   const { viewDetailsButton } = await openLocationDetailsModal(page);
@@ -26,7 +32,7 @@ export async function navigateToLocationDetailsFromMap(page: Page, route: string
 }
 
 export async function openLocationDetailsModal(
-  page: Page
+  page: Page,
 ): Promise<{ modal: Locator; viewDetailsButton: Locator }> {
   await clickClickableMarker(page);
 

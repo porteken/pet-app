@@ -7,7 +7,10 @@ import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { ForecastControls } from "@/lib/utils/forecast-controls";
 import { type HeatStressDescription } from "@/lib/utils/heat-stress";
-import { buildTrendAnalysisResult, type TrendGraphSnapshot } from "@/lib/utils/trend-analysis";
+import {
+  buildTrendAnalysisResult,
+  type TrendGraphSnapshot,
+} from "@/lib/utils/trend-analysis";
 
 interface TrendAnalysisProperties {
   id: number;
@@ -24,11 +27,16 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   initialGraphMeasure,
   onMeasureChange,
 }) => {
-  const [selectedGraphMeasure, setSelectedGraphMeasure] = React.useState(initialGraphMeasure);
-  const [trendGraph, setTrendGraph] = React.useState<React.ReactElement | undefined>();
-  const [forecastEnabled, setForecastEnabled] = React.useState(() => initialForecastEnabled);
+  const [selectedGraphMeasure, setSelectedGraphMeasure] =
+    React.useState(initialGraphMeasure);
+  const [trendGraph, setTrendGraph] = React.useState<
+    React.ReactElement | undefined
+  >();
+  const [forecastEnabled, setForecastEnabled] = React.useState(
+    () => initialForecastEnabled,
+  );
   const [forecastYearsAhead, setForecastYearsAhead] = React.useState(
-    () => initialForecastYearsAhead
+    () => initialForecastYearsAhead,
   );
   const [currentHeatStress, setCurrentHeatStress] = React.useState<
     HeatStressDescription | undefined
@@ -36,7 +44,8 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const [forecastHeatStress, setForecastHeatStress] = React.useState<
     HeatStressDescription | undefined
   >();
-  const [trendGraphSnapshot, setTrendGraphSnapshot] = React.useState<TrendGraphSnapshot>();
+  const [trendGraphSnapshot, setTrendGraphSnapshot] =
+    React.useState<TrendGraphSnapshot>();
   const [isMobileViewport, setIsMobileViewport] = React.useState(() => {
     if (typeof globalThis.matchMedia !== "function") {
       return false;
@@ -69,16 +78,19 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const generatePetTrendGraph = React.useCallback(
     async (option: string, enableForecast: boolean, yearsAhead: number) => {
       try {
-        const { forecastHeatStress, heatStressDescription, snapshot } =
-          await buildTrendAnalysisResult({
-            enableForecast,
-            fetchForecastData: () => FetchForecastData(id, yearsAhead),
-            fetchTrendGraphData: () => FetchTrendGraphData(option, id),
-            option,
-          });
+        const {
+          forecastHeatStress: newForecastHeatStress,
+          heatStressDescription: newHeatStressDescription,
+          snapshot,
+        } = await buildTrendAnalysisResult({
+          enableForecast,
+          fetchForecastData: () => FetchForecastData(id, yearsAhead),
+          fetchTrendGraphData: () => FetchTrendGraphData(option, id),
+          option,
+        });
 
-        setCurrentHeatStress(heatStressDescription);
-        setForecastHeatStress(forecastHeatStress);
+        setCurrentHeatStress(newHeatStressDescription);
+        setForecastHeatStress(newForecastHeatStress);
         setTrendGraphSnapshot(snapshot);
       } catch {
         setTrendGraphSnapshot({
@@ -93,7 +105,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
         setForecastHeatStress(undefined);
       }
     },
-    [id]
+    [id],
   );
 
   const handleGraphMeasureChange = React.useCallback(
@@ -107,23 +119,28 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
         // Ignore persistence failures and keep the local selection.
       }
     },
-    [onMeasureChange]
+    [onMeasureChange],
   );
 
   React.useEffect(() => {
     generatePetTrendGraph(
       selectedGraphMeasure,
       forecastEnabled && selectedGraphMeasure === "avg",
-      forecastYearsAhead
+      forecastYearsAhead,
     );
-  }, [generatePetTrendGraph, selectedGraphMeasure, forecastEnabled, forecastYearsAhead]);
+  }, [
+    generatePetTrendGraph,
+    selectedGraphMeasure,
+    forecastEnabled,
+    forecastYearsAhead,
+  ]);
 
   const handleForecastToggle = React.useCallback(
     (enabled: boolean) => {
       setForecastEnabled(enabled);
       setForecastPreferences(enabled, forecastYearsAhead).catch(() => {});
     },
-    [forecastYearsAhead]
+    [forecastYearsAhead],
   );
 
   const handleForecastYearsChange = React.useCallback(
@@ -131,7 +148,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       setForecastYearsAhead(yearsAhead);
       setForecastPreferences(forecastEnabled, yearsAhead).catch(() => {});
     },
-    [forecastEnabled]
+    [forecastEnabled],
   );
 
   React.useEffect(() => {
@@ -149,17 +166,22 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
         trendlinePets: trendGraphSnapshot.trendline_pets,
         yearPets: trendGraphSnapshot.year_pets,
         years: trendGraphSnapshot.years,
-      })
+      }),
     );
   }, [isMobileViewport, showTrendLegend, trendGraphSnapshot]);
 
   return (
     <div className="h-full">
       <div className="flex h-full flex-col rounded-lg bg-white p-3 shadow-md sm:p-6">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">Trend Analysis</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">
+          Trend Analysis
+        </h2>
         <div className="mb-4 space-y-4">
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="graph-measure">
+            <label
+              className="mb-2 block text-sm font-medium text-gray-700"
+              htmlFor="graph-measure"
+            >
               Graph Measure
             </label>
             <select

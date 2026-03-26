@@ -1,12 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockCookies, mockFetchLocations, mockFetchReferenceGraphData, mockFetchTrendGraphData } =
-  vi.hoisted(() => ({
-    mockCookies: vi.fn(),
-    mockFetchLocations: vi.fn(),
-    mockFetchReferenceGraphData: vi.fn(),
-    mockFetchTrendGraphData: vi.fn(),
-  }));
+const {
+  mockCookies,
+  mockFetchLocations,
+  mockFetchReferenceGraphData,
+  mockFetchTrendGraphData,
+} = vi.hoisted(() => ({
+  mockCookies: vi.fn(),
+  mockFetchLocations: vi.fn(),
+  mockFetchReferenceGraphData: vi.fn(),
+  mockFetchTrendGraphData: vi.fn(),
+}));
 
 vi.mock("next/headers", () => ({
   cookies: mockCookies,
@@ -75,7 +79,8 @@ describe("loadLocationPageData", () => {
 
     await expect(loadLocationPageData("7")).resolves.toEqual({
       payload: {
-        message: "Location data could not be loaded. The database may be temporarily unavailable.",
+        message:
+          "Location data could not be loaded. The database may be temporarily unavailable.",
         title: "No Data Available",
       },
       status: "database-error",
@@ -150,7 +155,7 @@ describe("loadLocationPageData", () => {
         [FORECAST_ENABLED_COOKIE_NAME]: "true",
         [FORECAST_YEARS_AHEAD_COOKIE_NAME]: "25",
         [GRAPH_MEASURE_COOKIE_NAME]: "max",
-      })
+      }),
     );
     mockFetchLocations.mockResolvedValue({
       LocationOptions: locationOptions,
@@ -199,7 +204,7 @@ describe("loadLocationPageData", () => {
       createCookieStore({
         [FORECAST_ENABLED_COOKIE_NAME]: "not-true",
         [FORECAST_YEARS_AHEAD_COOKIE_NAME]: "200",
-      })
+      }),
     );
     mockFetchLocations.mockResolvedValue({
       LocationOptions: [],

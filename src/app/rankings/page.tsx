@@ -13,7 +13,10 @@ export const metadata: Metadata = {
   description: "City rankings by heat stress (PET) values",
   title: "City Rankings - Heat Stress Analysis",
 };
-const yearMapping = (value: string | undefined, cookie_value: string | undefined) => {
+const yearMapping = (
+  value: string | undefined,
+  cookie_value: string | undefined,
+) => {
   if (value) {
     return Number(value);
   } else if (cookie_value) {
@@ -30,7 +33,9 @@ export default async function RankingsPage({
   const parameters = await searchParams;
   const cookieStore = await cookies();
 
-  const heatStressFromCookie = cookieStore.get(RANKINGS_HEAT_STRESS_COOKIE_NAME)?.value;
+  const heatStressFromCookie = cookieStore.get(
+    RANKINGS_HEAT_STRESS_COOKIE_NAME,
+  )?.value;
   const stateFromCookie = cookieStore.get(RANKINGS_STATE_COOKIE_NAME)?.value;
   const yearFromCookie = cookieStore.get(RANKINGS_YEAR_COOKIE_NAME)?.value;
 

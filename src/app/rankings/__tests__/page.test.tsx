@@ -1,16 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockCookies, mockFetchCityRankings, mockFetchLocations, mockRankingsMain } = vi.hoisted(
-  () => ({
-    mockCookies: vi.fn(),
-    mockFetchCityRankings: vi.fn(),
-    mockFetchLocations: vi.fn(),
-    mockRankingsMain: vi.fn((_properties?: unknown) => (
-      <div data-testid="rankings-main">Rankings</div>
-    )),
-  })
-);
+const {
+  mockCookies,
+  mockFetchCityRankings,
+  mockFetchLocations,
+  mockRankingsMain,
+} = vi.hoisted(() => ({
+  mockCookies: vi.fn(),
+  mockFetchCityRankings: vi.fn(),
+  mockFetchLocations: vi.fn(),
+  mockRankingsMain: vi.fn((_properties?: unknown) => (
+    <div data-testid="rankings-main">Rankings</div>
+  )),
+}));
 
 vi.mock("next/headers", () => ({
   cookies: mockCookies,
@@ -68,13 +71,13 @@ describe("rankings page", () => {
         [RANKINGS_HEAT_STRESS_COOKIE_NAME]: "severe",
         [RANKINGS_STATE_COOKIE_NAME]: "Arizona",
         [RANKINGS_YEAR_COOKIE_NAME]: "2027",
-      })
+      }),
     );
 
     render(
       await RankingsPage({
         searchParams: Promise.resolve({ measure: "avg", year: "2031" }),
-      })
+      }),
     );
 
     expect(metadata).toEqual({
@@ -104,7 +107,7 @@ describe("rankings page", () => {
           },
         ],
       },
-      undefined
+      undefined,
     );
   });
 
@@ -112,13 +115,13 @@ describe("rankings page", () => {
     mockCookies.mockResolvedValue(
       createCookieStore({
         [RANKINGS_YEAR_COOKIE_NAME]: "2028",
-      })
+      }),
     );
 
     render(
       await RankingsPage({
         searchParams: Promise.resolve({}),
-      })
+      }),
     );
 
     expect(mockFetchCityRankings).toHaveBeenCalledWith(2028);
@@ -128,7 +131,7 @@ describe("rankings page", () => {
         initialState: "",
         initialYear: 2028,
       }),
-      undefined
+      undefined,
     );
   });
 
@@ -138,7 +141,7 @@ describe("rankings page", () => {
     render(
       await RankingsPage({
         searchParams: Promise.resolve({}),
-      })
+      }),
     );
 
     expect(mockFetchCityRankings).toHaveBeenCalledWith(2025);
@@ -146,7 +149,7 @@ describe("rankings page", () => {
       expect.objectContaining({
         initialYear: 2025,
       }),
-      undefined
+      undefined,
     );
   });
 });

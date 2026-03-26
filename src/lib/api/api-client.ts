@@ -20,7 +20,7 @@ type ErrorHandler = (error: Error) => void;
 
 export async function apiRequest<T>(
   requestFunction: () => Promise<T>,
-  errorHandler?: ErrorHandler
+  errorHandler?: ErrorHandler,
 ): Promise<ApiResponse<T>> {
   try {
     const data = await requestFunction();

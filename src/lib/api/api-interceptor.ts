@@ -1,8 +1,12 @@
-import { createError, type ErrorContext, NetworkError } from "@/lib/utils/errors";
+import {
+  createError,
+  type ErrorContext,
+  NetworkError,
+} from "@/lib/utils/errors";
 
 export const handleApiResponse = async <T>(
   response: Response,
-  context?: ErrorContext
+  context?: ErrorContext,
 ): Promise<T> => {
   if (!response.ok) {
     const errorMessage = await extractErrorMessage(response);
@@ -15,7 +19,12 @@ export const handleApiResponse = async <T>(
   try {
     return await response.json();
   } catch (parseError) {
-    throw new NetworkError("Failed to parse server response", 500, parseError, context);
+    throw new NetworkError(
+      "Failed to parse server response",
+      500,
+      parseError,
+      context,
+    );
   }
 };
 
@@ -80,7 +89,7 @@ const getDefaultErrorMessage = (statusCode: number): string => {
 export const apiRequest = async <T>(
   url: string,
   options: RequestInit = {},
-  context?: ErrorContext
+  context?: ErrorContext,
 ): Promise<T> => {
   try {
     const response = await fetch(url, {
@@ -108,7 +117,7 @@ export const apiRequestWithRetry = async <T>(
   url: string,
   options: RequestInit = {},
   retries: number = 3,
-  context?: ErrorContext
+  context?: ErrorContext,
 ): Promise<T> => {
   let lastError: Error | undefined;
 

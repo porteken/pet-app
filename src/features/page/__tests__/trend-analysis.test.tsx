@@ -40,19 +40,25 @@ vi.mock("@/lib/utils/heat-stress", () => ({
 }));
 
 vi.mock("@/lib/utils/forecast-controls", () => ({
-  ForecastControls: vi.fn(({ enabled, onToggle, onYearsChange, yearsAhead }) => (
-    <div data-testid="forecast-controls">
-      <button data-testid="forecast-toggle" onClick={() => onToggle(!enabled)} type="button">
-        {enabled ? "Disable" : "Enable"} Forecast
-      </button>
-      <input
-        data-testid="forecast-years"
-        onChange={(event_) => onYearsChange(Number(event_.target.value))}
-        type="number"
-        value={yearsAhead}
-      />
-    </div>
-  )),
+  ForecastControls: vi.fn(
+    ({ enabled, onToggle, onYearsChange, yearsAhead }) => (
+      <div data-testid="forecast-controls">
+        <button
+          data-testid="forecast-toggle"
+          onClick={() => onToggle(!enabled)}
+          type="button"
+        >
+          {enabled ? "Disable" : "Enable"} Forecast
+        </button>
+        <input
+          data-testid="forecast-years"
+          onChange={(event_) => onYearsChange(Number(event_.target.value))}
+          type="number"
+          value={yearsAhead}
+        />
+      </div>
+    ),
+  ),
 }));
 
 vi.mock("@/lib/actions/actions", () => ({
@@ -127,7 +133,9 @@ describe("TrendAnalysis", () => {
       render(<TrendAnalysis {...defaultProps} initialGraphMeasure="max" />);
 
       await waitFor(() => {
-        expect(screen.queryByTestId("forecast-controls")).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId("forecast-controls"),
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -161,7 +169,7 @@ describe("TrendAnalysis", () => {
             trendlinePets: [20, 22, 24, 26],
             yearPets: [20, 22, 24, 26],
             years: [2020, 2021, 2022, 2023],
-          })
+          }),
         );
       });
     });
@@ -197,7 +205,7 @@ describe("TrendAnalysis", () => {
           expect.objectContaining({
             isMobileViewport: true,
             showLegend: false,
-          })
+          }),
         );
       });
 
@@ -208,7 +216,7 @@ describe("TrendAnalysis", () => {
           expect.objectContaining({
             isMobileViewport: true,
             showLegend: true,
-          })
+          }),
         );
       });
     });
@@ -283,7 +291,9 @@ describe("TrendAnalysis", () => {
   describe("Graph Measure Change", () => {
     it("should change measure when select value changes", async () => {
       const onMeasureChange = vi.fn().mockResolvedValue(Promise.resolve());
-      render(<TrendAnalysis {...defaultProps} onMeasureChange={onMeasureChange} />);
+      render(
+        <TrendAnalysis {...defaultProps} onMeasureChange={onMeasureChange} />,
+      );
 
       const select = screen.getByLabelText("Graph Measure");
       fireEvent.change(select, { target: { value: "max" } });
@@ -309,9 +319,13 @@ describe("TrendAnalysis", () => {
     });
 
     it("should ignore onMeasureChange persistence errors", async () => {
-      const onMeasureChange = vi.fn().mockRejectedValue(new Error("Server error"));
+      const onMeasureChange = vi
+        .fn()
+        .mockRejectedValue(new Error("Server error"));
 
-      render(<TrendAnalysis {...defaultProps} onMeasureChange={onMeasureChange} />);
+      render(
+        <TrendAnalysis {...defaultProps} onMeasureChange={onMeasureChange} />,
+      );
 
       const select = screen.getByLabelText("Graph Measure");
       fireEvent.change(select, { target: { value: "max" } });
@@ -334,7 +348,9 @@ describe("TrendAnalysis", () => {
       fireEvent.change(select, { target: { value: "max" } });
 
       await waitFor(() => {
-        expect(screen.queryByTestId("forecast-controls")).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId("forecast-controls"),
+        ).not.toBeInTheDocument();
       });
     });
   });
@@ -381,7 +397,7 @@ describe("TrendAnalysis", () => {
           {...defaultProps}
           initialForecastEnabled={true}
           initialForecastYearsAhead={20}
-        />
+        />,
       );
 
       await waitFor(() => {
@@ -390,7 +406,9 @@ describe("TrendAnalysis", () => {
     });
 
     it("should ignore forecast preference persistence errors", async () => {
-      vi.mocked(setForecastPreferences).mockRejectedValueOnce(new Error("Cookie write failed"));
+      vi.mocked(setForecastPreferences).mockRejectedValueOnce(
+        new Error("Cookie write failed"),
+      );
 
       render(<TrendAnalysis {...defaultProps} />);
 
@@ -427,7 +445,7 @@ describe("TrendAnalysis", () => {
             trendlinePets: expect.any(Array),
             yearPets: expect.any(Array),
             years: expect.any(Array),
-          })
+          }),
         );
       });
     });
@@ -467,7 +485,9 @@ describe("TrendAnalysis", () => {
 
   describe("Error Handling", () => {
     it("should handle API error gracefully", async () => {
-      vi.mocked(FetchTrendGraphData).mockRejectedValueOnce(new Error("API Error"));
+      vi.mocked(FetchTrendGraphData).mockRejectedValueOnce(
+        new Error("API Error"),
+      );
 
       render(<TrendAnalysis {...defaultProps} />);
 
@@ -482,13 +502,15 @@ describe("TrendAnalysis", () => {
             trendlinePets: [],
             yearPets: [],
             years: [],
-          })
+          }),
         );
       });
     });
 
     it("should clear heat stress on error", async () => {
-      vi.mocked(FetchTrendGraphData).mockRejectedValueOnce(new Error("API Error"));
+      vi.mocked(FetchTrendGraphData).mockRejectedValueOnce(
+        new Error("API Error"),
+      );
 
       render(<TrendAnalysis {...defaultProps} />);
 
@@ -502,7 +524,9 @@ describe("TrendAnalysis", () => {
     });
 
     it("should clear forecast heat stress on error", async () => {
-      vi.mocked(FetchTrendGraphData).mockRejectedValueOnce(new Error("API Error"));
+      vi.mocked(FetchTrendGraphData).mockRejectedValueOnce(
+        new Error("API Error"),
+      );
 
       render(<TrendAnalysis {...defaultProps} />);
 

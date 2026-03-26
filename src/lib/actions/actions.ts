@@ -11,7 +11,10 @@ import {
   RANKINGS_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
 
-export async function setForecastPreferences(forecastEnabled: boolean, forecastYearsAhead: number) {
+export async function setForecastPreferences(
+  forecastEnabled: boolean,
+  forecastYearsAhead: number,
+) {
   const cookieStore = await cookies();
   const expires = new Date(Date.now() + 5 * 60 * 1000);
 
@@ -21,11 +24,15 @@ export async function setForecastPreferences(forecastEnabled: boolean, forecastY
     path: "/",
   });
 
-  cookieStore.set(FORECAST_YEARS_AHEAD_COOKIE_NAME, String(forecastYearsAhead), {
-    expires,
-    httpOnly: true,
-    path: "/",
-  });
+  cookieStore.set(
+    FORECAST_YEARS_AHEAD_COOKIE_NAME,
+    String(forecastYearsAhead),
+    {
+      expires,
+      httpOnly: true,
+      path: "/",
+    },
+  );
 }
 
 export async function setGraphMeasure(measure: string) {

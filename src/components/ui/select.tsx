@@ -56,7 +56,10 @@ const preventInputBlur = (event: React.MouseEvent<HTMLButtonElement>) => {
   event.preventDefault();
 };
 
-const SearchableOptionButton = ({ onSelect, option }: SearchableOptionButtonProperties) => {
+const SearchableOptionButton = ({
+  onSelect,
+  option,
+}: SearchableOptionButtonProperties) => {
   const handleClick = () => {
     onSelect(option.value);
   };
@@ -93,7 +96,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
       w,
       ...properties
     },
-    reference
+    reference,
   ) => {
     const selectId = id ?? React.useId();
     const searchableContainerReference = React.useRef<HTMLDivElement>(null);
@@ -134,7 +137,9 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
           ...group,
           items: group.group.toLowerCase().includes(normalizedSearch)
             ? group.items
-            : group.items.filter((option) => option.label.toLowerCase().includes(normalizedSearch)),
+            : group.items.filter((option) =>
+                option.label.toLowerCase().includes(normalizedSearch),
+              ),
         }))
         .filter((group) => group.items.length > 0);
     }, [data, groupedData, normalizedSearch]);
@@ -148,11 +153,14 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
         return data;
       }
 
-      return data.filter((option) => option.label.toLowerCase().includes(normalizedSearch));
+      return data.filter((option) =>
+        option.label.toLowerCase().includes(normalizedSearch),
+      );
     }, [data, groupedData, normalizedSearch]);
 
     const showClearButton = clearable && value && value !== "";
-    const hasSearchResults = filteredGroupedData.length + filteredUngroupedData.length > 0;
+    const hasSearchResults =
+      filteredGroupedData.length + filteredUngroupedData.length > 0;
 
     React.useEffect(() => {
       if (!searchable || !isDropdownOpen) {
@@ -219,7 +227,10 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
     return (
       <div className={cn("space-y-2", className)} style={{ width: w }}>
         {label && (
-          <label className="text-sm font-medium text-gray-700" htmlFor={selectId}>
+          <label
+            className="text-sm font-medium text-gray-700"
+            htmlFor={selectId}
+          >
             {label}
           </label>
         )}
@@ -232,7 +243,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
                 "w-full rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500",
                 "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none",
                 getSizeClass(size),
-                showClearButton && "pr-8"
+                showClearButton && "pr-8",
               )}
               data-placeholder={placeholder}
               data-searchable="true"
@@ -254,9 +265,13 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
                   setSearchTerm("");
                 }
               }}
-              placeholder={placeholder ?? `Search ${label?.toLowerCase() ?? "options"}...`}
+              placeholder={
+                placeholder ?? `Search ${label?.toLowerCase() ?? "options"}...`
+              }
               type="text"
-              value={isDropdownOpen ? searchTerm : (selectedOption?.label ?? "")}
+              value={
+                isDropdownOpen ? searchTerm : (selectedOption?.label ?? "")
+              }
               {...(properties as unknown as React.InputHTMLAttributes<HTMLInputElement>)}
             />
 
@@ -281,7 +296,11 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
                   strokeWidth={2}
                   viewBox="0 0 24 24"
                 >
-                  <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M6 18L18 6M6 6l12 12"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </button>
             )}
@@ -299,7 +318,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
                 "w-full rounded-md border border-gray-300 bg-white text-gray-900 disabled:cursor-not-allowed disabled:opacity-50",
                 "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none",
                 getSizeClass(size),
-                showClearButton && "pr-8"
+                showClearButton && "pr-8",
               )}
               data-placeholder={placeholder}
               data-searchable={searchable ? "true" : "false"}
@@ -354,7 +373,11 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
                   strokeWidth={2}
                   viewBox="0 0 24 24"
                 >
-                  <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M6 18L18 6M6 6l12 12"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </button>
             )}
@@ -362,7 +385,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProperties>(
         )}
       </div>
     );
-  }
+  },
 );
 
 Select.displayName = "Select";

@@ -10,7 +10,9 @@ type PublicEnvironment = z.infer<typeof publicEnvironmentSchema>;
 
 let cachedPublicEnvironment: PublicEnvironment | undefined;
 
-const formatEnvironmentIssues = (issues: Array<{ message: string; path: PropertyKey[] }>) =>
+const formatEnvironmentIssues = (
+  issues: Array<{ message: string; path: PropertyKey[] }>,
+) =>
   issues
     .map((issue) => {
       const path = issue.path.join(".") || "env";
@@ -30,7 +32,7 @@ export const getPublicEnvironment = (): PublicEnvironment => {
   });
   if (!parsed.success) {
     throw new Error(
-      `Invalid public environment variables: ${formatEnvironmentIssues(parsed.error.issues)}`
+      `Invalid public environment variables: ${formatEnvironmentIssues(parsed.error.issues)}`,
     );
   }
 
@@ -38,4 +40,5 @@ export const getPublicEnvironment = (): PublicEnvironment => {
   return cachedPublicEnvironment;
 };
 
-export const isE2ETestRun = () => getPublicEnvironment().NEXT_PUBLIC_E2E_TEST === "true";
+export const isE2ETestRun = () =>
+  getPublicEnvironment().NEXT_PUBLIC_E2E_TEST === "true";

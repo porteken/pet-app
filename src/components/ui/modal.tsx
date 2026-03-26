@@ -58,7 +58,7 @@ const Modal = memo<ModalProperties>(
               ? "inset-0 h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 overflow-y-auto rounded-none border-0 bg-white p-3 shadow-lg sm:top-1/2 sm:left-1/2 sm:h-auto sm:max-h-[95dvh] sm:w-[calc(100%-2rem)] sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg sm:border sm:border-gray-200 sm:p-4 lg:p-5"
               : "top-1/2 left-1/2 max-h-[86dvh] w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 shadow-lg sm:max-h-[90dvh] sm:w-[calc(100%-2rem)] sm:p-6",
             dialogPositionClass,
-            dialogClassName
+            dialogClassName,
           )}
           onCancel={(event) => {
             event.preventDefault();
@@ -70,7 +70,11 @@ const Modal = memo<ModalProperties>(
           open
         >
           <h2
-            className={title ? "text-base leading-none font-semibold sm:text-lg" : "sr-only"}
+            className={
+              title
+                ? "text-base leading-none font-semibold sm:text-lg"
+                : "sr-only"
+            }
             id={titleId}
           >
             {title ?? "Details"}
@@ -87,7 +91,7 @@ const Modal = memo<ModalProperties>(
         </dialog>
       </div>
     );
-  }
+  },
 );
 
 Modal.displayName = "Modal";

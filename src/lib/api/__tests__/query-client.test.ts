@@ -28,9 +28,21 @@ describe("createQueryClient", () => {
 
 describe("queryKeys", () => {
   it("builds stable trend graph query keys", () => {
-    expect(queryKeys.trendGraph(123, "avg")).toEqual(["trend-graph", 123, "avg"]);
-    expect(queryKeys.trendGraph(123, "avg")).toEqual(["trend-graph", 123, "avg"]);
-    expect(queryKeys.trendGraph(999, "max")).toEqual(["trend-graph", 999, "max"]);
+    expect(queryKeys.trendGraph(123, "avg")).toEqual([
+      "trend-graph",
+      123,
+      "avg",
+    ]);
+    expect(queryKeys.trendGraph(123, "avg")).toEqual([
+      "trend-graph",
+      123,
+      "avg",
+    ]);
+    expect(queryKeys.trendGraph(999, "max")).toEqual([
+      "trend-graph",
+      999,
+      "max",
+    ]);
   });
 });
 
@@ -71,7 +83,9 @@ describe("prefetch/invalidate helpers", () => {
 
   it("prefetchTrendGraphData forwards to queryClient.prefetchQuery", () => {
     const queryClient = createQueryClient();
-    const prefetchSpy = vi.spyOn(queryClient, "prefetchQuery").mockResolvedValue();
+    const prefetchSpy = vi
+      .spyOn(queryClient, "prefetchQuery")
+      .mockResolvedValue();
 
     prefetchTrendGraphData(queryClient, 77, "avg");
 
@@ -83,7 +97,9 @@ describe("prefetch/invalidate helpers", () => {
 
   it("invalidateTrendGraphData forwards to queryClient.invalidateQueries", () => {
     const queryClient = createQueryClient();
-    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries").mockResolvedValue();
+    const invalidateSpy = vi
+      .spyOn(queryClient, "invalidateQueries")
+      .mockResolvedValue();
 
     invalidateTrendGraphData(queryClient);
 

@@ -6,8 +6,15 @@ import React, { useMemo, useState, useTransition } from "react";
 import { Pagination } from "@/components/ui/pagination";
 import { Select } from "@/components/ui/select";
 import { HeaderBar } from "@/features/header-bar";
-import { setRankingsHeatStress, setRankingsState, setRankingsYear } from "@/lib/actions/actions";
-import { getHeatStressInfo, type HeatStressLevel } from "@/lib/utils/heat-stress";
+import {
+  setRankingsHeatStress,
+  setRankingsState,
+  setRankingsYear,
+} from "@/lib/actions/actions";
+import {
+  getHeatStressInfo,
+  type HeatStressLevel,
+} from "@/lib/utils/heat-stress";
 import { LocationOptionSection } from "@/types/types";
 
 const getPetRange = (p10: number, p90: number): string => {
@@ -71,7 +78,13 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
   const [stateFilter, setStateFilter] = useState(initialState);
   const [heatStressFilter, setHeatStressFilter] = useState(initialHeatStress);
 
-  type SortColumn = "avg_pet" | "change" | "city" | "max_pet" | "rank" | "state";
+  type SortColumn =
+    | "avg_pet"
+    | "change"
+    | "city"
+    | "max_pet"
+    | "rank"
+    | "state";
   const [sortColumn, setSortColumn] = useState<SortColumn>("rank");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
@@ -80,12 +93,14 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
 
   const stateOptions = useMemo(() => {
     const filteredByHeatStress = heatStressFilter
-      ? rankings.filter((r) => getHeatStressInfo(r.avg_pet).level === heatStressFilter)
+      ? rankings.filter(
+          (r) => getHeatStressInfo(r.avg_pet).level === heatStressFilter,
+        )
       : rankings;
 
-    const uniqueStates = [...new Set(filteredByHeatStress.map((r) => r.state))].toSorted((a, b) =>
-      a.localeCompare(b)
-    );
+    const uniqueStates = [
+      ...new Set(filteredByHeatStress.map((r) => r.state)),
+    ].toSorted((a, b) => a.localeCompare(b));
     return uniqueStates.map((state) => ({ label: state, value: state }));
   }, [rankings, heatStressFilter]);
 
@@ -94,10 +109,12 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
       ? rankings.filter((r) => r.state === stateFilter)
       : rankings;
 
-    const availableLevels = new Set(filteredByState.map((r) => getHeatStressInfo(r.avg_pet).level));
+    const availableLevels = new Set(
+      filteredByState.map((r) => getHeatStressInfo(r.avg_pet).level),
+    );
 
     return ALL_HEAT_STRESS_LEVELS.filter((option) =>
-      availableLevels.has(option.value as HeatStressLevel)
+      availableLevels.has(option.value as HeatStressLevel),
     );
   }, [rankings, stateFilter]);
 
@@ -217,7 +234,9 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
       <HeaderBar LocationOptions={LocationOptions} />
       <main className="mx-auto max-w-7xl px-4 py-8">
         <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">Cities ranked by Average PET</h1>
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">
+            Cities ranked by Average PET
+          </h1>
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -256,31 +275,47 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-gray-600">
             Showing{" "}
-            {filteredAndSortedRankings.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}-
-            {Math.min(currentPage * itemsPerPage, filteredAndSortedRankings.length)} of{" "}
-            {filteredAndSortedRankings.length} cities
+            {filteredAndSortedRankings.length === 0
+              ? 0
+              : (currentPage - 1) * itemsPerPage + 1}
+            -
+            {Math.min(
+              currentPage * itemsPerPage,
+              filteredAndSortedRankings.length,
+            )}{" "}
+            of {filteredAndSortedRankings.length} cities
             {filteredAndSortedRankings.length !== rankings.length &&
               ` (filtered from ${rankings.length} total)`}
           </div>
           {totalPages > 1 && (
-            <Pagination onChange={setCurrentPage} total={totalPages} value={currentPage} />
+            <Pagination
+              onChange={setCurrentPage}
+              total={totalPages}
+              value={currentPage}
+            />
           )}
         </div>
 
         <div className="flex flex-col gap-6 xl:flex-row">
           <div className="w-full xl:w-64 xl:shrink-0">
             <div className="rounded-lg bg-white p-6 shadow xl:sticky xl:top-4">
-              <h3 className="mb-4 text-lg font-semibold text-gray-900">Heat Stress Levels</h3>
+              <h3 className="mb-4 text-lg font-semibold text-gray-900">
+                Heat Stress Levels
+              </h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <div>
-                    <div className="font-semibold text-green-600">None to Slight</div>
+                    <div className="font-semibold text-green-600">
+                      None to Slight
+                    </div>
                     <div className="text-sm text-gray-600">&lt; 29°C</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div>
-                    <div className="font-semibold text-yellow-600">Moderate</div>
+                    <div className="font-semibold text-yellow-600">
+                      Moderate
+                    </div>
                     <div className="text-sm text-gray-600">29-35°C</div>
                   </div>
                 </div>
@@ -414,12 +449,16 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                             {state}
                           </td>
                           <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            <span className={`font-semibold ${avgheatStressInfo.color}`}>
+                            <span
+                              className={`font-semibold ${avgheatStressInfo.color}`}
+                            >
                               {avg_pet.toFixed(1)}°C
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            <span className={`font-semibold ${maxheatStressInfo.color}`}>
+                            <span
+                              className={`font-semibold ${maxheatStressInfo.color}`}
+                            >
                               {max_pet.toFixed(1)}°C
                             </span>
                           </td>
@@ -430,14 +469,17 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                             {changePerDecade === undefined ? (
                               <span className="text-gray-400">N/A</span>
                             ) : (
-                              <span className={`font-semibold ${color_mapping(changePerDecade)}`}>
+                              <span
+                                className={`font-semibold ${color_mapping(changePerDecade)}`}
+                              >
                                 {changePerDecade > 0 ? "+" : ""}
                                 {changePerDecade.toFixed(1)}°C
                               </span>
                             )}
                           </td>
                           <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            {FutureValueLower !== undefined && FutureValueUpper !== undefined ? (
+                            {FutureValueLower !== undefined &&
+                            FutureValueUpper !== undefined ? (
                               <div>
                                 <span
                                   className={`font-semibold ${
@@ -461,7 +503,7 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                           </td>
                         </tr>
                       );
-                    }
+                    },
                   )}
                 </tbody>
               </table>
@@ -471,7 +513,11 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
 
         {totalPages > 1 && (
           <div className="mt-6 flex justify-center">
-            <Pagination onChange={setCurrentPage} total={totalPages} value={currentPage} />
+            <Pagination
+              onChange={setCurrentPage}
+              total={totalPages}
+              value={currentPage}
+            />
           </div>
         )}
       </main>

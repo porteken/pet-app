@@ -29,7 +29,9 @@ export function validateYearPets(yearPets: number[]): void {
 }
 
 export function validateYears(years: number[]): void {
-  if (years.some((year) => !Number.isInteger(year) || year < 1900 || year > 2100)) {
+  if (
+    years.some((year) => !Number.isInteger(year) || year < 1900 || year > 2100)
+  ) {
     throw new Error("Invalid year data detected");
   }
 }

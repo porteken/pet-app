@@ -1,1 +1,4 @@
-export { GenerateReferenceGraph, GenerateTrendGraph } from "./components/generate-graph";
+export {
+  GenerateReferenceGraph,
+  GenerateTrendGraph,
+} from "./components/generate-graph";

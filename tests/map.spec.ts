@@ -15,14 +15,18 @@ test.describe("Map Page", () => {
     await expect(marker).toBeVisible({ timeout: 10_000 });
   });
 
-  test("should open modal with details when a marker is clicked", async ({ page }) => {
+  test("should open modal with details when a marker is clicked", async ({
+    page,
+  }) => {
     await gotoAndWaitForMapPage(page, "/map");
     const { modal, viewDetailsButton } = await openLocationDetailsModal(page);
     await expect(modal).toBeVisible();
     await expect(viewDetailsButton).toBeVisible();
   });
 
-  test("should navigate to selected location from map modal", async ({ page }) => {
+  test("should navigate to selected location from map modal", async ({
+    page,
+  }) => {
     await navigateToLocationDetailsFromMap(page, "/map");
     await expect(page.getByText("Trend Analysis")).toBeVisible();
   });

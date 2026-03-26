@@ -43,8 +43,11 @@ export const buildTrendAnalysisResult = async ({
   const trendDataPromise = fetchTrendGraphData();
   const forecastDataPromise = enableForecast ? fetchForecastData() : undefined;
 
-  const { increase_per_year, trendline_pets, year_pets, years } = await trendDataPromise;
-  const forecastData = forecastDataPromise ? await forecastDataPromise : undefined;
+  const { increase_per_year, trendline_pets, year_pets, years } =
+    await trendDataPromise;
+  const forecastData = forecastDataPromise
+    ? await forecastDataPromise
+    : undefined;
 
   if (years.length === 0 || year_pets.length === 0) {
     return {
@@ -89,14 +92,18 @@ export const buildTrendAnalysisResult = async ({
         finalForecastValue,
         finalForecastYear,
         finalLowerBound10,
-        finalUpperBound90
+        finalUpperBound90,
       );
     }
   }
 
   return {
     forecastHeatStress,
-    heatStressDescription: getHeatStressDescription(currentPetValue, option, currentYear),
+    heatStressDescription: getHeatStressDescription(
+      currentPetValue,
+      option,
+      currentYear,
+    ),
     snapshot: {
       forecastData,
       increase_per_year,

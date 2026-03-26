@@ -81,7 +81,7 @@ describe("HeaderBar", () => {
       expect(githubLink).toBeInTheDocument();
       expect(githubLink.closest("a")).toHaveAttribute(
         "href",
-        "https://github.com/porteken/pet-app"
+        "https://github.com/porteken/pet-app",
       );
     });
 
@@ -210,7 +210,7 @@ describe("HeaderBar", () => {
       render(<HeaderBar id={1} LocationOptions={mockLocationOptions} />);
       expect(screen.getByTestId("city-selector")).toHaveAttribute(
         "data-placeholder",
-        "Change City"
+        "Change City",
       );
 
       render(<HeaderBar id={-1} LocationOptions={mockLocationOptions} />);
@@ -230,7 +230,9 @@ describe("HeaderBar", () => {
     });
 
     it("should handle ID with no current city gracefully", () => {
-      render(<HeaderBar id={undefined} LocationOptions={mockLocationOptions} />);
+      render(
+        <HeaderBar id={undefined} LocationOptions={mockLocationOptions} />,
+      );
       expect(screen.getByTestId("city-selector")).toBeInTheDocument();
     });
 

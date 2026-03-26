@@ -49,17 +49,25 @@ describe("NavButtons", () => {
 
     expect(screen.getByText("Map")).toBeInTheDocument();
     expect(screen.getByText("About")).toBeInTheDocument();
-    expect(screen.getByLabelText("View source code on GitHub")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("View source code on GitHub"),
+    ).toBeInTheDocument();
   });
 
   it("should render buttons with correct links", () => {
     render(<NavButtons buildUrl={mockBuildUrl} />);
 
-    expect(screen.getByLabelText("Navigate to map view")).toHaveAttribute("href", "/");
-    expect(screen.getByLabelText("Navigate to about page")).toHaveAttribute("href", "/about");
+    expect(screen.getByLabelText("Navigate to map view")).toHaveAttribute(
+      "href",
+      "/",
+    );
+    expect(screen.getByLabelText("Navigate to about page")).toHaveAttribute(
+      "href",
+      "/about",
+    );
     expect(screen.getByLabelText("View source code on GitHub")).toHaveAttribute(
       "href",
-      "https://github.com/porteken/pet-app"
+      "https://github.com/porteken/pet-app",
     );
   });
 
@@ -67,7 +75,10 @@ describe("NavButtons", () => {
     mockBuildUrl.mockReturnValueOnce("/with-params");
     render(<NavButtons buildUrl={mockBuildUrl} />);
 
-    expect(screen.getByLabelText("Navigate to map view")).toHaveAttribute("href", "/with-params");
+    expect(screen.getByLabelText("Navigate to map view")).toHaveAttribute(
+      "href",
+      "/with-params",
+    );
     expect(mockBuildUrl).toHaveBeenCalledWith("/");
   });
 });

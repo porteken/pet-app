@@ -12,7 +12,9 @@ const {
   mockGetForecastPreferencesFromCookies: vi.fn(),
   mockGetGraphMeasureFromCookies: vi.fn(),
   mockGetLocationData: vi.fn(),
-  mockHome: vi.fn((_properties?: any) => <div data-testid="home-component">Home Component</div>),
+  mockHome: vi.fn((_properties?: any) => (
+    <div data-testid="home-component">Home Component</div>
+  )),
   mockLocationErrorHandler: vi.fn((_properties?: any) => (
     <div data-testid="error-handler">Error Handler</div>
   )),
@@ -140,7 +142,9 @@ describe("Page Component", () => {
 
     render(await Page());
 
-    expect(mockGetGraphMeasureFromCookies).toHaveBeenCalledBefore(mockGetLocationData as any);
+    expect(mockGetGraphMeasureFromCookies).toHaveBeenCalledBefore(
+      mockGetLocationData as any,
+    );
     expect(mockGetGraphMeasureFromCookies).toHaveBeenCalledTimes(1);
     expect(mockGetForecastPreferencesFromCookies).toHaveBeenCalledTimes(1);
     expect(mockGetLocationData).toHaveBeenCalledTimes(1);

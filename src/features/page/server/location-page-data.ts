@@ -62,34 +62,39 @@ const parseLocationId = (id: string): number | undefined => {
   return locationId;
 };
 
-const getPreferencesFromCookies = async (): Promise<LocationPagePreferences> => {
-  const cookieStore = await cookies();
-  const initialGraphMeasure =
-    cookieStore.get(GRAPH_MEASURE_COOKIE_NAME)?.value || DEFAULT_GRAPH_MEASURE;
-  const initialForecastEnabled =
-    cookieStore.get(FORECAST_ENABLED_COOKIE_NAME)?.value === "true"
-      ? true
-      : DEFAULT_FORECAST_ENABLED;
+const getPreferencesFromCookies =
+  async (): Promise<LocationPagePreferences> => {
+    const cookieStore = await cookies();
+    const initialGraphMeasure =
+      cookieStore.get(GRAPH_MEASURE_COOKIE_NAME)?.value ||
+      DEFAULT_GRAPH_MEASURE;
+    const initialForecastEnabled =
+      cookieStore.get(FORECAST_ENABLED_COOKIE_NAME)?.value === "true"
+        ? true
+        : DEFAULT_FORECAST_ENABLED;
 
-  const rawForecastYearsAhead = Number(cookieStore.get(FORECAST_YEARS_AHEAD_COOKIE_NAME)?.value);
-  const initialForecastYearsAhead =
-    Number.isInteger(rawForecastYearsAhead) &&
-    rawForecastYearsAhead >= MIN_FORECAST_YEARS_AHEAD &&
-    rawForecastYearsAhead <= MAX_FORECAST_YEARS_AHEAD
-      ? rawForecastYearsAhead
-      : DEFAULT_FORECAST_YEARS_AHEAD;
+    const rawForecastYearsAhead = Number(
+      cookieStore.get(FORECAST_YEARS_AHEAD_COOKIE_NAME)?.value,
+    );
+    const initialForecastYearsAhead =
+      Number.isInteger(rawForecastYearsAhead) &&
+      rawForecastYearsAhead >= MIN_FORECAST_YEARS_AHEAD &&
+      rawForecastYearsAhead <= MAX_FORECAST_YEARS_AHEAD
+        ? rawForecastYearsAhead
+        : DEFAULT_FORECAST_YEARS_AHEAD;
 
-  return {
-    initialForecastEnabled,
-    initialForecastYearsAhead,
-    initialGraphMeasure,
+    return {
+      initialForecastEnabled,
+      initialForecastYearsAhead,
+      initialGraphMeasure,
+    };
   };
-};
 
 const fetchGraphData = async (locationId: number): Promise<GraphData> => {
   const trendData = await FetchTrendGraphData("avg", locationId);
 
-  const latestYear = trendData.years.length > 0 ? String(trendData.years.at(-1)) : "2024";
+  const latestYear =
+    trendData.years.length > 0 ? String(trendData.years.at(-1)) : "2024";
 
   const [currentData, referenceData] = await Promise.all([
     FetchReferenceGraphData(latestYear, locationId),
@@ -126,7 +131,7 @@ const fetchLocationData = async (): Promise<
 
 const createDatabaseError = (
   title = "Database Connection Error",
-  message = "Unable to connect to the database. Please try again later."
+  message = "Unable to connect to the database. Please try again later.",
 ): LocationPageError => ({
   message,
   title,
@@ -134,14 +139,14 @@ const createDatabaseError = (
 
 const createInvalidLocationError = (
   title = "Invalid location ID",
-  message = "The provided location ID is not valid."
+  message = "The provided location ID is not valid.",
 ): LocationPageError => ({
   message,
   title,
 });
 
 export const loadLocationPageData = async (
-  rawLocationId: string
+  rawLocationId: string,
 ): Promise<LocationPageLoadResult> => {
   const locationId = parseLocationId(rawLocationId);
   if (!locationId) {
@@ -166,18 +171,20 @@ export const loadLocationPageData = async (
     return {
       payload: createDatabaseError(
         "No Data Available",
-        "Location data could not be loaded. The database may be temporarily unavailable."
+        "Location data could not be loaded. The database may be temporarily unavailable.",
       ),
       status: "database-error",
     };
   }
 
-  const selectedLocation = locations.find((location) => location.location_id === locationId);
+  const selectedLocation = locations.find(
+    (location) => location.location_id === locationId,
+  );
   if (!selectedLocation) {
     return {
       payload: createInvalidLocationError(
         "Location not found",
-        "The requested location could not be found."
+        "The requested location could not be found.",
       ),
       status: "invalid-location",
     };

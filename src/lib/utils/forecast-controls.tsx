@@ -31,7 +31,10 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
 
       {enabled && (
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700" htmlFor="forecast-years">
+          <label
+            className="block text-sm font-medium text-gray-700"
+            htmlFor="forecast-years"
+          >
             Forecast {yearsAhead} year{yearsAhead === 1 ? "" : "s"} ahead
           </label>
           <input

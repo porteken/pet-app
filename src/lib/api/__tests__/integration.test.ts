@@ -46,27 +46,31 @@ describe("API Integration Tests", () => {
       const serverError = new Error("Server connection failed");
       vi.mocked(FetchTrendGraphData).mockRejectedValue(serverError);
 
-      await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow("Server connection failed");
+      await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
+        "Server connection failed",
+      );
     });
 
     it("should validate data consistency between client and server", async () => {
       const invalidLocationId = -1;
 
-      vi.mocked(FetchTrendGraphData).mockImplementation((_option, locationId) => {
-        if (locationId <= 0) {
-          return Promise.reject(new Error("Invalid location ID"));
-        }
-        return Promise.resolve({
-          increase_per_year: 0,
-          trendline_pets: [],
-          year_pets: [],
-          years: [],
-        });
-      });
-
-      await expect(FetchTrendGraphData("avg", invalidLocationId)).rejects.toThrow(
-        "Invalid location ID"
+      vi.mocked(FetchTrendGraphData).mockImplementation(
+        (_option, locationId) => {
+          if (locationId <= 0) {
+            return Promise.reject(new Error("Invalid location ID"));
+          }
+          return Promise.resolve({
+            increase_per_year: 0,
+            trendline_pets: [],
+            year_pets: [],
+            years: [],
+          });
+        },
       );
+
+      await expect(
+        FetchTrendGraphData("avg", invalidLocationId),
+      ).rejects.toThrow("Invalid location ID");
     });
   });
 });

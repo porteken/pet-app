@@ -3,7 +3,9 @@ import { expect, test } from "@playwright/test";
 const MARKER_SELECTOR = ".pet-map-marker-icon, .leaflet-marker-icon";
 
 test.describe("Accessibility", () => {
-  test("keyboard navigation: complete user journey using only keyboard", async ({ page }) => {
+  test("keyboard navigation: complete user journey using only keyboard", async ({
+    page,
+  }) => {
     await page.goto("/");
 
     await page.keyboard.press("Tab");
@@ -28,7 +30,9 @@ test.describe("Accessibility", () => {
     });
   });
 
-  test("screen reader compatibility: proper ARIA labels and semantics", async ({ page }) => {
+  test("screen reader compatibility: proper ARIA labels and semantics", async ({
+    page,
+  }) => {
     await page.goto("/1");
 
     const mainHeading = page.getByRole("heading", { level: 1 });
@@ -55,7 +59,9 @@ test.describe("Accessibility", () => {
     await expect(nav).toBeVisible();
   });
 
-  test("high contrast mode: UI remains usable with high contrast", async ({ page }) => {
+  test("high contrast mode: UI remains usable with high contrast", async ({
+    page,
+  }) => {
     await page.emulateMedia({ colorScheme: "dark" });
 
     await page.goto("/1");
@@ -71,7 +77,9 @@ test.describe("Accessibility", () => {
     await expect(focused).toBeVisible();
   });
 
-  test("reduced motion: animations respect user preferences", async ({ page }) => {
+  test("reduced motion: animations respect user preferences", async ({
+    page,
+  }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
 
     await page.goto("/");
@@ -98,7 +106,9 @@ test.describe("Accessibility", () => {
     });
   });
 
-  test("responsive zoom: content remains usable at 200% zoom", async ({ page }) => {
+  test("responsive zoom: content remains usable at 200% zoom", async ({
+    page,
+  }) => {
     await page.goto("/1");
 
     await page.setViewportSize({ height: 600, width: 800 });
@@ -116,7 +126,9 @@ test.describe("Accessibility", () => {
       timeout: 10_000,
     });
 
-    const bodyScrollWidth = await page.evaluate(() => document.body.scrollWidth);
+    const bodyScrollWidth = await page.evaluate(
+      () => document.body.scrollWidth,
+    );
     const viewportWidth = await page.evaluate(() => window.innerWidth);
 
     expect(bodyScrollWidth).toBeLessThan(viewportWidth + 50);
@@ -142,7 +154,9 @@ test.describe("Accessibility", () => {
     await expect(selectElement).toBeVisible();
   });
 
-  test("mobile accessibility: touch targets and screen reader on mobile", async ({ page }) => {
+  test("mobile accessibility: touch targets and screen reader on mobile", async ({
+    page,
+  }) => {
     await page.setViewportSize({ height: 667, width: 375 });
 
     await page.goto("/1");

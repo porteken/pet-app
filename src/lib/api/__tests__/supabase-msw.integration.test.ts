@@ -24,10 +24,14 @@ describe("Supabase MSW integration", () => {
   it("fails with a validation error when MSW returns malformed trend data", async () => {
     server.use(
       http.get("*/rest/v1/pet_year_avg", () =>
-        HttpResponse.json([{ location_id: 1, pet: "not-a-number", year: 2025 }])
-      )
+        HttpResponse.json([
+          { location_id: 1, pet: "not-a-number", year: 2025 },
+        ]),
+      ),
     );
 
-    await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow("response validation failed");
+    await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
+      "response validation failed",
+    );
   });
 });

@@ -11,7 +11,11 @@ vi.mock("@/lib/api/fetch-client", () => ({
 
 vi.mock("@/lib/api/query-client", () => ({
   queryKeys: {
-    trendGraph: (locationId: number, option: string) => ["trend-graph", locationId, option],
+    trendGraph: (locationId: number, option: string) => [
+      "trend-graph",
+      locationId,
+      option,
+    ],
   },
 }));
 
@@ -43,18 +47,24 @@ describe("useTrendGraphData", () => {
   });
 
   it("does not fetch when locationId is undefined", () => {
-    const { result } = renderHook(() => useTrendGraphData(undefined, "temperature"), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useTrendGraphData(undefined, "temperature"),
+      {
+        wrapper: createWrapper(),
+      },
+    );
 
     expect(result.current.isFetching).toBe(false);
     expect(mockFetchTrendGraphData).not.toHaveBeenCalled();
   });
 
   it("does not fetch when enabled is false", () => {
-    const { result } = renderHook(() => useTrendGraphData(123, "temperature", false), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useTrendGraphData(123, "temperature", false),
+      {
+        wrapper: createWrapper(),
+      },
+    );
 
     expect(result.current.isFetching).toBe(false);
     expect(mockFetchTrendGraphData).not.toHaveBeenCalled();
@@ -64,9 +74,12 @@ describe("useTrendGraphData", () => {
     const mockData = { data: "test data" };
     mockFetchTrendGraphData.mockResolvedValue(mockData);
 
-    const { result } = renderHook(() => useTrendGraphData(123, "temperature", true), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useTrendGraphData(123, "temperature", true),
+      {
+        wrapper: createWrapper(),
+      },
+    );
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -119,7 +132,7 @@ describe("useTrendGraphData", () => {
       {
         initialProps: { locationId: 123 },
         wrapper: createWrapper(),
-      }
+      },
     );
 
     await waitFor(() => {
@@ -134,8 +147,16 @@ describe("useTrendGraphData", () => {
       expect(result.current.data).toEqual(mockData2);
     });
 
-    expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(1, "temperature", 123);
-    expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(2, "temperature", 456);
+    expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(
+      1,
+      "temperature",
+      123,
+    );
+    expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(
+      2,
+      "temperature",
+      456,
+    );
   });
 
   it("updates when option changes", async () => {
@@ -145,10 +166,13 @@ describe("useTrendGraphData", () => {
     mockFetchTrendGraphData.mockResolvedValueOnce(mockData1);
     mockFetchTrendGraphData.mockResolvedValueOnce(mockData2);
 
-    const { rerender, result } = renderHook(({ option }) => useTrendGraphData(123, option), {
-      initialProps: { option: "temperature" },
-      wrapper: createWrapper(),
-    });
+    const { rerender, result } = renderHook(
+      ({ option }) => useTrendGraphData(123, option),
+      {
+        initialProps: { option: "temperature" },
+        wrapper: createWrapper(),
+      },
+    );
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -162,7 +186,11 @@ describe("useTrendGraphData", () => {
       expect(result.current.data).toEqual(mockData2);
     });
 
-    expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(1, "temperature", 123);
+    expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(
+      1,
+      "temperature",
+      123,
+    );
     expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(2, "humidity", 123);
   });
 
@@ -183,7 +211,7 @@ describe("useTrendGraphData", () => {
       {
         initialProps: { enabled: false },
         wrapper: createWrapper(),
-      }
+      },
     );
 
     expect(result.current.isFetching).toBe(false);

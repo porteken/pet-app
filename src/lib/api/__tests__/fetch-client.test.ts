@@ -13,7 +13,7 @@ describe("FetchTrendGraphData", () => {
     Reflect.deleteProperty(globalThis, "window");
 
     await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
-      "FetchTrendGraphData can only be called in browser environment"
+      "FetchTrendGraphData can only be called in browser environment",
     );
 
     globalThis.window = originalWindow;
@@ -21,7 +21,9 @@ describe("FetchTrendGraphData", () => {
   let mockSupabaseClient: ReturnType<
     (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
   >;
-  let mockValidation: ReturnType<(typeof import("@/testing/mocks"))["createMockValidation"]>;
+  let mockValidation: ReturnType<
+    (typeof import("@/testing/mocks"))["createMockValidation"]
+  >;
   let mockLinearRegression: ReturnType<typeof createMockLinearRegression>;
 
   beforeEach(async () => {
@@ -32,17 +34,20 @@ describe("FetchTrendGraphData", () => {
     mockValidation = setup.mockValidation;
 
     mockLinearRegression = createMockLinearRegression();
-    const { SimpleLinearRegression } = await import("@/lib/utils/simple-linear-regression");
-    vi.mocked(SimpleLinearRegression).mockImplementation(function MockSimpleLinearRegression() {
-      return mockLinearRegression as any;
-    });
+    const { SimpleLinearRegression } =
+      await import("@/lib/utils/simple-linear-regression");
+    vi.mocked(SimpleLinearRegression).mockImplementation(
+      function MockSimpleLinearRegression() {
+        return mockLinearRegression as any;
+      },
+    );
   });
 
   it("should throw FetchError for invalid trend option", async () => {
     mockValidation.validateTrendOption.mockReturnValue(false);
 
     await expect(FetchTrendGraphData("invalid", 1)).rejects.toThrow(
-      new FetchError("Invalid trend option. Must be 'avg' or 'max'")
+      new FetchError("Invalid trend option. Must be 'avg' or 'max'"),
     );
   });
 
@@ -50,7 +55,7 @@ describe("FetchTrendGraphData", () => {
     mockValidation.validateLocationId.mockReturnValue(false);
 
     await expect(FetchTrendGraphData("avg", -1)).rejects.toThrow(
-      new FetchError("Invalid location ID: -1")
+      new FetchError("Invalid location ID: -1"),
     );
   });
 
@@ -67,7 +72,9 @@ describe("FetchTrendGraphData", () => {
     };
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
-    mockLinearRegression.predict.mockImplementation((year: number) => year * 0.7 + 24);
+    mockLinearRegression.predict.mockImplementation(
+      (year: number) => year * 0.7 + 24,
+    );
 
     const result = await FetchTrendGraphData("avg", 1);
 
@@ -95,7 +102,9 @@ describe("FetchTrendGraphData", () => {
     };
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
-    mockLinearRegression.predict.mockImplementation((year: number) => year * 0.7 + 29);
+    mockLinearRegression.predict.mockImplementation(
+      (year: number) => year * 0.7 + 29,
+    );
 
     const result = await FetchTrendGraphData("max", 1);
 
@@ -134,7 +143,7 @@ describe("FetchTrendGraphData", () => {
     mockSupabaseClient.from.mockReturnValue(mockQuery);
 
     await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
-      "Database error fetching trend data"
+      "Database error fetching trend data",
     );
   });
 
@@ -152,7 +161,9 @@ describe("FetchTrendGraphData", () => {
       throw new FetchError("Invalid pet data");
     });
 
-    await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow("Invalid pet data");
+    await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
+      "Invalid pet data",
+    );
   });
 
   it("should handle unexpected errors", async () => {
@@ -171,7 +182,7 @@ describe("FetchTrendGraphData", () => {
     });
 
     await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
-      "Failed to fetch trend graph data for location 1 (avg): Regression calculation failed"
+      "Failed to fetch trend graph data for location 1 (avg): Regression calculation failed",
     );
   });
 
@@ -197,7 +208,9 @@ describe("FetchForecastData", () => {
   let mockSupabaseClient: ReturnType<
     (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
   >;
-  let mockValidation: ReturnType<(typeof import("@/testing/mocks"))["createMockValidation"]>;
+  let mockValidation: ReturnType<
+    (typeof import("@/testing/mocks"))["createMockValidation"]
+  >;
 
   beforeEach(async () => {
     clearAllMocks();
@@ -213,7 +226,7 @@ describe("FetchForecastData", () => {
     Reflect.deleteProperty(globalThis, "window");
 
     await expect(FetchForecastData(1, 10)).rejects.toThrow(
-      "FetchForecastData can only be called in browser environment"
+      "FetchForecastData can only be called in browser environment",
     );
 
     globalThis.window = originalWindow;
@@ -223,7 +236,7 @@ describe("FetchForecastData", () => {
     mockValidation.validateLocationId.mockReturnValue(false);
 
     await expect(FetchForecastData(-1, 10)).rejects.toThrow(
-      new FetchError("Invalid location ID: -1")
+      new FetchError("Invalid location ID: -1"),
     );
   });
 
@@ -245,7 +258,9 @@ describe("FetchForecastData", () => {
       eq: vi.fn().mockReturnThis(),
       gt: vi.fn().mockReturnThis(),
       lte: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: mockForecastData, error: undefined }),
+      order: vi
+        .fn()
+        .mockResolvedValue({ data: mockForecastData, error: undefined }),
       select: vi.fn().mockReturnThis(),
     };
 
@@ -331,7 +346,9 @@ describe("FetchForecastData", () => {
       .mockReturnValueOnce(mockHistoricalQuery)
       .mockReturnValueOnce(mockForecastQuery);
 
-    await expect(FetchForecastData(1, 10)).rejects.toThrow("Database error fetching forecast data");
+    await expect(FetchForecastData(1, 10)).rejects.toThrow(
+      "Database error fetching forecast data",
+    );
   });
 
   it("should calculate correct target year based on yearsAhead", async () => {
@@ -352,7 +369,9 @@ describe("FetchForecastData", () => {
       eq: vi.fn().mockReturnThis(),
       gt: vi.fn().mockReturnThis(),
       lte: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: mockForecastData, error: undefined }),
+      order: vi
+        .fn()
+        .mockResolvedValue({ data: mockForecastData, error: undefined }),
       select: vi.fn().mockReturnThis(),
     };
 
@@ -368,7 +387,9 @@ describe("FetchForecastData", () => {
 
   it("should convert pet, lower, and upper values to numbers", async () => {
     const mockHistoricalData = [{ year: 2025 }];
-    const mockForecastData = [{ lower: "28.5", pet: "30.5", upper: "32.5", year: 2026 }];
+    const mockForecastData = [
+      { lower: "28.5", pet: "30.5", upper: "32.5", year: 2026 },
+    ];
 
     const mockHistoricalQuery = {
       eq: vi.fn().mockReturnThis(),
@@ -381,7 +402,9 @@ describe("FetchForecastData", () => {
       eq: vi.fn().mockReturnThis(),
       gt: vi.fn().mockReturnThis(),
       lte: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: mockForecastData, error: undefined }),
+      order: vi
+        .fn()
+        .mockResolvedValue({ data: mockForecastData, error: undefined }),
       select: vi.fn().mockReturnThis(),
     };
 

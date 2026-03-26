@@ -5,11 +5,13 @@ const { mockAbout, mockDatabaseError, mockFetchLocations } = vi.hoisted(() => ({
   mockAbout: vi.fn(({ LocationOptions }: { LocationOptions: unknown[] }) => (
     <div data-count={LocationOptions.length} data-testid="about-page" />
   )),
-  mockDatabaseError: vi.fn(({ message, title }: { message: string; title: string }) => (
-    <div data-testid="database-error">
-      {title}:{message}
-    </div>
-  )),
+  mockDatabaseError: vi.fn(
+    ({ message, title }: { message: string; title: string }) => (
+      <div data-testid="database-error">
+        {title}:{message}
+      </div>
+    ),
+  ),
   mockFetchLocations: vi.fn(),
 }));
 
@@ -55,7 +57,7 @@ describe("about page", () => {
       {
         LocationOptions: locationOptions,
       },
-      undefined
+      undefined,
     );
   });
 
@@ -65,7 +67,7 @@ describe("about page", () => {
     render(await Page());
 
     expect(screen.getByTestId("database-error")).toHaveTextContent(
-      "Database Connection Error:Unable to connect to the database. Please try again later."
+      "Database Connection Error:Unable to connect to the database. Please try again later.",
     );
     expect(mockAbout).not.toHaveBeenCalled();
   });

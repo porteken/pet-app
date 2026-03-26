@@ -9,10 +9,12 @@ describe("InvalidLocationError", () => {
       <InvalidLocationError
         message="The requested location could not be found."
         title="Location not found"
-      />
+      />,
     );
 
     expect(screen.getByText("Location not found")).toBeInTheDocument();
-    expect(screen.getByText("The requested location could not be found.")).toBeInTheDocument();
+    expect(
+      screen.getByText("The requested location could not be found."),
+    ).toBeInTheDocument();
   });
 });

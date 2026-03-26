@@ -3,7 +3,10 @@ interface InvalidLocationErrorProperties {
   readonly title: string;
 }
 
-export const InvalidLocationError = ({ message, title }: InvalidLocationErrorProperties) => {
+export const InvalidLocationError = ({
+  message,
+  title,
+}: InvalidLocationErrorProperties) => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="text-center">

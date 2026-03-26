@@ -1,6 +1,8 @@
 import { z, ZodError } from "zod";
 
-const finiteNumberSchema = z.coerce.number().refine(Number.isFinite, "Expected a finite number");
+const finiteNumberSchema = z.coerce
+  .number()
+  .refine(Number.isFinite, "Expected a finite number");
 const positiveIntegerSchema = z.coerce.number().int().positive();
 const yearSchema = z.coerce.number().int().min(1900).max(2200);
 
@@ -72,7 +74,10 @@ const rankingChangeRowSchema = z.object({
 const formatIssuePath = (issuePath: PropertyKey[]) =>
   issuePath.length === 0 ? "response" : issuePath.join(".");
 
-export const formatSchemaValidationError = (resource: string, error: ZodError) => {
+export const formatSchemaValidationError = (
+  resource: string,
+  error: ZodError,
+) => {
   const issue = error.issues[0];
 
   if (!issue) {
@@ -80,23 +85,27 @@ export const formatSchemaValidationError = (resource: string, error: ZodError) =
   }
 
   return `${resource} response validation failed at ${formatIssuePath(
-    issue.path
+    issue.path,
   )}: ${issue.message}`;
 };
 
-export const parseTrendGraphRows = (rows: unknown) => z.array(trendGraphRowSchema).parse(rows);
+export const parseTrendGraphRows = (rows: unknown) =>
+  z.array(trendGraphRowSchema).parse(rows);
 
 export const parseReferenceGraphRows = (rows: unknown) =>
   z.array(referenceGraphRowSchema).parse(rows);
 
-export const parseForecastRows = (rows: unknown) => z.array(forecastRowSchema).parse(rows);
+export const parseForecastRows = (rows: unknown) =>
+  z.array(forecastRowSchema).parse(rows);
 
 export const parseHistoricalYearRows = (rows: unknown) =>
   z.array(historicalYearRowSchema).parse(rows);
 
-export const parseLocationRows = (rows: unknown) => z.array(locationRowSchema).parse(rows);
+export const parseLocationRows = (rows: unknown) =>
+  z.array(locationRowSchema).parse(rows);
 
-export const parseRankingPetRows = (rows: unknown) => z.array(rankingPetRowSchema).parse(rows);
+export const parseRankingPetRows = (rows: unknown) =>
+  z.array(rankingPetRowSchema).parse(rows);
 
 export const parseRankingLocationRows = (rows: unknown) =>
   z.array(rankingLocationRowSchema).parse(rows);

@@ -4,13 +4,21 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/features/graph", () => ({
-  GenerateReferenceGraph: vi.fn().mockImplementation(() => <div data-testid="reference-graph" />),
-  GenerateTrendGraph: vi.fn().mockImplementation(() => <div data-testid="trend-graph" />),
+  GenerateReferenceGraph: vi
+    .fn()
+    .mockImplementation(() => <div data-testid="reference-graph" />),
+  GenerateTrendGraph: vi
+    .fn()
+    .mockImplementation(() => <div data-testid="trend-graph" />),
 }));
 
 vi.mock("@/features/header-bar", () => ({
   HeaderBar: vi.fn(({ id, LocationOptions }) => (
-    <header data-id={id} data-options={JSON.stringify(LocationOptions)} data-testid="header-bar" />
+    <header
+      data-id={id}
+      data-options={JSON.stringify(LocationOptions)}
+      data-testid="header-bar"
+    />
   )),
 }));
 
@@ -147,7 +155,7 @@ describe("PageMain", () => {
           trendlinePets: [5, 10, 15],
           yearPets: [7, 12, 17],
           years: [2020, 2021, 2022],
-        })
+        }),
       );
     });
 

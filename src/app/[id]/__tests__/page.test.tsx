@@ -1,23 +1,31 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockDatabaseError, mockInvalidLocationError, mockLoadLocationPageData, mockPage } =
-  vi.hoisted(() => ({
-    mockDatabaseError: vi.fn(({ message, title }: { message: string; title: string }) => (
+const {
+  mockDatabaseError,
+  mockInvalidLocationError,
+  mockLoadLocationPageData,
+  mockPage,
+} = vi.hoisted(() => ({
+  mockDatabaseError: vi.fn(
+    ({ message, title }: { message: string; title: string }) => (
       <div data-testid="database-error">
         {title}:{message}
       </div>
-    )),
-    mockInvalidLocationError: vi.fn(({ message, title }: { message: string; title: string }) => (
+    ),
+  ),
+  mockInvalidLocationError: vi.fn(
+    ({ message, title }: { message: string; title: string }) => (
       <div data-testid="invalid-location-error">
         {title}:{message}
       </div>
-    )),
-    mockLoadLocationPageData: vi.fn(),
-    mockPage: vi.fn((_properties?: unknown) => (
-      <div data-testid="location-page">Location Page</div>
-    )),
-  }));
+    ),
+  ),
+  mockLoadLocationPageData: vi.fn(),
+  mockPage: vi.fn((_properties?: unknown) => (
+    <div data-testid="location-page">Location Page</div>
+  )),
+}));
 
 vi.mock("@/components/app/database-error", () => ({
   DatabaseError: mockDatabaseError,
@@ -92,7 +100,7 @@ describe("location route page", () => {
     render(await LocationPage({ params: Promise.resolve({ id: "7" }) }));
 
     expect(screen.getByTestId("database-error")).toHaveTextContent(
-      "Database Connection Error:Unable to connect"
+      "Database Connection Error:Unable to connect",
     );
     expect(mockPage).not.toHaveBeenCalled();
   });
@@ -109,7 +117,7 @@ describe("location route page", () => {
     render(await LocationPage({ params: Promise.resolve({ id: "404" }) }));
 
     expect(screen.getByTestId("invalid-location-error")).toHaveTextContent(
-      "Location not found:Missing location"
+      "Location not found:Missing location",
     );
     expect(mockPage).not.toHaveBeenCalled();
   });

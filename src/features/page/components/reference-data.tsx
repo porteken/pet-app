@@ -27,8 +27,12 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   ReferencePets,
 }) => {
   const DEFAULT_REFERENCE_YEAR = "2000";
-  const [selectedReferenceYear, setSelectedReferenceYear] = React.useState(DEFAULT_REFERENCE_YEAR);
-  const [referenceGraph, setReferenceGraph] = React.useState<React.ReactElement | undefined>();
+  const [selectedReferenceYear, setSelectedReferenceYear] = React.useState(
+    DEFAULT_REFERENCE_YEAR,
+  );
+  const [referenceGraph, setReferenceGraph] = React.useState<
+    React.ReactElement | undefined
+  >();
   const [referenceGraphSnapshot, setReferenceGraphSnapshot] =
     React.useState<ReferenceGraphSnapshot>();
   const [isMobileViewport, setIsMobileViewport] = React.useState(() => {
@@ -70,7 +74,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
       const { dates, pets } = referenceData;
       setReferenceGraphSnapshot({ dates, pets, year });
     },
-    [CurrentDates, ReferencePets, id]
+    [CurrentDates, ReferencePets, id],
   );
 
   const handleReferenceYearChange = React.useCallback(
@@ -79,7 +83,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
       setIsMobileLegendOpen(false);
       setSelectedReferenceYear(year);
     },
-    []
+    [],
   );
 
   React.useEffect(() => {
@@ -99,7 +103,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
         referenceGraphSnapshot.pets,
         CurrentPets,
         showReferenceLegend,
-        isMobileViewport
+        isMobileViewport,
       );
 
       if (!isCancelled) {
@@ -112,14 +116,24 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
     return () => {
       isCancelled = true;
     };
-  }, [CurrentPets, isMobileViewport, referenceGraphSnapshot, showReferenceLegend]);
+  }, [
+    CurrentPets,
+    isMobileViewport,
+    referenceGraphSnapshot,
+    showReferenceLegend,
+  ]);
 
   return (
     <div className="h-full">
       <div className="flex h-full flex-col rounded-lg bg-white p-3 shadow-md sm:p-6">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">Reference Data</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">
+          Reference Data
+        </h2>
         <div className="mb-4">
-          <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="reference-year">
+          <label
+            className="mb-2 block text-sm font-medium text-gray-700"
+            htmlFor="reference-year"
+          >
             Reference Year
           </label>
           <select

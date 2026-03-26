@@ -16,7 +16,8 @@ export default function MapError({
       <div className="flex flex-col items-center gap-6 text-center">
         <h1 className="text-3xl font-bold text-red-600">Map Error</h1>
         <p className="max-w-md text-base text-gray-600">
-          {error.message || "An error occurred while loading the map data or rendering the map."}
+          {error.message ||
+            "An error occurred while loading the map data or rendering the map."}
         </p>
 
         <div className="flex w-full max-w-md flex-col gap-3">

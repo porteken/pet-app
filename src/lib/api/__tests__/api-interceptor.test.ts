@@ -1,8 +1,21 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 import { server } from "@/testing/server";
 
-import { apiRequest, apiRequestWithRetry, handleApiResponse } from "../api-interceptor";
+import {
+  apiRequest,
+  apiRequestWithRetry,
+  handleApiResponse,
+} from "../api-interceptor";
 
 vi.mock("@/lib/utils/errors", () => ({
   createError: vi.fn(),
@@ -12,14 +25,19 @@ vi.mock("@/lib/utils/errors", () => ({
       originalError: unknown;
       statusCode: number;
 
-      constructor(message: string, statusCode: number, originalError?: unknown, context?: unknown) {
+      constructor(
+        message: string,
+        statusCode: number,
+        originalError?: unknown,
+        context?: unknown,
+      ) {
         super(message);
         this.name = "NetworkError";
         this.statusCode = statusCode;
         this.originalError = originalError;
         this.context = context;
       }
-    }
+    },
   ),
 }));
 
@@ -72,9 +90,15 @@ describe("handleApiResponse", () => {
 
     await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
 
-    expect(mockCreateError).toHaveBeenCalledWith(errorMessage, 404, undefined, undefined, {
-      url: "https://api.example.com/test",
-    });
+    expect(mockCreateError).toHaveBeenCalledWith(
+      errorMessage,
+      404,
+      undefined,
+      undefined,
+      {
+        url: "https://api.example.com/test",
+      },
+    );
   });
 
   it("includes context in error creation", async () => {
@@ -88,12 +112,20 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any, context)).rejects.toThrow();
+    await expect(
+      handleApiResponse(mockResponse as any, context),
+    ).rejects.toThrow();
 
-    expect(mockCreateError).toHaveBeenCalledWith("Server error", 500, undefined, undefined, {
-      ...context,
-      url: "https://api.example.com/test",
-    });
+    expect(mockCreateError).toHaveBeenCalledWith(
+      "Server error",
+      500,
+      undefined,
+      undefined,
+      {
+        ...context,
+        url: "https://api.example.com/test",
+      },
+    );
   });
 
   it("handles JSON parsing errors", async () => {
@@ -109,7 +141,7 @@ describe("handleApiResponse", () => {
       "Failed to parse server response",
       500,
       expect.any(Error),
-      undefined
+      undefined,
     );
   });
 
@@ -131,7 +163,7 @@ describe("handleApiResponse", () => {
       400,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
 
@@ -153,7 +185,7 @@ describe("handleApiResponse", () => {
       401,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
 
@@ -175,7 +207,7 @@ describe("handleApiResponse", () => {
       404,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
 
@@ -197,7 +229,7 @@ describe("handleApiResponse", () => {
       500,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
 
@@ -218,7 +250,7 @@ describe("handleApiResponse", () => {
       422,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
   it("uses default error message for unknown error format", async () => {
@@ -238,7 +270,7 @@ describe("handleApiResponse", () => {
       654,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
   it("uses service error when service is unavailable", async () => {
@@ -258,7 +290,7 @@ describe("handleApiResponse", () => {
       503,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
   it("uses gateway error when gateway is bad", async () => {
@@ -278,7 +310,7 @@ describe("handleApiResponse", () => {
       502,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
   it("uses internal error when Internal Service error", async () => {
@@ -298,7 +330,7 @@ describe("handleApiResponse", () => {
       500,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
   it("uses not found error when not found", async () => {
@@ -318,7 +350,7 @@ describe("handleApiResponse", () => {
       404,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
   it("uses access denied error when access denied", async () => {
@@ -338,7 +370,7 @@ describe("handleApiResponse", () => {
       403,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
   it("uses authentication required error when not authenticated", async () => {
@@ -358,7 +390,7 @@ describe("handleApiResponse", () => {
       401,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
   it("uses invalid request error when bad request", async () => {
@@ -378,7 +410,7 @@ describe("handleApiResponse", () => {
       400,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
 
@@ -399,7 +431,7 @@ describe("handleApiResponse", () => {
       429,
       undefined,
       undefined,
-      expect.objectContaining({ url: "https://api.example.com/test" })
+      expect.objectContaining({ url: "https://api.example.com/test" }),
     );
   });
 });
@@ -434,7 +466,7 @@ describe("apiRequest", () => {
         headers: {
           "Content-Type": "application/json",
         },
-      })
+      }),
     );
   });
 
@@ -465,7 +497,7 @@ describe("apiRequest", () => {
           "Content-Type": "application/json",
           "X-Custom-Header": "custom-value",
         },
-      })
+      }),
     );
   });
 
@@ -483,7 +515,7 @@ describe("apiRequest", () => {
     const context = { userId: 123 };
 
     await expect(
-      apiRequest("https://api.example.com/test", { method: "POST" }, context)
+      apiRequest("https://api.example.com/test", { method: "POST" }, context),
     ).rejects.toThrow();
 
     expect(mockCreateError).toHaveBeenCalledWith(
@@ -495,7 +527,7 @@ describe("apiRequest", () => {
         method: "POST",
         url: "https://api.example.com/test",
         userId: 123,
-      })
+      }),
     );
   });
 
@@ -509,7 +541,7 @@ describe("apiRequest", () => {
       "Network connection failed",
       0,
       networkError,
-      undefined
+      undefined,
     );
   });
 
@@ -517,7 +549,9 @@ describe("apiRequest", () => {
     const customError = new Error("Custom error");
     mockFetch.mockRejectedValue(customError);
 
-    await expect(apiRequest("https://api.example.com/test")).rejects.toThrow(customError);
+    await expect(apiRequest("https://api.example.com/test")).rejects.toThrow(
+      customError,
+    );
   });
 });
 
@@ -603,7 +637,9 @@ describe("apiRequestWithRetry", () => {
     mockError.name = "NetworkError";
     mockCreateError.mockReturnValue(mockError);
 
-    await expect(apiRequestWithRetry("https://api.example.com/test")).rejects.toThrow();
+    await expect(
+      apiRequestWithRetry("https://api.example.com/test"),
+    ).rejects.toThrow();
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
@@ -623,7 +659,9 @@ describe("apiRequestWithRetry", () => {
       url: "https://api.example.com/test",
     };
 
-    mockFetch.mockResolvedValueOnce(rateLimitResponse).mockResolvedValueOnce(successResponse);
+    mockFetch
+      .mockResolvedValueOnce(rateLimitResponse)
+      .mockResolvedValueOnce(successResponse);
 
     const mockError = new Error("Rate limited");
     (mockError as any).statusCode = 429;

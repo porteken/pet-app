@@ -85,7 +85,7 @@ describe("map page", () => {
         LocationOptions: locationData.LocationOptions,
         locations: locationData.locations,
       },
-      undefined
+      undefined,
     );
   });
 
@@ -96,7 +96,9 @@ describe("map page", () => {
 
     render(await Page());
 
-    expect(screen.getByTestId("error-handler")).toHaveTextContent("cookie lookup failed");
+    expect(screen.getByTestId("error-handler")).toHaveTextContent(
+      "cookie lookup failed",
+    );
     expect(mockLocationErrorHandler).toHaveBeenCalledWith({ error }, undefined);
     expect(mockHome).not.toHaveBeenCalled();
   });

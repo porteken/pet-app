@@ -37,7 +37,7 @@ describe("setGraphMeasure", () => {
         expires: expect.any(Date),
         httpOnly: true,
         path: "/",
-      })
+      }),
     );
   });
 
@@ -54,7 +54,7 @@ describe("setGraphMeasure", () => {
         expires: expect.any(Date),
         httpOnly: true,
         path: "/",
-      })
+      }),
     );
 
     const cookieOptions = mockSet.mock.calls[0][2];
@@ -83,7 +83,7 @@ describe("setGraphMeasure", () => {
           expires: expect.any(Date),
           httpOnly: true,
           path: "/",
-        })
+        }),
       );
     }
   });
@@ -100,7 +100,7 @@ describe("setGraphMeasure", () => {
         expires: expect.any(Date),
         httpOnly: true,
         path: "/",
-      })
+      }),
     );
   });
 
@@ -116,7 +116,7 @@ describe("setGraphMeasure", () => {
         expires: expect.any(Date),
         httpOnly: true,
         path: "/",
-      })
+      }),
     );
   });
 
@@ -157,11 +157,26 @@ describe("setGraphMeasure", () => {
 
     expect(mockSet).toHaveBeenCalledTimes(3);
 
-    expect(mockSet).toHaveBeenNthCalledWith(1, "graph-measure", "temperature", expect.any(Object));
+    expect(mockSet).toHaveBeenNthCalledWith(
+      1,
+      "graph-measure",
+      "temperature",
+      expect.any(Object),
+    );
 
-    expect(mockSet).toHaveBeenNthCalledWith(2, "graph-measure", "humidity", expect.any(Object));
+    expect(mockSet).toHaveBeenNthCalledWith(
+      2,
+      "graph-measure",
+      "humidity",
+      expect.any(Object),
+    );
 
-    expect(mockSet).toHaveBeenNthCalledWith(3, "graph-measure", "pressure", expect.any(Object));
+    expect(mockSet).toHaveBeenNthCalledWith(
+      3,
+      "graph-measure",
+      "pressure",
+      expect.any(Object),
+    );
   });
 
   it("awaits cookies() call", async () => {
@@ -199,7 +214,7 @@ describe("setForecastPreferences", () => {
         expires: expect.any(Date),
         httpOnly: true,
         path: "/",
-      })
+      }),
     );
     expect(mockSet).toHaveBeenNthCalledWith(
       2,
@@ -209,7 +224,7 @@ describe("setForecastPreferences", () => {
         expires: expect.any(Date),
         httpOnly: true,
         path: "/",
-      })
+      }),
     );
   });
 
@@ -224,16 +239,16 @@ describe("setForecastPreferences", () => {
     const fiveMinutesMs = 5 * 60 * 1000;
 
     expect(enabledCookieOptions.expires.getTime()).toBeGreaterThanOrEqual(
-      beforeCall + fiveMinutesMs - 1000
+      beforeCall + fiveMinutesMs - 1000,
     );
     expect(enabledCookieOptions.expires.getTime()).toBeLessThanOrEqual(
-      afterCall + fiveMinutesMs + 1000
+      afterCall + fiveMinutesMs + 1000,
     );
     expect(yearsCookieOptions.expires.getTime()).toBeGreaterThanOrEqual(
-      beforeCall + fiveMinutesMs - 1000
+      beforeCall + fiveMinutesMs - 1000,
     );
     expect(yearsCookieOptions.expires.getTime()).toBeLessThanOrEqual(
-      afterCall + fiveMinutesMs + 1000
+      afterCall + fiveMinutesMs + 1000,
     );
   });
 });
@@ -269,7 +284,7 @@ describe("setRankingsYear", () => {
         httpOnly: true,
         path: "/",
         sameSite: "strict",
-      })
+      }),
     );
   });
 
@@ -287,7 +302,7 @@ describe("setRankingsYear", () => {
           httpOnly: true,
           path: "/",
           sameSite: "strict",
-        })
+        }),
       );
     }
   });
@@ -355,21 +370,44 @@ describe("setRankingsYear", () => {
 
     expect(mockSet).toHaveBeenCalledTimes(3);
 
-    expect(mockSet).toHaveBeenNthCalledWith(1, "rankings-year", "2000", expect.any(Object));
+    expect(mockSet).toHaveBeenNthCalledWith(
+      1,
+      "rankings-year",
+      "2000",
+      expect.any(Object),
+    );
 
-    expect(mockSet).toHaveBeenNthCalledWith(2, "rankings-year", "2010", expect.any(Object));
+    expect(mockSet).toHaveBeenNthCalledWith(
+      2,
+      "rankings-year",
+      "2010",
+      expect.any(Object),
+    );
 
-    expect(mockSet).toHaveBeenNthCalledWith(3, "rankings-year", "2025", expect.any(Object));
+    expect(mockSet).toHaveBeenNthCalledWith(
+      3,
+      "rankings-year",
+      "2025",
+      expect.any(Object),
+    );
   });
 
   it("handles edge case years", async () => {
     await setRankingsYear(2000);
-    expect(mockSet).toHaveBeenCalledWith("rankings-year", "2000", expect.any(Object));
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-year",
+      "2000",
+      expect.any(Object),
+    );
 
     mockSet.mockClear();
 
     await setRankingsYear(2025);
-    expect(mockSet).toHaveBeenCalledWith("rankings-year", "2025", expect.any(Object));
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-year",
+      "2025",
+      expect.any(Object),
+    );
   });
 });
 
@@ -394,7 +432,7 @@ describe("setRankingsState", () => {
         httpOnly: true,
         path: "/",
         sameSite: "strict",
-      })
+      }),
     );
   });
 
@@ -416,7 +454,11 @@ describe("setRankingsState", () => {
   it("handles empty string for clearing filter", async () => {
     await setRankingsState("");
 
-    expect(mockSet).toHaveBeenCalledWith("rankings-state", "", expect.any(Object));
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-state",
+      "",
+      expect.any(Object),
+    );
   });
 });
 
@@ -441,7 +483,7 @@ describe("setRankingsHeatStress", () => {
         httpOnly: true,
         path: "/",
         sameSite: "strict",
-      })
+      }),
     );
   });
 
@@ -463,6 +505,10 @@ describe("setRankingsHeatStress", () => {
   it("handles empty string for clearing filter", async () => {
     await setRankingsHeatStress("");
 
-    expect(mockSet).toHaveBeenCalledWith("rankings-heat-stress", "", expect.any(Object));
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-heat-stress",
+      "",
+      expect.any(Object),
+    );
   });
 });

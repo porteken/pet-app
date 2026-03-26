@@ -2,7 +2,14 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import React, { FC, ReactElement, useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  FC,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { GenerateTrendGraph } from "@/features/graph";
 import { HeaderBar } from "@/features/header-bar";
@@ -31,15 +38,22 @@ const Home: FC<MapProperties> = ({
   locations,
 }: MapProperties) => {
   const queryClient = useQueryClient();
-  const [selectedGraphMeasure, setSelectedGraphMeasure] = useState(() => initialGraphMeasure);
+  const [selectedGraphMeasure, setSelectedGraphMeasure] = useState(
+    () => initialGraphMeasure,
+  );
 
   const [petGraph, setPetGraph] = useState<ReactElement | undefined>();
   const [graphLoading, setGraphLoading] = useState(false);
   const [selectedLocationId, setSelectedLocationId] = useState<number>();
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<LocationProperties>();
-  const [forecastEnabled, setForecastEnabled] = useState(() => initialForecastEnabled);
-  const [forecastYearsAhead, setForecastYearsAhead] = useState(() => initialForecastYearsAhead);
+  const [selectedLocation, setSelectedLocation] =
+    useState<LocationProperties>();
+  const [forecastEnabled, setForecastEnabled] = useState(
+    () => initialForecastEnabled,
+  );
+  const [forecastYearsAhead, setForecastYearsAhead] = useState(
+    () => initialForecastYearsAhead,
+  );
   const [isMobileViewport, setIsMobileViewport] = useState(() => {
     if (typeof globalThis.matchMedia !== "function") {
       return false;
@@ -48,8 +62,10 @@ const Home: FC<MapProperties> = ({
     return globalThis.matchMedia("(max-width: 639px)").matches;
   });
   const [isMobileGraphLegendOpen, setIsMobileGraphLegendOpen] = useState(false);
-  const [heatStressDescription, setHeatStressDescription] = useState<HeatStressDescription>();
-  const [forecastHeatStress, setForecastHeatStress] = useState<HeatStressDescription>();
+  const [heatStressDescription, setHeatStressDescription] =
+    useState<HeatStressDescription>();
+  const [forecastHeatStress, setForecastHeatStress] =
+    useState<HeatStressDescription>();
 
   const locationMap = useMemo(() => {
     return new Map(locations.map((loc) => [loc.location_id, loc]));
@@ -61,7 +77,7 @@ const Home: FC<MapProperties> = ({
         label: option.label,
         value: option.key,
       })),
-    []
+    [],
   );
 
   useEffect(() => {
@@ -85,20 +101,30 @@ const Home: FC<MapProperties> = ({
   const showTrendLegend = !isMobileViewport || isMobileGraphLegendOpen;
 
   const generateGraph = useCallback(
-    async (locationId: number, option: string, enableForecast: boolean, yearsAhead: number) => {
+    async (
+      locationId: number,
+      option: string,
+      enableForecast: boolean,
+      yearsAhead: number,
+    ) => {
       setGraphLoading(true);
       try {
-        const { forecastHeatStress, heatStressDescription, snapshot } =
-          await buildTrendAnalysisResult({
-            enableForecast,
-            fetchForecastData: () => FetchForecastData(locationId, yearsAhead),
-            fetchTrendGraphData: () =>
-              queryClient.fetchQuery(getTrendGraphQueryOptions(locationId, option)),
-            option,
-          });
+        const {
+          forecastHeatStress: newForecastHeatStress,
+          heatStressDescription: newHeatStressDescription,
+          snapshot,
+        } = await buildTrendAnalysisResult({
+          enableForecast,
+          fetchForecastData: () => FetchForecastData(locationId, yearsAhead),
+          fetchTrendGraphData: () =>
+            queryClient.fetchQuery(
+              getTrendGraphQueryOptions(locationId, option),
+            ),
+          option,
+        });
 
-        setHeatStressDescription(heatStressDescription);
-        setForecastHeatStress(forecastHeatStress);
+        setHeatStressDescription(newHeatStressDescription);
+        setForecastHeatStress(newForecastHeatStress);
 
         if (snapshot.years.length === 0 || snapshot.year_pets.length === 0) {
           throw new Error("No trend data available");
@@ -124,7 +150,7 @@ const Home: FC<MapProperties> = ({
         setGraphLoading(false);
       }
     },
-    [queryClient, showTrendLegend]
+    [isMobileViewport, queryClient, showTrendLegend],
   );
 
   const handleSelectChange = useCallback(
@@ -134,7 +160,7 @@ const Home: FC<MapProperties> = ({
         await setGraphMeasure(option);
       }
     },
-    [selectedLocationId]
+    [selectedLocationId],
   );
 
   useEffect(() => {
@@ -143,7 +169,7 @@ const Home: FC<MapProperties> = ({
         selectedLocationId,
         selectedGraphMeasure,
         forecastEnabled && selectedGraphMeasure === "avg",
-        forecastYearsAhead
+        forecastYearsAhead,
       );
     }
   }, [
@@ -163,7 +189,7 @@ const Home: FC<MapProperties> = ({
       setSelectedLocation(location);
       setModalOpen(true);
     },
-    [locationMap]
+    [locationMap],
   );
 
   const handleForecastToggle = useCallback(
@@ -171,7 +197,7 @@ const Home: FC<MapProperties> = ({
       setForecastEnabled(enabled);
       void setForecastPreferences(enabled, forecastYearsAhead);
     },
-    [forecastYearsAhead]
+    [forecastYearsAhead],
   );
 
   const handleForecastYearsChange = useCallback(
@@ -179,7 +205,7 @@ const Home: FC<MapProperties> = ({
       setForecastYearsAhead(yearsAhead);
       void setForecastPreferences(forecastEnabled, yearsAhead);
     },
-    [forecastEnabled]
+    [forecastEnabled],
   );
 
   const desktopDialogHeightClass = useMemo(() => {
@@ -207,7 +233,11 @@ const Home: FC<MapProperties> = ({
         mobileFullscreen
         onClose={() => setModalOpen(false)}
         open={modalOpen}
-        title={selectedLocation ? `${selectedLocation.city}, ${selectedLocation.state}` : undefined}
+        title={
+          selectedLocation
+            ? `${selectedLocation.city}, ${selectedLocation.state}`
+            : undefined
+        }
       >
         <GraphSection
           forecastEnabled={forecastEnabled}
@@ -220,7 +250,9 @@ const Home: FC<MapProperties> = ({
           onForecastToggle={handleForecastToggle}
           onForecastYearsChange={handleForecastYearsChange}
           onSelectChange={handleSelectChange}
-          onToggleMobileGraphLegend={() => setIsMobileGraphLegendOpen((previous) => !previous)}
+          onToggleMobileGraphLegend={() =>
+            setIsMobileGraphLegendOpen((previous) => !previous)
+          }
           petGraph={petGraph}
           selectedGraphMeasure={selectedGraphMeasure}
           selectedLocation={selectedLocation}

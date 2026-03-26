@@ -5,7 +5,11 @@ export interface HeatStressDescription {
   value: string;
 }
 
-export type HeatStressLevel = "Extreme" | "Moderate" | "None to Slight" | "Strong";
+export type HeatStressLevel =
+  | "Extreme"
+  | "Moderate"
+  | "None to Slight"
+  | "Strong";
 
 interface HeatStressInfo {
   color: string;
@@ -17,7 +21,7 @@ export function getForecastHeatStressDescription(
   petValue: number,
   year: number,
   lowerBound10?: number,
-  upperBound90?: number
+  upperBound90?: number,
 ): HeatStressDescription {
   const info = getHeatStressInfo(petValue);
 
@@ -43,7 +47,7 @@ export function getForecastHeatStressDescription(
 export function getHeatStressDescription(
   petValue: number,
   measureType: string,
-  year: number = 2025
+  year: number = 2025,
 ): HeatStressDescription {
   const info = getHeatStressInfo(petValue);
   const measure = measureType === "avg" ? "average" : "max";

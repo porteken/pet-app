@@ -64,7 +64,7 @@ const createSelectQuery = <T>({ data, error }: QueryResponse<T>) => ({
 });
 
 const createCityRankingsFixture = (
-  overrides: Partial<CityRankingsFixture> = {}
+  overrides: Partial<CityRankingsFixture> = {},
 ): CityRankingsFixture => ({
   change: [{ change: 1.5, location_id: 1 }],
   forecast: [{ location_id: 1, lower: 38, upper: 42 }],
@@ -93,15 +93,27 @@ const queueCityRankingsResponses = (
     percentiles?: QueryResponse<CityRankingsFixture["percentiles"]>;
     petAvg?: QueryResponse<CityRankingsFixture["petAvg"]>;
     petMax?: QueryResponse<CityRankingsFixture["petMax"]>;
-  } = {}
+  } = {},
 ) => {
   mockSupabaseClient.from
-    .mockReturnValueOnce(createEqQuery(petAvg ?? createSuccessResponse(fixture.petAvg)))
-    .mockReturnValueOnce(createEqQuery(petMax ?? createSuccessResponse(fixture.petMax)))
-    .mockReturnValueOnce(createSelectQuery(locations ?? createSuccessResponse(fixture.locations)))
-    .mockReturnValueOnce(createEqQuery(percentiles ?? createSuccessResponse(fixture.percentiles)))
-    .mockReturnValueOnce(createEqQuery(forecast ?? createSuccessResponse(fixture.forecast)))
-    .mockReturnValueOnce(createSelectQuery(change ?? createSuccessResponse(fixture.change)));
+    .mockReturnValueOnce(
+      createEqQuery(petAvg ?? createSuccessResponse(fixture.petAvg)),
+    )
+    .mockReturnValueOnce(
+      createEqQuery(petMax ?? createSuccessResponse(fixture.petMax)),
+    )
+    .mockReturnValueOnce(
+      createSelectQuery(locations ?? createSuccessResponse(fixture.locations)),
+    )
+    .mockReturnValueOnce(
+      createEqQuery(percentiles ?? createSuccessResponse(fixture.percentiles)),
+    )
+    .mockReturnValueOnce(
+      createEqQuery(forecast ?? createSuccessResponse(fixture.forecast)),
+    )
+    .mockReturnValueOnce(
+      createSelectQuery(change ?? createSuccessResponse(fixture.change)),
+    );
 
   return fixture;
 };
@@ -214,13 +226,13 @@ describe("fetch-server", () => {
 
     it("should throw error for invalid year", async () => {
       await expect(FetchCityRankings(1999)).rejects.toThrow(
-        new DatabaseError("Invalid year: 1999. Must be between 2000 and 2100.")
+        new DatabaseError("Invalid year: 1999. Must be between 2000 and 2100."),
       );
       await expect(FetchCityRankings(2101)).rejects.toThrow(
-        new DatabaseError("Invalid year: 2101. Must be between 2000 and 2100.")
+        new DatabaseError("Invalid year: 2101. Must be between 2000 and 2100."),
       );
       await expect(FetchCityRankings(Number.NaN)).rejects.toThrow(
-        new DatabaseError("Invalid year: NaN. Must be between 2000 and 2100.")
+        new DatabaseError("Invalid year: NaN. Must be between 2000 and 2100."),
       );
     });
 
@@ -230,7 +242,7 @@ describe("fetch-server", () => {
       });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError("Failed to fetch PET average data from database")
+        new DatabaseError("Failed to fetch PET average data from database"),
       );
     });
 
@@ -241,7 +253,10 @@ describe("fetch-server", () => {
       });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError("Failed to fetch PET average data from database", mockError)
+        new DatabaseError(
+          "Failed to fetch PET average data from database",
+          mockError,
+        ),
       );
     });
 
@@ -251,7 +266,7 @@ describe("fetch-server", () => {
       });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError("Failed to fetch PET max data from database")
+        new DatabaseError("Failed to fetch PET max data from database"),
       );
     });
 
@@ -261,7 +276,7 @@ describe("fetch-server", () => {
       });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError("Failed to fetch location data from database")
+        new DatabaseError("Failed to fetch location data from database"),
       );
     });
 
@@ -271,7 +286,7 @@ describe("fetch-server", () => {
       });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError("Failed to fetch percentiles from database")
+        new DatabaseError("Failed to fetch percentiles from database"),
       );
     });
 
@@ -281,7 +296,7 @@ describe("fetch-server", () => {
       });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError("Failed to fetch future PET data from database")
+        new DatabaseError("Failed to fetch future PET data from database"),
       );
     });
 
@@ -291,7 +306,7 @@ describe("fetch-server", () => {
       });
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError("Failed to fetch pet change data from database")
+        new DatabaseError("Failed to fetch pet change data from database"),
       );
     });
 
@@ -355,7 +370,9 @@ describe("fetch-server", () => {
       ];
 
       const mockQuery = {
-        select: vi.fn().mockResolvedValue({ data: mockLocations, error: undefined }),
+        select: vi
+          .fn()
+          .mockResolvedValue({ data: mockLocations, error: undefined }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -410,7 +427,9 @@ describe("fetch-server", () => {
       ];
 
       const mockQuery = {
-        select: vi.fn().mockResolvedValue({ data: mockLocations, error: undefined }),
+        select: vi
+          .fn()
+          .mockResolvedValue({ data: mockLocations, error: undefined }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -446,27 +465,36 @@ describe("fetch-server", () => {
     });
 
     it("should handle database errors", async () => {
-      const mockError = new Error("Failed to fetch location data from database");
+      const mockError = new Error(
+        "Failed to fetch location data from database",
+      );
       const mockQuery = {
-        select: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
+        select: vi
+          .fn()
+          .mockResolvedValue({ data: undefined, error: mockError }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
       await expect(FetchLocations()).rejects.toThrow(
-        new DatabaseError("Failed to fetch location data from database", mockError)
+        new DatabaseError(
+          "Failed to fetch location data from database",
+          mockError,
+        ),
       );
     });
 
     it("should handle null data response", async () => {
       const mockQuery = {
-        select: vi.fn().mockResolvedValue({ data: undefined, error: undefined }),
+        select: vi
+          .fn()
+          .mockResolvedValue({ data: undefined, error: undefined }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
       await expect(FetchLocations()).rejects.toThrow(
-        new DatabaseError("Failed to fetch location data from database")
+        new DatabaseError("Failed to fetch location data from database"),
       );
     });
   });
@@ -474,29 +502,29 @@ describe("fetch-server", () => {
   describe("FetchReferenceGraphData", () => {
     it("should throw error for invalid location ID", async () => {
       await expect(FetchReferenceGraphData("2023", 0)).rejects.toThrow(
-        new DatabaseError("Invalid locationId: 0")
+        new DatabaseError("Invalid locationId: 0"),
       );
 
       await expect(FetchReferenceGraphData("2023", -1)).rejects.toThrow(
-        new DatabaseError("Invalid locationId: -1")
+        new DatabaseError("Invalid locationId: -1"),
       );
 
       await expect(FetchReferenceGraphData("2023", Number.NaN)).rejects.toThrow(
-        new DatabaseError("Invalid locationId: NaN")
+        new DatabaseError("Invalid locationId: NaN"),
       );
     });
 
     it("should throw error for invalid year format", async () => {
       await expect(FetchReferenceGraphData("abc", 1)).rejects.toThrow(
-        new DatabaseError("Invalid year format: abc. Must be a 4-digit year.")
+        new DatabaseError("Invalid year format: abc. Must be a 4-digit year."),
       );
 
       await expect(FetchReferenceGraphData("23", 1)).rejects.toThrow(
-        new DatabaseError("Invalid year format: 23. Must be a 4-digit year.")
+        new DatabaseError("Invalid year format: 23. Must be a 4-digit year."),
       );
 
       await expect(FetchReferenceGraphData("", 1)).rejects.toThrow(
-        new DatabaseError("Invalid year format: . Must be a 4-digit year.")
+        new DatabaseError("Invalid year format: . Must be a 4-digit year."),
       );
     });
     it("should fetch trend data successfully", async () => {
@@ -521,7 +549,10 @@ describe("fetch-server", () => {
       expect(mockQuery.order).toHaveBeenCalledWith("date", { ascending: true });
 
       expect(result.pets).toEqual([25.5, 26.2]);
-      expect(result.dates).toEqual([new Date("2020-01-01"), new Date("2021-01-01")]);
+      expect(result.dates).toEqual([
+        new Date("2020-01-01"),
+        new Date("2021-01-01"),
+      ]);
     });
 
     it("should handle database errors", async () => {
@@ -535,7 +566,10 @@ describe("fetch-server", () => {
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
       await expect(FetchReferenceGraphData("2023", 1)).rejects.toThrow(
-        new DatabaseError("Failed to fetch reference graph data from database", mockError)
+        new DatabaseError(
+          "Failed to fetch reference graph data from database",
+          mockError,
+        ),
       );
     });
   });
@@ -554,7 +588,9 @@ describe("fetch-server", () => {
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
-      mockLinearRegression.predict.mockImplementation((year: number) => year * 0.7 + 24);
+      mockLinearRegression.predict.mockImplementation(
+        (year: number) => year * 0.7 + 24,
+      );
 
       const result = await FetchTrendGraphData("avg", 1);
 
@@ -571,23 +607,23 @@ describe("fetch-server", () => {
 
     it("should throw error for invalid location ID", async () => {
       await expect(FetchTrendGraphData("avg", 0)).rejects.toThrow(
-        new DatabaseError("Invalid locationId: 0")
+        new DatabaseError("Invalid locationId: 0"),
       );
       await expect(FetchTrendGraphData("avg", -1)).rejects.toThrow(
-        new DatabaseError("Invalid locationId: -1")
+        new DatabaseError("Invalid locationId: -1"),
       );
       await expect(FetchTrendGraphData("avg", Number.NaN)).rejects.toThrow(
-        new DatabaseError("Invalid locationId: NaN")
+        new DatabaseError("Invalid locationId: NaN"),
       );
     });
 
     it("should throw error for invalid option", async () => {
       await expect(FetchTrendGraphData("invalid", 1)).rejects.toThrow(
-        new DatabaseError("Invalid option: invalid. Must be 'avg' or 'max'")
+        new DatabaseError("Invalid option: invalid. Must be 'avg' or 'max'"),
       );
 
       await expect(FetchTrendGraphData("", 1)).rejects.toThrow(
-        new DatabaseError("Invalid option: . Must be 'avg' or 'max'")
+        new DatabaseError("Invalid option: . Must be 'avg' or 'max'"),
       );
     });
 
@@ -621,7 +657,10 @@ describe("fetch-server", () => {
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
       await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
-        new DatabaseError("Failed to fetch trend graph data from database", mockError)
+        new DatabaseError(
+          "Failed to fetch trend graph data from database",
+          mockError,
+        ),
       );
     });
 
@@ -637,10 +676,16 @@ describe("fetch-server", () => {
       mockLinearRegression.predict.mockReturnValue(1438);
 
       await FetchTrendGraphData("avg", 1);
-      expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(1, "pet_year_avg");
+      expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(
+        1,
+        "pet_year_avg",
+      );
 
       await FetchTrendGraphData("max", 1);
-      expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(2, "pet_year_max");
+      expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(
+        2,
+        "pet_year_max",
+      );
     });
   });
 });

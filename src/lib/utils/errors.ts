@@ -11,7 +11,7 @@ export class AppError extends Error {
     public readonly code: string,
     public readonly statusCode = 500,
     public readonly originalError?: unknown,
-    public readonly context?: ErrorContext
+    public readonly context?: ErrorContext,
   ) {
     super(message);
     this.name = "AppError";
@@ -33,7 +33,10 @@ export class AppError extends Error {
 }
 
 export class AuthenticationError extends AppError {
-  constructor(message: string = "Authentication failed", originalError?: unknown) {
+  constructor(
+    message: string = "Authentication failed",
+    originalError?: unknown,
+  ) {
     super(message, "AUTHENTICATION_ERROR", 401, originalError);
     this.name = "AuthenticationError";
   }
@@ -47,7 +50,11 @@ export class AuthorizationError extends AppError {
 }
 
 export class DatabaseError extends AppError {
-  constructor(message: string, originalError?: unknown, context?: ErrorContext) {
+  constructor(
+    message: string,
+    originalError?: unknown,
+    context?: ErrorContext,
+  ) {
     super(message, "DATABASE_ERROR", 500, originalError, context);
     this.name = "DatabaseError";
   }
@@ -58,7 +65,7 @@ export class NetworkError extends AppError {
     message: string,
     statusCode: number,
     originalError?: unknown,
-    context?: ErrorContext
+    context?: ErrorContext,
   ) {
     super(message, "NETWORK_ERROR", statusCode, originalError, context);
     this.name = "NetworkError";
@@ -91,7 +98,7 @@ export const createError = (
   statusCode: number = 500,
   _code?: string,
   originalError?: unknown,
-  context?: ErrorContext
+  context?: ErrorContext,
 ): AppError => {
   switch (true) {
     case statusCode === 400: {
@@ -115,7 +122,10 @@ export const createError = (
   }
 };
 
-export const handleAsyncError = (error: unknown, context?: ErrorContext): AppError => {
+export const handleAsyncError = (
+  error: unknown,
+  context?: ErrorContext,
+): AppError => {
   if (error instanceof AppError) {
     return error;
   }
@@ -125,13 +135,17 @@ export const handleAsyncError = (error: unknown, context?: ErrorContext): AppErr
       return new NetworkError(error.message, 500, error, context);
     }
 
-    if (error.message.includes("database") || error.message.includes("connection")) {
+    if (
+      error.message.includes("database") ||
+      error.message.includes("connection")
+    ) {
       return new DatabaseError(error.message, error, context);
     }
 
     return new AppError(error.message, "UNKNOWN_ERROR", 500, error, context);
   }
 
-  const message = typeof error === "string" ? error : "An unknown error occurred";
+  const message =
+    typeof error === "string" ? error : "An unknown error occurred";
   return new AppError(message, "UNKNOWN_ERROR", 500, error, context);
 };

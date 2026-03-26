@@ -70,7 +70,7 @@ export const MapComponent = memo<MapComponentProperties>(
       const markerSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="52" viewBox="0 0 28 40" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 11.2 14 26 14 26s14-14.8 14-26C28 6.268 21.732 0 14 0z" fill="#2563EB"/><circle cx="14" cy="14" r="5" fill="white"/></svg>`;
       const markerUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(markerSvg)}`;
 
-      const customIcon = L.icon({
+      const createdCustomIcon = L.icon({
         className: "pet-map-marker-icon",
         iconAnchor: [18, 52],
         iconRetinaUrl: markerUrl,
@@ -84,7 +84,7 @@ export const MapComponent = memo<MapComponentProperties>(
       setMarker(() => reactLeaflet.Marker);
       setIsLoaded(true);
 
-      setCustomIcon(customIcon);
+      setCustomIcon(createdCustomIcon);
     }, []);
 
     useEffect(() => {
@@ -134,9 +134,12 @@ export const MapComponent = memo<MapComponentProperties>(
                 />
               </svg>
             </div>
-            <h1 className="mb-4 text-2xl font-bold text-gray-900">No Map Data Available</h1>
+            <h1 className="mb-4 text-2xl font-bold text-gray-900">
+              No Map Data Available
+            </h1>
             <p className="mb-6 text-gray-600">
-              Unable to load location data for the map. The database may be temporarily unavailable.
+              Unable to load location data for the map. The database may be
+              temporarily unavailable.
             </p>
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
               <p className="text-sm text-blue-800">
@@ -177,7 +180,9 @@ export const MapComponent = memo<MapComponentProperties>(
               onClick={() => setIsLegendOpen((previous) => !previous)}
               type="button"
             >
-              {isLegendOpen ? "Hide Heat Stress Index" : "Show Heat Stress Index"}
+              {isLegendOpen
+                ? "Hide Heat Stress Index"
+                : "Show Heat Stress Index"}
             </button>
             {isLegendOpen && (
               <div id="desktop-heat-stress-legend">
@@ -189,7 +194,10 @@ export const MapComponent = memo<MapComponentProperties>(
         <div className="pointer-events-none absolute top-1/2 right-0 z-40 -translate-y-1/2 sm:hidden">
           <div className="pointer-events-auto flex items-center">
             {isLegendOpen && (
-              <div className="mr-2 max-w-[78vw] shadow-md" id="mobile-heat-stress-legend">
+              <div
+                className="mr-2 max-w-[78vw] shadow-md"
+                id="mobile-heat-stress-legend"
+              >
                 <HeatStressLegend />
               </div>
             )}
@@ -206,7 +214,7 @@ export const MapComponent = memo<MapComponentProperties>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 MapComponent.displayName = "MapComponent";

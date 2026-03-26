@@ -11,7 +11,12 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
-    exclude: ["node_modules/**", ".next/**", "tests/**", "src/utils/__tests__/test-utilities.ts"],
+    exclude: [
+      "node_modules/**",
+      ".next/**",
+      "tests/**",
+      "src/utils/__tests__/test-utilities.ts",
+    ],
     globals: true,
     include: [
       "src/**/*.integration.test.{js,jsx,ts,tsx}",

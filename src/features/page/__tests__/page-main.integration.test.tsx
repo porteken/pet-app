@@ -12,7 +12,9 @@ import type { PageProperties } from "../model/types";
 vi.mock("@/features/graph", () => ({
   GenerateReferenceGraph: vi
     .fn()
-    .mockImplementation(() => <div data-testid="reference-graph">Reference Graph</div>),
+    .mockImplementation(() => (
+      <div data-testid="reference-graph">Reference Graph</div>
+    )),
   GenerateTrendGraph: vi
     .fn()
     .mockImplementation(() => <div data-testid="trend-graph">Trend Graph</div>),
@@ -20,7 +22,11 @@ vi.mock("@/features/graph", () => ({
 
 vi.mock("@/features/header-bar", () => ({
   HeaderBar: vi.fn(({ id, LocationOptions }) => (
-    <header data-id={id} data-options={JSON.stringify(LocationOptions)} data-testid="header-bar">
+    <header
+      data-id={id}
+      data-options={JSON.stringify(LocationOptions)}
+      data-testid="header-bar"
+    >
       HeaderBar
     </header>
   )),
@@ -229,7 +235,9 @@ describe("PageMain Integration Tests", () => {
     it("should handle server action errors gracefully", async () => {
       const user = userEvent.setup();
 
-      vi.mocked(setGraphMeasure).mockRejectedValueOnce(new Error("Server error"));
+      vi.mocked(setGraphMeasure).mockRejectedValueOnce(
+        new Error("Server error"),
+      );
 
       render(<PageMain {...defaultProps} />);
 

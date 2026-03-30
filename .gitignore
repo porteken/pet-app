@@ -50,3 +50,6 @@ certificates
 
 # Sonar Scanner
 .scannerwork
+
+.env
+.env.dev

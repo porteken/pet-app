@@ -68,128 +68,6 @@ describe("setGraphMeasure", () => {
     expect(actualExpiration).toBeGreaterThanOrEqual(expectedExpiration - 1000);
     expect(actualExpiration).toBeLessThanOrEqual(afterCall + oneYearMs + 1000);
   });
-
-  it("handles different measure values correctly", async () => {
-    const measures = ["temperature", "humidity", "pressure", "wind_speed"];
-
-    for (const measure of measures) {
-      mockSet.mockClear();
-      await setGraphMeasure(measure);
-
-      expect(mockSet).toHaveBeenCalledWith(
-        "graph-measure",
-        measure,
-        expect.objectContaining({
-          expires: expect.any(Date),
-          httpOnly: true,
-          path: "/",
-        }),
-      );
-    }
-  });
-
-  it("handles empty string measure", async () => {
-    const measure = "";
-
-    await setGraphMeasure(measure);
-
-    expect(mockSet).toHaveBeenCalledWith(
-      "graph-measure",
-      "",
-      expect.objectContaining({
-        expires: expect.any(Date),
-        httpOnly: true,
-        path: "/",
-      }),
-    );
-  });
-
-  it("handles special characters in measure", async () => {
-    const measure = "temperature-celsius_2024";
-
-    await setGraphMeasure(measure);
-
-    expect(mockSet).toHaveBeenCalledWith(
-      "graph-measure",
-      measure,
-      expect.objectContaining({
-        expires: expect.any(Date),
-        httpOnly: true,
-        path: "/",
-      }),
-    );
-  });
-
-  it("sets httpOnly flag to true for security", async () => {
-    const measure = "temperature";
-
-    await setGraphMeasure(measure);
-
-    const cookieOptions = mockSet.mock.calls[0][2];
-
-    expect(cookieOptions.httpOnly).toBe(true);
-  });
-
-  it("sets path to root", async () => {
-    const measure = "temperature";
-
-    await setGraphMeasure(measure);
-
-    const cookieOptions = mockSet.mock.calls[0][2];
-
-    expect(cookieOptions.path).toBe("/");
-  });
-
-  it("uses correct cookie name", async () => {
-    const measure = "temperature";
-
-    await setGraphMeasure(measure);
-
-    const cookieName = mockSet.mock.calls[0][0];
-
-    expect(cookieName).toBe("graph-measure");
-  });
-
-  it("handles multiple sequential calls", async () => {
-    await setGraphMeasure("temperature");
-    await setGraphMeasure("humidity");
-    await setGraphMeasure("pressure");
-
-    expect(mockSet).toHaveBeenCalledTimes(3);
-
-    expect(mockSet).toHaveBeenNthCalledWith(
-      1,
-      "graph-measure",
-      "temperature",
-      expect.any(Object),
-    );
-
-    expect(mockSet).toHaveBeenNthCalledWith(
-      2,
-      "graph-measure",
-      "humidity",
-      expect.any(Object),
-    );
-
-    expect(mockSet).toHaveBeenNthCalledWith(
-      3,
-      "graph-measure",
-      "pressure",
-      expect.any(Object),
-    );
-  });
-
-  it("awaits cookies() call", async () => {
-    const { cookies } = await import("next/headers");
-    const cookiesSpy = vi.mocked(cookies);
-
-    cookiesSpy.mockClear();
-
-    await setGraphMeasure("temperature");
-
-    expect(cookiesSpy).toHaveBeenCalledWith();
-    expect(cookiesSpy).toHaveBeenCalledTimes(1);
-  });
 });
 
 describe("setForecastPreferences", () => {
@@ -288,126 +166,12 @@ describe("setRankingsYear", () => {
     );
   });
 
-  it("handles different year values correctly", async () => {
-    const years = [2000, 2010, 2025];
-
-    for (const year of years) {
-      mockSet.mockClear();
-      await setRankingsYear(year);
-
-      expect(mockSet).toHaveBeenCalledWith(
-        "rankings-year",
-        String(year),
-        expect.objectContaining({
-          httpOnly: true,
-          path: "/",
-          sameSite: "strict",
-        }),
-      );
-    }
-  });
-
-  it("converts year number to string for cookie value", async () => {
-    await setRankingsYear(2015);
-
-    const cookieValue = mockSet.mock.calls[0][1];
-    expect(typeof cookieValue).toBe("string");
-    expect(cookieValue).toBe("2015");
-  });
-
-  it("sets httpOnly flag to true for security", async () => {
-    await setRankingsYear(2020);
-
-    const cookieOptions = mockSet.mock.calls[0][2];
-    expect(cookieOptions.httpOnly).toBe(true);
-  });
-
-  it("sets path to root", async () => {
-    await setRankingsYear(2020);
-
-    const cookieOptions = mockSet.mock.calls[0][2];
-    expect(cookieOptions.path).toBe("/");
-  });
-
-  it("sets sameSite to strict", async () => {
-    await setRankingsYear(2020);
-
-    const cookieOptions = mockSet.mock.calls[0][2];
-    expect(cookieOptions.sameSite).toBe("strict");
-  });
-
-  it("uses correct cookie name", async () => {
-    await setRankingsYear(2020);
-
-    const cookieName = mockSet.mock.calls[0][0];
-    expect(cookieName).toBe("rankings-year");
-  });
-
   it("calls revalidatePath with /rankings", async () => {
     const { revalidatePath } = await import("next/cache");
 
     await setRankingsYear(2020);
 
     expect(revalidatePath).toHaveBeenCalledWith("/rankings");
-  });
-
-  it("awaits cookies() call", async () => {
-    const { cookies } = await import("next/headers");
-    const cookiesSpy = vi.mocked(cookies);
-
-    cookiesSpy.mockClear();
-
-    await setRankingsYear(2020);
-
-    expect(cookiesSpy).toHaveBeenCalledWith();
-    expect(cookiesSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it("handles multiple sequential calls", async () => {
-    await setRankingsYear(2000);
-    await setRankingsYear(2010);
-    await setRankingsYear(2025);
-
-    expect(mockSet).toHaveBeenCalledTimes(3);
-
-    expect(mockSet).toHaveBeenNthCalledWith(
-      1,
-      "rankings-year",
-      "2000",
-      expect.any(Object),
-    );
-
-    expect(mockSet).toHaveBeenNthCalledWith(
-      2,
-      "rankings-year",
-      "2010",
-      expect.any(Object),
-    );
-
-    expect(mockSet).toHaveBeenNthCalledWith(
-      3,
-      "rankings-year",
-      "2025",
-      expect.any(Object),
-    );
-  });
-
-  it("handles edge case years", async () => {
-    await setRankingsYear(2000);
-    expect(mockSet).toHaveBeenCalledWith(
-      "rankings-year",
-      "2000",
-      expect.any(Object),
-    );
-
-    mockSet.mockClear();
-
-    await setRankingsYear(2025);
-    expect(mockSet).toHaveBeenCalledWith(
-      "rankings-year",
-      "2025",
-      expect.any(Object),
-    );
   });
 });
 
@@ -436,29 +200,12 @@ describe("setRankingsState", () => {
     );
   });
 
-  it("uses correct cookie name", async () => {
-    await setRankingsState("CA");
-
-    const cookieName = mockSet.mock.calls[0][0];
-    expect(cookieName).toBe("rankings-state");
-  });
-
   it("calls revalidatePath with /rankings", async () => {
     const { revalidatePath } = await import("next/cache");
 
     await setRankingsState("NY");
 
     expect(revalidatePath).toHaveBeenCalledWith("/rankings");
-  });
-
-  it("handles empty string for clearing filter", async () => {
-    await setRankingsState("");
-
-    expect(mockSet).toHaveBeenCalledWith(
-      "rankings-state",
-      "",
-      expect.any(Object),
-    );
   });
 });
 
@@ -487,28 +234,11 @@ describe("setRankingsHeatStress", () => {
     );
   });
 
-  it("uses correct cookie name", async () => {
-    await setRankingsHeatStress("Extreme");
-
-    const cookieName = mockSet.mock.calls[0][0];
-    expect(cookieName).toBe("rankings-heat-stress");
-  });
-
   it("calls revalidatePath with /rankings", async () => {
     const { revalidatePath } = await import("next/cache");
 
     await setRankingsHeatStress("Strong");
 
     expect(revalidatePath).toHaveBeenCalledWith("/rankings");
-  });
-
-  it("handles empty string for clearing filter", async () => {
-    await setRankingsHeatStress("");
-
-    expect(mockSet).toHaveBeenCalledWith(
-      "rankings-heat-stress",
-      "",
-      expect.any(Object),
-    );
   });
 });

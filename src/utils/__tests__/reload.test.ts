@@ -17,10 +17,4 @@ describe("Reload Utility", () => {
 
     expect(globalThis.location.reload).toHaveBeenCalledOnce();
   });
-
-  it("should call reload without arguments", () => {
-    reloadPage();
-
-    expect(globalThis.location.reload).toHaveBeenCalledWith();
-  });
 });

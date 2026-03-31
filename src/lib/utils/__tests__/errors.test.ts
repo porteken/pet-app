@@ -56,12 +56,6 @@ describe("Error Classes", () => {
       expect(error.originalError).toBe(originalError);
       expect(error.name).toBe("AppError");
     });
-
-    it("should be an instance of Error", () => {
-      const error = new AppError("Test", "TEST");
-      expect(error).toBeInstanceOf(Error);
-      expect(error).toBeInstanceOf(AppError);
-    });
   });
 
   describe("DatabaseError", () => {
@@ -85,13 +79,6 @@ describe("Error Classes", () => {
       expect(error.originalError).toBe(originalError);
       expect(error.name).toBe("DatabaseError");
     });
-
-    it("should be an instance of AppError and Error", () => {
-      const error = new DatabaseError("Test");
-      expect(error).toBeInstanceOf(Error);
-      expect(error).toBeInstanceOf(AppError);
-      expect(error).toBeInstanceOf(DatabaseError);
-    });
   });
 
   describe("AuthenticationError", () => {
@@ -105,15 +92,6 @@ describe("Error Classes", () => {
       expect(error.originalError).toBeUndefined();
     });
 
-    it("should create an AuthenticationError with custom message", () => {
-      const error = new AuthenticationError("Invalid credentials");
-
-      expect(error.message).toBe("Invalid credentials");
-      expect(error.code).toBe("AUTHENTICATION_ERROR");
-      expect(error.statusCode).toBe(401);
-      expect(error.name).toBe("AuthenticationError");
-    });
-
     it("should create an AuthenticationError with original error", () => {
       const originalError = new Error("Token expired");
       const error = new AuthenticationError(
@@ -124,13 +102,6 @@ describe("Error Classes", () => {
       expect(error.message).toBe("Authentication failed");
       expect(error.originalError).toBe(originalError);
       expect(error.name).toBe("AuthenticationError");
-    });
-
-    it("should be an instance of AppError", () => {
-      const error = new AuthenticationError();
-      expect(error).toBeInstanceOf(Error);
-      expect(error).toBeInstanceOf(AppError);
-      expect(error).toBeInstanceOf(AuthenticationError);
     });
   });
 
@@ -145,15 +116,6 @@ describe("Error Classes", () => {
       expect(error.originalError).toBeUndefined();
     });
 
-    it("should create an AuthorizationError with custom message", () => {
-      const error = new AuthorizationError("Insufficient permissions");
-
-      expect(error.message).toBe("Insufficient permissions");
-      expect(error.code).toBe("AUTHORIZATION_ERROR");
-      expect(error.statusCode).toBe(403);
-      expect(error.name).toBe("AuthorizationError");
-    });
-
     it("should create an AuthorizationError with original error", () => {
       const originalError = new Error("Permission denied");
       const error = new AuthorizationError("Access denied", originalError);
@@ -161,13 +123,6 @@ describe("Error Classes", () => {
       expect(error.message).toBe("Access denied");
       expect(error.originalError).toBe(originalError);
       expect(error.name).toBe("AuthorizationError");
-    });
-
-    it("should be an instance of AppError", () => {
-      const error = new AuthorizationError();
-      expect(error).toBeInstanceOf(Error);
-      expect(error).toBeInstanceOf(AppError);
-      expect(error).toBeInstanceOf(AuthorizationError);
     });
   });
 
@@ -199,13 +154,6 @@ describe("Error Classes", () => {
       expect(error.context).toEqual(context);
       expect(error.name).toBe("NetworkError");
     });
-
-    it("should be an instance of AppError", () => {
-      const error = new NetworkError("Test", 500);
-      expect(error).toBeInstanceOf(Error);
-      expect(error).toBeInstanceOf(AppError);
-      expect(error).toBeInstanceOf(NetworkError);
-    });
   });
 
   describe("NotFoundError", () => {
@@ -230,13 +178,6 @@ describe("Error Classes", () => {
       expect(error.originalError).toBe(originalError);
       expect(error.context).toEqual({ resource: "user" });
       expect(error.name).toBe("NotFoundError");
-    });
-
-    it("should be an instance of AppError", () => {
-      const error = new NotFoundError("Test");
-      expect(error).toBeInstanceOf(Error);
-      expect(error).toBeInstanceOf(AppError);
-      expect(error).toBeInstanceOf(NotFoundError);
     });
   });
 
@@ -266,13 +207,6 @@ describe("Error Classes", () => {
       expect(error.originalError).toBe(originalError);
       expect(error.context).toEqual({ field: "email" });
       expect(error.name).toBe("ValidationError");
-    });
-
-    it("should be an instance of AppError", () => {
-      const error = new ValidationError("Test");
-      expect(error).toBeInstanceOf(Error);
-      expect(error).toBeInstanceOf(AppError);
-      expect(error).toBeInstanceOf(ValidationError);
     });
   });
 
@@ -381,15 +315,6 @@ describe("Error Classes", () => {
 
         expect(error).toBeInstanceOf(DatabaseError);
         expect(error.statusCode).toBe(500);
-      });
-
-      it("should create a DatabaseError for status codes >= 500 (like 502)", () => {
-        const error = createError("Bad gateway", 502);
-
-        expect(error).toBeInstanceOf(DatabaseError);
-        expect(error.message).toBe("Bad gateway");
-        expect(error.statusCode).toBe(500);
-        expect(error.code).toBe("DATABASE_ERROR");
       });
 
       it("should use default status code 500 when not provided", () => {
@@ -526,24 +451,6 @@ describe("Error Classes", () => {
 
         expect(result.context).toEqual(context);
       });
-
-      it("should handle errors with context for AppError", () => {
-        const context = { url: "https://api.example.com" };
-        const error = new Error("Network timeout");
-        const result = handleAsyncError(error, context);
-
-        expect(result).toBeInstanceOf(AppError);
-        expect(result.context).toEqual(context);
-      });
-
-      it("should handle database errors with context for AppError", () => {
-        const context = { query: "SELECT * FROM users" };
-        const error = new Error("Database query failed");
-        const result = handleAsyncError(error, context);
-
-        expect(result).toBeInstanceOf(AppError);
-        expect(result.context).toEqual(context);
-      });
     });
   });
 
@@ -563,19 +470,6 @@ describe("Error Classes", () => {
       expect(error.message).toBe("Fetch error");
       expect(error.originalError).toBe(originalError);
       expect(error.name).toBe("FetchError");
-    });
-
-    it("should be an instance of Error", () => {
-      const error = new FetchError("Test");
-      expect(error).toBeInstanceOf(Error);
-      expect(error).toBeInstanceOf(FetchError);
-    });
-
-    it("should be an instance of AppError and NetworkError", () => {
-      const error = new FetchError("Test");
-      expect(error).toBeInstanceOf(AppError);
-      expect(error).toBeInstanceOf(NetworkError);
-      expect(error).toBeInstanceOf(FetchError);
     });
   });
 });

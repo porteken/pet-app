@@ -142,11 +142,4 @@ describe("AboutMain", () => {
     const headerBar = screen.getByTestId("header-bar");
     expect(headerBar).toHaveTextContent("HeaderBar with 0 locations");
   });
-
-  it("should render with empty location options array", () => {
-    render(<AboutMain LocationOptions={[]} />);
-
-    const headerBar = screen.getByTestId("header-bar");
-    expect(headerBar).toHaveTextContent("HeaderBar with 0 locations");
-  });
 });

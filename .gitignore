@@ -43,7 +43,7 @@ public
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
+tsconfig.*.json
 certificates
 # Sentry Config File
 .env.sentry-build-plugin

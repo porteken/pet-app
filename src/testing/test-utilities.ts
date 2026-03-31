@@ -47,15 +47,6 @@ export const setupApiServerTest = async () => {
   return { mockCookieStore, mockLinearRegression, mockSupabaseClient };
 };
 
-export const setupActionsTest = async () => {
-  const mockCookieStore = createMockCookieStore();
-
-  const { cookies } = await import("next/headers");
-  vi.mocked(cookies).mockResolvedValue(mockCookieStore as any);
-
-  return { mockCookieStore };
-};
-
 export const clearAllMocks = () => {
   vi.clearAllMocks();
 };

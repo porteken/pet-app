@@ -26,6 +26,16 @@ import {
   TrendGraphDataProperties,
 } from "@/types/types";
 
+function assertQueryData<T>(
+  label: string,
+  data: T | null,
+  error: unknown,
+): asserts data is T {
+  if (error || !data) {
+    throw new DatabaseError(`Failed to fetch ${label} from database`, error);
+  }
+}
+
 export async function FetchCityRankings(year: number): Promise<
   Array<{
     avg_pet: number;
@@ -72,39 +82,11 @@ export async function FetchCityRankings(year: number): Promise<
     supabase.from("pet_change").select("location_id, change"),
   ]);
 
-  if (petAvgError || !petAvg) {
-    throw new DatabaseError(
-      "Failed to fetch PET average data from database",
-      petAvgError,
-    );
-  }
-  if (petMaxError || !petMax) {
-    throw new DatabaseError(
-      "Failed to fetch PET max data from database",
-      petMaxError,
-    );
-  }
-
-  if (locError || !locations) {
-    throw new DatabaseError(
-      "Failed to fetch location data from database",
-      locError,
-    );
-  }
-
-  if (percentileError || !percentiles_data) {
-    throw new DatabaseError(
-      "Failed to fetch percentiles from database",
-      percentileError,
-    );
-  }
-
-  if (futurePetError || !futurePetData) {
-    throw new DatabaseError(
-      "Failed to fetch future PET data from database",
-      futurePetError,
-    );
-  }
+  assertQueryData("PET average data", petAvg, petAvgError);
+  assertQueryData("PET max data", petMax, petMaxError);
+  assertQueryData("location data", locations, locError);
+  assertQueryData("percentiles", percentiles_data, percentileError);
+  assertQueryData("future PET data", futurePetData, futurePetError);
 
   const sanitizedPetAvg = filterRowsWithPositiveLocationId(petAvg);
   const sanitizedPetMax = filterRowsWithPositiveLocationId(petMax);
@@ -148,12 +130,7 @@ export async function FetchCityRankings(year: number): Promise<
     });
   }
 
-  if (petChangeError || !petChangeData) {
-    throw new DatabaseError(
-      "Failed to fetch pet change data from database",
-      petChangeError,
-    );
-  }
+  assertQueryData("pet change data", petChangeData, petChangeError);
 
   const sanitizedPetChangeData =
     filterRowsWithPositiveLocationId(petChangeData);

@@ -34,6 +34,41 @@ interface TrendAnalysisResult {
   snapshot: TrendGraphSnapshot;
 }
 
+function computeForecastHeatStress(
+  forecastData: ForecastGraphData,
+): HeatStressDescription | undefined {
+  if (
+    forecastData.forecastValues.length === 0 ||
+    forecastData.lowerBound10.length === 0 ||
+    forecastData.upperBound90.length === 0
+  ) {
+    return undefined;
+  }
+
+  const finalForecastYear = forecastData.forecastYears.at(-1);
+  const finalForecastValue = forecastData.forecastValues.at(-1);
+  const finalLowerBound10 = forecastData.lowerBound10.at(-1);
+  const finalUpperBound90 = forecastData.upperBound90.at(-1);
+
+  if (
+    finalForecastYear === undefined ||
+    finalForecastValue === undefined ||
+    finalLowerBound10 === undefined ||
+    finalUpperBound90 === undefined ||
+    Number.isNaN(finalLowerBound10) ||
+    Number.isNaN(finalUpperBound90)
+  ) {
+    return undefined;
+  }
+
+  return getForecastHeatStressDescription(
+    finalForecastValue,
+    finalForecastYear,
+    finalLowerBound10,
+    finalUpperBound90,
+  );
+}
+
 export const buildTrendAnalysisResult = async ({
   enableForecast,
   fetchForecastData,
@@ -67,35 +102,10 @@ export const buildTrendAnalysisResult = async ({
   const currentYear = years.at(-1)!;
   const currentPetValue = year_pets[years.length - 1];
 
-  let forecastHeatStress: HeatStressDescription | undefined;
-  if (
-    enableForecast &&
-    forecastData &&
-    forecastData.forecastValues.length > 0 &&
-    forecastData.lowerBound10.length > 0 &&
-    forecastData.upperBound90.length > 0
-  ) {
-    const finalForecastYear = forecastData.forecastYears.at(-1);
-    const finalForecastValue = forecastData.forecastValues.at(-1);
-    const finalLowerBound10 = forecastData.lowerBound10.at(-1);
-    const finalUpperBound90 = forecastData.upperBound90.at(-1);
-
-    if (
-      finalForecastYear !== undefined &&
-      finalForecastValue !== undefined &&
-      finalLowerBound10 !== undefined &&
-      finalUpperBound90 !== undefined &&
-      !Number.isNaN(finalLowerBound10) &&
-      !Number.isNaN(finalUpperBound90)
-    ) {
-      forecastHeatStress = getForecastHeatStressDescription(
-        finalForecastValue,
-        finalForecastYear,
-        finalLowerBound10,
-        finalUpperBound90,
-      );
-    }
-  }
+  const forecastHeatStress =
+    enableForecast && forecastData
+      ? computeForecastHeatStress(forecastData)
+      : undefined;
 
   return {
     forecastHeatStress,

@@ -56,6 +56,46 @@ interface RankingItem {
   state: string;
 }
 
+type SortColumn = "avg_pet" | "change" | "city" | "max_pet" | "rank" | "state";
+
+function compareRankingItems(
+  a: RankingItem,
+  b: RankingItem,
+  column: SortColumn,
+): number {
+  switch (column) {
+    case "avg_pet":
+      return a.avg_pet - b.avg_pet;
+    case "change":
+      return (a.changePerDecade ?? 0) - (b.changePerDecade ?? 0);
+    case "city":
+      return a.city.localeCompare(b.city);
+    case "max_pet":
+      return a.max_pet - b.max_pet;
+    case "rank":
+      return a.rank - b.rank;
+    case "state":
+      return a.state.localeCompare(b.state);
+  }
+}
+
+function filterRanking(
+  item: RankingItem,
+  stateFilter: string,
+  heatStressFilter: string,
+): boolean {
+  if (stateFilter !== "" && item.state !== stateFilter) {
+    return false;
+  }
+  if (heatStressFilter !== "") {
+    const heatStressInfo = getHeatStressInfo(item.avg_pet);
+    if (heatStressInfo.level !== heatStressFilter) {
+      return false;
+    }
+  }
+  return true;
+}
+
 interface RankingsMainProperties {
   initialHeatStress: string;
   initialState: string;
@@ -63,6 +103,26 @@ interface RankingsMainProperties {
   LocationOptions: LocationOptionSection[];
   rankings: RankingItem[];
 }
+
+const SortHeader: React.FC<{
+  column: SortColumn;
+  currentColumn: SortColumn;
+  currentDirection: "asc" | "desc";
+  label: string;
+  onSort: (column: SortColumn) => void;
+}> = ({ column, currentColumn, currentDirection, label, onSort }) => (
+  <th
+    className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
+    onClick={() => onSort(column)}
+  >
+    <div className="flex items-center gap-1">
+      {label}
+      {currentColumn === column && (
+        <span>{currentDirection === "asc" ? "↑" : "↓"}</span>
+      )}
+    </div>
+  </th>
+);
 
 export const RankingsMain: React.FC<RankingsMainProperties> = ({
   initialHeatStress,
@@ -78,13 +138,6 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
   const [stateFilter, setStateFilter] = useState(initialState);
   const [heatStressFilter, setHeatStressFilter] = useState(initialHeatStress);
 
-  type SortColumn =
-    | "avg_pet"
-    | "change"
-    | "city"
-    | "max_pet"
-    | "rank"
-    | "state";
   const [sortColumn, setSortColumn] = useState<SortColumn>("rank");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
@@ -119,53 +172,12 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
   }, [rankings, stateFilter]);
 
   const filteredAndSortedRankings = useMemo(() => {
-    const filtered = rankings.filter(({ avg_pet, state }) => {
-      if (stateFilter !== "" && state !== stateFilter) {
-        return false;
-      }
-
-      if (heatStressFilter !== "") {
-        const heatStressInfo = getHeatStressInfo(avg_pet);
-        if (heatStressInfo.level !== heatStressFilter) {
-          return false;
-        }
-      }
-
-      return true;
-    });
+    const filtered = rankings.filter((item) =>
+      filterRanking(item, stateFilter, heatStressFilter),
+    );
 
     return filtered.toSorted((a, b) => {
-      let comparison = 0;
-
-      switch (sortColumn) {
-        case "avg_pet": {
-          comparison = a.avg_pet - b.avg_pet;
-          break;
-        }
-        case "change": {
-          const aChange = a.changePerDecade ?? 0;
-          const bChange = b.changePerDecade ?? 0;
-          comparison = aChange - bChange;
-          break;
-        }
-        case "city": {
-          comparison = a.city.localeCompare(b.city);
-          break;
-        }
-        case "max_pet": {
-          comparison = a.max_pet - b.max_pet;
-          break;
-        }
-        case "rank": {
-          comparison = a.rank - b.rank;
-          break;
-        }
-        case "state": {
-          comparison = a.state.localeCompare(b.state);
-          break;
-        }
-      }
-
+      const comparison = compareRankingItems(a, b, sortColumn);
       return sortDirection === "asc" ? comparison : -comparison;
     });
   }, [rankings, stateFilter, heatStressFilter, sortColumn, sortDirection]);
@@ -340,75 +352,51 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th
-                      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                      onClick={() => handleSort("rank")}
-                    >
-                      <div className="flex items-center gap-1">
-                        Rank
-                        {sortColumn === "rank" && (
-                          <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
-                        )}
-                      </div>
-                    </th>
-                    <th
-                      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                      onClick={() => handleSort("city")}
-                    >
-                      <div className="flex items-center gap-1">
-                        City
-                        {sortColumn === "city" && (
-                          <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
-                        )}
-                      </div>
-                    </th>
-                    <th
-                      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                      onClick={() => handleSort("state")}
-                    >
-                      <div className="flex items-center gap-1">
-                        State
-                        {sortColumn === "state" && (
-                          <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
-                        )}
-                      </div>
-                    </th>
-                    <th
-                      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                      onClick={() => handleSort("avg_pet")}
-                    >
-                      <div className="flex items-center gap-1">
-                        Avg PET
-                        {sortColumn === "avg_pet" && (
-                          <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
-                        )}
-                      </div>
-                    </th>
-                    <th
-                      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                      onClick={() => handleSort("max_pet")}
-                    >
-                      <div className="flex items-center gap-1">
-                        Max PET
-                        {sortColumn === "max_pet" && (
-                          <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
-                        )}
-                      </div>
-                    </th>
+                    <SortHeader
+                      column="rank"
+                      currentColumn={sortColumn}
+                      currentDirection={sortDirection}
+                      label="Rank"
+                      onSort={handleSort}
+                    />
+                    <SortHeader
+                      column="city"
+                      currentColumn={sortColumn}
+                      currentDirection={sortDirection}
+                      label="City"
+                      onSort={handleSort}
+                    />
+                    <SortHeader
+                      column="state"
+                      currentColumn={sortColumn}
+                      currentDirection={sortDirection}
+                      label="State"
+                      onSort={handleSort}
+                    />
+                    <SortHeader
+                      column="avg_pet"
+                      currentColumn={sortColumn}
+                      currentDirection={sortDirection}
+                      label="Avg PET"
+                      onSort={handleSort}
+                    />
+                    <SortHeader
+                      column="max_pet"
+                      currentColumn={sortColumn}
+                      currentDirection={sortDirection}
+                      label="Max PET"
+                      onSort={handleSort}
+                    />
                     <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                       PET Range (10th-90th percentile)
                     </th>
-                    <th
-                      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-                      onClick={() => handleSort("change")}
-                    >
-                      <div className="flex items-center gap-1">
-                        Change per Decade
-                        {sortColumn === "change" && (
-                          <span>{sortDirection === "asc" ? "↑" : "↓"}</span>
-                        )}
-                      </div>
-                    </th>
+                    <SortHeader
+                      column="change"
+                      currentColumn={sortColumn}
+                      currentDirection={sortDirection}
+                      label="Change per Decade"
+                      onSort={handleSort}
+                    />
                     <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                       2100 Forecast Range
                     </th>

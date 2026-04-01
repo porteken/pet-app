@@ -249,7 +249,8 @@ describe("FetchForecastData", () => {
 
     const mockHistoricalQuery = {
       eq: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue({ data: mockHistoricalData }),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: mockHistoricalData[0] }),
       order: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
     };
@@ -284,7 +285,8 @@ describe("FetchForecastData", () => {
   it("should return undefined when no historical data found", async () => {
     const mockHistoricalQuery = {
       eq: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue({ data: [] }),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null }),
       order: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
     };
@@ -301,7 +303,8 @@ describe("FetchForecastData", () => {
 
     const mockHistoricalQuery = {
       eq: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue({ data: mockHistoricalData }),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: mockHistoricalData[0] }),
       order: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
     };
@@ -329,7 +332,8 @@ describe("FetchForecastData", () => {
 
     const mockHistoricalQuery = {
       eq: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue({ data: mockHistoricalData }),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: mockHistoricalData[0] }),
       order: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
     };
@@ -360,7 +364,8 @@ describe("FetchForecastData", () => {
 
     const mockHistoricalQuery = {
       eq: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue({ data: mockHistoricalData }),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: mockHistoricalData[0] }),
       order: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
     };
@@ -393,7 +398,8 @@ describe("FetchForecastData", () => {
 
     const mockHistoricalQuery = {
       eq: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue({ data: mockHistoricalData }),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: mockHistoricalData[0] }),
       order: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
     };

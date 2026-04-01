@@ -43,19 +43,29 @@ export async function FetchForecastData(
   const response = await apiRequest(async () => {
     const supabase = createClient();
 
-    const { data: historicalData } = (await supabase
+    const { data: historicalData, error: historicalError } = await supabase
       .from("pet_year_avg")
       .select("year")
       .eq("location_id", locationId)
       .order("year", { ascending: false })
-      .limit(1)) as {
-      data: Array<{ year: number | string }> | null;
-    };
+      .limit(1)
+      .maybeSingle();
+
+    if (historicalError) {
+      throw new FetchError(
+        "Database error fetching historical data",
+        historicalError,
+      );
+    }
+
+    if (!historicalData) {
+      return;
+    }
 
     const validatedHistoricalData = parseWithFetchError(
       "Historical year",
       parseHistoricalYearRows,
-      historicalData ?? [],
+      [historicalData],
     );
 
     if (validatedHistoricalData.length === 0) {

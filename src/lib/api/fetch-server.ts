@@ -59,7 +59,9 @@ export async function FetchCityRankings(year: number): Promise<
 
   const { data, error } = await supabase
     .from("city_rankings_view")
-    .select()
+    .select(
+      "avg_pet, change_per_decade, city, future_lower, future_upper, location_id, max_pet, p10, p90, state, year",
+    )
     .eq("year", year);
 
   assertQueryData("city rankings", data, error);
@@ -96,7 +98,7 @@ export const FetchLocations = cache(
 
     const { data: locations, error } = await supabase
       .from("locations")
-      .select();
+      .select("city, lat, lng, location_id, state");
 
     if (error || !locations) {
       throw new DatabaseError(
@@ -159,7 +161,7 @@ export async function FetchReferenceGraphData(
 
   const { data, error } = await supabase
     .from("pet_year")
-    .select()
+    .select("date, location_id, pet, year")
     .eq("location_id", locationId)
     .eq("year", year)
     .order("date", { ascending: true });
@@ -199,7 +201,7 @@ export async function FetchTrendGraphData(
 
   const { data, error } = await supabase
     .from(`pet_year_${option}`)
-    .select()
+    .select("location_id, pet, year")
     .eq("location_id", locationId)
     .order("year", { ascending: true });
 

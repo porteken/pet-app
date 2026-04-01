@@ -2,9 +2,13 @@ import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
 import type { Metadata } from "next";
+import { Geist } from "next/font/google";
 import * as React from "react";
 
 import { AppProviders } from "@/components/app/providers";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   description: "Physiological Equivalent Temperature data for US cities",
@@ -17,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn("font-sans", geist.variable)}>
       <body suppressHydrationWarning>
         <a className="skip-link" href="#main-content">
           Skip to main content

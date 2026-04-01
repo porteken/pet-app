@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import React, { memo, useId, type ReactNode } from "react";
+import React, { memo, useEffect, useId, useRef, type ReactNode } from "react";
 
 import { cn } from "@/lib/utilities";
 
@@ -26,6 +26,52 @@ const Modal = memo<ModalProperties>(
     title,
   }) => {
     const titleId = useId();
+    const dialogReference = useRef<HTMLDialogElement>(null);
+
+    useEffect(() => {
+      if (!open || !dialogReference.current) {
+        return;
+      }
+
+      const dialog = dialogReference.current;
+      const focusableSelector =
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+      const focusableElements = Array.from(
+        dialog.querySelectorAll<HTMLElement>(focusableSelector),
+      ).filter((element) => !element.hasAttribute("disabled"));
+
+      focusableElements[0]?.focus();
+
+      const handleKeydown = (event: KeyboardEvent) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          onClose();
+          return;
+        }
+
+        if (event.key !== "Tab" || focusableElements.length === 0) {
+          return;
+        }
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements.at(-1);
+        const activeElement = document.activeElement;
+
+        if (event.shiftKey && activeElement === firstElement) {
+          event.preventDefault();
+          lastElement?.focus();
+        } else if (!event.shiftKey && activeElement === lastElement) {
+          event.preventDefault();
+          firstElement?.focus();
+        }
+      };
+
+      dialog.addEventListener("keydown", handleKeydown);
+
+      return () => {
+        dialog.removeEventListener("keydown", handleKeydown);
+      };
+    }, [onClose, open]);
 
     if (!open) {
       return null;
@@ -53,6 +99,7 @@ const Modal = memo<ModalProperties>(
         />
         <dialog
           aria-labelledby={titleId}
+          aria-modal="true"
           className={cn(
             mobileFullscreen
               ? "inset-0 h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 overflow-y-auto rounded-none border-0 bg-white p-3 shadow-lg sm:top-1/2 sm:left-1/2 sm:h-auto sm:max-h-[95dvh] sm:w-[calc(100%-2rem)] sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg sm:border sm:border-gray-200 sm:p-4 lg:p-5"
@@ -64,10 +111,8 @@ const Modal = memo<ModalProperties>(
             event.preventDefault();
             onClose();
           }}
-          onClick={(event) => {
-            event.stopPropagation();
-          }}
           open
+          ref={dialogReference}
         >
           <h2
             className={

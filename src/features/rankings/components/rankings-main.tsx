@@ -244,7 +244,7 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderBar LocationOptions={LocationOptions} />
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <main className="mx-auto max-w-7xl px-4 py-8" id="main-content">
         <div className="mb-8">
           <h1 className="mb-2 text-3xl font-bold text-gray-900">
             Cities ranked by Average PET

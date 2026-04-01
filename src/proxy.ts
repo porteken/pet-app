@@ -8,7 +8,7 @@ export function proxy(request: NextRequest) {
     return new NextResponse(undefined, { status: 404 });
   }
 
-  const knownRoutes = ["/about", "/map", "/rankings"];
+  const knownRoutes = ["/about", "/map", "/monitoring", "/rankings"];
   if (knownRoutes.includes(pathname)) {
     return NextResponse.next();
   }

@@ -139,16 +139,25 @@ const getGraphFillHeightClass = (useCompactDesktopHeight: boolean): string =>
     ? "h-[clamp(220px,42vh,520px)] sm:h-[clamp(300px,45vh,500px)]"
     : "h-[clamp(220px,42vh,520px)] sm:h-[clamp(450px,70vh,850px)]";
 
-const Plot = dynamic(() => import("react-plotly.js"), {
-  loading: () => (
-    <div
-      className={`flex items-center justify-center text-gray-500 ${getGraphFillHeightClass(false)}`}
-    >
-      Loading chart...
-    </div>
-  ),
-  ssr: false,
-});
+const Plot = dynamic(
+  async () => {
+    const createPlotlyComponent = (await import("react-plotly.js/factory"))
+      .default;
+    const Plotly = (await import("plotly.js-basic-dist-min")).default;
+
+    return createPlotlyComponent(Plotly as never);
+  },
+  {
+    loading: () => (
+      <div
+        className={`flex items-center justify-center text-gray-500 ${getGraphFillHeightClass(false)}`}
+      >
+        Loading chart...
+      </div>
+    ),
+    ssr: false,
+  },
+);
 
 const PlotWrapper: React.FC<{
   config: PlotlyConfig;

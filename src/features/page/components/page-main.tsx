@@ -32,7 +32,7 @@ const Main: FC<PageProperties> = ({
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderBar id={id} LocationOptions={LocationOptions} />
-      <main className="mx-auto max-w-full px-4 py-8">
+      <main className="mx-auto max-w-full px-4 py-8" id="main-content">
         <PageHeader location={location} />
 
         <div className="flex flex-col gap-8 lg:flex-row">

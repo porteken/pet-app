@@ -32,6 +32,7 @@ const mockPush = vi.fn();
 const mockToString = vi.fn().mockReturnValue("");
 
 vi.mock("next/navigation", () => ({
+  usePathname: vi.fn().mockReturnValue("/"),
   useRouter: () => ({
     back: vi.fn(),
     forward: vi.fn(),

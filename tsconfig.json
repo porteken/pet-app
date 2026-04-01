@@ -20,7 +20,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "plotly.js-basic-dist-min": ["./src/types/plotly-js-basic-dist-min.d.ts"]
     },
     "target": "ES2023"
   },

@@ -125,6 +125,28 @@ const buildPetYearRows = () => {
 const petYearRows = buildPetYearRows();
 
 const MOCK_TABLES: Record<string, MockRow[]> = {
+  city_rankings_view: LOCATIONS.flatMap((location) =>
+    YEARS.map((year) => {
+      const avg = getAveragePet(location.location_id, year);
+      const forecastPet = round(
+        getAveragePet(location.location_id, 2025) +
+          (2100 - 2025) * location.trendPerYear,
+      );
+      return {
+        avg_pet: avg,
+        change_per_decade: round(location.trendPerYear * 10),
+        city: location.city,
+        future_lower: round(forecastPet - 2.2),
+        future_upper: round(forecastPet + 2.2),
+        location_id: location.location_id,
+        max_pet: getMaxPet(location.location_id, year),
+        p10: round(avg - 2.5),
+        p90: round(avg + 2.5),
+        state: location.state,
+        year,
+      };
+    }),
+  ),
   locations: LOCATIONS.map(({ city, lat, lng, location_id, state }) => ({
     city,
     lat,

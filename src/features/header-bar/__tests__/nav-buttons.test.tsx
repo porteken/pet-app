@@ -41,6 +41,10 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+vi.mock("next/navigation", () => ({
+  usePathname: vi.fn().mockReturnValue("/"),
+}));
+
 describe("NavButtons", () => {
   const mockBuildUrl = vi.fn().mockImplementation((path) => path);
 

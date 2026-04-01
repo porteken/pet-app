@@ -20,6 +20,7 @@ export const DatabaseError: React.FC<DatabaseErrorProperties> = ({
       <div className="mx-auto max-w-md p-6 text-center">
         <div className="mb-6">
           <svg
+            aria-hidden="true"
             className="mx-auto size-12 text-red-500"
             fill="none"
             stroke="currentColor"

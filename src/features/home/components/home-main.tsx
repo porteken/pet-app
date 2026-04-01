@@ -221,13 +221,16 @@ const Home: FC<MapProperties> = ({
       <div className="z-10010 shrink-0">
         <HeaderBar LocationOptions={LocationOptions} />
       </div>
-      <div className="relative min-h-0 flex-1 overflow-hidden">
+      <main
+        className="relative min-h-0 flex-1 overflow-hidden"
+        id="main-content"
+      >
         <MapComponent
           locations={locations}
           onMarkerClick={handleMarkerClick}
           selectedGraphMeasure={selectedGraphMeasure}
         />
-      </div>
+      </main>
       <Modal
         dialogClassName={desktopDialogHeightClass}
         mobileFullscreen

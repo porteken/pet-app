@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { waitForLocationDetailsPage } from "./utils/map-page";
+
 const MARKER_SELECTOR = ".pet-map-marker-icon, .leaflet-marker-icon";
 
 test.describe("Accessibility", () => {
@@ -11,10 +13,7 @@ test.describe("Accessibility", () => {
     await page.keyboard.press("Tab");
 
     await page.goto("/1");
-
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
-      timeout: 15_000,
-    });
+    await waitForLocationDetailsPage(page, /\/1(?:\?.*)?$/);
 
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");

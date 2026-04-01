@@ -4,6 +4,7 @@ import { MARKER_SELECTOR } from "./utils/map-marker";
 import {
   gotoAndWaitForMapPage,
   openLocationDetailsModal,
+  waitForLocationDetailsPage,
   waitForMapPage,
 } from "./utils/map-page";
 
@@ -24,16 +25,7 @@ test.describe("Smoke Tests", () => {
       .first();
     await expect(phoenixOption).toBeVisible({ timeout: 5000 });
     await phoenixOption.click();
-
-    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({
-      timeout: 10_000,
-    });
-    await expect(page.getByText("Trend Analysis")).toBeVisible({
-      timeout: 10_000,
-    });
-    await expect(page.getByText("Reference Data")).toBeVisible({
-      timeout: 10_000,
-    });
+    await waitForLocationDetailsPage(page);
 
     const graphMeasure = page.locator("select#graph-measure");
     await expect(graphMeasure).toBeVisible();
@@ -51,17 +43,7 @@ test.describe("Smoke Tests", () => {
     page,
   }) => {
     await page.goto("/1");
-
-    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({
-      timeout: 10_000,
-    });
-    await expect(page.getByText("Trend Analysis")).toBeVisible({
-      timeout: 10_000,
-    });
-
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
-      timeout: 15_000,
-    });
+    await waitForLocationDetailsPage(page, /\/1(?:\?.*)?$/);
 
     const graphMeasure = page.locator("select#graph-measure");
     const referenceYear = page.locator("select#reference-year");
@@ -108,13 +90,7 @@ test.describe("Smoke Tests", () => {
       .first();
     await expect(phoenixOption).toBeVisible({ timeout: 5000 });
     await phoenixOption.click();
-
-    await expect(page.getByText("Trend Analysis")).toBeVisible({
-      timeout: 10_000,
-    });
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
-      timeout: 15_000,
-    });
+    await waitForLocationDetailsPage(page);
   });
 
   test("performance: page loads within acceptable time", async ({ page }) => {

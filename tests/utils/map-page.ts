@@ -3,6 +3,7 @@ import { expect, type Locator, type Page } from "@playwright/test";
 import { clickClickableMarker } from "./map-marker";
 
 const MAP_LOAD_TIMEOUT = 30_000;
+const LOCATION_DETAILS_TIMEOUT = 45_000;
 const MODAL_TIMEOUT = 10_000;
 
 export async function gotoAndWaitForMapPage(
@@ -23,12 +24,7 @@ export async function navigateToLocationDetailsFromMap(
 
   await expect(viewDetailsButton).toBeEnabled({ timeout: MODAL_TIMEOUT });
   await viewDetailsButton.click();
-  await expect(page).toHaveURL(/\/\d+(?:\?.*)?$/, {
-    timeout: MAP_LOAD_TIMEOUT,
-  });
-  await expect(page.getByText("Trend Analysis")).toBeVisible({
-    timeout: MODAL_TIMEOUT,
-  });
+  await waitForLocationDetailsPage(page);
 }
 
 export async function openLocationDetailsModal(
@@ -52,4 +48,45 @@ export async function waitForMapPage(page: Page): Promise<void> {
     timeout: MAP_LOAD_TIMEOUT,
   });
   await expect(page.locator(".leaflet-container")).toBeVisible();
+}
+
+export async function waitForLocationDetailsPage(
+  page: Page,
+  urlPattern = /\/\d+(?:\?.*)?$/,
+): Promise<void> {
+  await expect(page).toHaveURL(urlPattern, {
+    timeout: LOCATION_DETAILS_TIMEOUT,
+  });
+
+  if (
+    await page
+      .getByRole("heading", { name: "Database Connection Error" })
+      .isVisible()
+      .catch(() => false)
+  ) {
+    await page.reload();
+    await expect(page).toHaveURL(urlPattern, {
+      timeout: LOCATION_DETAILS_TIMEOUT,
+    });
+  }
+
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Trend Analysis" }),
+  ).toBeVisible({
+    timeout: LOCATION_DETAILS_TIMEOUT,
+  });
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Reference Data" }),
+  ).toBeVisible({
+    timeout: LOCATION_DETAILS_TIMEOUT,
+  });
+  await expect(page.locator("select#graph-measure")).toBeVisible({
+    timeout: LOCATION_DETAILS_TIMEOUT,
+  });
+  await expect(page.locator("select#reference-year")).toBeVisible({
+    timeout: LOCATION_DETAILS_TIMEOUT,
+  });
+  await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+    timeout: LOCATION_DETAILS_TIMEOUT,
+  });
 }

@@ -49,9 +49,9 @@ interface RankingItem {
   FutureValueLower: number | undefined;
   FutureValueUpper: number | undefined;
   location_id: number;
-  max_pet: number;
-  p10: number;
-  p90: number;
+  max_pet: number | undefined;
+  p10: number | undefined;
+  p90: number | undefined;
   rank: number;
   state: string;
 }
@@ -71,7 +71,7 @@ function compareRankingItems(
     case "city":
       return a.city.localeCompare(b.city);
     case "max_pet":
-      return a.max_pet - b.max_pet;
+      return (a.max_pet ?? 0) - (b.max_pet ?? 0);
     case "rank":
       return a.rank - b.rank;
     case "state":
@@ -418,7 +418,6 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                       state,
                     }) => {
                       const avgheatStressInfo = getHeatStressInfo(avg_pet);
-                      const maxheatStressInfo = getHeatStressInfo(max_pet);
 
                       return (
                         <tr
@@ -444,14 +443,22 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            <span
-                              className={`font-semibold ${maxheatStressInfo.color}`}
-                            >
-                              {max_pet.toFixed(1)}°C
-                            </span>
+                            {max_pet === undefined ? (
+                              <span className="text-gray-400">N/A</span>
+                            ) : (
+                              <span
+                                className={`font-semibold ${getHeatStressInfo(max_pet).color}`}
+                              >
+                                {max_pet.toFixed(1)}°C
+                              </span>
+                            )}
                           </td>
                           <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                            {getPetRange(p10, p90)}°C
+                            {p10 !== undefined && p90 !== undefined ? (
+                              `${getPetRange(p10, p90)}°C`
+                            ) : (
+                              <span className="text-gray-400">N/A</span>
+                            )}
                           </td>
                           <td className="px-6 py-4 text-sm whitespace-nowrap">
                             {changePerDecade === undefined ? (

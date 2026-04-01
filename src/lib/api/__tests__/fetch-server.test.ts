@@ -10,13 +10,18 @@ import {
   FetchTrendGraphData,
 } from "../fetch-server";
 
-type CityRankingsFixture = {
-  change: RankingChangeRow[];
-  forecast: RankingForecastRow[];
-  locations: RankingLocationRow[];
-  percentiles: RankingPercentileRow[];
-  petAvg: RankingPetRow[];
-  petMax: RankingPetRow[];
+type RankingViewRow = {
+  avg_pet: number;
+  change_per_decade: number | null;
+  city: string;
+  future_lower: number | null;
+  future_upper: number | null;
+  location_id: number;
+  max_pet: number;
+  p10: number;
+  p90: number;
+  state: string;
+  year: number;
 };
 
 type MockSupabaseClient = ReturnType<
@@ -27,17 +32,6 @@ type QueryResponse<T> = {
   data: T | undefined;
   error: Error | undefined;
 };
-
-type RankingChangeRow = { change: number; location_id: number };
-type RankingForecastRow = { location_id: number; lower: number; upper: number };
-type RankingLocationRow = { city: string; location_id: number; state: string };
-type RankingPercentileRow = {
-  location_id: number;
-  p10: number;
-  p90: number;
-  year: number;
-};
-type RankingPetRow = { location_id: number; pet: number };
 
 const createSuccessResponse = <T>(data: T): QueryResponse<T> => ({
   data,
@@ -59,63 +53,28 @@ const createEqQuery = <T>({ data, error }: QueryResponse<T>) => ({
   select: vi.fn().mockReturnThis(),
 });
 
-const createSelectQuery = <T>({ data, error }: QueryResponse<T>) => ({
-  select: vi.fn().mockResolvedValue({ data, error }),
-});
-
-const createCityRankingsFixture = (
-  overrides: Partial<CityRankingsFixture> = {},
-): CityRankingsFixture => ({
-  change: [{ change: 1.5, location_id: 1 }],
-  forecast: [{ location_id: 1, lower: 38, upper: 42 }],
-  locations: [{ city: "Phoenix", location_id: 1, state: "Arizona" }],
-  percentiles: [{ location_id: 1, p10: 32, p90: 38, year: 2024 }],
-  petAvg: [{ location_id: 1, pet: 35.5 }],
-  petMax: [{ location_id: 1, pet: 40.5 }],
+const createViewRow = (
+  overrides: Partial<RankingViewRow> = {},
+): RankingViewRow => ({
+  avg_pet: 35.5,
+  change_per_decade: 1.5,
+  city: "Phoenix",
+  future_lower: 38,
+  future_upper: 42,
+  location_id: 1,
+  max_pet: 40.5,
+  p10: 32,
+  p90: 38,
+  state: "Arizona",
+  year: 2024,
   ...overrides,
 });
 
-const queueCityRankingsResponses = (
+const queueCityRankingsViewResponse = (
   mockSupabaseClient: MockSupabaseClient,
-  {
-    change,
-    fixture = createCityRankingsFixture(),
-    forecast,
-    locations,
-    percentiles,
-    petAvg,
-    petMax,
-  }: {
-    change?: QueryResponse<CityRankingsFixture["change"]>;
-    fixture?: CityRankingsFixture;
-    forecast?: QueryResponse<CityRankingsFixture["forecast"]>;
-    locations?: QueryResponse<CityRankingsFixture["locations"]>;
-    percentiles?: QueryResponse<CityRankingsFixture["percentiles"]>;
-    petAvg?: QueryResponse<CityRankingsFixture["petAvg"]>;
-    petMax?: QueryResponse<CityRankingsFixture["petMax"]>;
-  } = {},
+  response: QueryResponse<RankingViewRow[]>,
 ) => {
-  mockSupabaseClient.from
-    .mockReturnValueOnce(
-      createEqQuery(petAvg ?? createSuccessResponse(fixture.petAvg)),
-    )
-    .mockReturnValueOnce(
-      createEqQuery(petMax ?? createSuccessResponse(fixture.petMax)),
-    )
-    .mockReturnValueOnce(
-      createSelectQuery(locations ?? createSuccessResponse(fixture.locations)),
-    )
-    .mockReturnValueOnce(
-      createEqQuery(percentiles ?? createSuccessResponse(fixture.percentiles)),
-    )
-    .mockReturnValueOnce(
-      createEqQuery(forecast ?? createSuccessResponse(fixture.forecast)),
-    )
-    .mockReturnValueOnce(
-      createSelectQuery(change ?? createSuccessResponse(fixture.change)),
-    );
-
-  return fixture;
+  mockSupabaseClient.from.mockReturnValueOnce(createEqQuery(response));
 };
 
 describe("fetch-server", () => {
@@ -134,34 +93,30 @@ describe("fetch-server", () => {
 
   describe("FetchCityRankings", () => {
     it("should fetch and rank city data successfully", async () => {
-      queueCityRankingsResponses(mockSupabaseClient, {
-        fixture: createCityRankingsFixture({
-          change: [
-            { change: 1.5, location_id: 1 },
-            { change: 1.2, location_id: 2 },
-          ],
-          forecast: [
-            { location_id: 1, lower: 38, upper: 42 },
-            { location_id: 2, lower: 33, upper: 37 },
-          ],
-          locations: [
-            { city: "Phoenix", location_id: 1, state: "Arizona" },
-            { city: "Austin", location_id: 2, state: "Texas" },
-          ],
-          percentiles: [
-            { location_id: 1, p10: 32, p90: 38, year: 2024 },
-            { location_id: 2, p10: 28, p90: 34, year: 2024 },
-          ],
-          petAvg: [
-            { location_id: 1, pet: 35.5 },
-            { location_id: 2, pet: 30.2 },
-          ],
-          petMax: [
-            { location_id: 1, pet: 40.5 },
-            { location_id: 2, pet: 38.2 },
-          ],
+      const rows = [
+        createViewRow({
+          avg_pet: 35.5,
+          city: "Phoenix",
+          location_id: 1,
+          state: "Arizona",
         }),
-      });
+        createViewRow({
+          avg_pet: 30.2,
+          city: "Austin",
+          location_id: 2,
+          max_pet: 38.2,
+          p10: 28,
+          p90: 34,
+          change_per_decade: 1.2,
+          future_lower: 33,
+          future_upper: 37,
+          state: "Texas",
+        }),
+      ];
+      queueCityRankingsViewResponse(
+        mockSupabaseClient,
+        createSuccessResponse(rows),
+      );
 
       const result = await FetchCityRankings(2024);
 
@@ -182,48 +137,6 @@ describe("fetch-server", () => {
       expect(result[1].rank).toBe(2);
     });
 
-    it("should ignore locations with non-positive location_id", async () => {
-      queueCityRankingsResponses(mockSupabaseClient, {
-        fixture: createCityRankingsFixture({
-          change: [
-            { change: 99, location_id: 0 },
-            { change: 1.5, location_id: 1 },
-            { change: 1.2, location_id: 2 },
-          ],
-          forecast: [
-            { location_id: 0, lower: 999, upper: 1000 },
-            { location_id: 1, lower: 38, upper: 42 },
-            { location_id: 2, lower: 33, upper: 37 },
-          ],
-          locations: [
-            { city: "Invalid City", location_id: 0, state: "Nowhere" },
-            { city: "Phoenix", location_id: 1, state: "Arizona" },
-            { city: "Austin", location_id: 2, state: "Texas" },
-          ],
-          percentiles: [
-            { location_id: 0, p10: 999, p90: 1000, year: 2024 },
-            { location_id: 1, p10: 32, p90: 38, year: 2024 },
-            { location_id: 2, p10: 28, p90: 34, year: 2024 },
-          ],
-          petAvg: [
-            { location_id: 0, pet: 999.9 },
-            { location_id: 1, pet: 35.5 },
-            { location_id: 2, pet: 30.2 },
-          ],
-          petMax: [
-            { location_id: 0, pet: 999.9 },
-            { location_id: 1, pet: 40.5 },
-            { location_id: 2, pet: 38.2 },
-          ],
-        }),
-      });
-
-      const result = await FetchCityRankings(2024);
-
-      expect(result).toHaveLength(2);
-      expect(result.some((row) => row.location_id === 0)).toBe(false);
-    });
-
     it("should throw error for invalid year", async () => {
       await expect(FetchCityRankings(1999)).rejects.toThrow(
         new DatabaseError("Invalid year: 1999. Must be between 2000 and 2100."),
@@ -236,86 +149,38 @@ describe("fetch-server", () => {
       );
     });
 
-    it("should handle missing petAvg data", async () => {
-      queueCityRankingsResponses(mockSupabaseClient, {
-        petAvg: createMissingResponse(),
-      });
+    it("should handle missing data from view", async () => {
+      queueCityRankingsViewResponse(
+        mockSupabaseClient,
+        createMissingResponse(),
+      );
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError("Failed to fetch PET average data from database"),
+        new DatabaseError("Failed to fetch city rankings from database"),
       );
     });
 
-    it("should handle petAvg database error", async () => {
+    it("should handle database error from view", async () => {
       const mockError = new Error("Database connection failed");
-      queueCityRankingsResponses(mockSupabaseClient, {
-        petAvg: createFailedResponse(mockError),
-      });
+      queueCityRankingsViewResponse(
+        mockSupabaseClient,
+        createFailedResponse(mockError),
+      );
 
       await expect(FetchCityRankings(2024)).rejects.toThrow(
         new DatabaseError(
-          "Failed to fetch PET average data from database",
+          "Failed to fetch city rankings from database",
           mockError,
         ),
       );
     });
 
-    it("should handle missing petMax data", async () => {
-      queueCityRankingsResponses(mockSupabaseClient, {
-        petMax: createMissingResponse(),
-      });
-
-      await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError("Failed to fetch PET max data from database"),
+    it("should handle rows with null forecast values", async () => {
+      const rows = [createViewRow({ future_lower: null, future_upper: null })];
+      queueCityRankingsViewResponse(
+        mockSupabaseClient,
+        createSuccessResponse(rows),
       );
-    });
-
-    it("should handle missing locations data", async () => {
-      queueCityRankingsResponses(mockSupabaseClient, {
-        locations: createMissingResponse(),
-      });
-
-      await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError("Failed to fetch location data from database"),
-      );
-    });
-
-    it("should handle missing percentiles data", async () => {
-      queueCityRankingsResponses(mockSupabaseClient, {
-        percentiles: createMissingResponse(),
-      });
-
-      await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError("Failed to fetch percentiles from database"),
-      );
-    });
-
-    it("should handle missing future PET data", async () => {
-      queueCityRankingsResponses(mockSupabaseClient, {
-        forecast: createMissingResponse(),
-      });
-
-      await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError("Failed to fetch future PET data from database"),
-      );
-    });
-
-    it("should handle missing pet change data", async () => {
-      queueCityRankingsResponses(mockSupabaseClient, {
-        change: createMissingResponse(),
-      });
-
-      await expect(FetchCityRankings(2024)).rejects.toThrow(
-        new DatabaseError("Failed to fetch pet change data from database"),
-      );
-    });
-
-    it("should handle cities with null forecast values", async () => {
-      queueCityRankingsResponses(mockSupabaseClient, {
-        fixture: createCityRankingsFixture({
-          forecast: [],
-        }),
-      });
 
       const result = await FetchCityRankings(2024);
 
@@ -323,16 +188,34 @@ describe("fetch-server", () => {
       expect(result[0].FutureValueUpper).toBeUndefined();
     });
 
-    it("should handle cities with null change values", async () => {
-      queueCityRankingsResponses(mockSupabaseClient, {
-        fixture: createCityRankingsFixture({
-          change: [],
-        }),
-      });
+    it("should handle rows with null change values", async () => {
+      const rows = [createViewRow({ change_per_decade: null })];
+      queueCityRankingsViewResponse(
+        mockSupabaseClient,
+        createSuccessResponse(rows),
+      );
 
       const result = await FetchCityRankings(2024);
 
       expect(result[0].changePerDecade).toBeUndefined();
+    });
+
+    it("should sort by avg_pet descending and assign ranks", async () => {
+      const rows = [
+        createViewRow({ avg_pet: 20, location_id: 1 }),
+        createViewRow({ avg_pet: 40, location_id: 2 }),
+        createViewRow({ avg_pet: 30, location_id: 3 }),
+      ];
+      queueCityRankingsViewResponse(
+        mockSupabaseClient,
+        createSuccessResponse(rows),
+      );
+
+      const result = await FetchCityRankings(2024);
+
+      expect(result[0]).toMatchObject({ location_id: 2, rank: 1, avg_pet: 40 });
+      expect(result[1]).toMatchObject({ location_id: 3, rank: 2, avg_pet: 30 });
+      expect(result[2]).toMatchObject({ location_id: 1, rank: 3, avg_pet: 20 });
     });
   });
 

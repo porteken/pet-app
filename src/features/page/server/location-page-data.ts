@@ -156,8 +156,10 @@ export const loadLocationPageData = async (
     };
   }
 
-  const preferences = await getPreferencesFromCookies();
-  const locationData = await fetchLocationData();
+  const [preferences, locationData] = await Promise.all([
+    getPreferencesFromCookies(),
+    fetchLocationData(),
+  ]);
 
   if (!locationData) {
     return {

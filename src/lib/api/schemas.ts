@@ -42,33 +42,18 @@ const locationRowSchema = z.object({
   state: z.string().min(1),
 });
 
-const rankingPetRowSchema = z.object({
-  location_id: positiveIntegerSchema,
-  pet: finiteNumberSchema,
-});
-
-const rankingLocationRowSchema = z.object({
+const rankingViewRowSchema = z.object({
+  avg_pet: finiteNumberSchema,
+  change_per_decade: finiteNumberSchema.nullable(),
   city: z.string().min(1),
+  future_lower: finiteNumberSchema.nullable(),
+  future_upper: finiteNumberSchema.nullable(),
   location_id: positiveIntegerSchema,
+  max_pet: finiteNumberSchema.nullable(),
+  p10: finiteNumberSchema.nullable(),
+  p90: finiteNumberSchema.nullable(),
   state: z.string().min(1),
-});
-
-const rankingPercentileRowSchema = z.object({
-  location_id: positiveIntegerSchema,
-  p10: finiteNumberSchema,
-  p90: finiteNumberSchema,
   year: yearSchema,
-});
-
-const rankingForecastRowSchema = z.object({
-  location_id: positiveIntegerSchema,
-  lower: finiteNumberSchema,
-  upper: finiteNumberSchema,
-});
-
-const rankingChangeRowSchema = z.object({
-  change: finiteNumberSchema,
-  location_id: positiveIntegerSchema,
 });
 
 const formatIssuePath = (issuePath: PropertyKey[]) =>
@@ -104,20 +89,8 @@ export const parseHistoricalYearRows = (rows: unknown) =>
 export const parseLocationRows = (rows: unknown) =>
   z.array(locationRowSchema).parse(rows);
 
-export const parseRankingPetRows = (rows: unknown) =>
-  z.array(rankingPetRowSchema).parse(rows);
-
-export const parseRankingLocationRows = (rows: unknown) =>
-  z.array(rankingLocationRowSchema).parse(rows);
-
-export const parseRankingPercentileRows = (rows: unknown) =>
-  z.array(rankingPercentileRowSchema).parse(rows);
-
-export const parseRankingForecastRows = (rows: unknown) =>
-  z.array(rankingForecastRowSchema).parse(rows);
-
-export const parseRankingChangeRows = (rows: unknown) =>
-  z.array(rankingChangeRowSchema).parse(rows);
+export const parseRankingViewRows = (rows: unknown) =>
+  z.array(rankingViewRowSchema).parse(rows);
 
 export const isSchemaValidationError = (error: unknown): error is ZodError =>
   error instanceof ZodError;

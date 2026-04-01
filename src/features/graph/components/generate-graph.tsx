@@ -143,7 +143,7 @@ const Plot = dynamic(
   async () => {
     const createPlotlyComponent = (await import("react-plotly.js/factory"))
       .default;
-    const Plotly = (await import("plotly.js-basic-dist-min")).default;
+    const Plotly = await import("plotly.js-basic-dist-min");
 
     return createPlotlyComponent(Plotly as never);
   },

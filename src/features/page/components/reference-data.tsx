@@ -4,6 +4,7 @@ import React from "react";
 
 import { GenerateReferenceGraph } from "@/features/graph";
 import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
+import { YearOptions } from "@/lib/utils/select-options";
 
 interface ReferenceDataProperties {
   CurrentDates: Date[];
@@ -18,8 +19,6 @@ interface ReferenceGraphSnapshot {
   year: string;
 }
 
-const REFERENCE_YEARS = Array.from({ length: 25 }, (_, index) => 2000 + index);
-
 const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   CurrentDates,
   CurrentPets,
@@ -27,6 +26,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   ReferencePets,
 }) => {
   const DEFAULT_REFERENCE_YEAR = "2000";
+  const REFERENCE_YEARS = React.useMemo(() => YearOptions(), []);
   const [selectedReferenceYear, setSelectedReferenceYear] = React.useState(
     DEFAULT_REFERENCE_YEAR,
   );
@@ -142,9 +142,9 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
             onChange={handleReferenceYearChange}
             value={selectedReferenceYear}
           >
-            {REFERENCE_YEARS.map((year) => (
-              <option key={`year-${year}`} value={year.toString()}>
-                {year}
+            {REFERENCE_YEARS.map((option) => (
+              <option key={`year-${option.key}`} value={option.key}>
+                {option.label}
               </option>
             ))}
           </select>

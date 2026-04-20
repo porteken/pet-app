@@ -50,7 +50,7 @@ export default defineConfig({
   },
 
   webServer: {
-    command: "npm run dev",
+    command: "pnpm dev",
     cwd: projectRoot,
     env: {
       NEXT_PUBLIC_E2E_TEST: "true",

@@ -9,7 +9,7 @@ A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) 
 - **Measure Selection**: Switch between average and maximum PET.
 - **Forecasting**: Show 5-75 year forecasts for average PET with confidence ranges.
 - **City Detail Pages**: Open a city page with trend and reference charts.
-- **Reference Comparison**: Compare 2025 PET with a selected year (2000-2024).
+- **Reference Comparison**: Compare 2025 PET with a selected year (2000-2023).
 - **Rankings**: View cites ranked by PET.
 
 ## What is PET?

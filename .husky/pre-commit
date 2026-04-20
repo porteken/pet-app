@@ -1,10 +1,10 @@
 echo "Running pre-commit checks..."
 
-npx knip --fix --allow-remove-files
-npx lint-staged
+pnpm exec knip --fix --allow-remove-files
+pnpm exec lint-staged
 
-npm run test:unit
+pnpm run test:unit
 
-npm run test:integration
+pnpm run test:integration
 
 echo "Pre-commit checks passed!"

@@ -6,6 +6,7 @@ import {
   FetchTrendGraphData,
 } from "@/lib/api/fetch-server";
 import {
+  DEFAULT_REFERENCE_YEAR,
   DEFAULT_GRAPH_SEASON,
   DEFAULT_FORECAST_ENABLED,
   DEFAULT_FORECAST_YEARS_AHEAD,
@@ -14,11 +15,14 @@ import {
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
   GRAPH_MEASURE_COOKIE_NAME,
   GRAPH_SEASON_COOKIE_NAME,
+  REFERENCE_YEAR_COOKIE_NAME,
   MAX_FORECAST_YEARS_AHEAD,
   MIN_FORECAST_YEARS_AHEAD,
   normalizeGraphSeason,
   type GraphSeason,
 } from "@/lib/constants";
+import { getLatestCookieValue } from "@/lib/utils/server-cookies";
+import { validateYear } from "@/lib/utils/validation";
 import type { LocationOptionSection, LocationProperties } from "@/types/types";
 
 import type { PageProperties } from "../model/types";
@@ -56,6 +60,7 @@ interface LocationPagePreferences {
   initialForecastYearsAhead: number;
   initialGraphMeasure: string;
   initialGraphSeason: GraphSeason;
+  initialReferenceYear: string;
 }
 
 const parseLocationId = (id: string): number | undefined => {
@@ -71,18 +76,27 @@ const getPreferencesFromCookies =
   async (): Promise<LocationPagePreferences> => {
     const cookieStore = await cookies();
     const initialGraphMeasure =
-      cookieStore.get(GRAPH_MEASURE_COOKIE_NAME)?.value ||
+      getLatestCookieValue(cookieStore, GRAPH_MEASURE_COOKIE_NAME) ||
       DEFAULT_GRAPH_MEASURE;
     const initialGraphSeason = normalizeGraphSeason(
-      cookieStore.get(GRAPH_SEASON_COOKIE_NAME)?.value || DEFAULT_GRAPH_SEASON,
+      getLatestCookieValue(cookieStore, GRAPH_SEASON_COOKIE_NAME) ||
+        DEFAULT_GRAPH_SEASON,
     );
+    const rawReferenceYear = getLatestCookieValue(
+      cookieStore,
+      REFERENCE_YEAR_COOKIE_NAME,
+    );
+    const initialReferenceYear =
+      rawReferenceYear && validateYear(rawReferenceYear)
+        ? rawReferenceYear
+        : DEFAULT_REFERENCE_YEAR;
     const initialForecastEnabled =
-      cookieStore.get(FORECAST_ENABLED_COOKIE_NAME)?.value === "true"
+      getLatestCookieValue(cookieStore, FORECAST_ENABLED_COOKIE_NAME) === "true"
         ? true
         : DEFAULT_FORECAST_ENABLED;
 
     const rawForecastYearsAhead = Number(
-      cookieStore.get(FORECAST_YEARS_AHEAD_COOKIE_NAME)?.value,
+      getLatestCookieValue(cookieStore, FORECAST_YEARS_AHEAD_COOKIE_NAME),
     );
     const initialForecastYearsAhead =
       Number.isInteger(rawForecastYearsAhead) &&
@@ -96,12 +110,14 @@ const getPreferencesFromCookies =
       initialForecastYearsAhead,
       initialGraphMeasure,
       initialGraphSeason,
+      initialReferenceYear,
     };
   };
 
 const fetchGraphData = async (
   locationId: number,
   season: GraphSeason,
+  referenceYear: string,
 ): Promise<GraphData> => {
   const trendData = await FetchTrendGraphData("avg", locationId, season);
 
@@ -109,8 +125,8 @@ const fetchGraphData = async (
     trendData.years.length > 0 ? String(trendData.years.at(-1)) : "2024";
 
   const [currentData, referenceData] = await Promise.all([
-    FetchReferenceGraphData(latestYear, locationId, season),
-    FetchReferenceGraphData("2000", locationId, season),
+    FetchReferenceGraphData(latestYear, locationId, DEFAULT_GRAPH_SEASON),
+    FetchReferenceGraphData(referenceYear, locationId, DEFAULT_GRAPH_SEASON),
   ]);
 
   return {
@@ -208,6 +224,7 @@ export const loadLocationPageData = async (
     const graphData = await fetchGraphData(
       locationId,
       preferences.initialGraphSeason,
+      preferences.initialReferenceYear,
     );
 
     return {
@@ -219,6 +236,7 @@ export const loadLocationPageData = async (
         initialForecastYearsAhead: preferences.initialForecastYearsAhead,
         initialGraphMeasure: preferences.initialGraphMeasure,
         initialGraphSeason: preferences.initialGraphSeason,
+        initialReferenceYear: preferences.initialReferenceYear,
         location: selectedLocation,
         LocationOptions,
         ReferencePets: graphData.reference_pets,

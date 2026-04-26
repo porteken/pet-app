@@ -27,9 +27,10 @@ import { ReferenceData } from "../components/reference-data";
 const defaultProps: React.ComponentProps<typeof ReferenceData> = {
   CurrentDates: [new Date("2023-06-01"), new Date("2023-06-02")],
   CurrentPets: [22, 24],
-  graphSeason: "Annual",
   id: 1,
-  initialGraphSeason: "Annual",
+  initialReferenceYear: "2000",
+  onReferenceYearChange: vi.fn(),
+  referenceYear: "2000",
   ReferencePets: [18, 20],
 };
 
@@ -104,11 +105,27 @@ describe("ReferenceData", () => {
     });
   });
 
-  it("should fetch selected reference year data", async () => {
-    render(<ReferenceData {...defaultProps} />);
+  it("should notify the parent and fetch selected annual reference year data", async () => {
+    const onReferenceYearChange = vi.fn();
+    const { rerender } = render(
+      <ReferenceData
+        {...defaultProps}
+        onReferenceYearChange={onReferenceYearChange}
+      />,
+    );
 
     const referenceYear = screen.getByLabelText("Reference Year");
     fireEvent.change(referenceYear, { target: { value: "2001" } });
+
+    expect(onReferenceYearChange).toHaveBeenCalledWith("2001");
+
+    rerender(
+      <ReferenceData
+        {...defaultProps}
+        onReferenceYearChange={onReferenceYearChange}
+        referenceYear="2001"
+      />,
+    );
 
     await waitFor(() => {
       expect(FetchReferenceGraphData).toHaveBeenCalledWith("2001", 1, "Annual");

@@ -62,6 +62,8 @@ describe("location route page", () => {
       initialForecastEnabled: false,
       initialForecastYearsAhead: 10,
       initialGraphMeasure: "avg",
+      initialGraphSeason: "Annual",
+      initialReferenceYear: "2000",
       location: {
         city: "Boston",
         lat: 42.3601,

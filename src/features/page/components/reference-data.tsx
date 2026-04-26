@@ -4,38 +4,35 @@ import React from "react";
 
 import { GenerateReferenceGraph } from "@/features/graph";
 import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
-import { type GraphSeason } from "@/lib/constants";
+import { DEFAULT_GRAPH_SEASON } from "@/lib/constants";
 import { YearOptions } from "@/lib/utils/select-options";
 
 interface ReferenceDataProperties {
   CurrentDates: Date[];
   CurrentPets: number[];
-  graphSeason: GraphSeason;
   id: number;
-  initialGraphSeason: GraphSeason;
+  initialReferenceYear: string;
+  onReferenceYearChange: (referenceYear: string) => void;
+  referenceYear: string;
   ReferencePets: number[];
 }
 
 interface ReferenceGraphSnapshot {
   dates: Date[];
   pets: number[];
-  season: GraphSeason;
   year: string;
 }
 
 const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   CurrentDates,
   CurrentPets,
-  graphSeason,
   id,
-  initialGraphSeason,
+  initialReferenceYear,
+  onReferenceYearChange,
+  referenceYear,
   ReferencePets,
 }) => {
-  const DEFAULT_REFERENCE_YEAR = "2000";
   const REFERENCE_YEARS = React.useMemo(() => YearOptions(), []);
-  const [selectedReferenceYear, setSelectedReferenceYear] = React.useState(
-    DEFAULT_REFERENCE_YEAR,
-  );
   const [referenceGraph, setReferenceGraph] = React.useState<
     React.ReactElement | undefined
   >();
@@ -71,30 +68,30 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   }, []);
 
   const generatePetReferenceGraph = React.useCallback(
-    async (year: string, season: GraphSeason) => {
+    async (year: string) => {
       const referenceData =
-        year === DEFAULT_REFERENCE_YEAR && season === initialGraphSeason
+        year === initialReferenceYear
           ? { dates: CurrentDates, pets: ReferencePets }
-          : await FetchReferenceGraphData(year, id, season);
+          : await FetchReferenceGraphData(year, id, DEFAULT_GRAPH_SEASON);
 
       const { dates, pets } = referenceData;
-      setReferenceGraphSnapshot({ dates, pets, season, year });
+      setReferenceGraphSnapshot({ dates, pets, year });
     },
-    [CurrentDates, ReferencePets, id, initialGraphSeason],
+    [CurrentDates, ReferencePets, id, initialReferenceYear],
   );
 
   const handleReferenceYearChange = React.useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       const year = event.target.value;
       setIsMobileLegendOpen(false);
-      setSelectedReferenceYear(year);
+      onReferenceYearChange(year);
     },
-    [],
+    [onReferenceYearChange],
   );
 
   React.useEffect(() => {
-    generatePetReferenceGraph(selectedReferenceYear, graphSeason);
-  }, [generatePetReferenceGraph, graphSeason, selectedReferenceYear]);
+    generatePetReferenceGraph(referenceYear);
+  }, [generatePetReferenceGraph, referenceYear]);
 
   React.useEffect(() => {
     if (!referenceGraphSnapshot) {
@@ -110,7 +107,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
         CurrentPets,
         showReferenceLegend,
         isMobileViewport,
-        referenceGraphSnapshot.season,
+        DEFAULT_GRAPH_SEASON,
         CurrentDates.at(-1)?.getFullYear() ?? 2025,
       );
 
@@ -149,7 +146,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
             className="h-10 w-full rounded-md border border-gray-300 px-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
             id="reference-year"
             onChange={handleReferenceYearChange}
-            value={selectedReferenceYear}
+            value={referenceYear}
           >
             {REFERENCE_YEARS.map((option) => (
               <option key={`year-${option.key}`} value={option.key}>

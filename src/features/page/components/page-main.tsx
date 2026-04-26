@@ -1,10 +1,15 @@
 "use client";
+
 import React, { FC } from "react";
 
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { HeaderBar } from "@/features/header-bar";
-import { setGraphMeasure, setGraphSeason } from "@/lib/actions/actions";
 import { type GraphSeason } from "@/lib/constants";
+import {
+  persistGraphMeasurePreference,
+  persistGraphSeasonPreference,
+  persistReferenceYearPreference,
+} from "@/lib/utils/client-preferences";
 
 import { PageProperties } from "../model/types";
 import { PageHeader } from "./page-header";
@@ -13,7 +18,7 @@ import { TrendAnalysis } from "./trend-analysis";
 
 const handleMeasureChange = async (measure: string): Promise<void> => {
   try {
-    await setGraphMeasure(measure);
+    await persistGraphMeasurePreference(measure);
   } catch {
     // Ignore persistence failures; the UI can continue with the selected value.
   }
@@ -27,23 +32,37 @@ const Main: FC<PageProperties> = ({
   initialForecastYearsAhead,
   initialGraphMeasure,
   initialGraphSeason,
+  initialReferenceYear,
   location,
   LocationOptions,
   ReferencePets,
 }) => {
   const [selectedGraphSeason, setSelectedGraphSeason] =
     React.useState<GraphSeason>(initialGraphSeason);
+  const [selectedReferenceYear, setSelectedReferenceYear] =
+    React.useState(initialReferenceYear);
   const [isLegendOpen, setIsLegendOpen] = React.useState(false);
 
   const handleSeasonChange = React.useCallback(async (season: GraphSeason) => {
     setSelectedGraphSeason(season);
 
     try {
-      await setGraphSeason(season);
+      await persistGraphSeasonPreference(season);
     } catch {
       // Ignore persistence failures; the UI can continue with the selected value.
     }
   }, []);
+
+  const handleReferenceYearChange = React.useCallback(
+    (referenceYear: string) => {
+      setSelectedReferenceYear(referenceYear);
+
+      void persistReferenceYearPreference(referenceYear).catch(() => {
+        // Ignore persistence failures; the UI can continue with the selected value.
+      });
+    },
+    [],
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -60,14 +79,16 @@ const Main: FC<PageProperties> = ({
             initialGraphMeasure={initialGraphMeasure}
             onMeasureChange={handleMeasureChange}
             onSeasonChange={handleSeasonChange}
+            referenceYear={selectedReferenceYear}
           />
 
           <ReferenceData
             CurrentDates={CurrentDates}
             CurrentPets={CurrentPets}
-            graphSeason={selectedGraphSeason}
             id={id}
-            initialGraphSeason={initialGraphSeason}
+            initialReferenceYear={initialReferenceYear}
+            onReferenceYearChange={handleReferenceYearChange}
+            referenceYear={selectedReferenceYear}
             ReferencePets={ReferencePets}
           />
         </div>

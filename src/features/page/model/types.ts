@@ -9,6 +9,7 @@ export interface PageProperties {
   initialForecastYearsAhead: number;
   initialGraphMeasure: string;
   initialGraphSeason: GraphSeason;
+  initialReferenceYear: string;
   location: LocationProperties;
   LocationOptions: LocationOptionSection[];
   ReferencePets: number[];

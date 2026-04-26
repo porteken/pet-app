@@ -23,6 +23,7 @@ vi.mock("@/lib/api/fetch-server", () => ({
 }));
 
 import {
+  DEFAULT_REFERENCE_YEAR,
   DEFAULT_FORECAST_ENABLED,
   DEFAULT_FORECAST_YEARS_AHEAD,
   DEFAULT_GRAPH_MEASURE,
@@ -31,14 +32,32 @@ import {
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
   GRAPH_MEASURE_COOKIE_NAME,
   GRAPH_SEASON_COOKIE_NAME,
+  REFERENCE_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
 
 import { loadLocationPageData } from "../location-page-data";
 
-const createCookieStore = (values: Partial<Record<string, string>>) => ({
+const createCookieStore = (
+  values: Partial<Record<string, string>>,
+  duplicateValues?: Partial<Record<string, string[]>>,
+) => ({
   get: (name: string) => {
     const value = values[name];
     return value ? { value } : undefined;
+  },
+  getAll: (name?: string) => {
+    if (!name) {
+      return [];
+    }
+
+    const duplicates = duplicateValues?.[name];
+
+    if (duplicates && duplicates.length > 0) {
+      return duplicates.map((value) => ({ name, value }));
+    }
+
+    const value = values[name];
+    return value ? [{ name, value }] : [];
   },
 });
 
@@ -158,6 +177,7 @@ describe("loadLocationPageData", () => {
         [FORECAST_YEARS_AHEAD_COOKIE_NAME]: "25",
         [GRAPH_MEASURE_COOKIE_NAME]: "max",
         [GRAPH_SEASON_COOKIE_NAME]: "Winter",
+        [REFERENCE_YEAR_COOKIE_NAME]: "2010",
       }),
     );
     mockFetchLocations.mockResolvedValue({
@@ -188,6 +208,7 @@ describe("loadLocationPageData", () => {
         initialForecastYearsAhead: 25,
         initialGraphMeasure: "max",
         initialGraphSeason: "Winter",
+        initialReferenceYear: "2010",
         location,
         LocationOptions: locationOptions,
         ReferencePets: [25, 26],
@@ -203,13 +224,13 @@ describe("loadLocationPageData", () => {
       1,
       "2024",
       7,
-      "Winter",
+      "Annual",
     );
     expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
       2,
-      "2000",
+      "2010",
       7,
-      "Winter",
+      "Annual",
     );
   });
 
@@ -255,6 +276,7 @@ describe("loadLocationPageData", () => {
         initialForecastYearsAhead: DEFAULT_FORECAST_YEARS_AHEAD,
         initialGraphMeasure: DEFAULT_GRAPH_MEASURE,
         initialGraphSeason: DEFAULT_GRAPH_SEASON,
+        initialReferenceYear: DEFAULT_REFERENCE_YEAR,
       }),
       status: "success",
     });
@@ -264,5 +286,50 @@ describe("loadLocationPageData", () => {
       7,
       "Annual",
     );
+  });
+
+  it("prefers the latest graph preference cookies when duplicates exist", async () => {
+    mockCookies.mockResolvedValue(
+      createCookieStore(
+        {
+          [GRAPH_MEASURE_COOKIE_NAME]: "max",
+          [GRAPH_SEASON_COOKIE_NAME]: "Annual",
+        },
+        {
+          [GRAPH_MEASURE_COOKIE_NAME]: ["max", "avg"],
+          [GRAPH_SEASON_COOKIE_NAME]: ["Annual", "Winter"],
+        },
+      ),
+    );
+    mockFetchLocations.mockResolvedValue({
+      LocationOptions: [],
+      locations: [
+        {
+          city: "Boston",
+          lat: 42.3601,
+          lng: -71.0589,
+          location_id: 7,
+          state: "Massachusetts",
+        },
+      ],
+    });
+    mockFetchTrendGraphData.mockResolvedValue({
+      trendline_pets: [28, 29],
+      year_pets: [27, 28],
+      years: [2023, 2024],
+    });
+    mockFetchReferenceGraphData
+      .mockResolvedValueOnce({ dates: [], pets: [] })
+      .mockResolvedValueOnce({ dates: [], pets: [] });
+
+    const result = await loadLocationPageData("7");
+
+    expect(result).toEqual({
+      payload: expect.objectContaining({
+        initialGraphMeasure: "avg",
+        initialGraphSeason: "Winter",
+      }),
+      status: "success",
+    });
   });
 });

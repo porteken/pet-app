@@ -83,6 +83,7 @@ const defaultProps: React.ComponentProps<typeof TrendAnalysis> = {
   initialGraphMeasure: "avg",
   onMeasureChange: vi.fn().mockResolvedValue(Promise.resolve()),
   onSeasonChange: vi.fn().mockResolvedValue(Promise.resolve()),
+  referenceYear: "2000",
 };
 
 const waitForInitialTrendAnalysisRender = async () => {
@@ -188,6 +189,26 @@ describe("TrendAnalysis", () => {
           }),
         );
       });
+    });
+
+    it("should refresh trend graph data when reference year changes", async () => {
+      const { rerender } = render(<TrendAnalysis {...defaultProps} />);
+
+      await waitForInitialTrendAnalysisRender();
+
+      rerender(<TrendAnalysis {...defaultProps} referenceYear="2022" />);
+
+      await waitFor(() => {
+        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            trendlinePets: [20, 22, 24, 26],
+            yearPets: [20, 22, 24, 26],
+            years: [2020, 2021, 2022, 2023],
+          }),
+        );
+      });
+
+      expect(FetchTrendGraphData).toHaveBeenCalledTimes(2);
     });
 
     it("should keep mobile graph legend collapsed by default and toggle open", async () => {

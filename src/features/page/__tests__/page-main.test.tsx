@@ -39,11 +39,11 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/lib/actions/actions", () => ({
-  setGraphMeasure: vi.fn().mockResolvedValue("avg"),
-  setGraphSeason: vi.fn().mockResolvedValue("Annual"),
+  setForecastPreferences: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("@/lib/api/fetch-client", () => ({
+  FetchForecastData: vi.fn().mockResolvedValue(undefined),
   FetchReferenceGraphData: vi.fn().mockResolvedValue({
     dates: [new Date("2023-01-01"), new Date("2023-02-01")],
     pets: [10, 20],
@@ -57,10 +57,11 @@ vi.mock("@/lib/api/fetch-client", () => ({
 }));
 
 import { GenerateReferenceGraph, GenerateTrendGraph } from "@/features/graph";
-import { setGraphMeasure } from "@/lib/actions/actions";
 import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
 
 import { PageMain } from "../components/page-main";
+
+let fetchMock: ReturnType<typeof vi.fn>;
 
 describe("PageMain", () => {
   const defaultProps: React.ComponentProps<typeof PageMain> = {
@@ -71,6 +72,7 @@ describe("PageMain", () => {
     initialForecastYearsAhead: 10,
     initialGraphMeasure: "avg",
     initialGraphSeason: "Annual",
+    initialReferenceYear: "2000",
     location: {
       city: "Test City",
       lat: 40.7128,
@@ -92,6 +94,8 @@ describe("PageMain", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal("fetch", fetchMock);
   });
 
   describe("Component Rendering", () => {
@@ -196,7 +200,7 @@ describe("PageMain", () => {
   });
 
   describe("User Interactions", () => {
-    it("should change graph measure and trigger API call when selected", async () => {
+    it("should change graph measure and persist it through the preferences endpoint", async () => {
       const user = userEvent.setup();
       await act(async () => {
         render(<PageMain {...defaultProps} />);
@@ -206,9 +210,16 @@ describe("PageMain", () => {
       await user.selectOptions(selectElement, "max");
 
       await waitFor(() => {
-        expect(setGraphMeasure).toHaveBeenCalledWith("max");
         expect(GenerateTrendGraph).toHaveBeenCalled();
       });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/preferences/graph",
+        expect.objectContaining({
+          body: JSON.stringify({ graphMeasure: "max" }),
+          method: "POST",
+        }),
+      );
     });
 
     it("should change reference year and trigger API call when selected", async () => {
@@ -228,6 +239,65 @@ describe("PageMain", () => {
         );
         expect(GenerateReferenceGraph).toHaveBeenCalled();
       });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/preferences/graph",
+        expect.objectContaining({
+          body: JSON.stringify({ referenceYear: "2001" }),
+          method: "POST",
+        }),
+      );
+    });
+
+    it("should refresh the trend graph when reference year changes", async () => {
+      const user = userEvent.setup();
+
+      await act(async () => {
+        render(<PageMain {...defaultProps} />);
+      });
+
+      const selectElement = screen.getByLabelText("Reference Year");
+      await user.selectOptions(selectElement, "2021");
+
+      await waitFor(() => {
+        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            trendlinePets: [5, 10, 15],
+            yearPets: [7, 12, 17],
+            years: [2020, 2021, 2022],
+          }),
+        );
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/preferences/graph",
+        expect.objectContaining({
+          body: JSON.stringify({ referenceYear: "2021" }),
+          method: "POST",
+        }),
+      );
+    });
+
+    it("should not refetch reference graph data when graph season changes", async () => {
+      const user = userEvent.setup();
+
+      await act(async () => {
+        render(<PageMain {...defaultProps} />);
+      });
+
+      vi.mocked(FetchReferenceGraphData).mockClear();
+
+      const seasonSelect = screen.getByLabelText("Season");
+      await user.selectOptions(seasonSelect, "Winter");
+
+      expect(FetchReferenceGraphData).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/preferences/graph",
+        expect.objectContaining({
+          body: JSON.stringify({ graphSeason: "Winter" }),
+          method: "POST",
+        }),
+      );
     });
   });
 });

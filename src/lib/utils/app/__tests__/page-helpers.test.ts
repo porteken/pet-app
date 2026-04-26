@@ -125,6 +125,22 @@ describe("page-helpers", () => {
       expect(mockCookies).toHaveBeenCalled();
       expect(mockCookieStore.get).toHaveBeenCalledWith("graph-measure");
     });
+
+    it("prefers the latest graph measure cookie when duplicates exist", async () => {
+      const mockCookieStore = {
+        get: vi.fn().mockReturnValue({ value: "max" }),
+        getAll: vi.fn().mockReturnValue([
+          { name: "graph-measure", value: "max" },
+          { name: "graph-measure", value: "avg" },
+        ]),
+      };
+      mockCookies.mockResolvedValue(mockCookieStore);
+
+      const result = await getGraphMeasureFromCookies();
+
+      expect(result).toBe("avg");
+      expect(mockCookieStore.getAll).toHaveBeenCalledWith("graph-measure");
+    });
   });
 
   describe("getForecastPreferencesFromCookies", () => {

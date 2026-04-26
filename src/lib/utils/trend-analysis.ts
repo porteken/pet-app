@@ -88,24 +88,26 @@ export const buildTrendAnalysisResult = async ({
     ? await forecastDataPromise
     : undefined;
 
-  if (years.length === 0 || year_pets.length === 0) {
+  const snapshot = {
+    forecastData,
+    increase_per_year,
+    option,
+    season,
+    trendline_pets,
+    year_pets,
+    years,
+  };
+
+  if (snapshot.years.length === 0 || snapshot.year_pets.length === 0) {
     return {
       forecastHeatStress: undefined,
       heatStressDescription: undefined,
-      snapshot: {
-        forecastData,
-        increase_per_year: 0,
-        option,
-        season,
-        trendline_pets: [],
-        year_pets: [],
-        years: [],
-      },
+      snapshot,
     };
   }
 
-  const currentYear = years.at(-1)!;
-  const currentPetValue = year_pets[years.length - 1];
+  const currentYear = snapshot.years.at(-1)!;
+  const currentPetValue = snapshot.year_pets[snapshot.years.length - 1];
 
   const forecastHeatStress =
     enableForecast && forecastData
@@ -120,14 +122,6 @@ export const buildTrendAnalysisResult = async ({
       currentYear,
       season,
     ),
-    snapshot: {
-      forecastData,
-      increase_per_year,
-      option,
-      season,
-      trendline_pets,
-      year_pets,
-      years,
-    },
+    snapshot,
   };
 };

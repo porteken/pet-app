@@ -15,11 +15,13 @@ import {
   MIN_FORECAST_YEARS_AHEAD,
   normalizeGraphSeason,
 } from "@/lib/constants";
+import { getLatestCookieValue } from "@/lib/utils/server-cookies";
 
 export const getGraphMeasureFromCookies = async (): Promise<string> => {
   const cookieStore = await cookies();
   return (
-    cookieStore.get(GRAPH_MEASURE_COOKIE_NAME)?.value || DEFAULT_GRAPH_MEASURE
+    getLatestCookieValue(cookieStore, GRAPH_MEASURE_COOKIE_NAME) ||
+    DEFAULT_GRAPH_MEASURE
   );
 };
 
@@ -27,7 +29,8 @@ export const getGraphSeasonFromCookies = async () => {
   const cookieStore = await cookies();
 
   return normalizeGraphSeason(
-    cookieStore.get(GRAPH_SEASON_COOKIE_NAME)?.value || DEFAULT_GRAPH_SEASON,
+    getLatestCookieValue(cookieStore, GRAPH_SEASON_COOKIE_NAME) ||
+      DEFAULT_GRAPH_SEASON,
   );
 };
 
@@ -36,12 +39,14 @@ export const getForecastPreferencesFromCookies = async (): Promise<{
   yearsAhead: number;
 }> => {
   const cookieStore = await cookies();
-  const forecastEnabledRaw = cookieStore.get(
+  const forecastEnabledRaw = getLatestCookieValue(
+    cookieStore,
     FORECAST_ENABLED_COOKIE_NAME,
-  )?.value;
-  const forecastYearsAheadRaw = cookieStore.get(
+  );
+  const forecastYearsAheadRaw = getLatestCookieValue(
+    cookieStore,
     FORECAST_YEARS_AHEAD_COOKIE_NAME,
-  )?.value;
+  );
 
   const enabled =
     forecastEnabledRaw === undefined

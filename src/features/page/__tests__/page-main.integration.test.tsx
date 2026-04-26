@@ -3,11 +3,12 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { setGraphMeasure } from "@/lib/actions/actions";
 import { database, resetDatabase } from "@/testing/mocks";
 
 import { PageMain } from "../components/page-main";
 import type { PageProperties } from "../model/types";
+
+let fetchMock: ReturnType<typeof vi.fn>;
 
 vi.mock("@/features/graph", () => ({
   GenerateReferenceGraph: vi
@@ -53,11 +54,17 @@ vi.mock("@/features/page/components/trend-analysis", () => ({
 }));
 
 vi.mock("@/features/page/components/reference-data", () => ({
-  ReferenceData: vi.fn(() => (
+  ReferenceData: vi.fn(({ onReferenceYearChange, referenceYear }) => (
     <div data-testid="reference-data">
       <h2>Reference Data</h2>
       <label htmlFor="reference-year">Reference Year</label>
-      <select defaultValue="2000" id="reference-year">
+      <select
+        id="reference-year"
+        onChange={(event) => {
+          onReferenceYearChange(event.currentTarget.value);
+        }}
+        value={referenceYear}
+      >
         {Array.from({ length: 23 }, (_, index) => 2000 + index).map((year) => (
           <option key={year} value={year.toString()}>
             {year}
@@ -81,16 +88,14 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-vi.mock("@/lib/actions/actions", () => ({
-  setGraphMeasure: vi.fn().mockResolvedValue("max"),
-}));
-
 describe("PageMain Integration Tests", () => {
   let defaultProps: PageProperties;
 
   beforeEach(() => {
     vi.clearAllMocks();
     resetDatabase();
+    fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal("fetch", fetchMock);
 
     const location = database.location.create({
       city: "San Francisco",
@@ -106,6 +111,7 @@ describe("PageMain Integration Tests", () => {
       initialForecastYearsAhead: 10,
       initialGraphMeasure: "avg",
       initialGraphSeason: "Annual",
+      initialReferenceYear: "2000",
       location,
       LocationOptions: [
         {
@@ -143,7 +149,7 @@ describe("PageMain Integration Tests", () => {
       expect(locationOptions).toEqual(defaultProps.LocationOptions);
     });
 
-    it("should handle measure changes through server actions", async () => {
+    it("should handle measure changes through preference persistence", async () => {
       const user = userEvent.setup();
       render(<PageMain {...defaultProps} />);
 
@@ -152,6 +158,13 @@ describe("PageMain Integration Tests", () => {
 
       await user.selectOptions(measureSelect, "max");
       expect(measureSelect).toHaveValue("max");
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/preferences/graph",
+        expect.objectContaining({
+          body: JSON.stringify({ graphMeasure: "max" }),
+          method: "POST",
+        }),
+      );
     });
 
     it("should display location information correctly", async () => {
@@ -183,6 +196,13 @@ describe("PageMain Integration Tests", () => {
 
       await user.selectOptions(yearSelect, "2021");
       expect(yearSelect).toHaveValue("2021");
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/preferences/graph",
+        expect.objectContaining({
+          body: JSON.stringify({ referenceYear: "2021" }),
+          method: "POST",
+        }),
+      );
     });
   });
 
@@ -233,23 +253,14 @@ describe("PageMain Integration Tests", () => {
   });
 
   describe("Error Handling", () => {
-    it("should handle server action errors gracefully", async () => {
+    it("should keep the page mounted after changing graph measure", async () => {
       const user = userEvent.setup();
-
-      vi.mocked(setGraphMeasure).mockRejectedValueOnce(
-        new Error("Server error"),
-      );
-
       render(<PageMain {...defaultProps} />);
 
       const measureSelect = screen.getByLabelText("Graph Measure");
 
       await user.selectOptions(measureSelect, "max");
       expect(measureSelect).toHaveValue("max");
-
-      await waitFor(() => {
-        expect(setGraphMeasure).toHaveBeenCalledWith("max");
-      });
 
       expect(screen.getByTestId("header-bar")).toBeInTheDocument();
       expect(screen.getByTestId("trend-analysis")).toBeInTheDocument();

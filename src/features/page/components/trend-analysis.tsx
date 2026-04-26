@@ -21,6 +21,7 @@ interface TrendAnalysisProperties {
   initialGraphMeasure: string;
   onMeasureChange: (measure: string) => Promise<void>;
   onSeasonChange: (season: GraphSeason) => Promise<void>;
+  referenceYear: string;
 }
 
 const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
@@ -31,6 +32,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   initialGraphMeasure,
   onMeasureChange,
   onSeasonChange,
+  referenceYear,
 }) => {
   const [selectedGraphMeasure, setSelectedGraphMeasure] =
     React.useState(initialGraphMeasure);
@@ -164,6 +166,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     forecastEnabled,
     forecastSupported,
     forecastYearsAhead,
+    referenceYear,
   ]);
 
   const handleForecastToggle = React.useCallback(

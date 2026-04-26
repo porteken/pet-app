@@ -1,15 +1,15 @@
 # Historical PET USA
 
-A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) that visualizes Physiological Equivalent Temperature (PET) data for the top 500 largest cities in the United States from 2000 to 2025.
+A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) that visualizes Physiological Equivalent Temperature (PET) data for the top 500 largest cities in the Contiguous United States from 2000 to the present.
 
 ## Features
 
-- **US City Map**: View PET data across 500+ cities.
+- **Contiguous US City Map**: View PET data across 500+ cities.
 - **City Trend Charts**: Open a city modal from the map and view PET trends.
 - **Measure Selection**: Switch between average and maximum PET.
 - **Forecasting**: Show 5-75 year forecasts for average PET with confidence ranges.
 - **City Detail Pages**: Open a city page with trend and reference charts.
-- **Reference Comparison**: Compare 2025 PET with a selected year (2000-2023).
+- **Reference Comparison**: Compare the current year's PET with a selected historical year.
 - **Rankings**: View cites ranked by PET.
 
 ## What is PET?
@@ -29,11 +29,11 @@ Based on [this study](https://bjsm.bmj.com/content/55/15/825), PET may provide b
 ## Tech Stack
 
 - **Frontend**: Next.js, React, TypeScript
-- **UI**: shadcn/ui, Tailwind CSS
+- **UI**: shadcn/ui, Tailwind CSS (v4)
 - **Map**: Leaflet, React Leaflet, OpenStreetMap
 - **Charts**: Plotly.js
 - **Data**: Supabase, TanStack Query
 - **Monitoring**: Sentry
 - **Testing**: Vitest, Playwright, Testing Library, MSW
-- **Quality**: ESLint, Prettier, Husky
+- **Quality**: Oxc (oxlint, oxfmt), Knip, Husky
 - **Deployment**: Vercel

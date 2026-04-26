@@ -18,7 +18,9 @@ test.describe("Navigation", () => {
   test("should navigate to Rankings page from nav button", async ({ page }) => {
     await gotoAndWaitForMapPage(page, "/");
 
-    const rankingsButton = page.getByRole("link", { name: /rankings/i });
+    const rankingsButton = page.getByRole("link", {
+      name: "Navigate to rankings page",
+    });
     await expect(rankingsButton).toBeVisible({ timeout: 10_000 });
 
     await rankingsButton.click();
@@ -32,7 +34,9 @@ test.describe("Navigation", () => {
   test("should navigate to About page from nav button", async ({ page }) => {
     await gotoAndWaitForMapPage(page, "/");
 
-    const aboutButton = page.getByRole("link", { name: "About" });
+    const aboutButton = page.getByRole("link", {
+      name: "Navigate to about page",
+    });
     await expect(aboutButton).toBeVisible({ timeout: 10_000 });
 
     await aboutButton.click();
@@ -56,17 +60,17 @@ test.describe("Navigation", () => {
   test("should navigate between all main pages", async ({ page }) => {
     await gotoAndWaitForMapPage(page, "/");
 
-    await page.getByRole("link", { name: "About" }).click();
+    await page.getByRole("link", { name: "Navigate to about page" }).click();
     await expect(page).toHaveURL("/about");
     await expect(page.getByText("Purpose of the Application")).toBeVisible();
 
-    await page.getByRole("link", { name: /rankings/i }).click();
+    await page.getByRole("link", { name: "Navigate to rankings page" }).click();
     await expect(page).toHaveURL("/rankings");
     await expect(
       page.getByRole("heading", { name: "Cities ranked by Average PET" }),
     ).toBeVisible();
 
-    await page.getByRole("link", { name: "Map" }).click();
+    await page.getByRole("link", { name: "Navigate to map view" }).click();
     await expect(page).toHaveURL("/");
     await waitForMapPage(page);
   });
@@ -74,11 +78,17 @@ test.describe("Navigation", () => {
   test("should maintain navigation on location page", async ({ page }) => {
     await page.goto("/1");
 
-    await expect(page.getByRole("link", { name: "Map" })).toBeVisible({
+    await expect(
+      page.getByRole("link", { name: "Navigate to map view" }),
+    ).toBeVisible({
       timeout: 10_000,
     });
-    await expect(page.getByRole("link", { name: /rankings/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: "About" })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Navigate to rankings page" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Navigate to about page" }),
+    ).toBeVisible();
   });
 
   test("should display about content", async ({ page }) => {

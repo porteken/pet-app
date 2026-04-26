@@ -9,11 +9,11 @@ export const createClient = (): SupabaseClient => {
     return createRuntimeMockSupabaseClient() as unknown as SupabaseClient;
   }
 
-  const { NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_SUPABASE_URL } =
+  const { NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, NEXT_PUBLIC_SUPABASE_URL } =
     getPublicEnvironment();
 
   return createBrowserClient(
     NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   );
 };

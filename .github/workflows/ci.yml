@@ -164,8 +164,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ github.ref_name != 'prd' && secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '' }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ github.ref_name == 'prd' && secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || '' }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ github.ref_name == 'prd' && secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_PRD || secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV }}
       NEXT_PUBLIC_SUPABASE_URL: ${{ github.ref_name == 'prd' && secrets.NEXT_PUBLIC_SUPABASE_URL_PRD || secrets.NEXT_PUBLIC_SUPABASE_URL_DEV }}
 
     strategy:

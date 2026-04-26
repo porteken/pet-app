@@ -14,7 +14,8 @@ vi.mock("next/font/google", () => ({
 }));
 
 process.env.NEXT_PUBLIC_SUPABASE_URL ??= "https://mock-supabase.local";
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??= "mock-supabase-anon-key";
+process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??=
+  "mock-supabase-publishable-key";
 
 beforeAll(() => {
   server.listen({ onUnhandledRequest: "bypass" });

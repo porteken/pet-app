@@ -356,12 +356,14 @@ jobs:
           fetch-depth: 0
 
       - name: Download Vitest coverage
+        if: github.ref_name != 'prd'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: vitest-coverage
           path: coverage
 
       - name: SonarQube Scan
+        if: github.ref_name != 'prd'
         uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602
         with:
           args: >

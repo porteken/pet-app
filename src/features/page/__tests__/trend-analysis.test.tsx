@@ -25,7 +25,7 @@ vi.mock("@/lib/api/fetch-client", () => ({
   }),
 }));
 
-vi.mock("@/lib/utils/heat-stress", () => ({
+vi.mock("@/lib/utils/thermal-stress", () => ({
   getForecastHeatStressDescription: vi.fn((value, year, lower, upper) => ({
     colorClass: "text-red-500",
     confidenceRange: `(range: ${lower}-${upper})`,
@@ -34,7 +34,7 @@ vi.mock("@/lib/utils/heat-stress", () => ({
   })),
   getHeatStressDescription: vi.fn((value, option, year) => ({
     colorClass: "text-orange-500",
-    prefix: `${year} Heat Stress:`,
+    prefix: `${year} Thermal Stress:`,
     value: "Moderate",
   })),
 }));
@@ -71,7 +71,7 @@ import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 import {
   getForecastHeatStressDescription,
   getHeatStressDescription,
-} from "@/lib/utils/heat-stress";
+} from "@/lib/utils/thermal-stress";
 
 import { TrendAnalysis } from "../components/trend-analysis";
 
@@ -149,11 +149,18 @@ describe("TrendAnalysis", () => {
     });
 
     it("should render trend graph", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      const { container } = render(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId("mock-trend-graph")).toBeInTheDocument();
       });
+
+      expect(container.querySelector("#trend-analysis-graph")).toHaveClass(
+        "flex-1",
+      );
+      expect(container.querySelector("#trend-analysis-graph")).not.toHaveClass(
+        "mt-auto",
+      );
     });
 
     it("should call FetchTrendGraphData on mount", async () => {
@@ -231,8 +238,8 @@ describe("TrendAnalysis", () => {
     });
   });
 
-  describe("Heat Stress Display", () => {
-    it("should display current heat stress description", async () => {
+  describe("Thermal Stress Display", () => {
+    it("should display current thermal stress description", async () => {
       render(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
@@ -245,12 +252,12 @@ describe("TrendAnalysis", () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText("2023 Heat Stress:")).toBeInTheDocument();
+        expect(screen.getByText("2023 Thermal Stress:")).toBeInTheDocument();
         expect(screen.getByText("Moderate")).toBeInTheDocument();
       });
     });
 
-    it("should not display heat stress when years array is empty", async () => {
+    it("should not display thermal stress when years array is empty", async () => {
       vi.mocked(FetchTrendGraphData).mockResolvedValueOnce({
         increase_per_year: 0,
         trendline_pets: [],
@@ -261,11 +268,11 @@ describe("TrendAnalysis", () => {
       render(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
-        expect(screen.queryByText("Heat Stress:")).not.toBeInTheDocument();
+        expect(screen.queryByText("Thermal Stress:")).not.toBeInTheDocument();
       });
     });
 
-    it("should display forecast heat stress when forecast is enabled", async () => {
+    it("should display forecast thermal stress when forecast is enabled", async () => {
       render(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
@@ -535,7 +542,7 @@ describe("TrendAnalysis", () => {
       });
     });
 
-    it("should clear heat stress on error", async () => {
+    it("should clear thermal stress on error", async () => {
       vi.mocked(FetchTrendGraphData).mockRejectedValueOnce(
         new Error("API Error"),
       );
@@ -547,11 +554,11 @@ describe("TrendAnalysis", () => {
       });
 
       await waitFor(() => {
-        expect(screen.queryByText("Heat Stress:")).not.toBeInTheDocument();
+        expect(screen.queryByText("Thermal Stress:")).not.toBeInTheDocument();
       });
     });
 
-    it("should clear forecast heat stress on error", async () => {
+    it("should clear forecast thermal stress on error", async () => {
       vi.mocked(FetchTrendGraphData).mockRejectedValueOnce(
         new Error("API Error"),
       );

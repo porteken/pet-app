@@ -348,29 +348,50 @@ describe("RankingsMain", () => {
       expect(screen.getByTestId("year-select")).toBeInTheDocument();
     });
 
-    it("should render state and heat stress filters", () => {
+    it("should render state and thermal stress filters", () => {
       render(<RankingsMain {...defaultProps} />);
 
       expect(screen.getByTestId("season-select")).toBeInTheDocument();
       expect(screen.getByTestId("state-select")).toBeInTheDocument();
       expect(
-        screen.getByTestId("avg-heat-stress-level-select"),
+        screen.getByTestId("avg-thermal-stress-level-select"),
       ).toBeInTheDocument();
     });
 
-    it("should render the heat stress legend", () => {
+    it("should render the thermal stress legend", () => {
       render(<RankingsMain {...defaultProps} />);
 
-      expect(screen.getByText("Heat Stress Levels")).toBeInTheDocument();
+      expect(screen.getByText("Thermal Stress Index")).toBeInTheDocument();
       const legendSection = requireElement(
-        screen.getByText("Heat Stress Levels").closest("div"),
+        screen.getByText("Thermal Stress Index").closest("div"),
       );
       expect(
-        within(legendSection).getByText("None to Slight"),
+        within(legendSection).getByText("Extreme Cold Stress"),
       ).toBeInTheDocument();
-      expect(within(legendSection).getByText("Moderate")).toBeInTheDocument();
-      expect(within(legendSection).getByText("Strong")).toBeInTheDocument();
-      expect(within(legendSection).getByText("Extreme")).toBeInTheDocument();
+      expect(
+        within(legendSection).getByText("Strong Cold Stress"),
+      ).toBeInTheDocument();
+      expect(
+        within(legendSection).getByText("Moderate Cold Stress"),
+      ).toBeInTheDocument();
+      expect(
+        within(legendSection).getByText("Slight Cold Stress"),
+      ).toBeInTheDocument();
+      expect(
+        within(legendSection).getByText("No Thermal Stress"),
+      ).toBeInTheDocument();
+      expect(
+        within(legendSection).getByText("Slight Heat Stress"),
+      ).toBeInTheDocument();
+      expect(
+        within(legendSection).getByText("Moderate Heat Stress"),
+      ).toBeInTheDocument();
+      expect(
+        within(legendSection).getByText("Strong Heat Stress"),
+      ).toBeInTheDocument();
+      expect(
+        within(legendSection).getByText("Extreme Heat Stress"),
+      ).toBeInTheDocument();
     });
 
     it("should render table headers", () => {
@@ -463,18 +484,18 @@ describe("RankingsMain", () => {
     });
   });
 
-  describe("Heat Stress Filtering", () => {
-    it("should filter rankings by heat stress level", () => {
+  describe("Thermal Stress Filtering", () => {
+    it("should filter rankings by thermal stress level", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const heatStressSelect = screen.getByTestId(
-        "avg-heat-stress-level-select",
+        "avg-thermal-stress-level-select",
       );
       fireEvent.change(heatStressSelect, {
-        target: { value: "None to Slight" },
+        target: { value: "No Thermal Stress" },
       });
 
-      expect(screen.getByText("Denver")).toBeInTheDocument();
+      expect(screen.getByText("Seattle")).toBeInTheDocument();
     });
   });
 
@@ -554,8 +575,7 @@ describe("RankingsMain", () => {
     it("should display pagination when there are multiple pages", () => {
       render(<RankingsMain {...defaultProps} rankings={mockRankings} />);
 
-      const paginations = screen.getAllByTestId("pagination");
-      expect(paginations.length).toBe(2);
+      expect(screen.getByTestId("pagination")).toBeInTheDocument();
     });
 
     it("should not display pagination when there is only one page", () => {
@@ -569,11 +589,9 @@ describe("RankingsMain", () => {
     it("should change page when pagination is used", () => {
       render(<RankingsMain {...defaultProps} rankings={mockRankings} />);
 
-      const nextButtons = screen.getAllByTestId("next-page");
-      fireEvent.click(nextButtons[0]);
+      fireEvent.click(screen.getByTestId("next-page"));
 
-      const currentPages = screen.getAllByTestId("current-page");
-      expect(currentPages[0]).toHaveTextContent("2");
+      expect(screen.getByTestId("current-page")).toHaveTextContent("2");
     });
 
     it("should display showing text with correct counts", () => {
@@ -586,15 +604,15 @@ describe("RankingsMain", () => {
     it("should reset to page 1 when filters change", () => {
       render(<RankingsMain {...defaultProps} rankings={mockRankings} />);
 
-      const nextButtons = screen.getAllByTestId("next-page");
-      fireEvent.click(nextButtons[0]);
-      const currentPages = screen.getAllByTestId("current-page");
-      expect(currentPages[0]).toHaveTextContent("2");
+      fireEvent.click(screen.getByTestId("next-page"));
+      expect(screen.getByTestId("current-page")).toHaveTextContent("2");
 
       const heatStressSelect = screen.getByTestId(
-        "avg-heat-stress-level-select",
+        "avg-thermal-stress-level-select",
       );
-      fireEvent.change(heatStressSelect, { target: { value: "Extreme" } });
+      fireEvent.change(heatStressSelect, {
+        target: { value: "Extreme Heat Stress" },
+      });
 
       expect(screen.getByText(/Showing/)).toBeInTheDocument();
     });
@@ -784,10 +802,8 @@ describe("RankingsMain", () => {
     it("should reset page to 1 when sort column changes", () => {
       render(<RankingsMain {...defaultProps} rankings={mockRankings} />);
 
-      const nextButtons = screen.getAllByTestId("next-page");
-      fireEvent.click(nextButtons[0]);
-      const currentPages = screen.getAllByTestId("current-page");
-      expect(currentPages[0]).toHaveTextContent("2");
+      fireEvent.click(screen.getByTestId("next-page"));
+      expect(screen.getByTestId("current-page")).toHaveTextContent("2");
 
       const table = screen.getByRole("table");
       const cityHeader = requireElement(
@@ -795,8 +811,7 @@ describe("RankingsMain", () => {
       );
       fireEvent.click(cityHeader);
 
-      const updatedCurrentPages = screen.getAllByTestId("current-page");
-      expect(updatedCurrentPages[0]).toHaveTextContent("1");
+      expect(screen.getByTestId("current-page")).toHaveTextContent("1");
     });
   });
 });

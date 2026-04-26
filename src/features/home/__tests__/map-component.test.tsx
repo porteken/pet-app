@@ -149,7 +149,7 @@ describe("MapComponent", () => {
     expect(onMarkerClick).toHaveBeenCalledWith(mockLocations[0].location_id);
   });
 
-  it("should keep heat stress legend collapsed by default and toggle open", async () => {
+  it("should keep the thermal stress legend collapsed by default and toggle open", async () => {
     renderWithQueryClient(
       <MapComponent
         locations={mockLocations}
@@ -161,18 +161,18 @@ describe("MapComponent", () => {
     await screen.findByTestId("map-container");
 
     const desktopLegendToggle = screen.getByRole("button", {
-      name: "Show Heat Stress Index",
+      name: "Show Thermal Stress Index",
     });
     expect(desktopLegendToggle).toHaveAttribute("aria-expanded", "false");
     expect(
-      screen.queryByRole("heading", { name: "Heat Stress Index" }),
+      screen.queryByRole("heading", { name: "Thermal Stress Index" }),
     ).not.toBeInTheDocument();
 
     fireEvent.click(desktopLegendToggle);
 
     expect(desktopLegendToggle).toHaveAttribute("aria-expanded", "true");
     expect(
-      screen.getAllByRole("heading", { name: "Heat Stress Index" }).length,
+      screen.getAllByRole("heading", { name: "Thermal Stress Index" }).length,
     ).toBeGreaterThan(0);
   });
 });

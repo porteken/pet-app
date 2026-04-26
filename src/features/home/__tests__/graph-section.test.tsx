@@ -127,9 +127,12 @@ describe("GraphSection", () => {
     });
 
     it("should render pet graph when provided", () => {
-      render(<GraphSection {...defaultProps} />);
+      const { container } = render(<GraphSection {...defaultProps} />);
 
       expect(screen.getByTestId("pet-graph")).toBeInTheDocument();
+      expect(container.querySelector("#mobile-trend-graph")).toHaveClass(
+        "flex-1",
+      );
     });
 
     it("should render forecast controls when measure is avg", () => {
@@ -157,11 +160,11 @@ describe("GraphSection", () => {
     });
   });
 
-  describe("Heat Stress Display", () => {
-    it("should display heat stress description when provided", () => {
+  describe("Thermal Stress Display", () => {
+    it("should display thermal stress description when provided", () => {
       const heatStressDescription = {
         colorClass: "text-red-500",
-        prefix: "Current heat stress:",
+        prefix: "Current thermal stress:",
         value: "High",
       };
 
@@ -172,22 +175,22 @@ describe("GraphSection", () => {
         />,
       );
 
-      expect(screen.getByText("Current heat stress:")).toBeInTheDocument();
+      expect(screen.getByText("Current thermal stress:")).toBeInTheDocument();
       expect(screen.getByText("High")).toBeInTheDocument();
       expect(screen.getByText("High")).toHaveClass("text-red-500");
     });
 
-    it("should not display heat stress section when not provided", () => {
+    it("should not display thermal stress section when not provided", () => {
       render(
         <GraphSection {...defaultProps} heatStressDescription={undefined} />,
       );
 
       expect(
-        screen.queryByText("Current heat stress:"),
+        screen.queryByText("Current thermal stress:"),
       ).not.toBeInTheDocument();
     });
 
-    it("should display forecast heat stress when enabled and provided", () => {
+    it("should display forecast thermal stress when enabled and provided", () => {
       const heatStressDescription = {
         colorClass: "text-orange-500",
         prefix: "Current:",
@@ -214,7 +217,7 @@ describe("GraphSection", () => {
       expect(screen.getByText("(range: 20-30)")).toBeInTheDocument();
     });
 
-    it("should not display forecast heat stress when forecast is disabled", () => {
+    it("should not display forecast thermal stress when forecast is disabled", () => {
       const heatStressDescription = {
         colorClass: "text-orange-500",
         prefix: "Current:",
@@ -375,7 +378,7 @@ describe("GraphSection", () => {
       expect(screen.getByTestId("view-details-button")).toBeInTheDocument();
     });
 
-    it("should handle missing confidence range in forecast heat stress", () => {
+    it("should handle missing confidence range in forecast thermal stress", () => {
       const heatStressDescription = {
         colorClass: "text-orange-500",
         prefix: "Current:",

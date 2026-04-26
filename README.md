@@ -1,6 +1,6 @@
 # Historical PET USA
 
-A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) that visualizes Physiological Equivalent Temperature (PET) data for the top 500 largest cities in the Contiguous United States from 2000 to the present.
+A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) that visualizes Physiological Equivalent Temperature (PET) data for the top 500 largest cities in the Contiguous United States from 2000 to the present. The data pipline for getting the data is [here](https://github.com/porteken/pet-data).
 
 ## Features
 

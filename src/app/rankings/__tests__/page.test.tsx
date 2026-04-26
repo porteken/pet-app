@@ -83,8 +83,8 @@ describe("rankings page", () => {
     );
 
     expect(metadata).toEqual({
-      description: "City rankings by heat stress (PET) values",
-      title: "City Rankings - Heat Stress Analysis",
+      description: "City rankings by thermal stress (PET) values",
+      title: "City Rankings - Thermal Stress Analysis",
     });
     expect(mockFetchCityRankings).toHaveBeenCalledWith(2031, "Winter");
     expect(screen.getByTestId("rankings-main")).toBeInTheDocument();

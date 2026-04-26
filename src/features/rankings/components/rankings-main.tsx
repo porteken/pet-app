@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import React, { useMemo, useState, useTransition } from "react";
 
+import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { Pagination } from "@/components/ui/pagination";
 import { Select } from "@/components/ui/select";
 import { HeaderBar } from "@/features/header-bar";
@@ -19,8 +20,8 @@ import {
 } from "@/lib/constants";
 import {
   getHeatStressInfo,
-  type HeatStressLevel,
-} from "@/lib/utils/heat-stress";
+  THERMAL_STRESS_LEGEND_ITEMS,
+} from "@/lib/utils/thermal-stress";
 import { type LocationOptionSection } from "@/types/types";
 
 const getPetRange = (p10: number, p90: number): string => {
@@ -41,12 +42,10 @@ const YEAR_OPTIONS = Array.from({ length: 26 }, (_, index) => ({
   value: String(2000 + index),
 }));
 
-const ALL_HEAT_STRESS_LEVELS = [
-  { label: "None to Slight", value: "None to Slight" },
-  { label: "Moderate", value: "Moderate" },
-  { label: "Strong", value: "Strong" },
-  { label: "Extreme", value: "Extreme" },
-];
+const ALL_THERMAL_STRESS_LEVELS = THERMAL_STRESS_LEGEND_ITEMS.map((item) => ({
+  label: item.level,
+  value: item.level,
+}));
 
 const SEASON_OPTIONS = GRAPH_SEASONS.map((season) => ({
   label: season,
@@ -190,8 +189,8 @@ export function RankingsMain({
       filteredByState.map((r) => getHeatStressInfo(r.avg_pet).level),
     );
 
-    return ALL_HEAT_STRESS_LEVELS.filter((option) =>
-      availableLevels.has(option.value as HeatStressLevel),
+    return ALL_THERMAL_STRESS_LEVELS.filter((option) =>
+      availableLevels.has(option.value),
     );
   }, [rankings, stateFilter]);
 
@@ -332,7 +331,7 @@ export function RankingsMain({
             clearable
             data={heatStressOptions}
             disabled={isPending}
-            label="Avg Heat Stress Level"
+            label="Avg Thermal Stress Level"
             onChange={handleHeatStressChange}
             onClear={handleHeatStressClear}
             placeholder="All levels"
@@ -355,51 +354,12 @@ export function RankingsMain({
             {filteredAndSortedRankings.length !== rankings.length &&
               ` (filtered from ${rankings.length} total)`}
           </div>
-          {totalPages > 1 && (
-            <Pagination
-              onChange={setCurrentPage}
-              total={totalPages}
-              value={currentPage}
-            />
-          )}
         </div>
 
         <div className="flex flex-col gap-6 xl:flex-row">
           <div className="w-full xl:w-64 xl:shrink-0">
             <div className="rounded-lg bg-white p-6 shadow xl:sticky xl:top-4">
-              <h3 className="mb-4 text-lg font-semibold text-gray-900">
-                Heat Stress Levels
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="font-semibold text-green-600">
-                      None to Slight
-                    </div>
-                    <div className="text-sm text-gray-600">&lt; 29°C</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="font-semibold text-yellow-600">
-                      Moderate
-                    </div>
-                    <div className="text-sm text-gray-600">29-35°C</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="font-semibold text-orange-600">Strong</div>
-                    <div className="text-sm text-gray-600">35-41°C</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="font-semibold text-red-600">Extreme</div>
-                    <div className="text-sm text-gray-600">&gt; 41°C</div>
-                  </div>
-                </div>
-              </div>
+              <HeatStressLegend />
             </div>
           </div>
 

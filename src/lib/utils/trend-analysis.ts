@@ -3,7 +3,7 @@ import {
   getForecastHeatStressDescription,
   getHeatStressDescription,
   type HeatStressDescription,
-} from "@/lib/utils/heat-stress";
+} from "@/lib/utils/thermal-stress";
 import type { TrendGraphDataProperties } from "@/types/types";
 
 export interface TrendGraphSnapshot {

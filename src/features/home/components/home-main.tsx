@@ -21,8 +21,8 @@ import {
 import { FetchForecastData } from "@/lib/api/fetch-client";
 import { getTrendGraphQueryOptions } from "@/lib/api/query-client";
 import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
-import { type HeatStressDescription } from "@/lib/utils/heat-stress";
 import { GraphOptions, SeasonOptions } from "@/lib/utils/select-options";
+import { type HeatStressDescription } from "@/lib/utils/thermal-stress";
 import { buildTrendAnalysisResult } from "@/lib/utils/trend-analysis";
 import { LocationProperties } from "@/types/types";
 
@@ -242,10 +242,10 @@ const Home: FC<MapProperties> = ({
 
   const desktopDialogHeightClass = useMemo(() => {
     if (graphLoading) {
-      return "sm:!top-1/2 sm:!-translate-y-1/2 sm:!max-h-[90dvh] sm:!overflow-y-auto";
+      return "sm:!top-1/2 sm:!-translate-y-1/2 sm:!max-h-[94dvh] sm:!overflow-y-auto";
     }
 
-    return "sm:!top-1/2 sm:!-translate-y-1/2 sm:!h-[92dvh] sm:!max-h-[98dvh] sm:!w-[95vw] sm:!max-w-5xl sm:!overflow-y-auto";
+    return "sm:!top-1/2 sm:!-translate-y-1/2 sm:!h-[96dvh] sm:!max-h-[99dvh] sm:!w-[95vw] sm:!max-w-5xl sm:!overflow-y-auto";
   }, [graphLoading]);
 
   return (

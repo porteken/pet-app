@@ -136,6 +136,29 @@ describe("PageMain", () => {
       expect(screen.getByText("2000")).toBeInTheDocument();
       expect(screen.getByText("2022")).toBeInTheDocument();
     });
+
+    it("should render collapsible thermal stress legend popup", async () => {
+      const user = userEvent.setup();
+
+      await act(async () => {
+        render(<PageMain {...defaultProps} />);
+      });
+
+      const toggle = screen.getByRole("button", {
+        name: "Show Thermal Stress Index",
+      });
+      expect(toggle).toHaveAttribute("aria-expanded", "false");
+      expect(
+        screen.queryByRole("heading", { name: "Thermal Stress Index" }),
+      ).not.toBeInTheDocument();
+
+      await user.click(toggle);
+
+      expect(toggle).toHaveAttribute("aria-expanded", "true");
+      expect(
+        screen.getByRole("heading", { name: "Thermal Stress Index" }),
+      ).toBeInTheDocument();
+    });
   });
 
   describe("Graph Generation", () => {

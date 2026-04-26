@@ -12,8 +12,8 @@ import {
 } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  description: "City rankings by heat stress (PET) values",
-  title: "City Rankings - Heat Stress Analysis",
+  description: "City rankings by thermal stress (PET) values",
+  title: "City Rankings - Thermal Stress Analysis",
 };
 const yearMapping = (
   value: string | undefined,

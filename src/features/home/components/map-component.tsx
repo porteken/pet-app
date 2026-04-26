@@ -12,8 +12,8 @@ import React, {
   useState,
 } from "react";
 
-import { HeatStressLegend } from "@/components/app/heat-stress-legend";
 import { PageLoader } from "@/components/app/page-loader";
+import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
 
 import { OptimizedMarker } from "./optimized-marker";
@@ -189,18 +189,18 @@ export const MapComponent = memo<MapComponentProperties>(
         <div className="pointer-events-none absolute bottom-6 left-6 z-40 hidden sm:block">
           <div className="pointer-events-auto flex flex-col items-start gap-2">
             <button
-              aria-controls="desktop-heat-stress-legend"
+              aria-controls="desktop-thermal-stress-legend"
               aria-expanded={isLegendOpen}
               className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-md transition-colors hover:bg-gray-50"
               onClick={() => setIsLegendOpen((previous) => !previous)}
               type="button"
             >
               {isLegendOpen
-                ? "Hide Heat Stress Index"
-                : "Show Heat Stress Index"}
+                ? "Hide Thermal Stress Index"
+                : "Show Thermal Stress Index"}
             </button>
             {isLegendOpen && (
-              <div id="desktop-heat-stress-legend">
+              <div id="desktop-thermal-stress-legend">
                 <HeatStressLegend />
               </div>
             )}
@@ -211,19 +211,19 @@ export const MapComponent = memo<MapComponentProperties>(
             {isLegendOpen && (
               <div
                 className="mr-2 max-w-[78vw] shadow-md"
-                id="mobile-heat-stress-legend"
+                id="mobile-thermal-stress-legend"
               >
                 <HeatStressLegend />
               </div>
             )}
             <button
-              aria-controls="mobile-heat-stress-legend"
+              aria-controls="mobile-thermal-stress-legend"
               aria-expanded={isLegendOpen}
               className="rounded-l-lg border border-r-0 border-gray-200 bg-white px-2 py-3 text-xs font-semibold text-gray-900 shadow-md transition-colors hover:bg-gray-50"
               onClick={() => setIsLegendOpen((previous) => !previous)}
               type="button"
             >
-              {isLegendOpen ? "Close" : "Heat Stress"}
+              {isLegendOpen ? "Close" : "Thermal Stress"}
             </button>
           </div>
         </div>

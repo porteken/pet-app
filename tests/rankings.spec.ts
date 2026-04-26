@@ -30,33 +30,25 @@ test.describe("Rankings Page", () => {
 
     await expect(page.getByLabel("Year")).toBeVisible();
     await expect(page.getByLabel("State")).toBeVisible();
-    await expect(page.getByLabel("Avg Heat Stress Level")).toBeVisible();
+    await expect(page.getByLabel("Avg Thermal Stress Level")).toBeVisible();
   });
 
-  test("should display heat stress legend", async ({ page }) => {
+  test("should display thermal stress legend", async ({ page }) => {
     await page.goto("/rankings");
 
-    await expect(page.getByText("Heat Stress Levels")).toBeVisible({
+    await expect(page.getByText("Thermal Stress Index")).toBeVisible({
       timeout: 10_000,
     });
 
     const legendSection = page
       .locator("div")
-      .filter({ has: page.getByText("Heat Stress Levels") })
+      .filter({ has: page.getByText("Thermal Stress Index") })
       .first();
 
-    await expect(
-      legendSection.locator("div.font-semibold.text-green-600"),
-    ).toContainText("None to Slight");
-    await expect(
-      legendSection.locator("div.font-semibold.text-yellow-600"),
-    ).toContainText("Moderate");
-    await expect(
-      legendSection.locator("div.font-semibold.text-orange-600"),
-    ).toContainText("Strong");
-    await expect(
-      legendSection.locator("div.font-semibold.text-red-600"),
-    ).toContainText("Extreme");
+    await expect(legendSection).toContainText("Extreme Cold Stress");
+    await expect(legendSection).toContainText("No Thermal Stress");
+    await expect(legendSection).toContainText("Strong Heat Stress");
+    await expect(legendSection).toContainText("Extreme Heat Stress");
   });
 
   test("should change year and update rankings", async ({ page }) => {
@@ -133,7 +125,7 @@ test.describe("Rankings Page", () => {
     });
   });
 
-  test("should filter by heat stress level", async ({ page }) => {
+  test("should filter by thermal stress level", async ({ page }) => {
     await page.goto("/rankings", { waitUntil: "domcontentloaded" });
 
     await expect(
@@ -142,7 +134,7 @@ test.describe("Rankings Page", () => {
       timeout: 15_000,
     });
 
-    const heatStressSelect = page.getByLabel("Avg Heat Stress Level");
+    const heatStressSelect = page.getByLabel("Avg Thermal Stress Level");
     await expect(heatStressSelect).toBeVisible({ timeout: 10_000 });
 
     const firstOption = heatStressSelect.locator("option").nth(1);

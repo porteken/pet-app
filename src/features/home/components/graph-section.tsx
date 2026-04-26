@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { type GraphSeason } from "@/lib/constants";
 import { ForecastControls } from "@/lib/utils/forecast-controls";
-import type { HeatStressDescription } from "@/lib/utils/heat-stress";
+import type { HeatStressDescription } from "@/lib/utils/thermal-stress";
 
 interface GraphSectionProperties {
   forecastEnabled: boolean;
@@ -87,14 +87,14 @@ export const GraphSection = memo<GraphSectionProperties>(
 
     const graphContent = useMemo(
       () => (
-        <div className="flex min-h-[clamp(220px,42vh,520px)] w-full max-w-full items-center justify-center sm:min-h-[500px] sm:max-w-5xl">
+        <div className="flex min-h-[clamp(260px,48vh,620px)] w-full max-w-full flex-1 items-center justify-center sm:min-h-[560px] sm:max-w-5xl">
           {graphLoading ? loadingUI : petGraph}
         </div>
       ),
       [graphLoading, loadingUI, petGraph],
     );
     return (
-      <div className="flex w-full max-w-full min-w-0 flex-col items-center space-y-3 sm:min-h-0 sm:max-w-[95vw] sm:min-w-[320px] sm:space-y-3">
+      <div className="flex h-full w-full max-w-full min-w-0 flex-col items-center gap-3 sm:min-h-0 sm:max-w-[95vw] sm:min-w-[320px] sm:flex-1 sm:gap-4">
         <div className="w-full max-w-md space-y-3 sm:space-y-4">
           <Select
             className="w-full"
@@ -171,7 +171,7 @@ export const GraphSection = memo<GraphSectionProperties>(
             </div>
           )}
         </div>
-        <div className="w-full" id="mobile-trend-graph">
+        <div className="flex w-full flex-1" id="mobile-trend-graph">
           {graphContent}
         </div>
         {detailsButton}

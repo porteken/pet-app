@@ -1,7 +1,7 @@
 "use client";
 import React, { FC } from "react";
 
-import { HeatStressLegend } from "@/components/app/heat-stress-legend";
+import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { HeaderBar } from "@/features/header-bar";
 import { setGraphMeasure, setGraphSeason } from "@/lib/actions/actions";
 import { type GraphSeason } from "@/lib/constants";
@@ -33,6 +33,7 @@ const Main: FC<PageProperties> = ({
 }) => {
   const [selectedGraphSeason, setSelectedGraphSeason] =
     React.useState<GraphSeason>(initialGraphSeason);
+  const [isLegendOpen, setIsLegendOpen] = React.useState(false);
 
   const handleSeasonChange = React.useCallback(async (season: GraphSeason) => {
     setSelectedGraphSeason(season);
@@ -50,34 +51,48 @@ const Main: FC<PageProperties> = ({
       <main className="mx-auto max-w-full px-4 py-8" id="main-content">
         <PageHeader location={location} />
 
-        <div className="flex flex-col gap-8 lg:flex-row">
-          <div className="w-full lg:w-64 lg:shrink-0">
-            <div className="lg:sticky lg:top-8">
-              <HeatStressLegend />
-            </div>
-          </div>
+        <div className="grid items-stretch gap-8 lg:grid-cols-2">
+          <TrendAnalysis
+            graphSeason={selectedGraphSeason}
+            id={id}
+            initialForecastEnabled={initialForecastEnabled}
+            initialForecastYearsAhead={initialForecastYearsAhead}
+            initialGraphMeasure={initialGraphMeasure}
+            onMeasureChange={handleMeasureChange}
+            onSeasonChange={handleSeasonChange}
+          />
 
-          <div className="min-w-0 flex-1">
-            <div className="grid items-stretch gap-8 lg:grid-cols-2">
-              <TrendAnalysis
-                graphSeason={selectedGraphSeason}
-                id={id}
-                initialForecastEnabled={initialForecastEnabled}
-                initialForecastYearsAhead={initialForecastYearsAhead}
-                initialGraphMeasure={initialGraphMeasure}
-                onMeasureChange={handleMeasureChange}
-                onSeasonChange={handleSeasonChange}
-              />
+          <ReferenceData
+            CurrentDates={CurrentDates}
+            CurrentPets={CurrentPets}
+            graphSeason={selectedGraphSeason}
+            id={id}
+            initialGraphSeason={initialGraphSeason}
+            ReferencePets={ReferencePets}
+          />
+        </div>
 
-              <ReferenceData
-                CurrentDates={CurrentDates}
-                CurrentPets={CurrentPets}
-                graphSeason={selectedGraphSeason}
-                id={id}
-                initialGraphSeason={initialGraphSeason}
-                ReferencePets={ReferencePets}
-              />
-            </div>
+        <div className="pointer-events-none fixed bottom-6 left-6 z-40">
+          <div className="pointer-events-auto flex flex-col items-start gap-2">
+            {isLegendOpen && (
+              <div
+                className="max-h-[80vh] max-w-[78vw] overflow-auto shadow-md sm:max-w-xs"
+                id="city-thermal-stress-legend"
+              >
+                <HeatStressLegend />
+              </div>
+            )}
+            <button
+              aria-controls="city-thermal-stress-legend"
+              aria-expanded={isLegendOpen}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-md transition-colors hover:bg-gray-50"
+              onClick={() => setIsLegendOpen((previous) => !previous)}
+              type="button"
+            >
+              {isLegendOpen
+                ? "Hide Thermal Stress Index"
+                : "Show Thermal Stress Index"}
+            </button>
           </div>
         </div>
       </main>

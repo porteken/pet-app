@@ -52,7 +52,7 @@ describe("ReferenceData", () => {
   });
 
   it("should render reference graph controls and graph", async () => {
-    render(<ReferenceData {...defaultProps} />);
+    const { container } = render(<ReferenceData {...defaultProps} />);
 
     expect(screen.getByText("Reference Data")).toBeInTheDocument();
     expect(screen.getByLabelText("Reference Year")).toBeInTheDocument();
@@ -60,6 +60,13 @@ describe("ReferenceData", () => {
     await waitFor(() => {
       expect(screen.getByTestId("mock-reference-graph")).toBeInTheDocument();
     });
+
+    expect(container.querySelector("#reference-data-graph")).toHaveClass(
+      "flex-1",
+    );
+    expect(container.querySelector("#reference-data-graph")).not.toHaveClass(
+      "mt-auto",
+    );
   });
 
   it("should keep mobile graph legend collapsed by default and toggle open", async () => {

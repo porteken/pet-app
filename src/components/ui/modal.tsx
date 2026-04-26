@@ -102,8 +102,8 @@ const Modal = memo<ModalProperties>(
           aria-modal="true"
           className={cn(
             mobileFullscreen
-              ? "inset-0 h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 overflow-y-auto rounded-none border-0 bg-white p-3 shadow-lg sm:top-1/2 sm:left-1/2 sm:h-auto sm:max-h-[95dvh] sm:w-[calc(100%-2rem)] sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg sm:border sm:border-gray-200 sm:p-4 lg:p-5"
-              : "top-1/2 left-1/2 max-h-[86dvh] w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 shadow-lg sm:max-h-[90dvh] sm:w-[calc(100%-2rem)] sm:p-6",
+              ? "inset-0 flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col overflow-y-auto rounded-none border-0 bg-white p-3 shadow-lg sm:top-1/2 sm:left-1/2 sm:h-auto sm:max-h-[95dvh] sm:w-[calc(100%-2rem)] sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg sm:border sm:border-gray-200 sm:p-4 lg:p-5"
+              : "top-1/2 left-1/2 flex max-h-[86dvh] w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 shadow-lg sm:max-h-[90dvh] sm:w-[calc(100%-2rem)] sm:p-6",
             dialogPositionClass,
             dialogClassName,
           )}
@@ -132,7 +132,9 @@ const Modal = memo<ModalProperties>(
           >
             <X className="size-4" />
           </button>
-          <div className="mt-3 mb-4 sm:mt-3 sm:mb-4">{children}</div>
+          <div className="mt-3 mb-1 flex min-h-0 flex-1 flex-col sm:mt-3 sm:mb-2">
+            {children}
+          </div>
         </dialog>
       </div>
     );

@@ -80,6 +80,17 @@ interface TrendForecastData {
   upperBound90: number[];
 }
 
+type GenerateReferenceGraphArguments = readonly [
+  referenceYear: string,
+  dates: Date[],
+  referencePets: number[],
+  currentPets: number[],
+  showLegend?: boolean,
+  isMobileViewport?: boolean,
+  season?: GraphSeason,
+  currentYear?: number,
+];
+
 const normalizeGenerateTrendGraphOptions = (
   input: [GenerateTrendGraphOptions] | GenerateTrendGraphLegacyArguments,
 ): NormalizedGenerateTrendGraphOptions => {
@@ -145,8 +156,8 @@ const normalizeGenerateTrendGraphOptions = (
 
 const getGraphFillHeightClass = (useCompactDesktopHeight: boolean): string =>
   useCompactDesktopHeight
-    ? "h-[clamp(220px,42vh,520px)] sm:h-[clamp(300px,45vh,500px)]"
-    : "h-[clamp(220px,42vh,520px)] sm:h-[clamp(450px,70vh,850px)]";
+    ? "h-full min-h-[clamp(220px,42vh,520px)] sm:min-h-[clamp(300px,45vh,500px)]"
+    : "h-full min-h-[clamp(220px,42vh,520px)] sm:min-h-[clamp(450px,70vh,850px)]";
 
 const Plot = dynamic(
   async () => {
@@ -234,8 +245,8 @@ export const GenerateTrendGraph = (
     },
     margin: {
       b: isMobileViewport ? 34 : 40,
-      l: isMobileViewport ? 34 : 40,
-      r: isMobileViewport ? 10 : 20,
+      l: isMobileViewport ? 30 : 32,
+      r: isMobileViewport ? 6 : 10,
       t: isMobileViewport ? 52 : 60,
     },
     paper_bgcolor: GRAPH_COLORS.background,
@@ -353,8 +364,6 @@ export const GenerateTrendGraph = (
     <div
       className={graphFillHeightClass}
       style={{
-        margin: "0 auto",
-        maxWidth: 1100,
         width: "100%",
       }}
     >
@@ -372,16 +381,18 @@ export const GenerateTrendGraph = (
   );
 };
 
-export const GenerateReferenceGraph = async (
-  referenceYear: string,
-  dates: Date[],
-  referencePets: number[],
-  currentPets: number[],
-  showLegend = true,
-  isMobileViewport = false,
-  season: GraphSeason = DEFAULT_GRAPH_SEASON,
-  currentYear = 2025,
-): Promise<React.ReactElement> => {
+async function generateReferenceGraphInternal(
+  ...[
+    referenceYear,
+    dates,
+    referencePets,
+    currentPets,
+    showLegend = true,
+    isMobileViewport = false,
+    season = DEFAULT_GRAPH_SEASON,
+    currentYear = 2025,
+  ]: GenerateReferenceGraphArguments
+): Promise<React.ReactElement> {
   const graphFillHeightClass = getGraphFillHeightClass(false);
 
   if (
@@ -405,8 +416,8 @@ export const GenerateReferenceGraph = async (
     },
     margin: {
       b: isMobileViewport ? 34 : 40,
-      l: isMobileViewport ? 34 : 40,
-      r: isMobileViewport ? 10 : 20,
+      l: isMobileViewport ? 30 : 32,
+      r: isMobileViewport ? 6 : 10,
       t: isMobileViewport ? 38 : 40,
     },
     paper_bgcolor: GRAPH_COLORS.background,
@@ -473,8 +484,6 @@ export const GenerateReferenceGraph = async (
     <div
       className={graphFillHeightClass}
       style={{
-        margin: "0 auto",
-        maxWidth: 900,
         width: "100%",
       }}
     >
@@ -490,4 +499,10 @@ export const GenerateReferenceGraph = async (
       />
     </div>
   );
+}
+
+export const GenerateReferenceGraph = (
+  ...arguments_: GenerateReferenceGraphArguments
+): Promise<React.ReactElement> => {
+  return generateReferenceGraphInternal(...arguments_);
 };

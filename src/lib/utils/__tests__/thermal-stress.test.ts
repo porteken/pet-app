@@ -4,76 +4,125 @@ import {
   getForecastHeatStressDescription,
   getHeatStressDescription,
   getHeatStressInfo,
-} from "../heat-stress";
+} from "../thermal-stress";
 
-describe("heat-stress", () => {
+describe("thermal-stress", () => {
   describe("getHeatStressInfo", () => {
-    it("should return None to Slight for PET < 29", () => {
-      const result = getHeatStressInfo(20);
-      expect(result.level).toBe("None to Slight");
-      expect(result.color).toBe("text-green-600");
-      expect(result.value).toBe("20.0");
+    it("should return Extreme Cold Stress for PET < 4", () => {
+      const result = getHeatStressInfo(3.9);
+      expect(result.level).toBe("Extreme Cold Stress");
+      expect(result.color).toBe("text-blue-900");
+      expect(result.value).toBe("3.9");
     });
 
-    it("should return None to Slight for PET at boundary (28.9)", () => {
-      const result = getHeatStressInfo(28.9);
-      expect(result.level).toBe("None to Slight");
-      expect(result.color).toBe("text-green-600");
-      expect(result.value).toBe("28.9");
+    it("should return Strong Cold Stress for PET from 4 to 8", () => {
+      const result = getHeatStressInfo(4);
+      expect(result.level).toBe("Strong Cold Stress");
+      expect(result.color).toBe("text-blue-700");
+      expect(result.value).toBe("4.0");
     });
 
-    it("should return Moderate for PET = 29", () => {
+    it("should keep PET = 8 in Strong Cold Stress", () => {
+      const result = getHeatStressInfo(8);
+      expect(result.level).toBe("Strong Cold Stress");
+      expect(result.color).toBe("text-blue-700");
+      expect(result.value).toBe("8.0");
+    });
+
+    it("should return Moderate Cold Stress for PET just above 8", () => {
+      const result = getHeatStressInfo(8.1);
+      expect(result.level).toBe("Moderate Cold Stress");
+      expect(result.color).toBe("text-sky-700");
+      expect(result.value).toBe("8.1");
+    });
+
+    it("should keep PET = 13 in Moderate Cold Stress", () => {
+      const result = getHeatStressInfo(13);
+      expect(result.level).toBe("Moderate Cold Stress");
+      expect(result.color).toBe("text-sky-700");
+      expect(result.value).toBe("13.0");
+    });
+
+    it("should return Slight Cold Stress for PET just above 13", () => {
+      const result = getHeatStressInfo(13.1);
+      expect(result.level).toBe("Slight Cold Stress");
+      expect(result.color).toBe("text-cyan-600");
+      expect(result.value).toBe("13.1");
+    });
+
+    it("should keep PET = 18 in Slight Cold Stress", () => {
+      const result = getHeatStressInfo(18);
+      expect(result.level).toBe("Slight Cold Stress");
+      expect(result.color).toBe("text-cyan-600");
+      expect(result.value).toBe("18.0");
+    });
+
+    it("should return No Thermal Stress for PET just above 18", () => {
+      const result = getHeatStressInfo(18.1);
+      expect(result.level).toBe("No Thermal Stress");
+      expect(result.color).toBe("text-green-600");
+      expect(result.value).toBe("18.1");
+    });
+
+    it("should keep PET = 23 in No Thermal Stress", () => {
+      const result = getHeatStressInfo(23);
+      expect(result.level).toBe("No Thermal Stress");
+      expect(result.color).toBe("text-green-600");
+      expect(result.value).toBe("23.0");
+    });
+
+    it("should return Slight Heat Stress for PET just above 23", () => {
+      const result = getHeatStressInfo(23.1);
+      expect(result.level).toBe("Slight Heat Stress");
+      expect(result.color).toBe("text-yellow-600");
+      expect(result.value).toBe("23.1");
+    });
+
+    it("should keep PET = 29 in Slight Heat Stress", () => {
       const result = getHeatStressInfo(29);
-      expect(result.level).toBe("Moderate");
+      expect(result.level).toBe("Slight Heat Stress");
       expect(result.color).toBe("text-yellow-600");
       expect(result.value).toBe("29.0");
     });
 
-    it("should return Moderate for PET between 29 and 35", () => {
-      const result = getHeatStressInfo(32);
-      expect(result.level).toBe("Moderate");
-      expect(result.color).toBe("text-yellow-600");
-      expect(result.value).toBe("32.0");
+    it("should return Moderate Heat Stress for PET just above 29", () => {
+      const result = getHeatStressInfo(29.1);
+      expect(result.level).toBe("Moderate Heat Stress");
+      expect(result.color).toBe("text-amber-600");
+      expect(result.value).toBe("29.1");
     });
 
-    it("should return Moderate for PET at upper boundary (35)", () => {
+    it("should keep PET = 35 in Moderate Heat Stress", () => {
       const result = getHeatStressInfo(35);
-      expect(result.level).toBe("Moderate");
-      expect(result.color).toBe("text-yellow-600");
+      expect(result.level).toBe("Moderate Heat Stress");
+      expect(result.color).toBe("text-amber-600");
       expect(result.value).toBe("35.0");
     });
 
-    it("should return Strong for PET = 35.1", () => {
+    it("should return Strong Heat Stress for PET just above 35", () => {
       const result = getHeatStressInfo(35.1);
-      expect(result.level).toBe("Strong");
+      expect(result.level).toBe("Strong Heat Stress");
       expect(result.color).toBe("text-orange-600");
       expect(result.value).toBe("35.1");
     });
 
-    it("should return Strong for PET between 35 and 41", () => {
-      const result = getHeatStressInfo(38);
-      expect(result.level).toBe("Strong");
-      expect(result.color).toBe("text-orange-600");
-      expect(result.value).toBe("38.0");
-    });
-
-    it("should return Strong for PET at upper boundary (41)", () => {
+    it("should keep PET = 41 in Strong Heat Stress", () => {
       const result = getHeatStressInfo(41);
-      expect(result.level).toBe("Strong");
+      expect(result.level).toBe("Strong Heat Stress");
       expect(result.color).toBe("text-orange-600");
       expect(result.value).toBe("41.0");
     });
 
-    it("should return Extreme for PET > 41", () => {
+    it("should return Extreme Heat Stress for PET > 41", () => {
       const result = getHeatStressInfo(45);
-      expect(result.level).toBe("Extreme");
+      expect(result.level).toBe("Extreme Heat Stress");
       expect(result.color).toBe("text-red-600");
       expect(result.value).toBe("45.0");
     });
 
-    it("should return Extreme for PET = 41.1", () => {
+    it("should return Extreme Heat Stress for PET = 41.1", () => {
       const result = getHeatStressInfo(41.1);
-      expect(result.level).toBe("Extreme");
+      expect(result.level).toBe("Extreme Heat Stress");
       expect(result.color).toBe("text-red-600");
       expect(result.value).toBe("41.1");
     });
@@ -90,31 +139,31 @@ describe("heat-stress", () => {
   describe("getHeatStressDescription", () => {
     it("should return description for average measure type", () => {
       const result = getHeatStressDescription(32, "avg", 2024);
-      expect(result.prefix).toBe("The 2024 annual average heat stress is");
+      expect(result.prefix).toBe("The 2024 annual average thermal stress is");
       expect(result.value).toBe("32.0");
-      expect(result.colorClass).toBe("text-yellow-600");
+      expect(result.colorClass).toBe("text-amber-600");
       expect(result.confidenceRange).toBeUndefined();
     });
 
     it("should return description for max measure type", () => {
       const result = getHeatStressDescription(38, "max", 2023);
-      expect(result.prefix).toBe("The 2023 annual max heat stress is");
+      expect(result.prefix).toBe("The 2023 annual max thermal stress is");
       expect(result.value).toBe("38.0");
       expect(result.colorClass).toBe("text-orange-600");
     });
 
     it("should use default year 2025 when not provided", () => {
       const result = getHeatStressDescription(30, "avg");
-      expect(result.prefix).toBe("The 2025 annual average heat stress is");
+      expect(result.prefix).toBe("The 2025 annual average thermal stress is");
     });
 
-    it("should handle None to Slight heat stress level", () => {
-      const result = getHeatStressDescription(25, "avg", 2024);
+    it("should handle No Thermal Stress level", () => {
+      const result = getHeatStressDescription(22, "avg", 2024);
       expect(result.colorClass).toBe("text-green-600");
-      expect(result.value).toBe("25.0");
+      expect(result.value).toBe("22.0");
     });
 
-    it("should handle Extreme heat stress level", () => {
+    it("should handle Extreme Heat Stress level", () => {
       const result = getHeatStressDescription(45, "max", 2024);
       expect(result.colorClass).toBe("text-red-600");
       expect(result.value).toBe("45.0");
@@ -126,7 +175,7 @@ describe("heat-stress", () => {
       const result = getForecastHeatStressDescription(35, 2050, 32, 38);
       expect(result.prefix).toBe("By end of 2050, it could be");
       expect(result.value).toBe("35.0");
-      expect(result.colorClass).toBe("text-yellow-600");
+      expect(result.colorClass).toBe("text-amber-600");
       expect(result.confidenceRange).toBe("(10-90%: 32.0-38.0°C)");
     });
 
@@ -157,26 +206,26 @@ describe("heat-stress", () => {
       expect(result.confidenceRange).toBe("(10-90%: 34.9-35.1°C)");
     });
 
-    it("should handle None to Slight forecast", () => {
-      const result = getForecastHeatStressDescription(25, 2050, 22, 28);
+    it("should handle No Thermal Stress forecast", () => {
+      const result = getForecastHeatStressDescription(22, 2050, 20, 23);
       expect(result.colorClass).toBe("text-green-600");
-      expect(result.value).toBe("25.0");
-      expect(result.confidenceRange).toBe("(10-90%: 22.0-28.0°C)");
+      expect(result.value).toBe("22.0");
+      expect(result.confidenceRange).toBe("(10-90%: 20.0-23.0°C)");
     });
 
-    it("should handle Moderate forecast", () => {
+    it("should handle Moderate Heat Stress forecast", () => {
       const result = getForecastHeatStressDescription(32, 2050, 30, 34);
-      expect(result.colorClass).toBe("text-yellow-600");
+      expect(result.colorClass).toBe("text-amber-600");
       expect(result.value).toBe("32.0");
     });
 
-    it("should handle Strong forecast", () => {
+    it("should handle Strong Heat Stress forecast", () => {
       const result = getForecastHeatStressDescription(38, 2050, 36, 40);
       expect(result.colorClass).toBe("text-orange-600");
       expect(result.value).toBe("38.0");
     });
 
-    it("should handle Extreme forecast", () => {
+    it("should handle Extreme Heat Stress forecast", () => {
       const result = getForecastHeatStressDescription(45, 2050, 42, 48);
       expect(result.colorClass).toBe("text-red-600");
       expect(result.value).toBe("45.0");

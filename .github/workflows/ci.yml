@@ -57,15 +57,14 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
 
-      - run: pnpm run test:unit -- --reporter=blob --shard=${{ matrix.shard_index }}/5
+      - run: pnpm run test:unit -- --reporter=blob --outputFile=./vitest-unit-blob-${{ matrix.shard_index }}-of-5.json --shard=${{ matrix.shard_index }}/5
 
       - name: Upload Vitest unit blob report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vitest-unit-blob-${{ matrix.shard_index }}
-          path: .vitest-reports/*
-          include-hidden-files: true
+          path: vitest-unit-blob-${{ matrix.shard_index }}-of-5.json
           retention-days: 1
 
   merge-vitest-unit:
@@ -93,10 +92,27 @@ jobs:
           pattern: vitest-unit-blob-*
           merge-multiple: true
 
-      - name: Merge Vitest unit reports
+      - name: Check for downloaded Vitest unit blob reports
+        id: unit_blob_reports
         run: |
           mkdir -p ./all-vitest-unit-blob-reports
-          pnpm exec vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=junit
+
+          if find ./all-vitest-unit-blob-reports -maxdepth 1 -type f -name '*.json' | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "No Vitest unit blob reports were downloaded; skipping merge."
+          fi
+
+      - name: Merge Vitest unit reports
+        if: steps.unit_blob_reports.outputs.found == 'true'
+        run: pnpm exec vitest run --merge-reports=./all-vitest-unit-blob-reports --reporter=junit
+
+      - name: Fail when unit blob reports are unexpectedly missing
+        if: steps.unit_blob_reports.outputs.found != 'true' && needs.vitest-unit.result == 'success'
+        run: |
+          echo "Expected Vitest unit blob reports, but none were downloaded."
+          exit 1
 
   vitest-integration:
     name: Vitest Integration (shard ${{ matrix.shard_index }}/2)
@@ -118,15 +134,14 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
 
-      - run: pnpm run test:integration -- --reporter=blob --shard=${{ matrix.shard_index }}/2
+      - run: pnpm run test:integration -- --reporter=blob --outputFile=./vitest-integration-blob-${{ matrix.shard_index }}-of-2.json --shard=${{ matrix.shard_index }}/2
 
       - name: Upload Vitest integration blob report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vitest-integration-blob-${{ matrix.shard_index }}
-          path: .vitest-reports/*
-          include-hidden-files: true
+          path: vitest-integration-blob-${{ matrix.shard_index }}-of-2.json
           retention-days: 1
 
   merge-vitest-integration:
@@ -154,10 +169,27 @@ jobs:
           pattern: vitest-integration-blob-*
           merge-multiple: true
 
-      - name: Merge Vitest integration reports
+      - name: Check for downloaded Vitest integration blob reports
+        id: integration_blob_reports
         run: |
           mkdir -p ./all-vitest-integration-blob-reports
-          pnpm exec vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=junit
+
+          if find ./all-vitest-integration-blob-reports -maxdepth 1 -type f -name '*.json' | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "No Vitest integration blob reports were downloaded; skipping merge."
+          fi
+
+      - name: Merge Vitest integration reports
+        if: steps.integration_blob_reports.outputs.found == 'true'
+        run: pnpm exec vitest run --merge-reports=./all-vitest-integration-blob-reports --reporter=junit
+
+      - name: Fail when integration blob reports are unexpectedly missing
+        if: steps.integration_blob_reports.outputs.found != 'true' && needs.vitest-integration.result == 'success'
+        run: |
+          echo "Expected Vitest integration blob reports, but none were downloaded."
+          exit 1
 
   playwright-e2e:
     name: Playwright E2E (shard ${{ matrix.shard_index }}/20)
@@ -208,7 +240,7 @@ jobs:
 
       - name: Get Playwright Version
         id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(pnpm exec playwright --version | awk '{print $2}')" >> $GITHUB_ENV
+        run: echo "PLAYWRIGHT_VERSION=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_ENV"
 
       - name: Cache Playwright Browsers
         uses: actions/cache@v4

@@ -94,7 +94,9 @@ jobs:
           merge-multiple: true
 
       - name: Merge Vitest unit reports
-        run: pnpm exec vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=junit
+        run: |
+          mkdir -p ./all-vitest-unit-blob-reports
+          pnpm exec vitest --merge-reports=./all-vitest-unit-blob-reports --reporter=junit
 
   vitest-integration:
     name: Vitest Integration (shard ${{ matrix.shard_index }}/2)
@@ -153,15 +155,18 @@ jobs:
           merge-multiple: true
 
       - name: Merge Vitest integration reports
-        run: pnpm exec vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=junit
+        run: |
+          mkdir -p ./all-vitest-integration-blob-reports
+          pnpm exec vitest --merge-reports=./all-vitest-integration-blob-reports --reporter=junit
 
   playwright-e2e:
     name: Playwright E2E (shard ${{ matrix.shard_index }}/20)
     runs-on: ubuntu-latest
 
     env:
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ github.ref_name != 'prd' && secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '' }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ github.ref_name == 'prd' && secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || '' }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ github.ref_name == 'prd' && secrets.NEXT_PUBLIC_SUPABASE_URL_PRD || secrets.NEXT_PUBLIC_SUPABASE_URL_DEV }}
 
     strategy:
       fail-fast: false

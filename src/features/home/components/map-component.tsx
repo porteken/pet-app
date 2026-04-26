@@ -14,6 +14,7 @@ import React, {
 
 import { HeatStressLegend } from "@/components/app/heat-stress-legend";
 import { PageLoader } from "@/components/app/page-loader";
+import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
 
 import { OptimizedMarker } from "./optimized-marker";
 
@@ -29,6 +30,7 @@ interface MapComponentProperties {
   locations: Location[];
   onMarkerClick: (_locationId: number) => void;
   selectedGraphMeasure: string;
+  selectedGraphSeason?: GraphSeason;
 }
 
 type MapContainerType = ComponentType<{
@@ -55,7 +57,12 @@ type TileLayerType = ComponentType<{
 }>;
 
 export const MapComponent = memo<MapComponentProperties>(
-  ({ locations, onMarkerClick, selectedGraphMeasure }) => {
+  ({
+    locations,
+    onMarkerClick,
+    selectedGraphMeasure,
+    selectedGraphSeason = DEFAULT_GRAPH_SEASON,
+  }) => {
     const [MapContainer, setMapContainer] = useState<MapContainerType>();
     const [TileLayer, setTileLayer] = useState<TileLayerType>();
     const [Marker, setMarker] = useState<MarkerType>();
@@ -107,9 +114,17 @@ export const MapComponent = memo<MapComponentProperties>(
           onClick={onMarkerClick}
           position={[loc.lat, loc.lng]}
           selectedGraphMeasure={selectedGraphMeasure}
+          selectedGraphSeason={selectedGraphSeason}
         />
       ));
-    }, [locations, customIcon, Marker, onMarkerClick, selectedGraphMeasure]);
+    }, [
+      locations,
+      customIcon,
+      Marker,
+      onMarkerClick,
+      selectedGraphMeasure,
+      selectedGraphSeason,
+    ]);
 
     if (!isLoaded || !MapContainer || !TileLayer || !Marker || !customIcon) {
       return <PageLoader />;

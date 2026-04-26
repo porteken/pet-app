@@ -24,6 +24,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/actions/actions", () => ({
   setRankingsHeatStress: vi.fn(),
+  setRankingsSeason: vi.fn(),
   setRankingsState: vi.fn(),
   setRankingsYear: vi.fn(),
 }));
@@ -102,7 +103,7 @@ vi.mock("@/components/ui/pagination", () => ({
   )),
 }));
 
-import { setRankingsYear } from "@/lib/actions/actions";
+import { setRankingsSeason, setRankingsYear } from "@/lib/actions/actions";
 
 import { RankingsMain } from "../components/rankings-main";
 
@@ -312,10 +313,12 @@ const mockRankings = [
 
 const defaultProps = {
   initialHeatStress: "",
+  initialSeason: "Annual" as const,
   initialState: "",
   initialYear: 2020,
   LocationOptions: mockLocationOptions,
   rankings: mockRankings,
+  shouldPersistInitialSeason: false,
 };
 
 const requireElement = <T extends Element>(element: null | T): T => {
@@ -348,6 +351,7 @@ describe("RankingsMain", () => {
     it("should render state and heat stress filters", () => {
       render(<RankingsMain {...defaultProps} />);
 
+      expect(screen.getByTestId("season-select")).toBeInTheDocument();
       expect(screen.getByTestId("state-select")).toBeInTheDocument();
       expect(
         screen.getByTestId("avg-heat-stress-level-select"),
@@ -410,6 +414,31 @@ describe("RankingsMain", () => {
 
       await waitFor(() => {
         expect(setRankingsYear).toHaveBeenCalledWith(2025);
+      });
+    });
+
+    it("should call setRankingsSeason when season changes", async () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const seasonSelect = screen.getByTestId("season-select");
+      fireEvent.change(seasonSelect, { target: { value: "Winter" } });
+
+      await waitFor(() => {
+        expect(setRankingsSeason).toHaveBeenCalledWith("Winter");
+      });
+    });
+
+    it("should persist the default annual season when requested", async () => {
+      render(
+        <RankingsMain
+          {...defaultProps}
+          initialSeason="Annual"
+          shouldPersistInitialSeason
+        />,
+      );
+
+      await waitFor(() => {
+        expect(setRankingsSeason).toHaveBeenCalledWith("Annual");
       });
     });
   });

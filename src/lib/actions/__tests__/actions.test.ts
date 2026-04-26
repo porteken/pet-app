@@ -3,7 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   setForecastPreferences,
   setGraphMeasure,
+  setGraphSeason,
   setRankingsHeatStress,
+  setRankingsSeason,
   setRankingsState,
   setRankingsYear,
 } from "../actions";
@@ -67,6 +69,32 @@ describe("setGraphMeasure", () => {
 
     expect(actualExpiration).toBeGreaterThanOrEqual(expectedExpiration - 1000);
     expect(actualExpiration).toBeLessThanOrEqual(afterCall + oneYearMs + 1000);
+  });
+});
+
+describe("setGraphSeason", () => {
+  let mockSet: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    const { cookies } = await import("next/headers");
+    const cookiesResult = await cookies();
+    mockSet = vi.mocked(cookiesResult.set);
+  });
+
+  it("sets the graph season cookie with correct parameters", async () => {
+    await setGraphSeason("Winter");
+
+    expect(mockSet).toHaveBeenCalledWith(
+      "graph-season",
+      "Winter",
+      expect.objectContaining({
+        expires: expect.any(Date),
+        httpOnly: true,
+        path: "/",
+      }),
+    );
   });
 });
 
@@ -204,6 +232,40 @@ describe("setRankingsState", () => {
     const { revalidatePath } = await import("next/cache");
 
     await setRankingsState("NY");
+
+    expect(revalidatePath).toHaveBeenCalledWith("/rankings");
+  });
+});
+
+describe("setRankingsSeason", () => {
+  let mockSet: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    const { cookies } = await import("next/headers");
+    const cookiesResult = await cookies();
+    mockSet = vi.mocked(cookiesResult.set);
+  });
+
+  it("sets the rankings season cookie with correct parameters", async () => {
+    await setRankingsSeason("Winter");
+
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-season",
+      "Winter",
+      expect.objectContaining({
+        httpOnly: true,
+        path: "/",
+        sameSite: "strict",
+      }),
+    );
+  });
+
+  it("calls revalidatePath with /rankings", async () => {
+    const { revalidatePath } = await import("next/cache");
+
+    await setRankingsSeason("Spring");
 
     expect(revalidatePath).toHaveBeenCalledWith("/rankings");
   });

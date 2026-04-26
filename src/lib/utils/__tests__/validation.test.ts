@@ -178,16 +178,12 @@ describe("validation utilities", () => {
       );
     });
 
-    it("should throw for arrays containing negative numbers", () => {
-      expect(() => validateYearPets([1, 2, -1, 4])).toThrow(
-        "Invalid pet count data detected",
-      );
+    it("should allow arrays containing negative numbers", () => {
+      expect(() => validateYearPets([1, 2, -1, 4])).not.toThrow();
     });
 
-    it("should throw for arrays containing only negative numbers", () => {
-      expect(() => validateYearPets([-1, -2, -3])).toThrow(
-        "Invalid pet count data detected",
-      );
+    it("should allow arrays containing only negative numbers", () => {
+      expect(() => validateYearPets([-1, -2, -3])).not.toThrow();
     });
 
     it("should handle zero (valid pet count)", () => {
@@ -196,6 +192,10 @@ describe("validation utilities", () => {
 
     it("should handle decimal numbers (they are valid)", () => {
       expect(() => validateYearPets([1.5, 2.7, 3.14])).not.toThrow();
+    });
+
+    it("should allow mixed negative and decimal PET values", () => {
+      expect(() => validateYearPets([-4.1, 0, 14.3])).not.toThrow();
     });
   });
 

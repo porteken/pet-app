@@ -4,7 +4,9 @@ import { cookies } from "next/headers";
 import { RankingsMain } from "@/features/rankings";
 import { FetchCityRankings, FetchLocations } from "@/lib/api/fetch-server";
 import {
+  normalizeGraphSeason,
   RANKINGS_HEAT_STRESS_COOKIE_NAME,
+  RANKINGS_SEASON_COOKIE_NAME,
   RANKINGS_STATE_COOKIE_NAME,
   RANKINGS_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
@@ -36,22 +38,26 @@ export default async function RankingsPage({
   const heatStressFromCookie = cookieStore.get(
     RANKINGS_HEAT_STRESS_COOKIE_NAME,
   )?.value;
+  const seasonFromCookie = cookieStore.get(RANKINGS_SEASON_COOKIE_NAME)?.value;
   const stateFromCookie = cookieStore.get(RANKINGS_STATE_COOKIE_NAME)?.value;
   const yearFromCookie = cookieStore.get(RANKINGS_YEAR_COOKIE_NAME)?.value;
 
+  const initialSeason = normalizeGraphSeason(seasonFromCookie);
   const year = yearMapping(parameters.year, yearFromCookie);
   const [rankings, { LocationOptions }] = await Promise.all([
-    FetchCityRankings(year),
+    FetchCityRankings(year, initialSeason),
     FetchLocations(),
   ]);
 
   return (
     <RankingsMain
       initialHeatStress={heatStressFromCookie ?? ""}
+      initialSeason={initialSeason}
       initialState={stateFromCookie ?? ""}
       initialYear={year}
       LocationOptions={LocationOptions}
       rankings={rankings}
+      shouldPersistInitialSeason={seasonFromCookie !== initialSeason}
     />
   );
 }

@@ -5,16 +5,40 @@ export const APP_CONFIG = {
 } as const;
 
 export const GRAPH_MEASURE_COOKIE_NAME = "graph-measure" as const;
+export const GRAPH_SEASON_COOKIE_NAME = "graph-season" as const;
 export const RANKINGS_HEAT_STRESS_COOKIE_NAME = "rankings-heat-stress" as const;
+export const RANKINGS_SEASON_COOKIE_NAME = "rankings-season" as const;
 export const RANKINGS_STATE_COOKIE_NAME = "rankings-state" as const;
 export const RANKINGS_YEAR_COOKIE_NAME = "rankings-year" as const;
 export const FORECAST_ENABLED_COOKIE_NAME = "forecast-enabled" as const;
 export const FORECAST_YEARS_AHEAD_COOKIE_NAME = "forecast-years-ahead" as const;
 export const DEFAULT_GRAPH_MEASURE = "avg" as const;
+export const GRAPH_SEASONS = [
+  "Annual",
+  "Spring",
+  "Summer",
+  "Fall",
+  "Winter",
+] as const;
+export type GraphSeason = (typeof GRAPH_SEASONS)[number];
+export const DEFAULT_GRAPH_SEASON = "Annual" as const;
 export const DEFAULT_FORECAST_ENABLED = false as const;
 export const DEFAULT_FORECAST_YEARS_AHEAD = 10 as const;
 export const MIN_FORECAST_YEARS_AHEAD = 5 as const;
 export const MAX_FORECAST_YEARS_AHEAD = 75 as const;
+
+const isGraphSeason = (value: string): value is GraphSeason =>
+  GRAPH_SEASONS.includes(value as GraphSeason);
+
+export const normalizeGraphSeason = (
+  value: string | undefined,
+): GraphSeason => {
+  if (value && isGraphSeason(value)) {
+    return value;
+  }
+
+  return DEFAULT_GRAPH_SEASON;
+};
 
 export const ERROR_MESSAGES = {
   DATABASE_CONNECTION:

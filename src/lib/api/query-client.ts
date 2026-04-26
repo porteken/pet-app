@@ -2,6 +2,8 @@
 
 import { QueryClient } from "@tanstack/react-query";
 
+import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
+
 import { FetchTrendGraphData } from "./fetch-client";
 
 export const createQueryClient = () =>
@@ -15,25 +17,30 @@ export const createQueryClient = () =>
   });
 
 export const queryKeys = {
-  trendGraph: (locationId: number, option: string) =>
-    ["trend-graph", locationId, option] as const,
+  trendGraph: (
+    locationId: number,
+    option: string,
+    season: GraphSeason = DEFAULT_GRAPH_SEASON,
+  ) => ["trend-graph", locationId, option, season] as const,
 };
 
 export const getTrendGraphQueryOptions = (
   locationId: number,
   option: string,
+  season: GraphSeason = DEFAULT_GRAPH_SEASON,
 ) => ({
-  queryFn: () => FetchTrendGraphData(option, locationId),
-  queryKey: queryKeys.trendGraph(locationId, option),
+  queryFn: () => FetchTrendGraphData(option, locationId, season),
+  queryKey: queryKeys.trendGraph(locationId, option, season),
 });
 
 export const prefetchTrendGraphData = (
   queryClient: QueryClient,
   locationId: number,
   option: string,
+  season: GraphSeason = DEFAULT_GRAPH_SEASON,
 ) => {
   return queryClient.prefetchQuery({
-    ...getTrendGraphQueryOptions(locationId, option),
+    ...getTrendGraphQueryOptions(locationId, option, season),
   });
 };
 

@@ -5,6 +5,7 @@ import React from "react";
 import { GenerateTrendGraph } from "@/features/graph";
 import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
+import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
 import { ForecastControls } from "@/lib/utils/forecast-controls";
 import { type HeatStressDescription } from "@/lib/utils/heat-stress";
 import {
@@ -13,19 +14,23 @@ import {
 } from "@/lib/utils/trend-analysis";
 
 interface TrendAnalysisProperties {
+  graphSeason: GraphSeason;
   id: number;
   initialForecastEnabled: boolean;
   initialForecastYearsAhead: number;
   initialGraphMeasure: string;
   onMeasureChange: (measure: string) => Promise<void>;
+  onSeasonChange: (season: GraphSeason) => Promise<void>;
 }
 
 const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
+  graphSeason,
   id,
   initialForecastEnabled,
   initialForecastYearsAhead,
   initialGraphMeasure,
   onMeasureChange,
+  onSeasonChange,
 }) => {
   const [selectedGraphMeasure, setSelectedGraphMeasure] =
     React.useState(initialGraphMeasure);
@@ -76,7 +81,12 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   }, []);
 
   const generatePetTrendGraph = React.useCallback(
-    async (option: string, enableForecast: boolean, yearsAhead: number) => {
+    async (
+      option: string,
+      season: GraphSeason,
+      enableForecast: boolean,
+      yearsAhead: number,
+    ) => {
       try {
         const {
           forecastHeatStress: newForecastHeatStress,
@@ -84,9 +94,10 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           snapshot,
         } = await buildTrendAnalysisResult({
           enableForecast,
-          fetchForecastData: () => FetchForecastData(id, yearsAhead),
-          fetchTrendGraphData: () => FetchTrendGraphData(option, id),
+          fetchForecastData: () => FetchForecastData(id, yearsAhead, season),
+          fetchTrendGraphData: () => FetchTrendGraphData(option, id, season),
           option,
+          season,
         });
 
         setCurrentHeatStress(newHeatStressDescription);
@@ -97,6 +108,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           forecastData: undefined,
           increase_per_year: 0,
           option,
+          season,
           trendline_pets: [],
           year_pets: [],
           years: [],
@@ -122,16 +134,35 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     [onMeasureChange],
   );
 
+  const handleSeasonChange = React.useCallback(
+    async (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const season = normalizeGraphSeason(event.target.value);
+      setIsMobileLegendOpen(false);
+
+      try {
+        await onSeasonChange(season);
+      } catch {
+        // Ignore persistence failures and keep the local selection.
+      }
+    },
+    [onSeasonChange],
+  );
+
+  const forecastSupported = selectedGraphMeasure === "avg";
+
   React.useEffect(() => {
     generatePetTrendGraph(
       selectedGraphMeasure,
-      forecastEnabled && selectedGraphMeasure === "avg",
+      graphSeason,
+      forecastEnabled && forecastSupported,
       forecastYearsAhead,
     );
   }, [
     generatePetTrendGraph,
     selectedGraphMeasure,
+    graphSeason,
     forecastEnabled,
+    forecastSupported,
     forecastYearsAhead,
   ]);
 
@@ -162,6 +193,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
         increasePerYear: trendGraphSnapshot.increase_per_year,
         isMobileViewport,
         option: trendGraphSnapshot.option,
+        season: trendGraphSnapshot.season,
         showLegend: showTrendLegend,
         trendlinePets: trendGraphSnapshot.trendline_pets,
         yearPets: trendGraphSnapshot.year_pets,
@@ -177,6 +209,26 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           Trend Analysis
         </h2>
         <div className="mb-4 space-y-4">
+          <div>
+            <label
+              className="mb-2 block text-sm font-medium text-gray-700"
+              htmlFor="graph-season"
+            >
+              Season
+            </label>
+            <select
+              className="h-10 w-full rounded-md border border-gray-300 px-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              id="graph-season"
+              onChange={handleSeasonChange}
+              value={graphSeason}
+            >
+              <option value="Annual">Annual</option>
+              <option value="Spring">Spring</option>
+              <option value="Summer">Summer</option>
+              <option value="Fall">Fall</option>
+              <option value="Winter">Winter</option>
+            </select>
+          </div>
           <div>
             <label
               className="mb-2 block text-sm font-medium text-gray-700"
@@ -198,7 +250,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
               </option>
             </select>
           </div>
-          {selectedGraphMeasure === "avg" && (
+          {forecastSupported && (
             <ForecastControls
               enabled={forecastEnabled}
               onToggle={handleForecastToggle}

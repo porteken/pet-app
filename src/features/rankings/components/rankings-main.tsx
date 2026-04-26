@@ -8,14 +8,20 @@ import { Select } from "@/components/ui/select";
 import { HeaderBar } from "@/features/header-bar";
 import {
   setRankingsHeatStress,
+  setRankingsSeason,
   setRankingsState,
   setRankingsYear,
 } from "@/lib/actions/actions";
 import {
+  GRAPH_SEASONS,
+  normalizeGraphSeason,
+  type GraphSeason,
+} from "@/lib/constants";
+import {
   getHeatStressInfo,
   type HeatStressLevel,
 } from "@/lib/utils/heat-stress";
-import { LocationOptionSection } from "@/types/types";
+import { type LocationOptionSection } from "@/types/types";
 
 const getPetRange = (p10: number, p90: number): string => {
   return `${p10.toFixed(1)}-${p90.toFixed(1)}`;
@@ -41,6 +47,11 @@ const ALL_HEAT_STRESS_LEVELS = [
   { label: "Strong", value: "Strong" },
   { label: "Extreme", value: "Extreme" },
 ];
+
+const SEASON_OPTIONS = GRAPH_SEASONS.map((season) => ({
+  label: season,
+  value: season,
+}));
 
 interface RankingItem {
   avg_pet: number;
@@ -98,40 +109,53 @@ function filterRanking(
 
 interface RankingsMainProperties {
   initialHeatStress: string;
+  initialSeason: GraphSeason;
   initialState: string;
   initialYear: number;
   LocationOptions: LocationOptionSection[];
   rankings: RankingItem[];
+  shouldPersistInitialSeason?: boolean;
 }
 
-const SortHeader: React.FC<{
+function SortHeader({
+  column,
+  currentColumn,
+  currentDirection,
+  label,
+  onSort,
+}: Readonly<{
   column: SortColumn;
   currentColumn: SortColumn;
   currentDirection: "asc" | "desc";
   label: string;
   onSort: (column: SortColumn) => void;
-}> = ({ column, currentColumn, currentDirection, label, onSort }) => (
-  <th
-    className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-    onClick={() => onSort(column)}
-  >
-    <div className="flex items-center gap-1">
-      {label}
-      {currentColumn === column && (
-        <span>{currentDirection === "asc" ? "↑" : "↓"}</span>
-      )}
-    </div>
-  </th>
-);
+}>) {
+  return (
+    <th
+      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
+      onClick={() => onSort(column)}
+    >
+      <div className="flex items-center gap-1">
+        {label}
+        {currentColumn === column && (
+          <span>{currentDirection === "asc" ? "↑" : "↓"}</span>
+        )}
+      </div>
+    </th>
+  );
+}
 
-export const RankingsMain: React.FC<RankingsMainProperties> = ({
+export function RankingsMain({
   initialHeatStress,
+  initialSeason,
   initialState,
   initialYear,
   LocationOptions,
   rankings,
-}) => {
+  shouldPersistInitialSeason = false,
+}: Readonly<RankingsMainProperties>) {
   const router = useRouter();
+  const [selectedSeason, setSelectedSeason] = useState(initialSeason);
   const [selectedYear, setSelectedYear] = useState(initialYear);
   const [isPending, startTransition] = useTransition();
 
@@ -192,7 +216,23 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [stateFilter, heatStressFilter, sortColumn, sortDirection]);
+  }, [
+    stateFilter,
+    heatStressFilter,
+    selectedSeason,
+    sortColumn,
+    sortDirection,
+  ]);
+
+  React.useEffect(() => {
+    if (!shouldPersistInitialSeason) {
+      return;
+    }
+
+    startTransition(() => {
+      void setRankingsSeason(initialSeason);
+    });
+  }, [initialSeason, shouldPersistInitialSeason, startTransition]);
 
   const handleYearChange = (value: string) => {
     if (value) {
@@ -202,6 +242,14 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
         void setRankingsYear(year);
       });
     }
+  };
+
+  const handleSeasonChange = (value: string) => {
+    const season = normalizeGraphSeason(value);
+    setSelectedSeason(season);
+    startTransition(() => {
+      void setRankingsSeason(season);
+    });
   };
 
   const handleHeatStressChange = (value: string) => {
@@ -251,7 +299,7 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
           </h1>
         </div>
 
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Select
             className="w-full"
             data={YEAR_OPTIONS}
@@ -259,6 +307,14 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
             label="Year"
             onChange={handleYearChange}
             value={String(selectedYear)}
+          />
+          <Select
+            className="w-full"
+            data={SEASON_OPTIONS}
+            disabled={isPending}
+            label="Season"
+            onChange={handleSeasonChange}
+            value={selectedSeason}
           />
           <Select
             className="w-full"
@@ -518,4 +574,4 @@ export const RankingsMain: React.FC<RankingsMainProperties> = ({
       </main>
     </div>
   );
-};
+}

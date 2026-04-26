@@ -9,6 +9,7 @@ const setBaseEnvironment = () => {
   process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
   delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
+  delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 };
 
 afterEach(() => {
@@ -44,13 +45,26 @@ describe("getPublicEnvironment", () => {
     });
   });
 
+  it("falls back to the legacy publishable key when configured", async () => {
+    setBaseEnvironment();
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "publishable-key";
+
+    const { getPublicEnvironment } = await loadEnvironmentModule();
+
+    expect(getPublicEnvironment()).toEqual({
+      NEXT_PUBLIC_E2E_TEST: "false",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "publishable-key",
+      NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+    });
+  });
+
   it("throws when neither Supabase key is configured", async () => {
     setBaseEnvironment();
 
     const { getPublicEnvironment } = await loadEnvironmentModule();
 
     expect(() => getPublicEnvironment()).toThrow(
-      "NEXT_PUBLIC_SUPABASE_ANON_KEY: Required. Set NEXT_PUBLIC_SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY.",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY: Required. Set NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY, or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
     );
   });
 });

@@ -24,10 +24,12 @@ import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
 
 import { ReferenceData } from "../components/reference-data";
 
-const defaultProps = {
+const defaultProps: React.ComponentProps<typeof ReferenceData> = {
   CurrentDates: [new Date("2023-06-01"), new Date("2023-06-02")],
   CurrentPets: [22, 24],
+  graphSeason: "Annual",
   id: 1,
+  initialGraphSeason: "Annual",
   ReferencePets: [18, 20],
 };
 
@@ -102,7 +104,7 @@ describe("ReferenceData", () => {
     fireEvent.change(referenceYear, { target: { value: "2001" } });
 
     await waitFor(() => {
-      expect(FetchReferenceGraphData).toHaveBeenCalledWith("2001", 1);
+      expect(FetchReferenceGraphData).toHaveBeenCalledWith("2001", 1, "Annual");
     });
   });
 });

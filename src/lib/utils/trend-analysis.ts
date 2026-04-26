@@ -1,3 +1,4 @@
+import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
 import {
   getForecastHeatStressDescription,
   getHeatStressDescription,
@@ -9,6 +10,7 @@ export interface TrendGraphSnapshot {
   forecastData?: ForecastGraphData;
   increase_per_year: number;
   option: string;
+  season: GraphSeason;
   trendline_pets: number[];
   year_pets: number[];
   years: number[];
@@ -19,6 +21,7 @@ interface BuildTrendAnalysisResultOptions {
   fetchForecastData: () => Promise<ForecastGraphData | undefined>;
   fetchTrendGraphData: () => Promise<TrendGraphDataProperties>;
   option: string;
+  season?: GraphSeason;
 }
 
 interface ForecastGraphData {
@@ -74,6 +77,7 @@ export const buildTrendAnalysisResult = async ({
   fetchForecastData,
   fetchTrendGraphData,
   option,
+  season = DEFAULT_GRAPH_SEASON,
 }: BuildTrendAnalysisResultOptions): Promise<TrendAnalysisResult> => {
   const trendDataPromise = fetchTrendGraphData();
   const forecastDataPromise = enableForecast ? fetchForecastData() : undefined;
@@ -92,6 +96,7 @@ export const buildTrendAnalysisResult = async ({
         forecastData,
         increase_per_year: 0,
         option,
+        season,
         trendline_pets: [],
         year_pets: [],
         years: [],
@@ -113,11 +118,13 @@ export const buildTrendAnalysisResult = async ({
       currentPetValue,
       option,
       currentYear,
+      season,
     ),
     snapshot: {
       forecastData,
       increase_per_year,
       option,
+      season,
       trendline_pets,
       year_pets,
       years,

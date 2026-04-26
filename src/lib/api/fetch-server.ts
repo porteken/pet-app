@@ -4,6 +4,7 @@ import { cache } from "react";
 
 import { createClient } from "@/config/supabase/server";
 import {
+  filterReferenceRowsBySeason,
   mapReferenceRowsToGraphData,
   mapTrendRowsToGraphData,
 } from "@/lib/api/graph-data";
@@ -15,6 +16,11 @@ import {
   parseReferenceGraphRows,
   parseTrendGraphRows,
 } from "@/lib/api/schemas";
+import {
+  DEFAULT_GRAPH_SEASON,
+  type GraphSeason,
+  normalizeGraphSeason,
+} from "@/lib/constants";
 import { DatabaseError } from "@/lib/utils/errors";
 import {
   FetchLocationProperties,
@@ -22,6 +28,18 @@ import {
   ReferenceGraphDataProperties,
   TrendGraphDataProperties,
 } from "@/types/types";
+
+type LocationQueryRow = {
+  city: string;
+  id?: unknown;
+  lat: unknown;
+  lng: unknown;
+  location_id?: unknown;
+  state: string;
+};
+
+const CITY_RANKINGS_COLUMNS =
+  "avg_pet, change_per_decade, city, future_lower, future_upper, location_id, max_pet, p10, p90, state, year";
 
 function assertQueryData<T>(
   label: string,
@@ -33,7 +51,10 @@ function assertQueryData<T>(
   }
 }
 
-export async function FetchCityRankings(year: number): Promise<
+export async function FetchCityRankings(
+  year: number,
+  season: GraphSeason = DEFAULT_GRAPH_SEASON,
+): Promise<
   Array<{
     avg_pet: number;
     changePerDecade: number | undefined;
@@ -48,6 +69,8 @@ export async function FetchCityRankings(year: number): Promise<
     state: string;
   }>
 > {
+  const resolvedSeason = normalizeGraphSeason(season);
+
   if (!year || Number.isNaN(year) || year < 2000 || year > 2100) {
     throw new DatabaseError(
       `Invalid year: ${year}. Must be between 2000 and 2100.`,
@@ -57,12 +80,11 @@ export async function FetchCityRankings(year: number): Promise<
   const cookieStore = cookies();
   const supabase = await createClient(cookieStore);
 
-  const { data, error } = await supabase
-    .from("city_rankings_view")
-    .select(
-      "avg_pet, change_per_decade, city, future_lower, future_upper, location_id, max_pet, p10, p90, state, year",
-    )
-    .eq("year", year);
+  const { data, error } = await fetchCityRankingsRows(
+    supabase,
+    year,
+    resolvedSeason,
+  );
 
   assertQueryData("city rankings", data, error);
 
@@ -91,21 +113,33 @@ export async function FetchCityRankings(year: number): Promise<
   return rankings;
 }
 
+async function fetchCityRankingsRows(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  year: number,
+  season: GraphSeason,
+) {
+  const primaryQuery = await supabase
+    .from("city_rankings_view")
+    .select(CITY_RANKINGS_COLUMNS)
+    .eq("year", year)
+    .eq("season", season);
+
+  if (!isMissingCityRankingsSeasonColumnError(primaryQuery.error)) {
+    return primaryQuery;
+  }
+
+  return supabase
+    .from("city_rankings_view")
+    .select(CITY_RANKINGS_COLUMNS)
+    .eq("year", year);
+}
+
 export const FetchLocations = cache(
   async (): Promise<FetchLocationProperties> => {
     const cookieStore = cookies();
     const supabase = await createClient(cookieStore);
 
-    const { data: locations, error } = await supabase
-      .from("locations")
-      .select("city, lat, lng, location_id, state");
-
-    if (error || !locations) {
-      throw new DatabaseError(
-        "Failed to fetch location data from database",
-        error,
-      );
-    }
+    const locations = await fetchLocationRows(supabase);
 
     const sanitizedLocations = filterRowsWithPositiveLocationId(locations);
     const validatedLocations = parseWithDatabaseError(
@@ -142,10 +176,83 @@ export const FetchLocations = cache(
   },
 );
 
+async function fetchLocationRows(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+) {
+  const primaryQuery = await supabase
+    .from("locations")
+    .select("city, lat, lng, id, state");
+
+  const fallbackQuery = isMissingLocationColumnError(primaryQuery.error)
+    ? await supabase
+        .from("locations")
+        .select("city, lat, lng, location_id, state")
+    : primaryQuery;
+
+  if (fallbackQuery.error || !fallbackQuery.data) {
+    throw new DatabaseError(
+      "Failed to fetch location data from database",
+      fallbackQuery.error,
+    );
+  }
+
+  return fallbackQuery.data.map(normalizeLocationRow);
+}
+
+function normalizeLocationRow({
+  id,
+  location_id,
+  ...location
+}: LocationQueryRow) {
+  return {
+    ...location,
+    location_id: id ?? location_id,
+  };
+}
+
+function isMissingLocationColumnError(error: unknown): boolean {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const code = "code" in error ? error.code : undefined;
+  const message = "message" in error ? error.message : undefined;
+
+  return (
+    code === "42703" &&
+    typeof message === "string" &&
+    message.includes("column locations.id does not exist")
+  );
+}
+
+function isMissingCityRankingsSeasonColumnError(error: unknown): boolean {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const code = "code" in error ? error.code : undefined;
+  const message = "message" in error ? error.message : undefined;
+
+  if (typeof message !== "string") {
+    return false;
+  }
+
+  return (
+    (code === "42703" &&
+      message.includes("column city_rankings_view.season does not exist")) ||
+    (code === "PGRST204" &&
+      message.includes("'season'") &&
+      message.includes("'city_rankings_view'"))
+  );
+}
+
 export async function FetchReferenceGraphData(
   year: string,
   locationId: number,
+  season: GraphSeason = DEFAULT_GRAPH_SEASON,
 ): Promise<ReferenceGraphDataProperties> {
+  const resolvedSeason = normalizeGraphSeason(season);
+
   if (!isValidLocationId(locationId)) {
     throw new DatabaseError(`Invalid locationId: ${locationId}`);
   }
@@ -179,13 +286,18 @@ export async function FetchReferenceGraphData(
     data,
   );
 
-  return mapReferenceRowsToGraphData(validatedRows);
+  return mapReferenceRowsToGraphData(
+    filterReferenceRowsBySeason(validatedRows, resolvedSeason),
+  );
 }
 
 export async function FetchTrendGraphData(
   option: string,
   locationId: number,
+  season: GraphSeason = DEFAULT_GRAPH_SEASON,
 ): Promise<TrendGraphDataProperties> {
+  const resolvedSeason = normalizeGraphSeason(season);
+
   if (!isValidLocationId(locationId)) {
     throw new DatabaseError(`Invalid locationId: ${locationId}`);
   }
@@ -203,6 +315,7 @@ export async function FetchTrendGraphData(
     .from(`pet_year_${option}`)
     .select("location_id, pet, year")
     .eq("location_id", locationId)
+    .eq("season", resolvedSeason)
     .order("year", { ascending: true });
 
   if (error || !data) {

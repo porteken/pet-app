@@ -90,7 +90,7 @@ describe("heat-stress", () => {
   describe("getHeatStressDescription", () => {
     it("should return description for average measure type", () => {
       const result = getHeatStressDescription(32, "avg", 2024);
-      expect(result.prefix).toBe("The 2024 yearly average heat stress is");
+      expect(result.prefix).toBe("The 2024 annual average heat stress is");
       expect(result.value).toBe("32.0");
       expect(result.colorClass).toBe("text-yellow-600");
       expect(result.confidenceRange).toBeUndefined();
@@ -98,14 +98,14 @@ describe("heat-stress", () => {
 
     it("should return description for max measure type", () => {
       const result = getHeatStressDescription(38, "max", 2023);
-      expect(result.prefix).toBe("The 2023 yearly max heat stress is");
+      expect(result.prefix).toBe("The 2023 annual max heat stress is");
       expect(result.value).toBe("38.0");
       expect(result.colorClass).toBe("text-orange-600");
     });
 
     it("should use default year 2025 when not provided", () => {
       const result = getHeatStressDescription(30, "avg");
-      expect(result.prefix).toBe("The 2025 yearly average heat stress is");
+      expect(result.prefix).toBe("The 2025 annual average heat stress is");
     });
 
     it("should handle None to Slight heat stress level", () => {

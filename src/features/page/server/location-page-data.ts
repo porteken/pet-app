@@ -6,14 +6,18 @@ import {
   FetchTrendGraphData,
 } from "@/lib/api/fetch-server";
 import {
+  DEFAULT_GRAPH_SEASON,
   DEFAULT_FORECAST_ENABLED,
   DEFAULT_FORECAST_YEARS_AHEAD,
   DEFAULT_GRAPH_MEASURE,
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
   GRAPH_MEASURE_COOKIE_NAME,
+  GRAPH_SEASON_COOKIE_NAME,
   MAX_FORECAST_YEARS_AHEAD,
   MIN_FORECAST_YEARS_AHEAD,
+  normalizeGraphSeason,
+  type GraphSeason,
 } from "@/lib/constants";
 import type { LocationOptionSection, LocationProperties } from "@/types/types";
 
@@ -51,6 +55,7 @@ interface LocationPagePreferences {
   initialForecastEnabled: boolean;
   initialForecastYearsAhead: number;
   initialGraphMeasure: string;
+  initialGraphSeason: GraphSeason;
 }
 
 const parseLocationId = (id: string): number | undefined => {
@@ -68,6 +73,9 @@ const getPreferencesFromCookies =
     const initialGraphMeasure =
       cookieStore.get(GRAPH_MEASURE_COOKIE_NAME)?.value ||
       DEFAULT_GRAPH_MEASURE;
+    const initialGraphSeason = normalizeGraphSeason(
+      cookieStore.get(GRAPH_SEASON_COOKIE_NAME)?.value || DEFAULT_GRAPH_SEASON,
+    );
     const initialForecastEnabled =
       cookieStore.get(FORECAST_ENABLED_COOKIE_NAME)?.value === "true"
         ? true
@@ -87,18 +95,22 @@ const getPreferencesFromCookies =
       initialForecastEnabled,
       initialForecastYearsAhead,
       initialGraphMeasure,
+      initialGraphSeason,
     };
   };
 
-const fetchGraphData = async (locationId: number): Promise<GraphData> => {
-  const trendData = await FetchTrendGraphData("avg", locationId);
+const fetchGraphData = async (
+  locationId: number,
+  season: GraphSeason,
+): Promise<GraphData> => {
+  const trendData = await FetchTrendGraphData("avg", locationId, season);
 
   const latestYear =
     trendData.years.length > 0 ? String(trendData.years.at(-1)) : "2024";
 
   const [currentData, referenceData] = await Promise.all([
-    FetchReferenceGraphData(latestYear, locationId),
-    FetchReferenceGraphData("2000", locationId),
+    FetchReferenceGraphData(latestYear, locationId, season),
+    FetchReferenceGraphData("2000", locationId, season),
   ]);
 
   return {
@@ -193,7 +205,10 @@ export const loadLocationPageData = async (
   }
 
   try {
-    const graphData = await fetchGraphData(locationId);
+    const graphData = await fetchGraphData(
+      locationId,
+      preferences.initialGraphSeason,
+    );
 
     return {
       payload: {
@@ -203,6 +218,7 @@ export const loadLocationPageData = async (
         initialForecastEnabled: preferences.initialForecastEnabled,
         initialForecastYearsAhead: preferences.initialForecastYearsAhead,
         initialGraphMeasure: preferences.initialGraphMeasure,
+        initialGraphSeason: preferences.initialGraphSeason,
         location: selectedLocation,
         LocationOptions,
         ReferencePets: graphData.reference_pets,

@@ -30,6 +30,7 @@ vi.mock("@/lib/api/fetch-server", () => ({
 
 import {
   RANKINGS_HEAT_STRESS_COOKIE_NAME,
+  RANKINGS_SEASON_COOKIE_NAME,
   RANKINGS_STATE_COOKIE_NAME,
   RANKINGS_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
@@ -69,6 +70,7 @@ describe("rankings page", () => {
     mockCookies.mockResolvedValue(
       createCookieStore({
         [RANKINGS_HEAT_STRESS_COOKIE_NAME]: "severe",
+        [RANKINGS_SEASON_COOKIE_NAME]: "Winter",
         [RANKINGS_STATE_COOKIE_NAME]: "Arizona",
         [RANKINGS_YEAR_COOKIE_NAME]: "2027",
       }),
@@ -84,11 +86,12 @@ describe("rankings page", () => {
       description: "City rankings by heat stress (PET) values",
       title: "City Rankings - Heat Stress Analysis",
     });
-    expect(mockFetchCityRankings).toHaveBeenCalledWith(2031);
+    expect(mockFetchCityRankings).toHaveBeenCalledWith(2031, "Winter");
     expect(screen.getByTestId("rankings-main")).toBeInTheDocument();
     expect(mockRankingsMain).toHaveBeenCalledWith(
       {
         initialHeatStress: "severe",
+        initialSeason: "Winter",
         initialState: "Arizona",
         initialYear: 2031,
         LocationOptions: [
@@ -106,12 +109,13 @@ describe("rankings page", () => {
             state: "Arizona",
           },
         ],
+        shouldPersistInitialSeason: false,
       },
       undefined,
     );
   });
 
-  it("falls back to the cookie year when the search param is missing", async () => {
+  it("falls back to the cookie year and default annual season when the season cookie is missing", async () => {
     mockCookies.mockResolvedValue(
       createCookieStore({
         [RANKINGS_YEAR_COOKIE_NAME]: "2028",
@@ -124,12 +128,14 @@ describe("rankings page", () => {
       }),
     );
 
-    expect(mockFetchCityRankings).toHaveBeenCalledWith(2028);
+    expect(mockFetchCityRankings).toHaveBeenCalledWith(2028, "Annual");
     expect(mockRankingsMain).toHaveBeenCalledWith(
       expect.objectContaining({
         initialHeatStress: "",
+        initialSeason: "Annual",
         initialState: "",
         initialYear: 2028,
+        shouldPersistInitialSeason: true,
       }),
       undefined,
     );
@@ -144,10 +150,35 @@ describe("rankings page", () => {
       }),
     );
 
-    expect(mockFetchCityRankings).toHaveBeenCalledWith(2025);
+    expect(mockFetchCityRankings).toHaveBeenCalledWith(2025, "Annual");
     expect(mockRankingsMain).toHaveBeenCalledWith(
       expect.objectContaining({
+        initialSeason: "Annual",
         initialYear: 2025,
+        shouldPersistInitialSeason: true,
+      }),
+      undefined,
+    );
+  });
+
+  it("normalizes an invalid season cookie back to annual", async () => {
+    mockCookies.mockResolvedValue(
+      createCookieStore({
+        [RANKINGS_SEASON_COOKIE_NAME]: "Monsoon",
+      }),
+    );
+
+    render(
+      await RankingsPage({
+        searchParams: Promise.resolve({}),
+      }),
+    );
+
+    expect(mockFetchCityRankings).toHaveBeenCalledWith(2025, "Annual");
+    expect(mockRankingsMain).toHaveBeenCalledWith(
+      expect.objectContaining({
+        initialSeason: "Annual",
+        shouldPersistInitialSeason: true,
       }),
       undefined,
     );

@@ -40,6 +40,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/actions/actions", () => ({
   setGraphMeasure: vi.fn().mockResolvedValue("avg"),
+  setGraphSeason: vi.fn().mockResolvedValue("Annual"),
 }));
 
 vi.mock("@/lib/api/fetch-client", () => ({
@@ -62,13 +63,14 @@ import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
 import { PageMain } from "../components/page-main";
 
 describe("PageMain", () => {
-  const defaultProps = {
+  const defaultProps: React.ComponentProps<typeof PageMain> = {
     CurrentDates: [new Date("2023-01-01"), new Date("2023-02-01")],
     CurrentPets: [15, 25],
     id: 1,
     initialForecastEnabled: false,
     initialForecastYearsAhead: 10,
     initialGraphMeasure: "avg",
+    initialGraphSeason: "Annual",
     location: {
       city: "Test City",
       lat: 40.7128,
@@ -196,7 +198,11 @@ describe("PageMain", () => {
       await user.selectOptions(selectElement, "2001");
 
       await waitFor(() => {
-        expect(FetchReferenceGraphData).toHaveBeenCalledWith("2001", 1);
+        expect(FetchReferenceGraphData).toHaveBeenCalledWith(
+          "2001",
+          1,
+          "Annual",
+        );
         expect(GenerateReferenceGraph).toHaveBeenCalled();
       });
     });

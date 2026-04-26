@@ -27,6 +27,21 @@ type OrderOperation = { ascending: boolean; column: string };
 
 const YEARS = Array.from({ length: 26 }, (_, index) => 2000 + index);
 const FORECAST_YEARS = Array.from({ length: 75 }, (_, index) => 2026 + index);
+const GRAPH_SEASONS = ["Annual", "Spring", "Summer", "Fall", "Winter"] as const;
+const SEASONAL_AVG_OFFSETS = {
+  Annual: 0,
+  Fall: -0.8,
+  Spring: -1.6,
+  Summer: 4.5,
+  Winter: -7.5,
+} as const;
+const SEASONAL_MAX_OFFSETS = {
+  Annual: 4.5,
+  Fall: 3.6,
+  Spring: 2.3,
+  Summer: 6.8,
+  Winter: 1.4,
+} as const;
 
 const LOCATIONS = [
   {
@@ -93,9 +108,6 @@ const getAveragePet = (locationId: number, year: number) => {
   return round(location.year2000Avg + delta * location.trendPerYear);
 };
 
-const getMaxPet = (locationId: number, year: number) =>
-  round(getAveragePet(locationId, year) + 4.5);
-
 const buildPetYearRows = () => {
   const rows: MockRow[] = [];
 
@@ -126,29 +138,40 @@ const petYearRows = buildPetYearRows();
 
 const MOCK_TABLES: Record<string, MockRow[]> = {
   city_rankings_view: LOCATIONS.flatMap((location) =>
-    YEARS.map((year) => {
-      const avg = getAveragePet(location.location_id, year);
-      const forecastPet = round(
-        getAveragePet(location.location_id, 2025) +
-          (2100 - 2025) * location.trendPerYear,
-      );
-      return {
-        avg_pet: avg,
-        change_per_decade: round(location.trendPerYear * 10),
-        city: location.city,
-        future_lower: round(forecastPet - 2.2),
-        future_upper: round(forecastPet + 2.2),
-        location_id: location.location_id,
-        max_pet: getMaxPet(location.location_id, year),
-        p10: round(avg - 2.5),
-        p90: round(avg + 2.5),
-        state: location.state,
-        year,
-      };
-    }),
+    YEARS.flatMap((year) =>
+      GRAPH_SEASONS.map((season) => {
+        const avg = round(
+          getAveragePet(location.location_id, year) +
+            SEASONAL_AVG_OFFSETS[season],
+        );
+        const forecastPet = round(
+          getAveragePet(location.location_id, 2025) +
+            SEASONAL_AVG_OFFSETS[season] +
+            (2100 - 2025) * location.trendPerYear,
+        );
+        return {
+          avg_pet: avg,
+          change_per_decade: round(location.trendPerYear * 10),
+          city: location.city,
+          future_lower: round(forecastPet - 2.2),
+          future_upper: round(forecastPet + 2.2),
+          location_id: location.location_id,
+          max_pet: round(
+            getAveragePet(location.location_id, year) +
+              SEASONAL_MAX_OFFSETS[season],
+          ),
+          p10: round(avg - 2.5),
+          p90: round(avg + 2.5),
+          season,
+          state: location.state,
+          year,
+        };
+      }),
+    ),
   ),
   locations: LOCATIONS.map(({ city, lat, lng, location_id, state }) => ({
     city,
+    id: location_id,
     lat,
     lng,
     location_id,
@@ -160,24 +183,28 @@ const MOCK_TABLES: Record<string, MockRow[]> = {
   })),
   pet_forecast: LOCATIONS.flatMap((location) => {
     const lastHistoricalYear = 2025;
-    const lastHistoricalAvg = getAveragePet(
-      location.location_id,
-      lastHistoricalYear,
-    );
 
-    return FORECAST_YEARS.map((year) => {
-      const yearsAhead = year - lastHistoricalYear;
-      const forecastPet = round(
-        lastHistoricalAvg + yearsAhead * location.trendPerYear,
+    return GRAPH_SEASONS.flatMap((season) => {
+      const lastHistoricalAvg = round(
+        getAveragePet(location.location_id, lastHistoricalYear) +
+          SEASONAL_AVG_OFFSETS[season],
       );
 
-      return {
-        location_id: location.location_id,
-        lower: round(forecastPet - 2.2),
-        pet: forecastPet,
-        upper: round(forecastPet + 2.2),
-        year,
-      };
+      return FORECAST_YEARS.map((year) => {
+        const yearsAhead = year - lastHistoricalYear;
+        const forecastPet = round(
+          lastHistoricalAvg + yearsAhead * location.trendPerYear,
+        );
+
+        return {
+          location_id: location.location_id,
+          lower: round(forecastPet - 2.2),
+          pet: forecastPet,
+          season,
+          upper: round(forecastPet + 2.2),
+          year,
+        };
+      });
     });
   }),
   pet_percentiles: LOCATIONS.flatMap((location) =>
@@ -193,18 +220,30 @@ const MOCK_TABLES: Record<string, MockRow[]> = {
   ),
   pet_year: petYearRows,
   pet_year_avg: LOCATIONS.flatMap((location) =>
-    YEARS.map((year) => ({
-      location_id: location.location_id,
-      pet: getAveragePet(location.location_id, year),
-      year,
-    })),
+    YEARS.flatMap((year) =>
+      GRAPH_SEASONS.map((season) => ({
+        location_id: location.location_id,
+        pet: round(
+          getAveragePet(location.location_id, year) +
+            SEASONAL_AVG_OFFSETS[season],
+        ),
+        season,
+        year,
+      })),
+    ),
   ),
   pet_year_max: LOCATIONS.flatMap((location) =>
-    YEARS.map((year) => ({
-      location_id: location.location_id,
-      pet: getMaxPet(location.location_id, year),
-      year,
-    })),
+    YEARS.flatMap((year) =>
+      GRAPH_SEASONS.map((season) => ({
+        location_id: location.location_id,
+        pet: round(
+          getAveragePet(location.location_id, year) +
+            SEASONAL_MAX_OFFSETS[season],
+        ),
+        season,
+        year,
+      })),
+    ),
   ),
 };
 

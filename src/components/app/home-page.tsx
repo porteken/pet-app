@@ -5,6 +5,7 @@ import { PageLoader } from "@/components/app/page-loader";
 import {
   getForecastPreferencesFromCookies,
   getGraphMeasureFromCookies,
+  getGraphSeasonFromCookies,
   getLocationData,
 } from "@/lib/utils/app/page-helpers";
 
@@ -14,16 +15,24 @@ const Home = dynamic(() => import("@/features/home"), {
 
 const HomePage = async () => {
   try {
-    const initialGraphMeasure = await getGraphMeasureFromCookies();
-    const initialForecastPreferences =
-      await getForecastPreferencesFromCookies();
-    const { LocationOptions, locations } = await getLocationData();
+    const [
+      initialGraphMeasure,
+      initialGraphSeason,
+      initialForecastPreferences,
+      { LocationOptions, locations },
+    ] = await Promise.all([
+      getGraphMeasureFromCookies(),
+      getGraphSeasonFromCookies(),
+      getForecastPreferencesFromCookies(),
+      getLocationData(),
+    ]);
 
     return (
       <Home
         initialForecastEnabled={initialForecastPreferences.enabled}
         initialForecastYearsAhead={initialForecastPreferences.yearsAhead}
         initialGraphMeasure={initialGraphMeasure}
+        initialGraphSeason={initialGraphSeason}
         LocationOptions={LocationOptions}
         locations={locations}
       />

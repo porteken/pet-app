@@ -37,6 +37,7 @@ describe("OptimizedMarker", () => {
     onClick: vi.fn(),
     position: [40.7128, -74.006] as [number, number],
     selectedGraphMeasure: "temperature",
+    selectedGraphSeason: "Annual",
   };
 
   let mockPrefetchTrendGraphData: any;
@@ -85,6 +86,7 @@ describe("OptimizedMarker", () => {
       mockQueryClient,
       mockProperties.locationId,
       mockProperties.selectedGraphMeasure,
+      mockProperties.selectedGraphSeason,
     );
   });
 
@@ -105,6 +107,7 @@ describe("OptimizedMarker", () => {
       mockQueryClient,
       mockProperties.locationId,
       mockProperties.selectedGraphMeasure,
+      mockProperties.selectedGraphSeason,
     );
   });
 

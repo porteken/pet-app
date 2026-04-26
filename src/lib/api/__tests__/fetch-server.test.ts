@@ -30,7 +30,7 @@ type MockSupabaseClient = ReturnType<
 
 type QueryResponse<T> = {
   data: T | undefined;
-  error: Error | undefined;
+  error: unknown;
 };
 
 const createSuccessResponse = <T>(data: T): QueryResponse<T> => ({
@@ -43,15 +43,29 @@ const createMissingResponse = <T>(): QueryResponse<T> => ({
   error: undefined,
 });
 
-const createFailedResponse = <T>(error: Error): QueryResponse<T> => ({
+const createFailedResponse = <T>(error: unknown): QueryResponse<T> => ({
   data: undefined,
   error,
 });
 
-const createEqQuery = <T>({ data, error }: QueryResponse<T>) => ({
-  eq: vi.fn().mockResolvedValue({ data, error }),
-  select: vi.fn().mockReturnThis(),
-});
+const createEqQuery = <T>(
+  { data, error }: QueryResponse<T>,
+  resolveOnEqCall = 2,
+) => {
+  const response = Promise.resolve({ data, error });
+  let eqCallCount = 0;
+  const query = {
+    eq: vi.fn(function () {
+      eqCallCount += 1;
+      return eqCallCount < resolveOnEqCall ? query : response;
+    }),
+    select: vi.fn(function () {
+      return query;
+    }),
+  };
+
+  return query;
+};
 
 const createViewRow = (
   overrides: Partial<RankingViewRow> = {},
@@ -73,8 +87,12 @@ const createViewRow = (
 const queueCityRankingsViewResponse = (
   mockSupabaseClient: MockSupabaseClient,
   response: QueryResponse<RankingViewRow[]>,
+  resolveOnEqCall = 2,
 ) => {
-  mockSupabaseClient.from.mockReturnValueOnce(createEqQuery(response));
+  const query = createEqQuery(response, resolveOnEqCall);
+  mockSupabaseClient.from.mockReturnValueOnce(query);
+
+  return query;
 };
 
 describe("fetch-server", () => {
@@ -113,12 +131,15 @@ describe("fetch-server", () => {
           state: "Texas",
         }),
       ];
-      queueCityRankingsViewResponse(
+      const mockQuery = queueCityRankingsViewResponse(
         mockSupabaseClient,
         createSuccessResponse(rows),
       );
 
       const result = await FetchCityRankings(2024);
+
+      expect(mockQuery.eq).toHaveBeenNthCalledWith(1, "year", 2024);
+      expect(mockQuery.eq).toHaveBeenNthCalledWith(2, "season", "Annual");
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
@@ -217,11 +238,96 @@ describe("fetch-server", () => {
       expect(result[1]).toMatchObject({ location_id: 3, rank: 2, avg_pet: 30 });
       expect(result[2]).toMatchObject({ location_id: 1, rank: 3, avg_pet: 20 });
     });
+
+    it("should filter rankings by the requested season", async () => {
+      const mockQuery = queueCityRankingsViewResponse(
+        mockSupabaseClient,
+        createSuccessResponse([createViewRow()]),
+      );
+
+      await FetchCityRankings(2024, "Winter");
+
+      expect(mockQuery.eq).toHaveBeenNthCalledWith(1, "year", 2024);
+      expect(mockQuery.eq).toHaveBeenNthCalledWith(2, "season", "Winter");
+    });
+
+    it("should fall back to legacy rankings data when the season column is unavailable", async () => {
+      const seasonColumnError = {
+        code: "PGRST204",
+        details: null,
+        hint: null,
+        message:
+          "Could not find the 'season' column of 'city_rankings_view' in the schema cache",
+      };
+      const primaryQuery = queueCityRankingsViewResponse(
+        mockSupabaseClient,
+        createFailedResponse(seasonColumnError),
+      );
+      const fallbackQuery = queueCityRankingsViewResponse(
+        mockSupabaseClient,
+        createSuccessResponse([createViewRow()]),
+        1,
+      );
+
+      const result = await FetchCityRankings(2024);
+
+      expect(primaryQuery.eq).toHaveBeenNthCalledWith(1, "year", 2024);
+      expect(primaryQuery.eq).toHaveBeenNthCalledWith(2, "season", "Annual");
+      expect(fallbackQuery.eq).toHaveBeenCalledWith("year", 2024);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({ city: "Phoenix", rank: 1 });
+    });
   });
 
   describe("FetchLocations", () => {
     it("should fetch and format location data successfully", async () => {
       const mockLocations = [
+        {
+          city: "Boston",
+          id: 1,
+          lat: 42.3601,
+          lng: -71.0589,
+          state: "Massachusetts",
+        },
+        {
+          city: "Cambridge",
+          id: 2,
+          lat: 42.3736,
+          lng: -71.1097,
+          state: "Massachusetts",
+        },
+        {
+          city: "Austin",
+          id: 3,
+          lat: 30.2672,
+          lng: -97.7431,
+          state: "Texas",
+        },
+        {
+          city: "Dallas",
+          id: 4,
+          lat: 32.7767,
+          lng: -96.797,
+          state: "Texas",
+        },
+      ];
+
+      const mockQuery = {
+        select: vi
+          .fn()
+          .mockResolvedValue({ data: mockLocations, error: undefined }),
+      };
+
+      mockSupabaseClient.from.mockReturnValue(mockQuery);
+
+      const result = await FetchLocations();
+
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith("locations");
+      expect(mockQuery.select).toHaveBeenCalledWith(
+        "city, lat, lng, id, state",
+      );
+
+      expect(result.locations).toEqual([
         {
           city: "Boston",
           lat: 42.3601,
@@ -250,22 +356,7 @@ describe("fetch-server", () => {
           location_id: 4,
           state: "Texas",
         },
-      ];
-
-      const mockQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: mockLocations, error: undefined }),
-      };
-
-      mockSupabaseClient.from.mockReturnValue(mockQuery);
-
-      const result = await FetchLocations();
-
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith("locations");
-      expect(mockQuery.select).toHaveBeenCalled();
-
-      expect(result.locations).toEqual(mockLocations);
+      ]);
       expect(result.LocationOptions).toEqual([
         {
           items: [
@@ -284,15 +375,19 @@ describe("fetch-server", () => {
       ]);
     });
 
-    it("should ignore locations with non-positive location_id", async () => {
-      const mockLocations = [
-        {
-          city: "Invalid City",
-          lat: 0,
-          lng: 0,
-          location_id: 0,
-          state: "Nowhere",
-        },
+    it("should fall back to location_id when id is unavailable", async () => {
+      const columnError = {
+        code: "42703",
+        details: null,
+        hint: null,
+        message: "column locations.id does not exist",
+      };
+      const initialQuery = {
+        select: vi
+          .fn()
+          .mockResolvedValue({ data: undefined, error: columnError }),
+      };
+      const fallbackLocations = [
         {
           city: "Boston",
           lat: 42.3601,
@@ -300,11 +395,50 @@ describe("fetch-server", () => {
           location_id: 1,
           state: "Massachusetts",
         },
+      ];
+      const fallbackQuery = {
+        select: vi.fn().mockResolvedValue({
+          data: fallbackLocations,
+          error: undefined,
+        }),
+      };
+
+      mockSupabaseClient.from
+        .mockReturnValueOnce(initialQuery)
+        .mockReturnValueOnce(fallbackQuery);
+
+      const result = await FetchLocations();
+
+      expect(initialQuery.select).toHaveBeenCalledWith(
+        "city, lat, lng, id, state",
+      );
+      expect(fallbackQuery.select).toHaveBeenCalledWith(
+        "city, lat, lng, location_id, state",
+      );
+      expect(result.locations).toEqual(fallbackLocations);
+    });
+
+    it("should ignore locations with non-positive ids", async () => {
+      const mockLocations = [
+        {
+          city: "Invalid City",
+          id: 0,
+          lat: 0,
+          lng: 0,
+          state: "Nowhere",
+        },
+        {
+          city: "Boston",
+          id: 1,
+          lat: 42.3601,
+          lng: -71.0589,
+          state: "Massachusetts",
+        },
         {
           city: "Austin",
+          id: 3,
           lat: 30.2672,
           lng: -97.7431,
-          location_id: 3,
           state: "Texas",
         },
       ];
@@ -480,6 +614,7 @@ describe("fetch-server", () => {
       expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year_avg");
       expect(mockQuery.select).toHaveBeenCalled();
       expect(mockQuery.eq).toHaveBeenCalledWith("location_id", 1);
+      expect(mockQuery.eq).toHaveBeenCalledWith("season", "Annual");
       expect(mockQuery.order).toHaveBeenCalledWith("year", { ascending: true });
 
       expect(result.years).toEqual([2020, 2021]);

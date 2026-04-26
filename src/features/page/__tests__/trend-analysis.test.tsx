@@ -75,12 +75,14 @@ import {
 
 import { TrendAnalysis } from "../components/trend-analysis";
 
-const defaultProps = {
+const defaultProps: React.ComponentProps<typeof TrendAnalysis> = {
+  graphSeason: "Annual",
   id: 1,
   initialForecastEnabled: false,
   initialForecastYearsAhead: 10,
   initialGraphMeasure: "avg",
   onMeasureChange: vi.fn().mockResolvedValue(Promise.resolve()),
+  onSeasonChange: vi.fn().mockResolvedValue(Promise.resolve()),
 };
 
 const waitForInitialTrendAnalysisRender = async () => {
@@ -129,6 +131,13 @@ describe("TrendAnalysis", () => {
       expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
     });
 
+    it("should render forecast controls for seasonal averages", async () => {
+      render(<TrendAnalysis {...defaultProps} graphSeason="Winter" />);
+      await waitForInitialTrendAnalysisRender();
+
+      expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
+    });
+
     it("should not render forecast controls when measure is max", async () => {
       render(<TrendAnalysis {...defaultProps} initialGraphMeasure="max" />);
 
@@ -151,7 +160,7 @@ describe("TrendAnalysis", () => {
       render(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1);
+        expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1, "Annual");
       });
     });
 
@@ -227,7 +236,12 @@ describe("TrendAnalysis", () => {
       render(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
-        expect(getHeatStressDescription).toHaveBeenCalledWith(26, "avg", 2023);
+        expect(getHeatStressDescription).toHaveBeenCalledWith(
+          26,
+          "avg",
+          2023,
+          "Annual",
+        );
       });
 
       await waitFor(() => {
@@ -261,7 +275,7 @@ describe("TrendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10);
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual");
       });
 
       await waitFor(() => {
@@ -307,14 +321,14 @@ describe("TrendAnalysis", () => {
       render(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1);
+        expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1, "Annual");
       });
 
       const select = screen.getByLabelText("Graph Measure");
       fireEvent.change(select, { target: { value: "max" } });
 
       await waitFor(() => {
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1);
+        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1, "Annual");
       });
     });
 
@@ -366,7 +380,7 @@ describe("TrendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10);
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual");
       });
 
       expect(setForecastPreferences).toHaveBeenCalledWith(true, 10);
@@ -385,7 +399,7 @@ describe("TrendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 15);
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 15, "Annual");
       });
 
       expect(setForecastPreferences).toHaveBeenCalledWith(false, 15);
@@ -401,7 +415,21 @@ describe("TrendAnalysis", () => {
       );
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 20);
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 20, "Annual");
+      });
+    });
+
+    it("should fetch seasonal forecast data when enabled", async () => {
+      render(<TrendAnalysis {...defaultProps} graphSeason="Winter" />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("forecast-toggle")).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId("forecast-toggle"));
+
+      await waitFor(() => {
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Winter");
       });
     });
 
@@ -577,7 +605,12 @@ describe("TrendAnalysis", () => {
       render(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
-        expect(getHeatStressDescription).toHaveBeenCalledWith(25, "avg", 2023);
+        expect(getHeatStressDescription).toHaveBeenCalledWith(
+          25,
+          "avg",
+          2023,
+          "Annual",
+        );
       });
     });
 
@@ -585,7 +618,7 @@ describe("TrendAnalysis", () => {
       render(<TrendAnalysis {...defaultProps} initialGraphMeasure="max" />);
 
       await waitFor(() => {
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1);
+        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1, "Annual");
       });
 
       expect(FetchForecastData).not.toHaveBeenCalled();

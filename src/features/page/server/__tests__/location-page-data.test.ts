@@ -26,9 +26,11 @@ import {
   DEFAULT_FORECAST_ENABLED,
   DEFAULT_FORECAST_YEARS_AHEAD,
   DEFAULT_GRAPH_MEASURE,
+  DEFAULT_GRAPH_SEASON,
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
   GRAPH_MEASURE_COOKIE_NAME,
+  GRAPH_SEASON_COOKIE_NAME,
 } from "@/lib/constants";
 
 import { loadLocationPageData } from "../location-page-data";
@@ -155,6 +157,7 @@ describe("loadLocationPageData", () => {
         [FORECAST_ENABLED_COOKIE_NAME]: "true",
         [FORECAST_YEARS_AHEAD_COOKIE_NAME]: "25",
         [GRAPH_MEASURE_COOKIE_NAME]: "max",
+        [GRAPH_SEASON_COOKIE_NAME]: "Winter",
       }),
     );
     mockFetchLocations.mockResolvedValue({
@@ -184,6 +187,7 @@ describe("loadLocationPageData", () => {
         initialForecastEnabled: true,
         initialForecastYearsAhead: 25,
         initialGraphMeasure: "max",
+        initialGraphSeason: "Winter",
         location,
         LocationOptions: locationOptions,
         ReferencePets: [25, 26],
@@ -194,9 +198,19 @@ describe("loadLocationPageData", () => {
       status: "success",
     });
 
-    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("avg", 7);
-    expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(1, "2024", 7);
-    expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(2, "2000", 7);
+    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("avg", 7, "Winter");
+    expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
+      1,
+      "2024",
+      7,
+      "Winter",
+    );
+    expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
+      2,
+      "2000",
+      7,
+      "Winter",
+    );
   });
 
   it("falls back to default preferences and reference year when cookies are invalid", async () => {
@@ -240,9 +254,15 @@ describe("loadLocationPageData", () => {
         initialForecastEnabled: DEFAULT_FORECAST_ENABLED,
         initialForecastYearsAhead: DEFAULT_FORECAST_YEARS_AHEAD,
         initialGraphMeasure: DEFAULT_GRAPH_MEASURE,
+        initialGraphSeason: DEFAULT_GRAPH_SEASON,
       }),
       status: "success",
     });
-    expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(1, "2024", 7);
+    expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
+      1,
+      "2024",
+      7,
+      "Annual",
+    );
   });
 });

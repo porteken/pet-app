@@ -32,16 +32,19 @@ describe("queryKeys", () => {
       "trend-graph",
       123,
       "avg",
+      "Annual",
     ]);
     expect(queryKeys.trendGraph(123, "avg")).toEqual([
       "trend-graph",
       123,
       "avg",
+      "Annual",
     ]);
     expect(queryKeys.trendGraph(999, "max")).toEqual([
       "trend-graph",
       999,
       "max",
+      "Annual",
     ]);
   });
 });
@@ -54,7 +57,7 @@ describe("getTrendGraphQueryOptions", () => {
   it("returns a query function and query key", () => {
     const options = getTrendGraphQueryOptions(44, "avg");
 
-    expect(options.queryKey).toEqual(["trend-graph", 44, "avg"]);
+    expect(options.queryKey).toEqual(["trend-graph", 44, "avg", "Annual"]);
     expect(options.queryFn).toBeTypeOf("function");
   });
 
@@ -71,7 +74,7 @@ describe("getTrendGraphQueryOptions", () => {
     const options = getTrendGraphQueryOptions(55, "max");
     const result = await options.queryFn();
 
-    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("max", 55);
+    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("max", 55, "Annual");
     expect(result).toEqual(mockData);
   });
 });
@@ -91,7 +94,7 @@ describe("prefetch/invalidate helpers", () => {
 
     expect(prefetchSpy).toHaveBeenCalledWith({
       queryFn: expect.any(Function),
-      queryKey: ["trend-graph", 77, "avg"],
+      queryKey: ["trend-graph", 77, "avg", "Annual"],
     });
   });
 

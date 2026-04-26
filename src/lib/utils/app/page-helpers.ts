@@ -5,18 +5,29 @@ import {
   DEFAULT_FORECAST_ENABLED,
   DEFAULT_FORECAST_YEARS_AHEAD,
   DEFAULT_GRAPH_MEASURE,
+  DEFAULT_GRAPH_SEASON,
   ERROR_MESSAGES,
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
   GRAPH_MEASURE_COOKIE_NAME,
+  GRAPH_SEASON_COOKIE_NAME,
   MAX_FORECAST_YEARS_AHEAD,
   MIN_FORECAST_YEARS_AHEAD,
+  normalizeGraphSeason,
 } from "@/lib/constants";
 
 export const getGraphMeasureFromCookies = async (): Promise<string> => {
   const cookieStore = await cookies();
   return (
     cookieStore.get(GRAPH_MEASURE_COOKIE_NAME)?.value || DEFAULT_GRAPH_MEASURE
+  );
+};
+
+export const getGraphSeasonFromCookies = async () => {
+  const cookieStore = await cookies();
+
+  return normalizeGraphSeason(
+    cookieStore.get(GRAPH_SEASON_COOKIE_NAME)?.value || DEFAULT_GRAPH_SEASON,
   );
 };
 

@@ -1,12 +1,20 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/config/supabase/client";
-import { mapReferenceRowsToGraphData } from "@/lib/api/graph-data";
+import {
+  filterReferenceRowsBySeason,
+  mapReferenceRowsToGraphData,
+} from "@/lib/api/graph-data";
 import {
   formatSchemaValidationError,
   isSchemaValidationError,
   parseReferenceGraphRows,
 } from "@/lib/api/schemas";
+import {
+  DEFAULT_GRAPH_SEASON,
+  type GraphSeason,
+  normalizeGraphSeason,
+} from "@/lib/constants";
 import { FetchError } from "@/lib/utils/errors";
 import { validateLocationId, validateYear } from "@/lib/utils/validation";
 import type { ReferenceGraphDataProperties } from "@/types/types";
@@ -14,8 +22,10 @@ import type { ReferenceGraphDataProperties } from "@/types/types";
 export async function FetchReferenceGraphData(
   year: string,
   locationId: number,
+  season: GraphSeason = DEFAULT_GRAPH_SEASON,
 ): Promise<ReferenceGraphDataProperties> {
   const supabase = createClient();
+  const resolvedSeason = normalizeGraphSeason(season);
 
   if (!validateYear(year)) {
     throw new FetchError("Invalid year format. Must be a 4-digit year.");
@@ -26,7 +36,9 @@ export async function FetchReferenceGraphData(
   }
 
   const data = await fetchData(supabase, locationId, year);
-  return mapReferenceRowsToGraphData(data);
+  return mapReferenceRowsToGraphData(
+    filterReferenceRowsBySeason(data, resolvedSeason),
+  );
 }
 
 async function fetchData(

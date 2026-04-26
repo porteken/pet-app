@@ -4,25 +4,31 @@ import React from "react";
 
 import { GenerateReferenceGraph } from "@/features/graph";
 import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
+import { type GraphSeason } from "@/lib/constants";
 import { YearOptions } from "@/lib/utils/select-options";
 
 interface ReferenceDataProperties {
   CurrentDates: Date[];
   CurrentPets: number[];
+  graphSeason: GraphSeason;
   id: number;
+  initialGraphSeason: GraphSeason;
   ReferencePets: number[];
 }
 
 interface ReferenceGraphSnapshot {
   dates: Date[];
   pets: number[];
+  season: GraphSeason;
   year: string;
 }
 
 const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   CurrentDates,
   CurrentPets,
+  graphSeason,
   id,
+  initialGraphSeason,
   ReferencePets,
 }) => {
   const DEFAULT_REFERENCE_YEAR = "2000";
@@ -65,16 +71,16 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   }, []);
 
   const generatePetReferenceGraph = React.useCallback(
-    async (year: string) => {
+    async (year: string, season: GraphSeason) => {
       const referenceData =
-        year === DEFAULT_REFERENCE_YEAR
+        year === DEFAULT_REFERENCE_YEAR && season === initialGraphSeason
           ? { dates: CurrentDates, pets: ReferencePets }
-          : await FetchReferenceGraphData(year, id);
+          : await FetchReferenceGraphData(year, id, season);
 
       const { dates, pets } = referenceData;
-      setReferenceGraphSnapshot({ dates, pets, year });
+      setReferenceGraphSnapshot({ dates, pets, season, year });
     },
-    [CurrentDates, ReferencePets, id],
+    [CurrentDates, ReferencePets, id, initialGraphSeason],
   );
 
   const handleReferenceYearChange = React.useCallback(
@@ -87,8 +93,8 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   );
 
   React.useEffect(() => {
-    generatePetReferenceGraph(selectedReferenceYear);
-  }, [generatePetReferenceGraph, selectedReferenceYear]);
+    generatePetReferenceGraph(selectedReferenceYear, graphSeason);
+  }, [generatePetReferenceGraph, graphSeason, selectedReferenceYear]);
 
   React.useEffect(() => {
     if (!referenceGraphSnapshot) {
@@ -104,6 +110,8 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
         CurrentPets,
         showReferenceLegend,
         isMobileViewport,
+        referenceGraphSnapshot.season,
+        CurrentDates.at(-1)?.getFullYear() ?? 2025,
       );
 
       if (!isCancelled) {
@@ -117,6 +125,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
       isCancelled = true;
     };
   }, [
+    CurrentDates,
     CurrentPets,
     isMobileViewport,
     referenceGraphSnapshot,
@@ -129,7 +138,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
         <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">
           Reference Data
         </h2>
-        <div className="mb-4">
+        <div className="mb-4 space-y-4">
           <label
             className="mb-2 block text-sm font-medium text-gray-700"
             htmlFor="reference-year"

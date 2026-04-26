@@ -3,7 +3,8 @@ import React, { FC } from "react";
 
 import { HeatStressLegend } from "@/components/app/heat-stress-legend";
 import { HeaderBar } from "@/features/header-bar";
-import { setGraphMeasure } from "@/lib/actions/actions";
+import { setGraphMeasure, setGraphSeason } from "@/lib/actions/actions";
+import { type GraphSeason } from "@/lib/constants";
 
 import { PageProperties } from "../model/types";
 import { PageHeader } from "./page-header";
@@ -25,10 +26,24 @@ const Main: FC<PageProperties> = ({
   initialForecastEnabled,
   initialForecastYearsAhead,
   initialGraphMeasure,
+  initialGraphSeason,
   location,
   LocationOptions,
   ReferencePets,
 }) => {
+  const [selectedGraphSeason, setSelectedGraphSeason] =
+    React.useState<GraphSeason>(initialGraphSeason);
+
+  const handleSeasonChange = React.useCallback(async (season: GraphSeason) => {
+    setSelectedGraphSeason(season);
+
+    try {
+      await setGraphSeason(season);
+    } catch {
+      // Ignore persistence failures; the UI can continue with the selected value.
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderBar id={id} LocationOptions={LocationOptions} />
@@ -45,17 +60,21 @@ const Main: FC<PageProperties> = ({
           <div className="min-w-0 flex-1">
             <div className="grid items-stretch gap-8 lg:grid-cols-2">
               <TrendAnalysis
+                graphSeason={selectedGraphSeason}
                 id={id}
                 initialForecastEnabled={initialForecastEnabled}
                 initialForecastYearsAhead={initialForecastYearsAhead}
                 initialGraphMeasure={initialGraphMeasure}
                 onMeasureChange={handleMeasureChange}
+                onSeasonChange={handleSeasonChange}
               />
 
               <ReferenceData
                 CurrentDates={CurrentDates}
                 CurrentPets={CurrentPets}
+                graphSeason={selectedGraphSeason}
                 id={id}
+                initialGraphSeason={initialGraphSeason}
                 ReferencePets={ReferencePets}
               />
             </div>

@@ -24,6 +24,7 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
 vi.mock("@/lib/actions/actions", () => ({
   setForecastPreferences: vi.fn().mockResolvedValue({}),
   setGraphMeasure: vi.fn().mockResolvedValue({}),
+  setGraphSeason: vi.fn().mockResolvedValue({}),
 }));
 
 vi.mock("@/features/graph", () => ({
@@ -112,16 +113,20 @@ vi.mock("@/components/ui/select", () => ({
   Select: vi.fn(
     ({
       data,
+      label,
       onChange,
       value,
     }: {
       data: Array<{ label: string; value: string }>;
+      label?: string;
       onChange?: (value: string) => void;
       value?: string;
     }) => (
       <div>
         <select
-          data-testid="graph-measure-select"
+          data-testid={
+            label === "Season" ? "graph-season-select" : "graph-measure-select"
+          }
           onChange={(event) => onChange?.(event.target.value)}
           value={value}
         >
@@ -141,6 +146,10 @@ vi.mock("@/lib/utils/select-options", () => ({
     { key: "avg", label: "Average" },
     { key: "max", label: "Maximum" },
     { key: "min", label: "Minimum" },
+  ],
+  SeasonOptions: [
+    { key: "Annual", label: "Annual" },
+    { key: "Winter", label: "Winter" },
   ],
 }));
 
@@ -199,10 +208,11 @@ const mockLocations = [
   },
 ];
 
-const defaultProps = {
+const defaultProps: React.ComponentProps<typeof Home> = {
   initialForecastEnabled: false,
   initialForecastYearsAhead: 10,
   initialGraphMeasure: "avg",
+  initialGraphSeason: "Annual",
   LocationOptions: mockLocationOptions,
   locations: mockLocations,
 };
@@ -278,7 +288,7 @@ describe("Home", () => {
       fireEvent.click(markerButton);
 
       await waitFor(() => {
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1);
+        expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1, "Annual");
         expect(GenerateTrendGraph).toHaveBeenCalled();
       });
     });
@@ -314,7 +324,7 @@ describe("Home", () => {
 
       await waitFor(() => {
         expect(setGraphMeasure).toHaveBeenCalledWith("max");
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1);
+        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1, "Annual");
       });
     });
 
@@ -401,7 +411,27 @@ describe("Home", () => {
       });
 
       await waitFor(() =>
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10),
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual"),
+      );
+    });
+
+    it("should fetch seasonal forecast data when seasonal forecast is enabled", async () => {
+      render(
+        <Home
+          {...defaultProps}
+          initialForecastEnabled={true}
+          initialGraphSeason="Winter"
+        />,
+      );
+
+      fireEvent.click(screen.getByTestId("marker-click"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("modal")).toBeInTheDocument();
+      });
+
+      await waitFor(() =>
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Winter"),
       );
     });
 
@@ -491,7 +521,7 @@ describe("Home", () => {
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10);
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual");
       });
     });
 
@@ -501,7 +531,7 @@ describe("Home", () => {
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1);
+        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1, "Annual");
       });
     });
 
@@ -517,7 +547,7 @@ describe("Home", () => {
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 20);
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 20, "Annual");
       });
     });
   });

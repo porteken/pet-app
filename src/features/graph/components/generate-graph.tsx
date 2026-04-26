@@ -4,7 +4,11 @@ import dynamic from "next/dynamic";
 import type { Layout } from "plotly.js";
 import React from "react";
 
-import { GRAPH_COLORS } from "@/lib/constants";
+import {
+  DEFAULT_GRAPH_SEASON,
+  GRAPH_COLORS,
+  type GraphSeason,
+} from "@/lib/constants";
 
 type GenerateTrendGraphLegacyArguments = [
   years: number[],
@@ -23,6 +27,7 @@ interface GenerateTrendGraphOptions {
   increasePerYear: number;
   isMobileViewport?: boolean;
   option: string;
+  season?: GraphSeason;
   showLegend?: boolean;
   trendlinePets: number[];
   useCompactDesktopHeight?: boolean;
@@ -35,6 +40,7 @@ interface NormalizedGenerateTrendGraphOptions extends Omit<
   "isMobileViewport" | "showLegend" | "useCompactDesktopHeight"
 > {
   isMobileViewport: boolean;
+  season: GraphSeason;
   showLegend: boolean;
   useCompactDesktopHeight: boolean;
 }
@@ -89,6 +95,7 @@ const normalizeGenerateTrendGraphOptions = (
       increasePerYear,
       isMobileViewport = false,
       option,
+      season = DEFAULT_GRAPH_SEASON,
       showLegend = true,
       trendlinePets,
       useCompactDesktopHeight = false,
@@ -101,6 +108,7 @@ const normalizeGenerateTrendGraphOptions = (
       increasePerYear,
       isMobileViewport,
       option,
+      season,
       showLegend,
       trendlinePets,
       useCompactDesktopHeight,
@@ -126,6 +134,7 @@ const normalizeGenerateTrendGraphOptions = (
     increasePerYear,
     isMobileViewport,
     option,
+    season: DEFAULT_GRAPH_SEASON,
     showLegend,
     trendlinePets,
     useCompactDesktopHeight,
@@ -188,6 +197,7 @@ export const GenerateTrendGraph = (
     increasePerYear,
     isMobileViewport,
     option,
+    season,
     showLegend,
     trendlinePets,
     useCompactDesktopHeight,
@@ -232,7 +242,7 @@ export const GenerateTrendGraph = (
     plot_bgcolor: GRAPH_COLORS.background,
     showlegend: showLegend,
     title: {
-      text: `${graphType} PET in summer (2000-2025)<br><sub>Increase per year: ${increaseText}°C</sub>`,
+      text: `${graphType} ${season} PET (2000-2025)<br><sub>Increase per year: ${increaseText}°C</sub>`,
     },
     xaxis: {
       gridcolor: GRAPH_COLORS.grid,
@@ -369,6 +379,8 @@ export const GenerateReferenceGraph = async (
   currentPets: number[],
   showLegend = true,
   isMobileViewport = false,
+  season: GraphSeason = DEFAULT_GRAPH_SEASON,
+  currentYear = 2025,
 ): Promise<React.ReactElement> => {
   const graphFillHeightClass = getGraphFillHeightClass(false);
 
@@ -400,7 +412,7 @@ export const GenerateReferenceGraph = async (
     paper_bgcolor: GRAPH_COLORS.background,
     plot_bgcolor: GRAPH_COLORS.background,
     showlegend: showLegend,
-    title: { text: `PET in summer 2025 vs ${referenceYear}` },
+    title: { text: `${season} PET in ${currentYear} vs ${referenceYear}` },
     xaxis: {
       gridcolor: GRAPH_COLORS.grid,
       tickformat: "%b %-d",

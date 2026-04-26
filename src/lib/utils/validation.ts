@@ -23,7 +23,7 @@ export function validateYear(year: string): boolean {
 }
 
 export function validateYearPets(yearPets: number[]): void {
-  if (yearPets.some((pet) => Number.isNaN(pet) || pet < 0)) {
+  if (yearPets.some((pet) => Number.isNaN(pet))) {
     throw new Error("Invalid pet count data detected");
   }
 }

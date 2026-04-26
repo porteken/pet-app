@@ -1,3 +1,4 @@
+import type { GraphSeason } from "@/lib/constants";
 import { LocationOptionSection, LocationProperties } from "@/types/types";
 
 export interface PageProperties {
@@ -7,6 +8,7 @@ export interface PageProperties {
   initialForecastEnabled: boolean;
   initialForecastYearsAhead: number;
   initialGraphMeasure: string;
+  initialGraphSeason: GraphSeason;
   location: LocationProperties;
   LocationOptions: LocationOptionSection[];
   ReferencePets: number[];

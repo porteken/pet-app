@@ -6,7 +6,10 @@ import {
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
   GRAPH_MEASURE_COOKIE_NAME,
+  GRAPH_SEASON_COOKIE_NAME,
+  type GraphSeason,
   RANKINGS_HEAT_STRESS_COOKIE_NAME,
+  RANKINGS_SEASON_COOKIE_NAME,
   RANKINGS_STATE_COOKIE_NAME,
   RANKINGS_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
@@ -45,11 +48,31 @@ export async function setGraphMeasure(measure: string) {
   });
 }
 
+export async function setGraphSeason(season: string) {
+  const cookieStore = await cookies();
+
+  cookieStore.set(GRAPH_SEASON_COOKIE_NAME, season, {
+    expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+    httpOnly: true,
+    path: "/",
+  });
+}
+
 import { revalidatePath } from "next/cache";
 
 export const setRankingsHeatStress = async (heatStress: string) => {
   const cookieStore = await cookies();
   cookieStore.set(RANKINGS_HEAT_STRESS_COOKIE_NAME, heatStress, {
+    httpOnly: true,
+    path: "/",
+    sameSite: "strict",
+  });
+  revalidatePath("/rankings");
+};
+
+export const setRankingsSeason = async (season: GraphSeason) => {
+  const cookieStore = await cookies();
+  cookieStore.set(RANKINGS_SEASON_COOKIE_NAME, season, {
     httpOnly: true,
     path: "/",
     sameSite: "strict",

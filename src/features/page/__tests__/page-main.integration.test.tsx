@@ -105,6 +105,7 @@ describe("PageMain Integration Tests", () => {
       initialForecastEnabled: false,
       initialForecastYearsAhead: 10,
       initialGraphMeasure: "avg",
+      initialGraphSeason: "Annual",
       location,
       LocationOptions: [
         {

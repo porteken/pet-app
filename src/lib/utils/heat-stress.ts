@@ -1,3 +1,5 @@
+import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
+
 export interface HeatStressDescription {
   colorClass: string;
   confidenceRange?: string;
@@ -48,12 +50,16 @@ export function getHeatStressDescription(
   petValue: number,
   measureType: string,
   year: number = 2025,
+  season: GraphSeason = DEFAULT_GRAPH_SEASON,
 ): HeatStressDescription {
   const info = getHeatStressInfo(petValue);
   const measure = measureType === "avg" ? "average" : "max";
+  const seasonLabel =
+    season === DEFAULT_GRAPH_SEASON ? "annual" : season.toLowerCase();
+
   return {
     colorClass: info.color,
-    prefix: `The ${year} yearly ${measure} heat stress is`,
+    prefix: `The ${year} ${seasonLabel} ${measure} heat stress is`,
     value: info.value,
   };
 }

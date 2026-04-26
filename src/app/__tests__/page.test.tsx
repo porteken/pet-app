@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const {
   mockGetForecastPreferencesFromCookies,
   mockGetGraphMeasureFromCookies,
+  mockGetGraphSeasonFromCookies,
   mockGetLocationData,
   mockHome,
   mockLocationErrorHandler,
@@ -11,6 +12,7 @@ const {
 } = vi.hoisted(() => ({
   mockGetForecastPreferencesFromCookies: vi.fn(),
   mockGetGraphMeasureFromCookies: vi.fn(),
+  mockGetGraphSeasonFromCookies: vi.fn(),
   mockGetLocationData: vi.fn(),
   mockHome: vi.fn((_properties?: any) => (
     <div data-testid="home-component">Home Component</div>
@@ -28,6 +30,7 @@ vi.mock("@/features/home", () => ({
 vi.mock("@/lib/utils/app/page-helpers", () => ({
   getForecastPreferencesFromCookies: mockGetForecastPreferencesFromCookies,
   getGraphMeasureFromCookies: mockGetGraphMeasureFromCookies,
+  getGraphSeasonFromCookies: mockGetGraphSeasonFromCookies,
   getLocationData: mockGetLocationData,
 }));
 
@@ -72,6 +75,7 @@ describe("Page Component", () => {
     };
 
     mockGetGraphMeasureFromCookies.mockResolvedValue("temperature");
+    mockGetGraphSeasonFromCookies.mockResolvedValue("Annual");
     mockGetForecastPreferencesFromCookies.mockResolvedValue({
       enabled: false,
       yearsAhead: 10,
@@ -85,6 +89,7 @@ describe("Page Component", () => {
       initialForecastEnabled: false,
       initialForecastYearsAhead: 10,
       initialGraphMeasure: "temperature",
+      initialGraphSeason: "Annual",
       LocationOptions: mockLocationData.LocationOptions,
       locations: mockLocationData.locations,
     });
@@ -94,6 +99,7 @@ describe("Page Component", () => {
     const error = new Error("Failed to fetch locations");
 
     mockGetGraphMeasureFromCookies.mockResolvedValue("humidity");
+    mockGetGraphSeasonFromCookies.mockResolvedValue("Annual");
     mockGetForecastPreferencesFromCookies.mockResolvedValue({
       enabled: false,
       yearsAhead: 10,
@@ -111,6 +117,7 @@ describe("Page Component", () => {
     const error = new Error("Cookie access failed");
 
     mockGetGraphMeasureFromCookies.mockRejectedValue(error);
+    mockGetGraphSeasonFromCookies.mockResolvedValue("Annual");
     mockGetForecastPreferencesFromCookies.mockResolvedValue({
       enabled: false,
       yearsAhead: 10,
@@ -134,6 +141,7 @@ describe("Page Component", () => {
     };
 
     mockGetGraphMeasureFromCookies.mockResolvedValue("pressure");
+    mockGetGraphSeasonFromCookies.mockResolvedValue("Annual");
     mockGetForecastPreferencesFromCookies.mockResolvedValue({
       enabled: false,
       yearsAhead: 10,
@@ -146,6 +154,7 @@ describe("Page Component", () => {
       mockGetLocationData as any,
     );
     expect(mockGetGraphMeasureFromCookies).toHaveBeenCalledTimes(1);
+    expect(mockGetGraphSeasonFromCookies).toHaveBeenCalledTimes(1);
     expect(mockGetForecastPreferencesFromCookies).toHaveBeenCalledTimes(1);
     expect(mockGetLocationData).toHaveBeenCalledTimes(1);
   });
@@ -157,6 +166,7 @@ describe("Page Component", () => {
     };
 
     mockGetGraphMeasureFromCookies.mockResolvedValue("temperature");
+    mockGetGraphSeasonFromCookies.mockResolvedValue("Annual");
     mockGetForecastPreferencesFromCookies.mockResolvedValue({
       enabled: false,
       yearsAhead: 10,
@@ -170,6 +180,7 @@ describe("Page Component", () => {
       initialForecastEnabled: false,
       initialForecastYearsAhead: 10,
       initialGraphMeasure: "temperature",
+      initialGraphSeason: "Annual",
       LocationOptions: [],
       locations: [],
     });

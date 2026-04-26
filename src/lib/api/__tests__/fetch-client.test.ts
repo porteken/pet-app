@@ -81,6 +81,7 @@ describe("FetchTrendGraphData", () => {
     expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year_avg");
     expect(mockQuery.select).toHaveBeenCalledWith("year, pet, location_id");
     expect(mockQuery.eq).toHaveBeenCalledWith("location_id", 1);
+    expect(mockQuery.eq).toHaveBeenCalledWith("season", "Annual");
     expect(mockQuery.order).toHaveBeenCalledWith("year", { ascending: true });
 
     expect(result.years).toEqual([2020, 2021]);
@@ -109,6 +110,7 @@ describe("FetchTrendGraphData", () => {
     const result = await FetchTrendGraphData("max", 1);
 
     expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year_max");
+    expect(mockQuery.eq).toHaveBeenCalledWith("season", "Annual");
     expect(result.years).toEqual([2020, 2021]);
     expect(result.year_pets).toEqual([30.5, 31.2]);
     expect(result.trendline_pets[0]).toBe(1443);
@@ -274,12 +276,48 @@ describe("FetchForecastData", () => {
     expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(1, "pet_year_avg");
     expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(2, "pet_forecast");
     expect(mockSupabaseClient.from).toHaveBeenCalledTimes(2);
+    expect(mockHistoricalQuery.eq).toHaveBeenCalledWith("season", "Annual");
+    expect(mockForecastQuery.eq).toHaveBeenCalledWith("season", "Annual");
     expect(result).toEqual({
       forecastValues: [30.5, 31],
       forecastYears: [2026, 2027],
       lowerBound10: [28.5, 29],
       upperBound90: [32.5, 33],
     });
+  });
+
+  it("should fetch seasonal forecast data when season is provided", async () => {
+    const mockHistoricalData = [{ year: 2025 }];
+    const mockForecastData = [
+      { lower: 10.5, pet: 12.5, upper: 14.5, year: 2026 },
+    ];
+
+    const mockHistoricalQuery = {
+      eq: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: mockHistoricalData[0] }),
+      order: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    const mockForecastQuery = {
+      eq: vi.fn().mockReturnThis(),
+      gt: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi
+        .fn()
+        .mockResolvedValue({ data: mockForecastData, error: undefined }),
+      select: vi.fn().mockReturnThis(),
+    };
+
+    mockSupabaseClient.from
+      .mockReturnValueOnce(mockHistoricalQuery)
+      .mockReturnValueOnce(mockForecastQuery);
+
+    await FetchForecastData(1, 10, "Winter");
+
+    expect(mockHistoricalQuery.eq).toHaveBeenCalledWith("season", "Winter");
+    expect(mockForecastQuery.eq).toHaveBeenCalledWith("season", "Winter");
   });
 
   it("should return undefined when no historical data found", async () => {

@@ -1,3 +1,4 @@
+import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
 import { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
 import {
   validateDates,
@@ -14,6 +15,29 @@ interface ReferenceGraphRow {
   date: string;
   pet: number;
 }
+
+const SEASON_MONTHS: Record<Exclude<GraphSeason, "Annual">, number[]> = {
+  Fall: [9, 10, 11],
+  Spring: [3, 4, 5],
+  Summer: [6, 7, 8],
+  Winter: [12, 1, 2],
+};
+
+export const filterReferenceRowsBySeason = <TRow extends ReferenceGraphRow>(
+  rows: TRow[],
+  season: GraphSeason = DEFAULT_GRAPH_SEASON,
+): TRow[] => {
+  if (season === DEFAULT_GRAPH_SEASON) {
+    return rows;
+  }
+
+  const allowedMonths = SEASON_MONTHS[season];
+
+  return rows.filter(({ date }) => {
+    const month = Number(date.slice(5, 7));
+    return allowedMonths.includes(month);
+  });
+};
 
 interface TrendGraphRow {
   pet: number;

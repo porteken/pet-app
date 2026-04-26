@@ -4,6 +4,7 @@ import React, { memo, useCallback, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { type GraphSeason } from "@/lib/constants";
 import { ForecastControls } from "@/lib/utils/forecast-controls";
 import type { HeatStressDescription } from "@/lib/utils/heat-stress";
 
@@ -17,15 +18,18 @@ interface GraphSectionProperties {
   isMobileViewport?: boolean;
   onForecastToggle: (enabled: boolean) => void;
   onForecastYearsChange: (years: number) => void;
+  onSeasonChange: (value: GraphSeason) => void;
   onSelectChange: (value: string) => void;
   onToggleMobileGraphLegend?: () => void;
   petGraph?: React.ReactElement;
   selectedGraphMeasure: string;
+  selectedGraphSeason: GraphSeason;
   selectedLocation?: {
     city: string;
     location_id: number;
     state: string;
   };
+  seasonOptions: Array<{ label: string; value: GraphSeason }>;
   selectOptions: Array<{ label: string; value: string }>;
 }
 
@@ -40,11 +44,14 @@ export const GraphSection = memo<GraphSectionProperties>(
     isMobileViewport = false,
     onForecastToggle,
     onForecastYearsChange,
+    onSeasonChange,
     onSelectChange,
     onToggleMobileGraphLegend,
     petGraph,
     selectedGraphMeasure,
+    selectedGraphSeason,
     selectedLocation,
+    seasonOptions,
     selectOptions,
   }) => {
     const router = useRouter();
@@ -89,6 +96,18 @@ export const GraphSection = memo<GraphSectionProperties>(
     return (
       <div className="flex w-full max-w-full min-w-0 flex-col items-center space-y-3 sm:min-h-0 sm:max-w-[95vw] sm:min-w-[320px] sm:space-y-3">
         <div className="w-full max-w-md space-y-3 sm:space-y-4">
+          <Select
+            className="w-full"
+            data={seasonOptions}
+            label="Season"
+            onChange={(value) => {
+              if (value) {
+                onSeasonChange(value as GraphSeason);
+              }
+            }}
+            size="sm"
+            value={selectedGraphSeason}
+          />
           <Select
             className="w-full"
             data={selectOptions}

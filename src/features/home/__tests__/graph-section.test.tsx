@@ -41,7 +41,7 @@ vi.mock("@/components/ui/select", () => ({
       <div>
         {label && <label>{label}</label>}
         <select
-          data-testid="measure-select"
+          data-testid={label === "Season" ? "season-select" : "measure-select"}
           onChange={(event) => onChange?.(event.target.value)}
           value={value}
         >
@@ -80,7 +80,7 @@ vi.mock("@/lib/utils/forecast-controls", () => ({
 
 import { GraphSection } from "../components/graph-section";
 
-const defaultProps = {
+const defaultProps: React.ComponentProps<typeof GraphSection> = {
   forecastEnabled: false,
   forecastHeatStress: undefined,
   forecastYearsAhead: 10,
@@ -88,10 +88,16 @@ const defaultProps = {
   heatStressDescription: undefined,
   onForecastToggle: vi.fn(),
   onForecastYearsChange: vi.fn(),
+  onSeasonChange: vi.fn(),
   onSelectChange: vi.fn(),
   petGraph: <div data-testid="pet-graph">Mock Graph</div>,
   selectedGraphMeasure: "avg",
+  selectedGraphSeason: "Annual",
   selectedLocation: { city: "New York", location_id: 1, state: "NY" },
+  seasonOptions: [
+    { label: "Annual", value: "Annual" },
+    { label: "Winter", value: "Winter" },
+  ],
   selectOptions: [
     { label: "Average", value: "avg" },
     { label: "Maximum", value: "max" },
@@ -110,6 +116,7 @@ describe("GraphSection", () => {
 
       expect(screen.getByTestId("measure-select")).toBeInTheDocument();
       expect(screen.getByText("Measure")).toBeInTheDocument();
+      expect(screen.getByText("Season")).toBeInTheDocument();
     });
 
     it("should render view details button", () => {
@@ -127,6 +134,18 @@ describe("GraphSection", () => {
 
     it("should render forecast controls when measure is avg", () => {
       render(<GraphSection {...defaultProps} selectedGraphMeasure="avg" />);
+
+      expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
+    });
+
+    it("should render forecast controls for seasonal averages", () => {
+      render(
+        <GraphSection
+          {...defaultProps}
+          selectedGraphMeasure="avg"
+          selectedGraphSeason="Winter"
+        />,
+      );
 
       expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
     });

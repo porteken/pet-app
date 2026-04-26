@@ -13,11 +13,16 @@ import React, {
 
 import { GenerateTrendGraph } from "@/features/graph";
 import { HeaderBar } from "@/features/header-bar";
-import { setForecastPreferences, setGraphMeasure } from "@/lib/actions/actions";
+import {
+  setForecastPreferences,
+  setGraphMeasure,
+  setGraphSeason,
+} from "@/lib/actions/actions";
 import { FetchForecastData } from "@/lib/api/fetch-client";
 import { getTrendGraphQueryOptions } from "@/lib/api/query-client";
+import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
 import { type HeatStressDescription } from "@/lib/utils/heat-stress";
-import { GraphOptions } from "@/lib/utils/select-options";
+import { GraphOptions, SeasonOptions } from "@/lib/utils/select-options";
 import { buildTrendAnalysisResult } from "@/lib/utils/trend-analysis";
 import { LocationProperties } from "@/types/types";
 
@@ -34,12 +39,16 @@ const Home: FC<MapProperties> = ({
   initialForecastEnabled,
   initialForecastYearsAhead,
   initialGraphMeasure,
+  initialGraphSeason,
   LocationOptions,
   locations,
 }: MapProperties) => {
   const queryClient = useQueryClient();
   const [selectedGraphMeasure, setSelectedGraphMeasure] = useState(
     () => initialGraphMeasure,
+  );
+  const [selectedGraphSeason, setSelectedGraphSeason] = useState<GraphSeason>(
+    () => initialGraphSeason,
   );
 
   const [petGraph, setPetGraph] = useState<ReactElement | undefined>();
@@ -79,6 +88,14 @@ const Home: FC<MapProperties> = ({
       })),
     [],
   );
+  const seasonOptions = useMemo(
+    () =>
+      SeasonOptions.map((option) => ({
+        label: option.label,
+        value: option.key as GraphSeason,
+      })),
+    [],
+  );
 
   useEffect(() => {
     if (typeof globalThis.matchMedia !== "function") {
@@ -104,6 +121,7 @@ const Home: FC<MapProperties> = ({
     async (
       locationId: number,
       option: string,
+      season: GraphSeason,
       enableForecast: boolean,
       yearsAhead: number,
     ) => {
@@ -115,12 +133,14 @@ const Home: FC<MapProperties> = ({
           snapshot,
         } = await buildTrendAnalysisResult({
           enableForecast,
-          fetchForecastData: () => FetchForecastData(locationId, yearsAhead),
+          fetchForecastData: () =>
+            FetchForecastData(locationId, yearsAhead, season),
           fetchTrendGraphData: () =>
             queryClient.fetchQuery(
-              getTrendGraphQueryOptions(locationId, option),
+              getTrendGraphQueryOptions(locationId, option, season),
             ),
           option,
+          season,
         });
 
         setHeatStressDescription(newHeatStressDescription);
@@ -135,6 +155,7 @@ const Home: FC<MapProperties> = ({
           increasePerYear: snapshot.increase_per_year,
           isMobileViewport,
           option: snapshot.option,
+          season: snapshot.season,
           showLegend: showTrendLegend,
           trendlinePets: snapshot.trendline_pets,
           useCompactDesktopHeight: false,
@@ -163,20 +184,31 @@ const Home: FC<MapProperties> = ({
     [selectedLocationId],
   );
 
+  const handleSeasonChange = useCallback(async (season: GraphSeason) => {
+    const nextSeason = normalizeGraphSeason(season);
+    setSelectedGraphSeason(nextSeason);
+    await setGraphSeason(nextSeason);
+  }, []);
+
+  const forecastSupported = selectedGraphMeasure === "avg";
+
   useEffect(() => {
     if (selectedLocationId !== undefined) {
       generateGraph(
         selectedLocationId,
         selectedGraphMeasure,
-        forecastEnabled && selectedGraphMeasure === "avg",
+        selectedGraphSeason,
+        forecastEnabled && forecastSupported,
         forecastYearsAhead,
       );
     }
   }, [
     selectedLocationId,
     selectedGraphMeasure,
+    selectedGraphSeason,
     forecastEnabled,
     forecastYearsAhead,
+    forecastSupported,
     showTrendLegend,
     generateGraph,
   ]);
@@ -229,6 +261,7 @@ const Home: FC<MapProperties> = ({
           locations={locations}
           onMarkerClick={handleMarkerClick}
           selectedGraphMeasure={selectedGraphMeasure}
+          selectedGraphSeason={selectedGraphSeason}
         />
       </main>
       <Modal
@@ -252,13 +285,16 @@ const Home: FC<MapProperties> = ({
           isMobileViewport={isMobileViewport}
           onForecastToggle={handleForecastToggle}
           onForecastYearsChange={handleForecastYearsChange}
+          onSeasonChange={handleSeasonChange}
           onSelectChange={handleSelectChange}
           onToggleMobileGraphLegend={() =>
             setIsMobileGraphLegendOpen((previous) => !previous)
           }
           petGraph={petGraph}
           selectedGraphMeasure={selectedGraphMeasure}
+          selectedGraphSeason={selectedGraphSeason}
           selectedLocation={selectedLocation}
+          seasonOptions={seasonOptions}
           selectOptions={selectOptions}
         />
       </Modal>

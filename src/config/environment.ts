@@ -5,12 +5,14 @@ const publicEnvironmentSchema = z
     NEXT_PUBLIC_E2E_TEST: z.enum(["false", "true"]).default("false"),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: z.string().min(1).optional(),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_SUPABASE_URL: z.url(),
   })
   .superRefine((environment, context) => {
     if (
       environment.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-      environment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY
+      environment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+      environment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
     ) {
       return;
     }
@@ -18,7 +20,7 @@ const publicEnvironmentSchema = z
     context.addIssue({
       code: "custom",
       message:
-        "Required. Set NEXT_PUBLIC_SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY.",
+        "Required. Set NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY, or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
       path: ["NEXT_PUBLIC_SUPABASE_ANON_KEY"],
     });
   })
@@ -26,12 +28,14 @@ const publicEnvironmentSchema = z
     ({
       NEXT_PUBLIC_SUPABASE_ANON_KEY,
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
       ...environment
     }) => ({
       ...environment,
       NEXT_PUBLIC_SUPABASE_ANON_KEY:
         NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ??
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     }),
   );
 
@@ -59,6 +63,8 @@ export const getPublicEnvironment = (): PublicEnvironment => {
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY:
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   });
   if (!parsed.success) {

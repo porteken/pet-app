@@ -1,6 +1,7 @@
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import * as React from "react";
@@ -27,6 +28,7 @@ export default function RootLayout({
           Skip to main content
         </a>
         <AppProviders>{children}</AppProviders>
+        <Analytics />
       </body>
     </html>
   );

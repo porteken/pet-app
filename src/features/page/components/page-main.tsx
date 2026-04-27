@@ -65,9 +65,12 @@ const Main: FC<PageProperties> = ({
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <HeaderBar id={id} LocationOptions={LocationOptions} />
-      <main className="mx-auto max-w-full px-4 py-8" id="main-content">
+      <main
+        className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
+        id="main-content"
+      >
         <PageHeader location={location} />
 
         <div className="grid items-stretch gap-8 lg:grid-cols-2">
@@ -97,7 +100,7 @@ const Main: FC<PageProperties> = ({
           <div className="pointer-events-auto flex flex-col items-start gap-2">
             {isLegendOpen && (
               <div
-                className="max-h-[80vh] max-w-[78vw] overflow-auto shadow-md sm:max-w-xs"
+                className="glass-panel max-h-[80vh] max-w-[78vw] overflow-auto rounded-3xl p-2 shadow-md sm:max-w-xs"
                 id="city-thermal-stress-legend"
               >
                 <HeatStressLegend />
@@ -106,7 +109,7 @@ const Main: FC<PageProperties> = ({
             <button
               aria-controls="city-thermal-stress-legend"
               aria-expanded={isLegendOpen}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-md transition-colors hover:bg-gray-50"
+              className="glass-panel-muted text-foreground hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
               onClick={() => setIsLegendOpen((previous) => !previous)}
               type="button"
             >

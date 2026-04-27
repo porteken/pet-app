@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { RankingsMain } from "@/features/rankings";
 import { FetchCityRankings, FetchLocations } from "@/lib/api/fetch-server";
 import {
+  GRAPH_CONFIG,
   normalizeGraphSeason,
   RANKINGS_HEAT_STRESS_COOKIE_NAME,
   RANKINGS_SEASON_COOKIE_NAME,
@@ -24,7 +25,7 @@ const yearMapping = (
   } else if (cookie_value) {
     return Number(cookie_value);
   }
-  return 2025;
+  return GRAPH_CONFIG.YEAR_RANGE.END;
 };
 
 export default async function RankingsPage({

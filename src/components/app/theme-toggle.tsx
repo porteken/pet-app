@@ -1,0 +1,40 @@
+"use client";
+
+import { MoonStar, SunMedium } from "lucide-react";
+import { useTheme } from "next-themes";
+import * as React from "react";
+
+import { Button } from "@/components/ui/button";
+
+export const ThemeToggle = () => {
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDarkMode = mounted && resolvedTheme === "dark";
+  const nextTheme = isDarkMode ? "light" : "dark";
+  const themeLabel = isDarkMode ? "Light mode" : "Dark mode";
+  const label = mounted ? `Switch to ${nextTheme} mode` : "Toggle color theme";
+
+  return (
+    <Button
+      aria-label={label}
+      className="min-w-30 justify-center sm:min-w-35"
+      onClick={() => setTheme(isDarkMode ? "light" : "dark")}
+      size="sm"
+      type="button"
+      variant="outline"
+    >
+      {isDarkMode ? (
+        <SunMedium className="size-4" />
+      ) : (
+        <MoonStar className="size-4" />
+      )}
+      <span className="hidden sm:inline">{mounted ? themeLabel : "Theme"}</span>
+      <span className="sm:hidden">Theme</span>
+    </Button>
+  );
+};

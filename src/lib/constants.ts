@@ -2,6 +2,7 @@ export const APP_CONFIG = {
   GITHUB_URL: "https://github.com/porteken/pet-app",
   NAME: "Historical PET USA",
   STUDY_URL: "https://bjsm.bmj.com/content/55/15/825",
+  TAGLINE: "Track how thermal stress has shifted across major U.S. cities.",
 } as const;
 
 export const GRAPH_MEASURE_COOKIE_NAME = "graph-measure" as const;
@@ -76,8 +77,13 @@ export const GRAPH_CONFIG = {
 } as const;
 
 export const GRAPH_COLORS = {
-  background: "#ffffff",
-  grid: "#e5e7eb",
-  primary: "#3b82f6",
-  secondary: "#000000",
+  background: "var(--graph-surface)",
+  confidenceFill: "var(--graph-confidence-fill)",
+  grid: "var(--graph-grid)",
+  primary: "var(--graph-primary)",
+  reference: "var(--graph-reference)",
+  secondary: "var(--graph-secondary)",
+  text: "var(--graph-text)",
+  tooltipBackground: "var(--graph-tooltip-background)",
+  tooltipBorder: "var(--graph-tooltip-border)",
 } as const;

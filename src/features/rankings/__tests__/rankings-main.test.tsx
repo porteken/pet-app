@@ -782,7 +782,7 @@ describe("RankingsMain", () => {
       );
 
       const changeCell = screen.getByText("0.0°C");
-      expect(changeCell).toHaveClass("text-grey-600");
+      expect(changeCell).toHaveClass("text-gray-600");
     });
   });
 

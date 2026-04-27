@@ -14,10 +14,12 @@ import {
   setRankingsYear,
 } from "@/lib/actions/actions";
 import {
+  APP_CONFIG,
   GRAPH_SEASONS,
   normalizeGraphSeason,
   type GraphSeason,
 } from "@/lib/constants";
+import { YearOptions } from "@/lib/utils/select-options";
 import {
   getHeatStressInfo,
   THERMAL_STRESS_LEGEND_ITEMS,
@@ -27,19 +29,19 @@ import { type LocationOptionSection } from "@/types/types";
 const getPetRange = (p10: number, p90: number): string => {
   return `${p10.toFixed(1)}-${p90.toFixed(1)}`;
 };
-const color_mapping = (value: number) => {
+const colorMapping = (value: number) => {
   if (value > 0) {
     return "text-red-600";
   } else if (value < 0) {
     return "text-blue-600";
   }
 
-  return "text-grey-600";
+  return "text-gray-600";
 };
 
-const YEAR_OPTIONS = Array.from({ length: 26 }, (_, index) => ({
-  label: String(2000 + index),
-  value: String(2000 + index),
+const YEAR_OPTIONS = YearOptions().map(({ key, label }) => ({
+  label,
+  value: key,
 }));
 
 const ALL_THERMAL_STRESS_LEVELS = THERMAL_STRESS_LEGEND_ITEMS.map((item) => ({
@@ -106,6 +108,22 @@ function filterRanking(
   return true;
 }
 
+function getRankBadgeClasses(rank: number): string {
+  if (rank === 1) {
+    return "border border-amber-300 bg-amber-100 text-amber-900";
+  }
+
+  if (rank === 2) {
+    return "border border-slate-300 bg-slate-100 text-slate-900";
+  }
+
+  if (rank === 3) {
+    return "border border-orange-300 bg-orange-100 text-orange-900";
+  }
+
+  return "border border-border bg-background/80 text-foreground";
+}
+
 interface RankingsMainProperties {
   initialHeatStress: string;
   initialSeason: GraphSeason;
@@ -131,7 +149,7 @@ function SortHeader({
 }>) {
   return (
     <th
-      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
+      className="text-muted-foreground hover:bg-accent/60 cursor-pointer px-6 py-4 text-left text-xs font-medium tracking-[0.2em] uppercase transition"
       onClick={() => onSort(column)}
     >
       <div className="flex items-center gap-1">
@@ -289,58 +307,71 @@ export function RankingsMain({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <HeaderBar LocationOptions={LocationOptions} />
-      <main className="mx-auto max-w-7xl px-4 py-8" id="main-content">
-        <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">
+      <main
+        className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
+        id="main-content"
+      >
+        <section className="climate-hero fade-in-up mb-8 rounded-4xl p-6 sm:p-8">
+          <p className="mb-2 text-xs font-semibold tracking-[0.24em] text-white/80 uppercase">
+            City rankings
+          </p>
+          <h1 className="mb-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
             Cities ranked by Average PET
           </h1>
-        </div>
+          <p className="max-w-3xl text-sm text-white/85 sm:text-base">
+            Compare thermal stress conditions across cities, filter by season or
+            state, and trace which places are warming fastest.{" "}
+            {APP_CONFIG.TAGLINE}
+          </p>
+        </section>
 
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Select
-            className="w-full"
-            data={YEAR_OPTIONS}
-            disabled={isPending}
-            label="Year"
-            onChange={handleYearChange}
-            value={String(selectedYear)}
-          />
-          <Select
-            className="w-full"
-            data={SEASON_OPTIONS}
-            disabled={isPending}
-            label="Season"
-            onChange={handleSeasonChange}
-            value={selectedSeason}
-          />
-          <Select
-            className="w-full"
-            clearable
-            data={stateOptions}
-            disabled={isPending}
-            label="State"
-            onChange={handleStateChange}
-            onClear={handleStateClear}
-            placeholder="All states"
-            value={stateFilter}
-          />
-          <Select
-            className="w-full"
-            clearable
-            data={heatStressOptions}
-            disabled={isPending}
-            label="Avg Thermal Stress Level"
-            onChange={handleHeatStressChange}
-            onClear={handleHeatStressClear}
-            placeholder="All levels"
-            value={heatStressFilter}
-          />
-        </div>
+        <section className="glass-panel fade-in-up mb-6 rounded-3xl p-4 [animation-delay:80ms] sm:p-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Select
+              className="w-full"
+              data={YEAR_OPTIONS}
+              disabled={isPending}
+              label="Year"
+              onChange={handleYearChange}
+              value={String(selectedYear)}
+            />
+            <Select
+              className="w-full"
+              data={SEASON_OPTIONS}
+              disabled={isPending}
+              label="Season"
+              onChange={handleSeasonChange}
+              value={selectedSeason}
+            />
+            <Select
+              className="w-full"
+              clearable
+              data={stateOptions}
+              disabled={isPending}
+              label="State"
+              onChange={handleStateChange}
+              onClear={handleStateClear}
+              placeholder="All states"
+              value={stateFilter}
+            />
+            <Select
+              className="w-full"
+              clearable
+              data={heatStressOptions}
+              disabled={isPending}
+              label="Avg Thermal Stress Level"
+              onChange={handleHeatStressChange}
+              onClear={handleHeatStressClear}
+              placeholder="All levels"
+              value={heatStressFilter}
+            />
+          </div>
+        </section>
 
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-gray-600">
+          <div className="text-muted-foreground text-sm">
             Showing{" "}
             {filteredAndSortedRankings.length === 0
               ? 0
@@ -354,19 +385,24 @@ export function RankingsMain({
             {filteredAndSortedRankings.length !== rankings.length &&
               ` (filtered from ${rankings.length} total)`}
           </div>
+          {isPending && (
+            <div className="rounded-full bg-(--pill-surface) px-3 py-1 text-xs font-semibold text-(--pill-foreground)">
+              Refreshing filters…
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-6 xl:flex-row">
           <div className="w-full xl:w-64 xl:shrink-0">
-            <div className="rounded-lg bg-white p-6 shadow xl:sticky xl:top-4">
+            <div className="glass-panel rounded-3xl p-6 xl:sticky xl:top-28">
               <HeatStressLegend />
             </div>
           </div>
 
-          <div className="flex-1 overflow-hidden rounded-lg bg-white shadow">
+          <div className="glass-panel flex-1 overflow-hidden rounded-3xl">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="divide-border/70 min-w-full divide-y">
+                <thead className="bg-background/55 backdrop-blur-xl">
                   <tr>
                     <SortHeader
                       column="rank"
@@ -403,7 +439,7 @@ export function RankingsMain({
                       label="Max PET"
                       onSort={handleSort}
                     />
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    <th className="text-muted-foreground px-6 py-4 text-left text-xs font-medium tracking-[0.2em] uppercase">
                       PET Range (10th-90th percentile)
                     </th>
                     <SortHeader
@@ -413,108 +449,135 @@ export function RankingsMain({
                       label="Change per Decade"
                       onSort={handleSort}
                     />
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    <th className="text-muted-foreground px-6 py-4 text-left text-xs font-medium tracking-[0.2em] uppercase">
                       2100 Forecast Range
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {paginatedRankings.map(
-                    ({
-                      avg_pet,
-                      changePerDecade,
-                      city,
-                      FutureValueLower,
-                      FutureValueUpper,
-                      location_id,
-                      max_pet,
-                      p10,
-                      p90,
-                      rank,
-                      state,
-                    }) => {
-                      const avgheatStressInfo = getHeatStressInfo(avg_pet);
+                <tbody className="divide-border/70 divide-y bg-transparent">
+                  {paginatedRankings.length === 0 ? (
+                    <tr>
+                      <td
+                        className="text-muted-foreground px-6 py-12 text-center text-sm"
+                        colSpan={8}
+                      >
+                        No cities match the current filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedRankings.map(
+                      ({
+                        avg_pet,
+                        changePerDecade,
+                        city,
+                        FutureValueLower,
+                        FutureValueUpper,
+                        location_id,
+                        max_pet,
+                        p10,
+                        p90,
+                        rank,
+                        state,
+                      }) => {
+                        const avgheatStressInfo = getHeatStressInfo(avg_pet);
 
-                      return (
-                        <tr
-                          className="hover:bg-gray-50"
-                          key={location_id}
-                          onClick={() => router.push(`/${location_id}`)}
-                          style={{ cursor: "pointer" }}
-                        >
-                          <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
-                            {rank}
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
-                            {city}
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                            {state}
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            <span
-                              className={`font-semibold ${avgheatStressInfo.color}`}
-                            >
-                              {avg_pet.toFixed(1)}°C
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            {max_pet === undefined ? (
-                              <span className="text-gray-400">N/A</span>
-                            ) : (
+                        return (
+                          <tr
+                            className="hover:bg-accent/45 even:bg-background/30 cursor-pointer transition hover:-translate-y-px"
+                            key={location_id}
+                            onClick={() => router.push(`/${location_id}`)}
+                          >
+                            <td className="text-foreground px-6 py-4 text-sm font-medium whitespace-nowrap">
                               <span
-                                className={`font-semibold ${getHeatStressInfo(max_pet).color}`}
+                                className={`inline-flex min-w-10 items-center justify-center rounded-full px-3 py-1 text-xs font-bold ${getRankBadgeClasses(rank)}`}
                               >
-                                {max_pet.toFixed(1)}°C
+                                {rank}
                               </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                            {p10 !== undefined && p90 !== undefined ? (
-                              `${getPetRange(p10, p90)}°C`
-                            ) : (
-                              <span className="text-gray-400">N/A</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            {changePerDecade === undefined ? (
-                              <span className="text-gray-400">N/A</span>
-                            ) : (
+                            </td>
+                            <td className="text-foreground px-6 py-4 text-sm whitespace-nowrap">
+                              {city}
+                            </td>
+                            <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
+                              <span className="bg-background/80 text-foreground rounded-full px-2.5 py-1 font-medium">
+                                {state}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-sm whitespace-nowrap">
                               <span
-                                className={`font-semibold ${color_mapping(changePerDecade)}`}
+                                className={`font-semibold ${avgheatStressInfo.color}`}
                               >
-                                {changePerDecade > 0 ? "+" : ""}
-                                {changePerDecade.toFixed(1)}°C
+                                {avg_pet.toFixed(1)}°C
                               </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            {FutureValueLower !== undefined &&
-                            FutureValueUpper !== undefined ? (
-                              <div>
-                                <span
-                                  className={`font-semibold ${
-                                    getHeatStressInfo(FutureValueLower).color
-                                  }`}
-                                >
-                                  {FutureValueLower.toFixed(1)}
+                            </td>
+                            <td className="px-6 py-4 text-sm whitespace-nowrap">
+                              {max_pet === undefined ? (
+                                <span className="text-muted-foreground">
+                                  N/A
                                 </span>
-                                <span> - </span>
+                              ) : (
                                 <span
-                                  className={`font-semibold ${
-                                    getHeatStressInfo(FutureValueUpper).color
-                                  }`}
+                                  className={`font-semibold ${getHeatStressInfo(max_pet).color}`}
                                 >
-                                  {FutureValueUpper.toFixed(1)}°C
+                                  {max_pet.toFixed(1)}°C
                                 </span>
-                              </div>
-                            ) : (
-                              <span className="text-gray-400">N/A</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    },
+                              )}
+                            </td>
+                            <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
+                              {p10 !== undefined && p90 !== undefined ? (
+                                `${getPetRange(p10, p90)}°C`
+                              ) : (
+                                <span className="text-muted-foreground">
+                                  N/A
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-sm whitespace-nowrap">
+                              {changePerDecade === undefined ? (
+                                <span className="text-muted-foreground">
+                                  N/A
+                                </span>
+                              ) : (
+                                <span
+                                  className={`font-semibold ${colorMapping(changePerDecade)}`}
+                                >
+                                  {changePerDecade > 0 ? "+" : ""}
+                                  {changePerDecade.toFixed(1)}°C
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-sm whitespace-nowrap">
+                              {FutureValueLower !== undefined &&
+                              FutureValueUpper !== undefined ? (
+                                <div>
+                                  <span
+                                    className={`font-semibold ${
+                                      getHeatStressInfo(FutureValueLower).color
+                                    }`}
+                                  >
+                                    {FutureValueLower.toFixed(1)}
+                                  </span>
+                                  <span className="text-muted-foreground">
+                                    {" "}
+                                    -{" "}
+                                  </span>
+                                  <span
+                                    className={`font-semibold ${
+                                      getHeatStressInfo(FutureValueUpper).color
+                                    }`}
+                                  >
+                                    {FutureValueUpper.toFixed(1)}°C
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">
+                                  N/A
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      },
+                    )
                   )}
                 </tbody>
               </table>

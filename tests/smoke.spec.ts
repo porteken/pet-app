@@ -9,6 +9,9 @@ import {
 } from "./utils/map-page";
 
 test.describe("Smoke Tests", () => {
+  const locationCharts =
+    '[data-testid="trend-chart"], [data-testid="reference-chart"]';
+
   test("complete user journey: home → location selection → data analysis", async ({
     page,
   }) => {
@@ -31,7 +34,7 @@ test.describe("Smoke Tests", () => {
     await expect(graphMeasure).toBeVisible();
     await graphMeasure.selectOption("max");
 
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+    await expect(page.locator(locationCharts)).toHaveCount(2, {
       timeout: 10_000,
     });
 
@@ -111,7 +114,9 @@ test.describe("Smoke Tests", () => {
 
     const dataStartTime = Date.now();
     await page.goto("/1");
-    await expect(page.getByText("Trend Analysis")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Trend Analysis" }),
+    ).toBeVisible();
 
     const dataLoadTime = Date.now() - dataStartTime;
     expect(dataLoadTime).toBeLessThan(15_000);

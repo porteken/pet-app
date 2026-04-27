@@ -46,38 +46,23 @@ describe("AboutMain", () => {
   it("should render the main content container", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    const container = screen
-      .getByText("Purpose of the Application")
-      .closest("div.mx-auto");
+    const container = screen.getByRole("main");
     expect(container).toBeInTheDocument();
-    expect(container).toHaveClass(
-      "mx-auto",
-      "flex",
-      "flex-col",
-      "gap-5",
-      "p-8",
-      "px-4",
-    );
+    expect(container).toHaveClass("mx-auto", "px-4", "py-8");
   });
 
-  it("should display the purpose section with correct heading", () => {
+  it("should display the purpose section label", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    const purposeHeading = screen.getByRole("heading", {
-      name: /purpose of the application/i,
-    });
-    expect(purposeHeading).toBeInTheDocument();
-    expect(purposeHeading).toHaveClass("text-2xl", "font-extrabold");
+    expect(screen.getByText(/purpose of the application/i)).toBeInTheDocument();
   });
 
   it("should display the purpose description", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    const purposeText = screen.getByText(
-      /this application shows how the physiological equivalent temperature/i,
-    );
+    const purposeText = screen.getByText(/explore how pet changed from/i);
     expect(purposeText).toBeInTheDocument();
-    expect(purposeText).toHaveTextContent("from 2000 to 2013");
+    expect(purposeText).toHaveTextContent("from 2000 to 2025");
     expect(purposeText).toHaveTextContent("top 500 largest cities");
     expect(purposeText).toHaveTextContent("Contiguous United States");
   });
@@ -87,7 +72,7 @@ describe("AboutMain", () => {
 
     const petHeading = screen.getByRole("heading", { name: /what is pet\?/i });
     expect(petHeading).toBeInTheDocument();
-    expect(petHeading).toHaveClass("text-2xl", "font-extrabold");
+    expect(petHeading).toHaveClass("text-2xl", "font-bold");
   });
 
   it("should display the PET definition", () => {
@@ -116,13 +101,13 @@ describe("AboutMain", () => {
   it("should render a link to the research study", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    const studyLink = screen.getByRole("link", { name: /this/i });
+    const studyLink = screen.getByRole("link", { name: /this study/i });
     expect(studyLink).toBeInTheDocument();
     expect(studyLink).toHaveAttribute(
       "href",
       "https://bjsm.bmj.com/content/55/15/825",
     );
-    expect(studyLink).toHaveClass("text-blue-600");
+    expect(studyLink).toHaveClass("text-primary");
   });
 
   it("should mention the study's findings about PET", () => {

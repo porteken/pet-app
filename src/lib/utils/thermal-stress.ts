@@ -1,4 +1,8 @@
-import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
+import {
+  DEFAULT_GRAPH_SEASON,
+  GRAPH_CONFIG,
+  type GraphSeason,
+} from "@/lib/constants";
 
 export interface HeatStressDescription {
   colorClass: string;
@@ -129,7 +133,7 @@ export function getForecastHeatStressDescription(
 export function getHeatStressDescription(
   petValue: number,
   measureType: string,
-  year: number = 2025,
+  year: number = GRAPH_CONFIG.YEAR_RANGE.END,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
 ): HeatStressDescription {
   const info = getHeatStressInfo(petValue);

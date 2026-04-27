@@ -16,7 +16,7 @@ test("mounts, unmounts, and remounts the plot without browser errors", async ({
   });
 
   const toggle = page.locator("#toggle");
-  const plot = page.locator(".js-plotly-plot");
+  const plot = page.getByTestId("plot-test-chart");
 
   await page.goto("/plot-test");
 

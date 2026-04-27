@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/features/graph", () => ({
   GenerateReferenceGraph: vi
     .fn()
-    .mockResolvedValue(
+    .mockReturnValue(
       <div data-testid="mock-reference-graph">Reference Graph</div>,
     ),
 }));
@@ -92,16 +92,24 @@ describe("ReferenceData", () => {
 
     await waitFor(() => {
       const calls = vi.mocked(GenerateReferenceGraph).mock.calls;
-      expect(calls.at(-1)?.[4]).toBe(false);
-      expect(calls.at(-1)?.[5]).toBe(true);
+      expect(calls.at(-1)?.[0]).toEqual(
+        expect.objectContaining({
+          isMobileViewport: true,
+          showLegend: false,
+        }),
+      );
     });
 
     fireEvent.click(toggle);
 
     await waitFor(() => {
       const calls = vi.mocked(GenerateReferenceGraph).mock.calls;
-      expect(calls.at(-1)?.[4]).toBe(true);
-      expect(calls.at(-1)?.[5]).toBe(true);
+      expect(calls.at(-1)?.[0]).toEqual(
+        expect.objectContaining({
+          isMobileViewport: true,
+          showLegend: true,
+        }),
+      );
     });
   });
 

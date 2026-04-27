@@ -5,7 +5,7 @@ import * as React from "react";
 import { cn } from "@/lib/utilities";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25",
   {
     defaultVariants: {
       size: "default",
@@ -19,13 +19,15 @@ const buttonVariants = cva(
         sm: "h-9 rounded-md px-3",
       },
       variant: {
-        default: "bg-blue-600 text-white hover:bg-blue-700",
-        destructive: "bg-red-600 text-white hover:bg-red-700",
-        ghost: "hover:bg-gray-100 hover:text-gray-900",
-        link: "text-blue-600 underline-offset-4 hover:underline",
+        default:
+          "bg-primary text-primary-foreground shadow-sm hover:-translate-y-0.5 hover:brightness-95",
+        destructive: "bg-destructive text-white hover:brightness-95",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
         outline:
-          "border border-gray-300 bg-white text-gray-900 hover:bg-gray-50",
-        secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",
+          "border border-border bg-background/80 text-foreground shadow-sm hover:bg-accent",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
       },
     },
   },

@@ -100,6 +100,9 @@ describe("fetch-server", () => {
   let mockLinearRegression: ReturnType<
     (typeof import("@/testing/mocks"))["createMockLinearRegression"]
   >;
+  let mockValidation: ReturnType<
+    (typeof import("@/testing/mocks"))["createMockValidation"]
+  >;
 
   beforeEach(async () => {
     clearAllMocks();
@@ -107,6 +110,7 @@ describe("fetch-server", () => {
     const setup = await setupApiServerTest();
     mockSupabaseClient = setup.mockSupabaseClient;
     mockLinearRegression = setup.mockLinearRegression;
+    mockValidation = setup.mockValidation;
   });
 
   describe("FetchCityRankings", () => {
@@ -518,6 +522,8 @@ describe("fetch-server", () => {
 
   describe("FetchReferenceGraphData", () => {
     it("should throw error for invalid location ID", async () => {
+      mockValidation.validateLocationId.mockReturnValue(false);
+
       await expect(FetchReferenceGraphData("2023", 0)).rejects.toThrow(
         new DatabaseError("Invalid locationId: 0"),
       );
@@ -532,6 +538,8 @@ describe("fetch-server", () => {
     });
 
     it("should throw error for invalid year format", async () => {
+      mockValidation.validateYear.mockReturnValue(false);
+
       await expect(FetchReferenceGraphData("abc", 1)).rejects.toThrow(
         new DatabaseError("Invalid year format: abc. Must be a 4-digit year."),
       );
@@ -624,6 +632,8 @@ describe("fetch-server", () => {
     });
 
     it("should throw error for invalid location ID", async () => {
+      mockValidation.validateLocationId.mockReturnValue(false);
+
       await expect(FetchTrendGraphData("avg", 0)).rejects.toThrow(
         new DatabaseError("Invalid locationId: 0"),
       );
@@ -636,6 +646,8 @@ describe("fetch-server", () => {
     });
 
     it("should throw error for invalid option", async () => {
+      mockValidation.validateTrendOption.mockReturnValue(false);
+
       await expect(FetchTrendGraphData("invalid", 1)).rejects.toThrow(
         new DatabaseError("Invalid option: invalid. Must be 'avg' or 'max'"),
       );

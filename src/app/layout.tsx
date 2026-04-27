@@ -22,8 +22,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body suppressHydrationWarning>
+    <html
+      className={cn("font-sans", geist.variable)}
+      lang="en"
+      suppressHydrationWarning
+    >
+      <body className="app-shell min-h-screen" suppressHydrationWarning>
         <a className="skip-link" href="#main-content">
           Skip to main content
         </a>

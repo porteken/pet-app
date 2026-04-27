@@ -2,17 +2,10 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import React, {
-  FC,
-  ReactElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { FC, useCallback, useMemo, useState } from "react";
 
-import { GenerateTrendGraph } from "@/features/graph";
 import { HeaderBar } from "@/features/header-bar";
+import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import {
   setForecastPreferences,
   setGraphMeasure,
@@ -23,11 +16,13 @@ import { getTrendGraphQueryOptions } from "@/lib/api/query-client";
 import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
 import { GraphOptions, SeasonOptions } from "@/lib/utils/select-options";
 import { type HeatStressDescription } from "@/lib/utils/thermal-stress";
-import { buildTrendAnalysisResult } from "@/lib/utils/trend-analysis";
+import {
+  buildTrendAnalysisResult,
+  type TrendGraphSnapshot,
+} from "@/lib/utils/trend-analysis";
 import { LocationProperties } from "@/types/types";
 
 import { MapProperties } from "../model/types";
-import { ErrorGraphDisplay } from "./error-graph-display";
 import { GraphSection } from "./graph-section";
 import { MapComponent } from "./map-component";
 
@@ -51,7 +46,9 @@ const Home: FC<MapProperties> = ({
     () => initialGraphSeason,
   );
 
-  const [petGraph, setPetGraph] = useState<ReactElement | undefined>();
+  const [trendGraphSnapshot, setTrendGraphSnapshot] =
+    useState<TrendGraphSnapshot>();
+  const [graphHasError, setGraphHasError] = useState(false);
   const [graphLoading, setGraphLoading] = useState(false);
   const [selectedLocationId, setSelectedLocationId] = useState<number>();
   const [modalOpen, setModalOpen] = useState(false);
@@ -63,13 +60,7 @@ const Home: FC<MapProperties> = ({
   const [forecastYearsAhead, setForecastYearsAhead] = useState(
     () => initialForecastYearsAhead,
   );
-  const [isMobileViewport, setIsMobileViewport] = useState(() => {
-    if (typeof globalThis.matchMedia !== "function") {
-      return false;
-    }
-
-    return globalThis.matchMedia("(max-width: 639px)").matches;
-  });
+  const isMobileViewport = useIsMobileViewport();
   const [isMobileGraphLegendOpen, setIsMobileGraphLegendOpen] = useState(false);
   const [heatStressDescription, setHeatStressDescription] =
     useState<HeatStressDescription>();
@@ -97,26 +88,6 @@ const Home: FC<MapProperties> = ({
     [],
   );
 
-  useEffect(() => {
-    if (typeof globalThis.matchMedia !== "function") {
-      return;
-    }
-
-    const mediaQuery = globalThis.matchMedia("(max-width: 639px)");
-    const updateIsMobileViewport = () => {
-      setIsMobileViewport(mediaQuery.matches);
-    };
-
-    updateIsMobileViewport();
-
-    mediaQuery.addEventListener("change", updateIsMobileViewport);
-    return () => {
-      mediaQuery.removeEventListener("change", updateIsMobileViewport);
-    };
-  }, []);
-
-  const showTrendLegend = !isMobileViewport || isMobileGraphLegendOpen;
-
   const generateGraph = useCallback(
     async (
       locationId: number,
@@ -126,6 +97,7 @@ const Home: FC<MapProperties> = ({
       yearsAhead: number,
     ) => {
       setGraphLoading(true);
+      setGraphHasError(false);
       try {
         const {
           forecastHeatStress: newForecastHeatStress,
@@ -145,38 +117,23 @@ const Home: FC<MapProperties> = ({
 
         setHeatStressDescription(newHeatStressDescription);
         setForecastHeatStress(newForecastHeatStress);
-
-        if (snapshot.years.length === 0 || snapshot.year_pets.length === 0) {
-          throw new Error("No trend data available");
-        }
-
-        const graph = GenerateTrendGraph({
-          forecastData: snapshot.forecastData,
-          increasePerYear: snapshot.increase_per_year,
-          isMobileViewport,
-          option: snapshot.option,
-          season: snapshot.season,
-          showLegend: showTrendLegend,
-          trendlinePets: snapshot.trendline_pets,
-          useCompactDesktopHeight: false,
-          yearPets: snapshot.year_pets,
-          years: snapshot.years,
-        });
-        setPetGraph(graph);
+        setTrendGraphSnapshot(snapshot);
       } catch {
-        setPetGraph(<ErrorGraphDisplay />);
+        setTrendGraphSnapshot(undefined);
+        setGraphHasError(true);
         setHeatStressDescription(undefined);
         setForecastHeatStress(undefined);
       } finally {
         setGraphLoading(false);
       }
     },
-    [isMobileViewport, queryClient, showTrendLegend],
+    [queryClient],
   );
 
   const handleSelectChange = useCallback(
     async (option: string) => {
       if (selectedLocationId !== undefined) {
+        setIsMobileGraphLegendOpen(false);
         setSelectedGraphMeasure(option);
         await setGraphMeasure(option);
       }
@@ -186,13 +143,14 @@ const Home: FC<MapProperties> = ({
 
   const handleSeasonChange = useCallback(async (season: GraphSeason) => {
     const nextSeason = normalizeGraphSeason(season);
+    setIsMobileGraphLegendOpen(false);
     setSelectedGraphSeason(nextSeason);
     await setGraphSeason(nextSeason);
   }, []);
 
   const forecastSupported = selectedGraphMeasure === "avg";
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (selectedLocationId !== undefined) {
       generateGraph(
         selectedLocationId,
@@ -209,7 +167,6 @@ const Home: FC<MapProperties> = ({
     forecastEnabled,
     forecastYearsAhead,
     forecastSupported,
-    showTrendLegend,
     generateGraph,
   ]);
 
@@ -279,6 +236,7 @@ const Home: FC<MapProperties> = ({
           forecastEnabled={forecastEnabled}
           forecastHeatStress={forecastHeatStress}
           forecastYearsAhead={forecastYearsAhead}
+          graphHasError={graphHasError}
           graphLoading={graphLoading}
           heatStressDescription={heatStressDescription}
           isMobileGraphLegendOpen={isMobileGraphLegendOpen}
@@ -290,12 +248,12 @@ const Home: FC<MapProperties> = ({
           onToggleMobileGraphLegend={() =>
             setIsMobileGraphLegendOpen((previous) => !previous)
           }
-          petGraph={petGraph}
           selectedGraphMeasure={selectedGraphMeasure}
           selectedGraphSeason={selectedGraphSeason}
           selectedLocation={selectedLocation}
           seasonOptions={seasonOptions}
           selectOptions={selectOptions}
+          trendGraphSnapshot={trendGraphSnapshot}
         />
       </Modal>
     </div>

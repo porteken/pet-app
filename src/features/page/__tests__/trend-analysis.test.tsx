@@ -39,7 +39,7 @@ vi.mock("@/lib/utils/thermal-stress", () => ({
   })),
 }));
 
-vi.mock("@/lib/utils/forecast-controls", () => ({
+vi.mock("@/components/app/forecast-controls", () => ({
   ForecastControls: vi.fn(
     ({ enabled, onToggle, onYearsChange, yearsAhead }) => (
       <div data-testid="forecast-controls">
@@ -187,6 +187,7 @@ describe("TrendAnalysis", () => {
             yearPets: [20, 22, 24, 26],
             years: [2020, 2021, 2022, 2023],
           }),
+          undefined,
         );
       });
     });
@@ -205,6 +206,7 @@ describe("TrendAnalysis", () => {
             yearPets: [20, 22, 24, 26],
             years: [2020, 2021, 2022, 2023],
           }),
+          undefined,
         );
       });
 
@@ -243,6 +245,7 @@ describe("TrendAnalysis", () => {
             isMobileViewport: true,
             showLegend: false,
           }),
+          undefined,
         );
       });
 
@@ -254,6 +257,7 @@ describe("TrendAnalysis", () => {
             isMobileViewport: true,
             showLegend: true,
           }),
+          undefined,
         );
       });
     });
@@ -502,6 +506,7 @@ describe("TrendAnalysis", () => {
             yearPets: expect.any(Array),
             years: expect.any(Array),
           }),
+          undefined,
         );
       });
     });
@@ -559,6 +564,7 @@ describe("TrendAnalysis", () => {
             yearPets: [],
             years: [],
           }),
+          undefined,
         );
       });
     });

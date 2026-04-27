@@ -56,7 +56,7 @@ vi.mock("@/components/ui/select", () => ({
   ),
 }));
 
-vi.mock("@/lib/utils/forecast-controls", () => ({
+vi.mock("@/components/app/forecast-controls", () => ({
   ForecastControls: vi.fn(
     ({ enabled, onToggle, onYearsChange, yearsAhead }) => (
       <div data-testid="forecast-controls">
@@ -78,19 +78,25 @@ vi.mock("@/lib/utils/forecast-controls", () => ({
   ),
 }));
 
+vi.mock("@/features/graph", () => ({
+  GenerateTrendGraph: vi
+    .fn()
+    .mockReturnValue(<div data-testid="pet-graph">Mock Graph</div>),
+}));
+
 import { GraphSection } from "../components/graph-section";
 
 const defaultProps: React.ComponentProps<typeof GraphSection> = {
   forecastEnabled: false,
   forecastHeatStress: undefined,
   forecastYearsAhead: 10,
+  graphHasError: false,
   graphLoading: false,
   heatStressDescription: undefined,
   onForecastToggle: vi.fn(),
   onForecastYearsChange: vi.fn(),
   onSeasonChange: vi.fn(),
   onSelectChange: vi.fn(),
-  petGraph: <div data-testid="pet-graph">Mock Graph</div>,
   selectedGraphMeasure: "avg",
   selectedGraphSeason: "Annual",
   selectedLocation: { city: "New York", location_id: 1, state: "NY" },
@@ -102,6 +108,15 @@ const defaultProps: React.ComponentProps<typeof GraphSection> = {
     { label: "Average", value: "avg" },
     { label: "Maximum", value: "max" },
   ],
+  trendGraphSnapshot: {
+    forecastData: undefined,
+    increase_per_year: 0.5,
+    option: "avg",
+    season: "Annual",
+    trendline_pets: [20, 22, 24],
+    year_pets: [20, 22, 24],
+    years: [2020, 2021, 2022],
+  },
 };
 
 describe("GraphSection", () => {
@@ -373,9 +388,12 @@ describe("GraphSection", () => {
 
   describe("Edge Cases", () => {
     it("should render without pet graph", () => {
-      render(<GraphSection {...defaultProps} petGraph={undefined} />);
+      render(<GraphSection {...defaultProps} trendGraphSnapshot={undefined} />);
 
       expect(screen.getByTestId("view-details-button")).toBeInTheDocument();
+      expect(
+        screen.getByText("Select a city to view PET trend data."),
+      ).toBeInTheDocument();
     });
 
     it("should handle missing confidence range in forecast thermal stress", () => {

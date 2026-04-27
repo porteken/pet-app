@@ -132,11 +132,11 @@ export const MapComponent = memo<MapComponentProperties>(
 
     if (!locations || locations.length === 0) {
       return (
-        <div className="flex h-full items-center justify-center bg-gray-50">
+        <div className="bg-background/30 flex h-full items-center justify-center px-4">
           <div className="mx-auto max-w-md p-6 text-center">
             <div className="mb-6">
               <svg
-                className="mx-auto size-12 text-red-500"
+                className="text-destructive mx-auto size-12"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -149,18 +149,18 @@ export const MapComponent = memo<MapComponentProperties>(
                 />
               </svg>
             </div>
-            <h1 className="mb-4 text-2xl font-bold text-gray-900">
+            <h1 className="text-foreground mb-4 text-2xl font-bold">
               No Map Data Available
             </h1>
-            <p className="mb-6 text-gray-600">
+            <p className="text-muted-foreground mb-6">
               Unable to load location data for the map. The database may be
               temporarily unavailable.
             </p>
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-              <p className="text-sm text-blue-800">
+            <div className="glass-panel-muted rounded-2xl p-4">
+              <p className="text-foreground text-sm">
                 <strong>Need help?</strong> Contact Kenneth Porter at{" "}
                 <a
-                  className="text-blue-600 underline hover:text-blue-800"
+                  className="text-primary hover:text-primary/80 underline underline-offset-4"
                   href="mailto:porteken@gmail.com"
                 >
                   porteken@gmail.com
@@ -191,7 +191,7 @@ export const MapComponent = memo<MapComponentProperties>(
             <button
               aria-controls="desktop-thermal-stress-legend"
               aria-expanded={isLegendOpen}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-md transition-colors hover:bg-gray-50"
+              className="glass-panel-muted text-foreground hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
               onClick={() => setIsLegendOpen((previous) => !previous)}
               type="button"
             >
@@ -210,7 +210,7 @@ export const MapComponent = memo<MapComponentProperties>(
           <div className="pointer-events-auto flex items-center">
             {isLegendOpen && (
               <div
-                className="mr-2 max-w-[78vw] shadow-md"
+                className="glass-panel mr-2 max-w-[78vw] rounded-3xl p-2 shadow-md"
                 id="mobile-thermal-stress-legend"
               >
                 <HeatStressLegend />
@@ -219,7 +219,7 @@ export const MapComponent = memo<MapComponentProperties>(
             <button
               aria-controls="mobile-thermal-stress-legend"
               aria-expanded={isLegendOpen}
-              className="rounded-l-lg border border-r-0 border-gray-200 bg-white px-2 py-3 text-xs font-semibold text-gray-900 shadow-md transition-colors hover:bg-gray-50"
+              className="glass-panel-muted text-foreground hover:bg-accent rounded-l-2xl border-r-0 px-3 py-3 text-xs font-semibold transition"
               onClick={() => setIsLegendOpen((previous) => !previous)}
               type="button"
             >

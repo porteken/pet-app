@@ -23,8 +23,8 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
         <Link
           aria-current={isActivePath("/") ? "page" : undefined}
           className={cn(
-            "rounded-md px-1",
-            isActivePath("/") && "bg-gray-100 font-semibold text-gray-900",
+            "rounded-full px-3 py-2",
+            isActivePath("/") && "bg-accent font-semibold text-foreground",
           )}
           href={buildUrl("/")}
         >
@@ -36,9 +36,9 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
         <Link
           aria-current={isActivePath("/rankings") ? "page" : undefined}
           className={cn(
-            "rounded-md px-1",
+            "rounded-full px-3 py-2",
             isActivePath("/rankings") &&
-              "bg-gray-100 font-semibold text-gray-900",
+              "bg-accent font-semibold text-foreground",
           )}
           href="/rankings"
         >
@@ -50,8 +50,8 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
         <Link
           aria-current={isActivePath("/about") ? "page" : undefined}
           className={cn(
-            "rounded-md px-1",
-            isActivePath("/about") && "bg-gray-100 font-semibold text-gray-900",
+            "rounded-full px-3 py-2",
+            isActivePath("/about") && "bg-accent font-semibold text-foreground",
           )}
           href="/about"
         >
@@ -59,8 +59,9 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
         </Link>
       </Button>
 
-      <Button aria-label="View source code on GitHub" asChild variant="ghost">
+      <Button aria-label="View source code on GitHub" asChild variant="outline">
         <a
+          className="rounded-full"
           href={APP_CONFIG.GITHUB_URL}
           rel="noopener noreferrer"
           target="_blank"

@@ -13,6 +13,7 @@ import {
   DEFAULT_GRAPH_MEASURE,
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
+  GRAPH_CONFIG,
   GRAPH_MEASURE_COOKIE_NAME,
   GRAPH_SEASON_COOKIE_NAME,
   REFERENCE_YEAR_COOKIE_NAME,
@@ -119,13 +120,13 @@ const fetchGraphData = async (
   season: GraphSeason,
   referenceYear: string,
 ): Promise<GraphData> => {
-  const trendData = await FetchTrendGraphData("avg", locationId, season);
-
-  const latestYear =
-    trendData.years.length > 0 ? String(trendData.years.at(-1)) : "2024";
-
-  const [currentData, referenceData] = await Promise.all([
-    FetchReferenceGraphData(latestYear, locationId, DEFAULT_GRAPH_SEASON),
+  const [trendData, currentData, referenceData] = await Promise.all([
+    FetchTrendGraphData("avg", locationId, season),
+    FetchReferenceGraphData(
+      String(GRAPH_CONFIG.YEAR_RANGE.END),
+      locationId,
+      DEFAULT_GRAPH_SEASON,
+    ),
     FetchReferenceGraphData(referenceYear, locationId, DEFAULT_GRAPH_SEASON),
   ]);
 

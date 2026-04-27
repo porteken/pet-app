@@ -1,26 +1,31 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import type { Layout } from "plotly.js";
-import React from "react";
+import * as React from "react";
+import {
+  Area,
+  CartesianGrid,
+  ComposedChart,
+  Legend,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 import {
   DEFAULT_GRAPH_SEASON,
   GRAPH_COLORS,
+  GRAPH_CONFIG,
   type GraphSeason,
 } from "@/lib/constants";
 
-type GenerateTrendGraphLegacyArguments = [
-  years: number[],
-  option: string,
-  year_pets: number[],
-  trendline_pets: number[],
-  increase_per_year: number,
-  forecastData?: TrendForecastData,
-  showLegend?: boolean,
-  isMobileViewport?: boolean,
-  useCompactDesktopHeight?: boolean,
-];
+interface TrendForecastData {
+  forecastValues: number[];
+  forecastYears: number[];
+  lowerBound10: number[];
+  upperBound90: number[];
+}
 
 interface GenerateTrendGraphOptions {
   forecastData?: TrendForecastData;
@@ -35,474 +40,662 @@ interface GenerateTrendGraphOptions {
   years: number[];
 }
 
-interface NormalizedGenerateTrendGraphOptions extends Omit<
-  GenerateTrendGraphOptions,
-  "isMobileViewport" | "showLegend" | "useCompactDesktopHeight"
-> {
+interface GenerateReferenceGraphOptions {
+  currentPets: number[];
+  currentYear?: number;
+  dates: Date[];
+  isMobileViewport?: boolean;
+  referencePets: number[];
+  referenceYear: string;
+  season?: GraphSeason;
+  showLegend?: boolean;
+}
+
+interface ChartShellProperties {
+  children?: React.ReactNode;
+  emptyState: string;
+  subtitle?: string;
+  title: string;
+  useCompactDesktopHeight?: boolean;
+}
+
+interface ChartTooltipPayload {
+  color?: string;
+  dataKey?: string;
+  name?: string;
+  payload: Record<string, unknown>;
+  value?: number;
+}
+
+interface ChartTooltipProperties {
+  active?: boolean;
+  label?: number | string;
+  payload?: ChartTooltipPayload[];
+}
+
+interface ReferenceChartPoint {
+  currentPet?: number;
+  label: string;
+  referencePet?: number;
+  tooltipLabel: string;
+}
+
+interface TrendChartPoint {
+  confidenceFloor?: number;
+  confidenceHigh?: number;
+  confidenceLow?: number;
+  confidenceSpan?: number;
+  forecast?: number;
+  pet?: number;
+  tooltipLabel: string;
+  trendline?: number;
+  year: number;
+}
+
+interface ChartMarginOptions {
+  isMobileViewport: boolean;
+  showLegend: boolean;
+}
+
+interface GraphLegendProperties {
+  showLegend: boolean;
+}
+
+interface TrendForecastSeriesProperties {
+  forecastData?: TrendForecastData;
+  shouldAnimate: boolean;
+}
+
+interface TrendChartBodyProperties {
+  chartData: TrendChartPoint[];
+  forecastData?: TrendForecastData;
+  graphType: string;
   isMobileViewport: boolean;
   season: GraphSeason;
+  shouldAnimate: boolean;
   showLegend: boolean;
-  useCompactDesktopHeight: boolean;
 }
 
-interface PlotlyConfig {
-  displaylogo: boolean;
-  displayModeBar: "hover" | boolean;
-  modeBarButtonsToRemove: ("lasso2d" | "pan2d" | "select2d")[];
-  responsive: boolean;
+interface ReferenceChartBodyProperties {
+  chartData: ReferenceChartPoint[];
+  currentYear: number;
+  isMobileViewport: boolean;
+  referenceYear: string;
+  season: GraphSeason;
+  shouldAnimate: boolean;
+  showLegend: boolean;
 }
 
-interface PlotlyTrace {
-  fill?: "none" | "tonexty" | "tozeroy";
-  fillcolor?: string;
-  hovertemplate: string;
-  line: {
-    color: string;
-    dash?: "dashdot" | "dot";
-    width: number;
-  };
-  marker?: {
-    color: string;
-    size: number;
-  };
-  mode: "lines" | "lines+markers" | "none";
-  name: string;
-  showlegend?: boolean;
-  type: "scatter";
-  x: Date[] | number[];
-  y: number[];
-}
+const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  day: "numeric",
+  month: "short",
+});
 
-interface TrendForecastData {
-  forecastValues: number[];
-  forecastYears: number[];
-  lowerBound10: number[];
-  upperBound90: number[];
-}
-
-type GenerateReferenceGraphArguments = readonly [
-  referenceYear: string,
-  dates: Date[],
-  referencePets: number[],
-  currentPets: number[],
-  showLegend?: boolean,
-  isMobileViewport?: boolean,
-  season?: GraphSeason,
-  currentYear?: number,
-];
-
-const normalizeGenerateTrendGraphOptions = (
-  input: [GenerateTrendGraphOptions] | GenerateTrendGraphLegacyArguments,
-): NormalizedGenerateTrendGraphOptions => {
-  const [firstInput] = input;
-
-  if (
-    input.length === 1 &&
-    typeof firstInput === "object" &&
-    !Array.isArray(firstInput)
-  ) {
-    const {
-      forecastData,
-      increasePerYear,
-      isMobileViewport = false,
-      option,
-      season = DEFAULT_GRAPH_SEASON,
-      showLegend = true,
-      trendlinePets,
-      useCompactDesktopHeight = false,
-      yearPets,
-      years,
-    } = firstInput;
-
-    return {
-      forecastData,
-      increasePerYear,
-      isMobileViewport,
-      option,
-      season,
-      showLegend,
-      trendlinePets,
-      useCompactDesktopHeight,
-      yearPets,
-      years,
-    };
-  }
-
-  const [
-    years,
-    option,
-    yearPets,
-    trendlinePets,
-    increasePerYear,
-    forecastData,
-    showLegend = true,
-    isMobileViewport = false,
-    useCompactDesktopHeight = false,
-  ] = input as GenerateTrendGraphLegacyArguments;
-
-  return {
-    forecastData,
-    increasePerYear,
-    isMobileViewport,
-    option,
-    season: DEFAULT_GRAPH_SEASON,
-    showLegend,
-    trendlinePets,
-    useCompactDesktopHeight,
-    yearPets,
-    years,
-  };
-};
+const PET_FORMATTER = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 1,
+});
 
 const getGraphFillHeightClass = (useCompactDesktopHeight: boolean): string =>
   useCompactDesktopHeight
     ? "h-full min-h-[clamp(220px,42vh,520px)] sm:min-h-[clamp(300px,45vh,500px)]"
     : "h-full min-h-[clamp(220px,42vh,520px)] sm:min-h-[clamp(450px,70vh,850px)]";
 
-const Plot = dynamic(
-  async () => {
-    const createPlotlyComponent = (await import("react-plotly.js/factory"))
-      .default;
-    const Plotly = await import("plotly.js-basic-dist-min");
+const formatPetValue = (value?: number): string => {
+  if (value === undefined || Number.isNaN(value)) {
+    return "—";
+  }
 
-    return createPlotlyComponent(Plotly as never);
-  },
-  {
-    loading: () => (
-      <div
-        className={`flex items-center justify-center text-gray-500 ${getGraphFillHeightClass(false)}`}
-      >
-        Loading chart...
-      </div>
-    ),
-    ssr: false,
-  },
-);
+  return `${PET_FORMATTER.format(value)}°C`;
+};
 
-const PlotWrapper: React.FC<{
-  config: PlotlyConfig;
-  data: PlotlyTrace[];
-  layout: Partial<Layout>;
-}> = ({ config, data, layout }) => {
+const formatLegendLabel = (value: string) => {
   return (
-    <Plot
-      config={config}
-      data={data}
-      layout={{
-        ...layout,
-        autosize: true,
-        height: undefined,
-        width: undefined,
+    <span className="text-foreground/80 text-xs font-medium">{value}</span>
+  );
+};
+
+const shouldAnimateCharts = (): boolean => {
+  if (typeof globalThis.matchMedia !== "function") {
+    return true;
+  }
+
+  return !globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+};
+
+const buildReferenceChartData = (
+  dates: Date[],
+  currentPets: number[],
+  referencePets: number[],
+): ReferenceChartPoint[] => {
+  return dates.map((date, index) => ({
+    currentPet: currentPets[index],
+    label: DATE_FORMATTER.format(date),
+    referencePet: referencePets[index],
+    tooltipLabel: DATE_FORMATTER.format(date),
+  }));
+};
+
+const buildTrendChartData = (
+  years: number[],
+  yearPets: number[],
+  trendlinePets: number[],
+  forecastData?: TrendForecastData,
+): TrendChartPoint[] => {
+  const pointMap = new Map<number, TrendChartPoint>(
+    years.map((year, index) => [
+      year,
+      {
+        pet: yearPets[index],
+        tooltipLabel: String(year),
+        trendline: trendlinePets[index],
+        year,
+      },
+    ]),
+  );
+
+  if (!forecastData || forecastData.forecastYears.length === 0) {
+    return [...pointMap.values()].toSorted((a, b) => a.year - b.year);
+  }
+
+  const lastHistoricalYear = years.at(-1);
+  const lastHistoricalPet = yearPets.at(-1);
+
+  if (lastHistoricalYear === undefined || lastHistoricalPet === undefined) {
+    return [...pointMap.values()].toSorted((a, b) => a.year - b.year);
+  }
+
+  const forecastPoints: TrendChartPoint[] = [
+    {
+      confidenceFloor: lastHistoricalPet,
+      confidenceHigh: lastHistoricalPet,
+      confidenceLow: lastHistoricalPet,
+      confidenceSpan: 0,
+      forecast: lastHistoricalPet,
+      tooltipLabel: String(lastHistoricalYear),
+      year: lastHistoricalYear,
+    },
+    ...forecastData.forecastYears.map((year, index) => {
+      const confidenceLow = forecastData.lowerBound10[index];
+      const confidenceHigh = forecastData.upperBound90[index];
+
+      return {
+        confidenceFloor: confidenceLow,
+        confidenceHigh,
+        confidenceLow,
+        confidenceSpan:
+          confidenceLow !== undefined && confidenceHigh !== undefined
+            ? confidenceHigh - confidenceLow
+            : undefined,
+        forecast: forecastData.forecastValues[index],
+        tooltipLabel: String(year),
+        year,
+      } satisfies TrendChartPoint;
+    }),
+  ];
+
+  for (const forecastPoint of forecastPoints) {
+    pointMap.set(forecastPoint.year, {
+      ...pointMap.get(forecastPoint.year),
+      ...forecastPoint,
+    });
+  }
+
+  return [...pointMap.values()].toSorted((a, b) => a.year - b.year);
+};
+
+const getChartMargin = ({
+  isMobileViewport,
+  showLegend,
+}: ChartMarginOptions) => {
+  return {
+    bottom: showLegend ? 4 : 0,
+    left: isMobileViewport ? -18 : -10,
+    right: isMobileViewport ? 4 : 12,
+    top: 8,
+  };
+};
+
+const hasTrendGraphData = (
+  years: number[],
+  yearPets: number[],
+  trendlinePets: number[],
+): boolean => {
+  return years.length > 0 && yearPets.length > 0 && trendlinePets.length > 0;
+};
+
+const hasReferenceGraphData = (
+  dates: Date[],
+  currentPets: number[],
+  referencePets: number[],
+): boolean => {
+  return dates.length > 0 && referencePets.length > 0 && currentPets.length > 0;
+};
+
+const getTrendGraphType = (option: string): string => {
+  return option === GRAPH_CONFIG.TREND_OPTIONS.AVG ? "Average" : "Maximum";
+};
+
+const formatIncreasePerYearText = (increasePerYear: number): string => {
+  return increasePerYear >= 0
+    ? `+${increasePerYear.toFixed(2)}`
+    : increasePerYear.toFixed(2);
+};
+
+const ChartShell = ({
+  children,
+  emptyState,
+  subtitle,
+  title,
+  useCompactDesktopHeight = false,
+}: ChartShellProperties): React.ReactElement => {
+  return (
+    <div
+      className={`${getGraphFillHeightClass(useCompactDesktopHeight)} w-full`}
+    >
+      <div className="graph-surface-panel flex h-full flex-col rounded-2xl p-3 sm:p-4">
+        <div className="border-border/60 mb-3 space-y-1 border-b pb-3">
+          <h3 className="text-foreground text-base font-semibold sm:text-lg">
+            {title}
+          </h3>
+          {subtitle && (
+            <p className="text-muted-foreground text-sm">{subtitle}</p>
+          )}
+        </div>
+
+        <div className="min-h-0 flex-1">
+          {children ?? (
+            <div className="border-border/80 bg-background/20 text-muted-foreground flex h-full items-center justify-center rounded-xl border border-dashed px-4 text-center text-sm">
+              {emptyState}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ChartTooltip = ({
+  active,
+  label,
+  payload,
+}: ChartTooltipProperties): React.ReactElement | null => {
+  if (!active || !payload || payload.length === 0) {
+    return null;
+  }
+
+  const point = payload[0]?.payload as Partial<
+    ReferenceChartPoint & TrendChartPoint
+  >;
+  const visiblePayload = payload.filter(
+    (entry) =>
+      typeof entry.value === "number" &&
+      entry.dataKey !== "confidenceFloor" &&
+      entry.dataKey !== "confidenceSpan",
+  );
+
+  return (
+    <div
+      className="rounded-xl border px-3 py-2 text-xs shadow-lg backdrop-blur"
+      style={{
+        background: GRAPH_COLORS.tooltipBackground,
+        borderColor: GRAPH_COLORS.tooltipBorder,
       }}
-      style={{ height: "100%", width: "100%" }}
-      useResizeHandler
+    >
+      <p className="text-foreground mb-2 font-semibold">
+        {point.tooltipLabel ?? String(label ?? "")}
+      </p>
+      <div className="space-y-1.5">
+        {visiblePayload.map((entry) => (
+          <div
+            className="flex items-center justify-between gap-3"
+            key={`${entry.dataKey}-${entry.name}`}
+          >
+            <span className="text-muted-foreground flex items-center gap-2">
+              <span
+                className="inline-flex size-2 rounded-full"
+                style={{ backgroundColor: entry.color ?? GRAPH_COLORS.primary }}
+              />
+              {entry.name}
+            </span>
+            <span className="text-foreground font-semibold">
+              {formatPetValue(entry.value)}
+            </span>
+          </div>
+        ))}
+      </div>
+      {typeof point.confidenceLow === "number" &&
+        typeof point.confidenceHigh === "number" && (
+          <p className="border-border/70 text-muted-foreground mt-2 border-t pt-2 text-[11px]">
+            80% confidence interval: {formatPetValue(point.confidenceLow)} to{" "}
+            {formatPetValue(point.confidenceHigh)}
+          </p>
+        )}
+    </div>
+  );
+};
+
+const GraphLegend = ({
+  showLegend,
+}: GraphLegendProperties): React.ReactElement | null => {
+  if (!showLegend) {
+    return null;
+  }
+
+  return (
+    <Legend
+      formatter={formatLegendLabel}
+      iconSize={10}
+      wrapperStyle={{ paddingTop: "0.75rem" }}
     />
   );
 };
 
-export const GenerateTrendGraph = (
-  ...input: [GenerateTrendGraphOptions] | GenerateTrendGraphLegacyArguments
-): React.ReactElement => {
-  const {
-    forecastData,
-    increasePerYear,
-    isMobileViewport,
-    option,
-    season,
-    showLegend,
-    trendlinePets,
-    useCompactDesktopHeight,
-    yearPets,
-    years,
-  } = normalizeGenerateTrendGraphOptions(input);
-
-  const graphFillHeightClass = getGraphFillHeightClass(useCompactDesktopHeight);
-
-  if (
-    years.length === 0 ||
-    yearPets.length === 0 ||
-    trendlinePets.length === 0
-  ) {
-    return (
-      <div
-        className={`flex items-center justify-center text-gray-500 ${graphFillHeightClass}`}
-      >
-        No data available for the selected parameters
-      </div>
-    );
+const TrendForecastSeries = ({
+  forecastData,
+  shouldAnimate,
+}: TrendForecastSeriesProperties): React.ReactElement | null => {
+  if (!forecastData || forecastData.forecastYears.length === 0) {
+    return null;
   }
-
-  const graphType = option === "avg" ? "Average" : "Max";
-  const increaseText =
-    increasePerYear >= 0
-      ? `+${increasePerYear.toFixed(2)}`
-      : increasePerYear.toFixed(2);
-
-  const layout: Partial<Layout> = {
-    autosize: true,
-    font: {
-      color: "#374151",
-    },
-    margin: {
-      b: isMobileViewport ? 34 : 40,
-      l: isMobileViewport ? 30 : 32,
-      r: isMobileViewport ? 6 : 10,
-      t: isMobileViewport ? 52 : 60,
-    },
-    paper_bgcolor: GRAPH_COLORS.background,
-    plot_bgcolor: GRAPH_COLORS.background,
-    showlegend: showLegend,
-    title: {
-      text: `${graphType} ${season} PET (2000-2025)<br><sub>Increase per year: ${increaseText}°C</sub>`,
-    },
-    xaxis: {
-      gridcolor: GRAPH_COLORS.grid,
-      title: { text: "Year" },
-      zeroline: false,
-    },
-    yaxis: {
-      gridcolor: GRAPH_COLORS.grid,
-      title: { text: "PET" },
-      zeroline: false,
-    },
-  };
-
-  const data: PlotlyTrace[] = [
-    {
-      hovertemplate: "Year: %{x}<br>PET: %{y:.2f}<extra></extra>",
-      line: {
-        color: GRAPH_COLORS.primary,
-        width: 2,
-      },
-      marker: {
-        color: GRAPH_COLORS.primary,
-        size: 6,
-      },
-      mode: "lines+markers",
-      name: "PET",
-      type: "scatter",
-      x: years,
-      y: yearPets,
-    },
-    {
-      hovertemplate: "Year: %{x}<br>Trendline: %{y:.2f}<extra></extra>",
-      line: {
-        color: GRAPH_COLORS.secondary,
-        dash: "dashdot",
-        width: 2,
-      },
-      mode: "lines",
-      name: "Trendline of PET",
-      type: "scatter",
-      x: years,
-      y: trendlinePets,
-    },
-  ];
-
-  if (forecastData && forecastData.forecastYears.length > 0) {
-    const lastYear = years.at(-1)!;
-    const lastPetValue = yearPets.at(-1)!;
-    const lastLowerBound = lastPetValue;
-    const lastUpperBound = lastPetValue;
-
-    data.push(
-      {
-        fill: "none",
-        hovertemplate:
-          "Year: %{x}<br>Upper Bound (90%): %{y:.2f}°C<extra></extra>",
-        line: {
-          color: "rgba(99, 102, 241, 0.2)",
-          width: 0,
-        },
-        mode: "lines",
-        name: "90% Confidence",
-        showlegend: false,
-        type: "scatter",
-        x: [lastYear, ...forecastData.forecastYears],
-        y: [lastUpperBound, ...forecastData.upperBound90],
-      },
-      {
-        fill: "tonexty",
-        fillcolor: "rgba(99, 102, 241, 0.2)",
-        hovertemplate:
-          "Year: %{x}<br>Lower Bound (10%): %{y:.2f}°C<extra></extra>",
-        line: {
-          color: "rgba(99, 102, 241, 0.2)",
-          width: 0,
-        },
-        mode: "lines",
-        name: "80% Confidence Interval",
-        showlegend: true,
-        type: "scatter",
-        x: [lastYear, ...forecastData.forecastYears],
-        y: [lastLowerBound, ...forecastData.lowerBound10],
-      },
-      {
-        hovertemplate: "Year: %{x}<br>Forecast: %{y:.2f}°C<extra></extra>",
-        line: {
-          color: GRAPH_COLORS.secondary,
-          dash: "dot",
-          width: 2,
-        },
-        mode: "lines",
-        name: "Forecast",
-        type: "scatter",
-        x: [lastYear, ...forecastData.forecastYears],
-        y: [lastPetValue, ...forecastData.forecastValues],
-      },
-    );
-  }
-
-  const config: PlotlyConfig = {
-    displaylogo: false,
-    displayModeBar: "hover",
-    modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],
-    responsive: true,
-  };
 
   return (
-    <div
-      className={graphFillHeightClass}
-      style={{
-        width: "100%",
-      }}
-    >
-      <PlotWrapper
-        config={config}
-        data={data}
-        layout={{
-          ...layout,
-          autosize: true,
-          height: undefined,
-          width: undefined,
-        }}
+    <>
+      <Area
+        activeDot={false}
+        dataKey="confidenceFloor"
+        fill="transparent"
+        isAnimationActive={shouldAnimate}
+        legendType="none"
+        stackId="confidence"
+        stroke="none"
       />
+      <Area
+        activeDot={false}
+        dataKey="confidenceSpan"
+        fill={GRAPH_COLORS.confidenceFill}
+        isAnimationActive={shouldAnimate}
+        name="80% Confidence Interval"
+        stackId="confidence"
+        stroke="none"
+      />
+      <Line
+        connectNulls
+        dataKey="forecast"
+        dot={false}
+        isAnimationActive={shouldAnimate}
+        name="Forecast"
+        stroke={GRAPH_COLORS.secondary}
+        strokeDasharray="6 5"
+        strokeWidth={2}
+        type="monotone"
+      />
+    </>
+  );
+};
+
+const TrendChartBody = ({
+  chartData,
+  forecastData,
+  graphType,
+  isMobileViewport,
+  season,
+  shouldAnimate,
+  showLegend,
+}: TrendChartBodyProperties): React.ReactElement => {
+  return (
+    <div
+      aria-label={`${graphType} ${season} PET trend chart`}
+      className="h-full w-full"
+      data-testid="trend-chart"
+      role="img"
+    >
+      <ResponsiveContainer height="100%" width="100%">
+        <ComposedChart
+          data={chartData}
+          margin={getChartMargin({ isMobileViewport, showLegend })}
+        >
+          <CartesianGrid
+            stroke={GRAPH_COLORS.grid}
+            strokeDasharray="4 4"
+            vertical={false}
+          />
+          <XAxis
+            allowDecimals={false}
+            axisLine={false}
+            dataKey="year"
+            domain={["dataMin", "dataMax"]}
+            minTickGap={24}
+            tick={{
+              fill: GRAPH_COLORS.text,
+              fontSize: isMobileViewport ? 12 : 13,
+            }}
+            tickCount={isMobileViewport ? 6 : 8}
+            tickLine={false}
+            type="number"
+          />
+          <YAxis
+            axisLine={false}
+            tick={{
+              fill: GRAPH_COLORS.text,
+              fontSize: isMobileViewport ? 12 : 13,
+            }}
+            tickFormatter={(value: number) => `${value.toFixed(0)}°`}
+            tickLine={false}
+            width={isMobileViewport ? 42 : 56}
+          />
+          <Tooltip
+            content={<ChartTooltip />}
+            cursor={{ stroke: GRAPH_COLORS.grid }}
+          />
+          <GraphLegend showLegend={showLegend} />
+          <TrendForecastSeries
+            forecastData={forecastData}
+            shouldAnimate={shouldAnimate}
+          />
+          <Line
+            activeDot={{ fill: GRAPH_COLORS.primary, r: 4 }}
+            dataKey="pet"
+            dot={{
+              fill: GRAPH_COLORS.primary,
+              r: isMobileViewport ? 2.5 : 3,
+            }}
+            isAnimationActive={shouldAnimate}
+            name="PET"
+            stroke={GRAPH_COLORS.primary}
+            strokeWidth={2.5}
+            type="monotone"
+          />
+          <Line
+            connectNulls
+            dataKey="trendline"
+            dot={false}
+            isAnimationActive={shouldAnimate}
+            name="Trendline of PET"
+            stroke={GRAPH_COLORS.reference}
+            strokeDasharray="8 5"
+            strokeWidth={2}
+            type="monotone"
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
     </div>
   );
 };
 
-async function generateReferenceGraphInternal(
-  ...[
-    referenceYear,
-    dates,
-    referencePets,
-    currentPets,
-    showLegend = true,
-    isMobileViewport = false,
-    season = DEFAULT_GRAPH_SEASON,
-    currentYear = 2025,
-  ]: GenerateReferenceGraphArguments
-): Promise<React.ReactElement> {
-  const graphFillHeightClass = getGraphFillHeightClass(false);
+const ReferenceChartBody = ({
+  chartData,
+  currentYear,
+  isMobileViewport,
+  referenceYear,
+  season,
+  shouldAnimate,
+  showLegend,
+}: ReferenceChartBodyProperties): React.ReactElement => {
+  return (
+    <div
+      aria-label={`${season} PET reference comparison chart`}
+      className="h-full w-full"
+      data-testid="reference-chart"
+      role="img"
+    >
+      <ResponsiveContainer height="100%" width="100%">
+        <ComposedChart
+          data={chartData}
+          margin={getChartMargin({ isMobileViewport, showLegend })}
+        >
+          <CartesianGrid
+            stroke={GRAPH_COLORS.grid}
+            strokeDasharray="4 4"
+            vertical={false}
+          />
+          <XAxis
+            axisLine={false}
+            dataKey="label"
+            interval="preserveStartEnd"
+            minTickGap={isMobileViewport ? 28 : 16}
+            tick={{
+              fill: GRAPH_COLORS.text,
+              fontSize: isMobileViewport ? 12 : 13,
+            }}
+            tickLine={false}
+          />
+          <YAxis
+            axisLine={false}
+            tick={{
+              fill: GRAPH_COLORS.text,
+              fontSize: isMobileViewport ? 12 : 13,
+            }}
+            tickFormatter={(value: number) => `${value.toFixed(0)}°`}
+            tickLine={false}
+            width={isMobileViewport ? 42 : 56}
+          />
+          <Tooltip
+            content={<ChartTooltip />}
+            cursor={{ stroke: GRAPH_COLORS.grid }}
+          />
+          <GraphLegend showLegend={showLegend} />
+          <Line
+            activeDot={{ fill: GRAPH_COLORS.primary, r: 4 }}
+            dataKey="currentPet"
+            dot={false}
+            isAnimationActive={shouldAnimate}
+            name={`${currentYear} PET`}
+            stroke={GRAPH_COLORS.primary}
+            strokeWidth={2.5}
+            type="monotone"
+          />
+          <Line
+            activeDot={{ fill: GRAPH_COLORS.reference, r: 4 }}
+            dataKey="referencePet"
+            dot={false}
+            isAnimationActive={shouldAnimate}
+            name={`${referenceYear} PET`}
+            stroke={GRAPH_COLORS.reference}
+            strokeDasharray="8 5"
+            strokeWidth={2.5}
+            type="monotone"
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
 
-  if (
-    dates.length === 0 ||
-    referencePets.length === 0 ||
-    currentPets.length === 0
-  ) {
+export const GenerateTrendGraph = ({
+  forecastData,
+  increasePerYear,
+  isMobileViewport = false,
+  option,
+  season = DEFAULT_GRAPH_SEASON,
+  showLegend = true,
+  trendlinePets,
+  useCompactDesktopHeight = false,
+  yearPets,
+  years,
+}: GenerateTrendGraphOptions): React.ReactElement => {
+  if (!hasTrendGraphData(years, yearPets, trendlinePets)) {
     return (
-      <div
-        className={`flex items-center justify-center text-gray-500 ${graphFillHeightClass}`}
-      >
-        No data available for the selected parameters
-      </div>
+      <ChartShell
+        emptyState="No data available for the selected parameters."
+        subtitle="Try a different measure or season."
+        title="Trend analysis"
+        useCompactDesktopHeight={useCompactDesktopHeight}
+      />
     );
   }
 
-  const layout: Partial<Layout> = {
-    autosize: true,
-    font: {
-      color: "#374151",
-    },
-    margin: {
-      b: isMobileViewport ? 34 : 40,
-      l: isMobileViewport ? 30 : 32,
-      r: isMobileViewport ? 6 : 10,
-      t: isMobileViewport ? 38 : 40,
-    },
-    paper_bgcolor: GRAPH_COLORS.background,
-    plot_bgcolor: GRAPH_COLORS.background,
-    showlegend: showLegend,
-    title: { text: `${season} PET in ${currentYear} vs ${referenceYear}` },
-    xaxis: {
-      gridcolor: GRAPH_COLORS.grid,
-      tickformat: "%b %-d",
-      title: { text: "Date" },
-      zeroline: false,
-    },
-    yaxis: {
-      gridcolor: GRAPH_COLORS.grid,
-      title: { text: "PET" },
-      zeroline: false,
-    },
-  };
+  const chartData = buildTrendChartData(
+    years,
+    yearPets,
+    trendlinePets,
+    forecastData,
+  );
 
-  const data: PlotlyTrace[] = [
-    {
-      hovertemplate: "Date: %{x|%b %-d}<br>PET: %{y:.2f}<extra></extra>",
-      line: {
-        color: GRAPH_COLORS.primary,
-        width: 2,
-      },
-      marker: {
-        color: GRAPH_COLORS.primary,
-        size: 6,
-      },
-      mode: "lines+markers",
-      name: "2025 PET",
-      type: "scatter",
-      x: dates,
-      y: currentPets,
-    },
-    {
-      hovertemplate: "Date: %{x|%b %-d}<br>PET: %{y:.2f}<extra></extra>",
-      line: {
-        color: GRAPH_COLORS.secondary,
-        dash: "dashdot",
-        width: 2,
-      },
-      marker: {
-        color: GRAPH_COLORS.secondary,
-        size: 6,
-      },
-      mode: "lines+markers",
-      name: `${referenceYear} PET`,
-      type: "scatter",
-      x: dates,
-      y: referencePets,
-    },
-  ];
-
-  const config: PlotlyConfig = {
-    displaylogo: false,
-    displayModeBar: "hover",
-    modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],
-    responsive: true,
-  };
+  const graphType = getTrendGraphType(option);
+  const startYear = years.at(0) ?? GRAPH_CONFIG.YEAR_RANGE.START;
+  const endYear = years.at(-1) ?? GRAPH_CONFIG.YEAR_RANGE.END;
+  const increaseText = formatIncreasePerYearText(increasePerYear);
+  const shouldAnimate = shouldAnimateCharts();
 
   return (
-    <div
-      className={graphFillHeightClass}
-      style={{
-        width: "100%",
-      }}
+    <ChartShell
+      emptyState="No data available for the selected parameters."
+      subtitle={`${startYear}–${endYear} · Increase per year: ${increaseText}°C`}
+      title={`${graphType} ${season} PET`}
+      useCompactDesktopHeight={useCompactDesktopHeight}
     >
-      <PlotWrapper
-        config={config}
-        data={data}
-        layout={{
-          ...layout,
-          autosize: true,
-          height: undefined,
-          width: undefined,
-        }}
+      <TrendChartBody
+        chartData={chartData}
+        forecastData={forecastData}
+        graphType={graphType}
+        isMobileViewport={isMobileViewport}
+        season={season}
+        shouldAnimate={shouldAnimate}
+        showLegend={showLegend}
       />
-    </div>
+    </ChartShell>
   );
-}
+};
 
-export const GenerateReferenceGraph = (
-  ...arguments_: GenerateReferenceGraphArguments
-): Promise<React.ReactElement> => {
-  return generateReferenceGraphInternal(...arguments_);
+export const GenerateReferenceGraph = ({
+  currentPets,
+  currentYear = GRAPH_CONFIG.YEAR_RANGE.END,
+  dates,
+  isMobileViewport = false,
+  referencePets,
+  referenceYear,
+  season = DEFAULT_GRAPH_SEASON,
+  showLegend = true,
+}: GenerateReferenceGraphOptions): React.ReactElement => {
+  if (!hasReferenceGraphData(dates, currentPets, referencePets)) {
+    return (
+      <ChartShell
+        emptyState="No data available for the selected parameters."
+        subtitle="Try a different reference year."
+        title="Reference comparison"
+      />
+    );
+  }
+
+  const chartData = buildReferenceChartData(dates, currentPets, referencePets);
+  const shouldAnimate = shouldAnimateCharts();
+
+  return (
+    <ChartShell
+      emptyState="No data available for the selected parameters."
+      subtitle="Daily physiological equivalent temperature comparison."
+      title={`${season} PET in ${currentYear} vs ${referenceYear}`}
+    >
+      <ReferenceChartBody
+        chartData={chartData}
+        currentYear={currentYear}
+        isMobileViewport={isMobileViewport}
+        referenceYear={referenceYear}
+        season={season}
+        shouldAnimate={shouldAnimate}
+        showLegend={showLegend}
+      />
+    </ChartShell>
+  );
 };

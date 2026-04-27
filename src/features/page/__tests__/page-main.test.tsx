@@ -185,6 +185,7 @@ describe("PageMain", () => {
           yearPets: [7, 12, 17],
           years: [2020, 2021, 2022],
         }),
+        undefined,
       );
     });
 
@@ -266,6 +267,7 @@ describe("PageMain", () => {
             yearPets: [7, 12, 17],
             years: [2020, 2021, 2022],
           }),
+          undefined,
         );
       });
 

@@ -23,6 +23,11 @@ import {
 } from "@/lib/constants";
 import { DatabaseError } from "@/lib/utils/errors";
 import {
+  validateLocationId,
+  validateTrendOption,
+  validateYear,
+} from "@/lib/utils/validation";
+import {
   FetchLocationProperties,
   LocationOptionSection,
   ReferenceGraphDataProperties,
@@ -77,7 +82,7 @@ export async function FetchCityRankings(
     );
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = await createClient(cookieStore);
 
   const { data, error } = await fetchCityRankingsRows(
@@ -136,7 +141,7 @@ async function fetchCityRankingsRows(
 
 export const FetchLocations = cache(
   async (): Promise<FetchLocationProperties> => {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = await createClient(cookieStore);
 
     const locations = await fetchLocationRows(supabase);
@@ -253,17 +258,17 @@ export async function FetchReferenceGraphData(
 ): Promise<ReferenceGraphDataProperties> {
   const resolvedSeason = normalizeGraphSeason(season);
 
-  if (!isValidLocationId(locationId)) {
+  if (!validateLocationId(locationId)) {
     throw new DatabaseError(`Invalid locationId: ${locationId}`);
   }
 
-  if (!isValidYear(year)) {
+  if (!validateYear(year)) {
     throw new DatabaseError(
       `Invalid year format: ${year}. Must be a 4-digit year.`,
     );
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = await createClient(cookieStore);
 
   const { data, error } = await supabase
@@ -298,17 +303,17 @@ export async function FetchTrendGraphData(
 ): Promise<TrendGraphDataProperties> {
   const resolvedSeason = normalizeGraphSeason(season);
 
-  if (!isValidLocationId(locationId)) {
+  if (!validateLocationId(locationId)) {
     throw new DatabaseError(`Invalid locationId: ${locationId}`);
   }
 
-  if (!isValidTrendOption(option)) {
+  if (!validateTrendOption(option)) {
     throw new DatabaseError(
       `Invalid option: ${option}. Must be 'avg' or 'max'`,
     );
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = await createClient(cookieStore);
 
   const { data, error } = await supabase
@@ -343,18 +348,6 @@ function filterRowsWithPositiveLocationId<
     const locationId = Number(row.location_id);
     return Number.isInteger(locationId) && locationId > 0;
   });
-}
-
-function isValidLocationId(locationId: number): boolean {
-  return Number.isInteger(locationId) && locationId > 0;
-}
-
-function isValidTrendOption(option: string): boolean {
-  return option === "avg" || option === "max";
-}
-
-function isValidYear(year: string): boolean {
-  return /^\d{4}$/.test(year);
 }
 
 const parseWithDatabaseError = <T>(

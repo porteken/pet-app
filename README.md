@@ -1,6 +1,6 @@
 # Historical PET USA
 
-A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) that visualizes Physiological Equivalent Temperature (PET) data for the top 500 largest cities in the Contiguous United States from 2000 to the present. The data pipline for getting the data is [here](https://github.com/porteken/pet-data).
+A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) that visualizes Physiological Equivalent Temperature (PET) data for the top 500 largest cities in the Contiguous United States from 2000 to 2025. The data pipeline for getting the data is [here](https://github.com/porteken/pet-data).
 
 ## Features
 
@@ -10,7 +10,7 @@ A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) 
 - **Forecasting**: Show 5-75 year forecasts for average PET with confidence ranges.
 - **City Detail Pages**: Open a city page with trend and reference charts.
 - **Reference Comparison**: Compare the current year's PET with a selected historical year.
-- **Rankings**: View cites ranked by PET.
+- **Rankings**: View cities ranked by PET.
 
 ## What is PET?
 
@@ -31,7 +31,7 @@ Based on [this study](https://bjsm.bmj.com/content/55/15/825), PET may provide b
 - **Frontend**: Next.js, React, TypeScript
 - **UI**: shadcn/ui, Tailwind CSS (v4)
 - **Map**: Leaflet, React Leaflet, OpenStreetMap
-- **Charts**: Plotly.js
+- **Charts**: Recharts
 - **Data**: Supabase, TanStack Query
 - **Monitoring**: Sentry
 - **Testing**: Vitest, Playwright, Testing Library, MSW

@@ -222,7 +222,7 @@ describe("loadLocationPageData", () => {
     expect(mockFetchTrendGraphData).toHaveBeenCalledWith("avg", 7, "Winter");
     expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
       1,
-      "2024",
+      "2025",
       7,
       "Annual",
     );
@@ -282,7 +282,7 @@ describe("loadLocationPageData", () => {
     });
     expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
       1,
-      "2024",
+      "2025",
       7,
       "Annual",
     );

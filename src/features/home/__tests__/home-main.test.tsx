@@ -153,7 +153,7 @@ vi.mock("@/lib/utils/select-options", () => ({
   ],
 }));
 
-vi.mock("@/lib/utils/forecast-controls", () => ({
+vi.mock("@/components/app/forecast-controls", () => ({
   ForecastControls: vi.fn(
     ({ enabled, onToggle, onYearsChange, yearsAhead }) => (
       <div data-testid="forecast-controls">
@@ -566,9 +566,14 @@ describe("Home", () => {
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Unable to load graph data"),
-        ).toBeInTheDocument();
+        expect(GenerateTrendGraph).toHaveBeenCalledWith(
+          expect.objectContaining({
+            trendlinePets: [],
+            yearPets: [],
+            years: [],
+          }),
+          undefined,
+        );
       });
     });
 
@@ -585,9 +590,14 @@ describe("Home", () => {
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Unable to load graph data"),
-        ).toBeInTheDocument();
+        expect(GenerateTrendGraph).toHaveBeenCalledWith(
+          expect.objectContaining({
+            trendlinePets: [],
+            yearPets: [],
+            years: [2000],
+          }),
+          undefined,
+        );
       });
     });
   });

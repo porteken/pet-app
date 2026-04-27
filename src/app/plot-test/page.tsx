@@ -1,31 +1,56 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useState } from "react";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-const PlotLoad = dynamic(
-  async () => {
-    const fn = (await import("react-plotly.js/factory")).default;
-    const plotly = await import("plotly.js-basic-dist-min");
-
-    const P = plotly.default || (plotly as any);
-    if (!P) {
-      throw new Error("Plotly is undefined");
-    }
-    return fn(P as never);
-  },
-  { ssr: false },
-);
+const TEST_DATA = [
+  { value: 18, year: "2000" },
+  { value: 20, year: "2001" },
+  { value: 22, year: "2002" },
+  { value: 24, year: "2003" },
+];
 
 export default function Page() {
   const [show, setShow] = useState(true);
 
   return (
-    <div>
-      <button id="toggle" onClick={() => setShow(!show)}>
+    <div className="mx-auto flex min-h-screen max-w-4xl flex-col gap-4 px-4 py-10">
+      <button
+        className="border-border bg-background/80 text-foreground w-fit rounded-full border px-4 py-2 text-sm font-semibold"
+        id="toggle"
+        onClick={() => setShow(!show)}
+        type="button"
+      >
         Toggle
       </button>
-      {show && <PlotLoad data={[{ x: [1], y: [2] }]} layout={{}} />}
+      {show && (
+        <div
+          className="graph-surface-panel h-96 rounded-3xl p-4"
+          data-testid="plot-test-chart"
+        >
+          <ResponsiveContainer height="100%" width="100%">
+            <LineChart data={TEST_DATA}>
+              <CartesianGrid stroke="var(--graph-grid)" strokeDasharray="4 4" />
+              <XAxis dataKey="year" stroke="var(--graph-text)" />
+              <YAxis stroke="var(--graph-text)" />
+              <Line
+                dataKey="value"
+                dot={{ fill: "var(--graph-primary)", r: 4 }}
+                stroke="var(--graph-primary)"
+                strokeWidth={2.5}
+                type="monotone"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }

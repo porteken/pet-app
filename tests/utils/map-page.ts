@@ -5,6 +5,8 @@ import { clickClickableMarker } from "./map-marker";
 const MAP_LOAD_TIMEOUT = 30_000;
 const LOCATION_DETAILS_TIMEOUT = 45_000;
 const MODAL_TIMEOUT = 10_000;
+const LOCATION_CHARTS =
+  '[data-testid="trend-chart"], [data-testid="reference-chart"]';
 
 export async function gotoAndWaitForMapPage(
   page: Page,
@@ -86,7 +88,7 @@ export async function waitForLocationDetailsPage(
   await expect(page.locator("select#reference-year")).toBeVisible({
     timeout: LOCATION_DETAILS_TIMEOUT,
   });
-  await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+  await expect(page.locator(LOCATION_CHARTS)).toHaveCount(2, {
     timeout: LOCATION_DETAILS_TIMEOUT,
   });
 }

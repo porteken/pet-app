@@ -6,6 +6,18 @@ import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+const playwrightPort =
+  process.env.PLAYWRIGHT_PORT ?? process.env.PORT ?? "3000";
+const playwrightBaseURL =
+  process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${playwrightPort}`;
+const playwrightServerMode =
+  process.env.PLAYWRIGHT_SERVER_MODE === "production"
+    ? "production"
+    : "development";
+const webServerCommand =
+  playwrightServerMode === "production" ? "pnpm start" : "pnpm dev";
+const webServerTimeout =
+  playwrightServerMode === "production" ? 240 * 1000 : 180 * 1000;
 
 export default defineConfig({
   forbidOnly: !!process.env.CI,
@@ -41,7 +53,7 @@ export default defineConfig({
   timeout: 60_000,
   use: {
     actionTimeout: 30_000,
-    baseURL: "http://localhost:3000",
+    baseURL: playwrightBaseURL,
 
     navigationTimeout: 30_000,
 
@@ -50,15 +62,16 @@ export default defineConfig({
   },
 
   webServer: {
-    command: "pnpm dev",
+    command: webServerCommand,
     cwd: projectRoot,
     env: {
       NEXT_PUBLIC_E2E_TEST: "true",
+      PORT: playwrightPort,
     },
     reuseExistingServer: !process.env.CI,
     stderr: "ignore",
-    timeout: 180 * 1000,
-    url: "http://localhost:3000",
+    timeout: webServerTimeout,
+    url: playwrightBaseURL,
   },
 
   workers: process.env.CI ? 1 : 4,

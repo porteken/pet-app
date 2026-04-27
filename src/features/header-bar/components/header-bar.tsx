@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useMemo } from "react";
 
+import { ThemeToggle } from "@/components/app/theme-toggle";
 import { Select } from "@/components/ui/select";
 import { APP_CONFIG } from "@/lib/constants";
 import { NavProperties } from "@/types/types";
@@ -84,35 +85,58 @@ const HeaderBarComponent = ({
   }, [groupedCities]);
 
   return (
-    <header className="relative z-10 w-full border-b border-gray-200 bg-white">
-      <div className="mx-auto max-w-4xl px-4">
-        <div className="py-1.5 text-center">
-          <h1 className="text-xl font-extrabold dark:text-white">
-            {APP_CONFIG.NAME}
-          </h1>
-        </div>
-        <div className="rounded-md bg-white p-2 sm:p-3">
-          <div className="flex flex-wrap justify-center gap-2">
-            <Select
-              className="w-full sm:w-75"
-              clearable
-              data={selectData}
-              data-testid="city-selector"
-              onChange={(value) => {
-                if (value) {
-                  router.push(`/${value}`);
-                }
-              }}
-              onClear={() => {
-                router.push(buildUrl("/", true));
-              }}
-              placeholder={id! >= 0 ? "Change City" : "Select City"}
-              searchable
-              value={currentCity?.key.toString()}
-              w={300}
-            />
+    <header className="border-border/70 bg-background/80 sticky top-0 z-20 w-full border-b backdrop-blur-xl">
+      <div className="via-primary/60 absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent to-transparent" />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 py-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1">
+              <p className="text-primary text-xs font-semibold tracking-[0.24em] uppercase">
+                Physiological Equivalent Temperature
+              </p>
+              <div>
+                <h1 className="brand-gradient-text text-2xl font-black tracking-tight">
+                  {APP_CONFIG.NAME}
+                </h1>
+                <p className="text-muted-foreground max-w-2xl text-sm">
+                  {APP_CONFIG.TAGLINE}
+                </p>
+              </div>
+            </div>
+            <div className="hidden sm:block">
+              <ThemeToggle />
+            </div>
+          </div>
 
-            <NavButtons buildUrl={buildUrl} />
+          <div className="glass-panel-muted rounded-3xl p-3 sm:p-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <Select
+                className="w-full lg:max-w-xl"
+                clearable
+                data={selectData}
+                data-testid="city-selector"
+                onChange={(value) => {
+                  if (value) {
+                    router.push(`/${value}`);
+                  }
+                }}
+                onClear={() => {
+                  router.push(buildUrl("/", true));
+                }}
+                placeholder={
+                  id !== undefined && id >= 0 ? "Change City" : "Select City"
+                }
+                searchable
+                value={currentCity?.key.toString()}
+              />
+
+              <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-start">
+                <NavButtons buildUrl={buildUrl} />
+                <div className="sm:hidden">
+                  <ThemeToggle />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

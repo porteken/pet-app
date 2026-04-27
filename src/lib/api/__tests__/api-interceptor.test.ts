@@ -88,7 +88,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       errorMessage,
@@ -114,7 +116,7 @@ describe("handleApiResponse", () => {
 
     await expect(
       handleApiResponse(mockResponse as any, context),
-    ).rejects.toThrow();
+    ).rejects.toThrow("Custom error");
 
     expect(mockCreateError).toHaveBeenCalledWith(
       "Server error",
@@ -135,7 +137,9 @@ describe("handleApiResponse", () => {
       url: "https://api.example.com/test",
     };
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Failed to parse server response",
+    );
 
     expect(MockedNetworkError).toHaveBeenCalledWith(
       "Failed to parse server response",
@@ -156,7 +160,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       errorMessage,
@@ -178,7 +184,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       errorMessage,
@@ -200,7 +208,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       errorMessage,
@@ -222,7 +232,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       errorMessage,
@@ -243,7 +255,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       "Validation failed. Please check your input.",
@@ -263,7 +277,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       `Request failed with status 654`,
@@ -283,7 +299,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       `Service unavailable. Please try again later.`,
@@ -303,7 +321,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       `Bad gateway. The server is temporarily unavailable.`,
@@ -323,7 +343,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       `Internal server error. Please try again later.`,
@@ -343,7 +365,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       `The requested resource was not found.`,
@@ -363,7 +387,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       `Access denied. You don't have permission to perform this action.`,
@@ -383,7 +409,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       `Authentication required. Please log in.`,
@@ -403,7 +431,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       `Invalid request. Please check your input.`,
@@ -424,7 +454,9 @@ describe("handleApiResponse", () => {
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
-    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow();
+    await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
+      "Custom error",
+    );
 
     expect(mockCreateError).toHaveBeenCalledWith(
       "Too many requests. Please try again later.",
@@ -516,7 +548,7 @@ describe("apiRequest", () => {
 
     await expect(
       apiRequest("https://api.example.com/test", { method: "POST" }, context),
-    ).rejects.toThrow();
+    ).rejects.toThrow("Custom error");
 
     expect(mockCreateError).toHaveBeenCalledWith(
       "Bad request",
@@ -535,7 +567,9 @@ describe("apiRequest", () => {
     const networkError = new TypeError("fetch failed");
     mockFetch.mockRejectedValue(networkError);
 
-    await expect(apiRequest("https://api.example.com/test")).rejects.toThrow();
+    await expect(apiRequest("https://api.example.com/test")).rejects.toThrow(
+      "Network connection failed",
+    );
 
     expect(MockedNetworkError).toHaveBeenCalledWith(
       "Network connection failed",
@@ -639,7 +673,7 @@ describe("apiRequestWithRetry", () => {
 
     await expect(
       apiRequestWithRetry("https://api.example.com/test"),
-    ).rejects.toThrow();
+    ).rejects.toThrow("Bad request");
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });

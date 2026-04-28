@@ -1,16 +1,16 @@
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React, { memo, useCallback } from "react";
-
 import { ForecastControls } from "@/components/app/forecast-controls";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { GenerateTrendGraph } from "@/features/graph";
 import { type GraphSeason } from "@/lib/constants";
-import type { HeatStressDescription } from "@/lib/utils/thermal-stress";
-import type { TrendGraphSnapshot } from "@/lib/utils/trend-analysis";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React, { memo, useCallback } from "react";
 
 import { ErrorGraphDisplay } from "./error-graph-display";
+
+import type { HeatStressDescription } from "@/lib/utils/thermal-stress";
+import type { TrendGraphSnapshot } from "@/lib/utils/trend-analysis";
 
 interface GraphSectionProperties {
   forecastEnabled: boolean;
@@ -209,70 +209,77 @@ const MobileLegendToggle = ({
   );
 };
 
-const GraphControlsPanel = ({
-  forecastEnabled,
-  forecastHeatStress,
-  forecastYearsAhead,
-  heatStressDescription,
-  isMobileGraphLegendOpen,
-  isMobileViewport,
-  onForecastToggle,
-  onForecastYearsChange,
-  onSeasonChange,
-  onSelectChange,
-  onToggleMobileGraphLegend,
-  selectedGraphMeasure,
-  selectedGraphSeason,
-  seasonOptions,
-  selectOptions,
-}: GraphControlsPanelProperties): React.ReactElement => {
-  const showForecastControls = selectedGraphMeasure === "avg";
-  const showMobileLegendToggle = isMobileViewport && onToggleMobileGraphLegend;
+class GraphControlsPanel extends React.PureComponent<GraphControlsPanelProperties> {
+  private readonly handleMeasureChange = (value: string | undefined) => {
+    handleMeasureSelectChange(value, this.props.onSelectChange);
+  };
 
-  return (
-    <div className="w-full max-w-md space-y-3 sm:space-y-4">
-      <Select
-        className="w-full"
-        data={seasonOptions}
-        label="Season"
-        onChange={(value) => {
-          handleSeasonSelectChange(value, onSeasonChange);
-        }}
-        size="sm"
-        value={selectedGraphSeason}
-      />
-      <Select
-        className="w-full"
-        data={selectOptions}
-        label="Measure"
-        onChange={(value) => {
-          handleMeasureSelectChange(value, onSelectChange);
-        }}
-        size="sm"
-        value={selectedGraphMeasure}
-      />
-      {showForecastControls && (
-        <ForecastControls
-          enabled={forecastEnabled}
-          onToggle={onForecastToggle}
-          onYearsChange={onForecastYearsChange}
-          yearsAhead={forecastYearsAhead}
+  private readonly handleSeasonChange = (value: string | undefined) => {
+    handleSeasonSelectChange(value, this.props.onSeasonChange);
+  };
+
+  public render(): React.ReactElement {
+    const {
+      forecastEnabled,
+      forecastHeatStress,
+      forecastYearsAhead,
+      heatStressDescription,
+      isMobileGraphLegendOpen,
+      isMobileViewport,
+      onForecastToggle,
+      onForecastYearsChange,
+      onToggleMobileGraphLegend,
+      selectedGraphMeasure,
+      selectedGraphSeason,
+      seasonOptions,
+      selectOptions,
+    } = this.props;
+
+    const showForecastControls = selectedGraphMeasure === "avg";
+    const showMobileLegendToggle =
+      isMobileViewport && onToggleMobileGraphLegend !== undefined;
+
+    return (
+      <div className="w-full max-w-md space-y-3 sm:space-y-4">
+        <Select
+          className="w-full"
+          data={seasonOptions}
+          label="Season"
+          onChange={this.handleSeasonChange}
+          size="sm"
+          value={selectedGraphSeason}
         />
-      )}
-      <GraphHeatStressSummary
-        forecastEnabled={forecastEnabled}
-        forecastHeatStress={forecastHeatStress}
-        heatStressDescription={heatStressDescription}
-      />
-      {showMobileLegendToggle && (
-        <MobileLegendToggle
-          isMobileGraphLegendOpen={isMobileGraphLegendOpen}
-          onToggleMobileGraphLegend={onToggleMobileGraphLegend}
+        <Select
+          className="w-full"
+          data={selectOptions}
+          label="Measure"
+          onChange={this.handleMeasureChange}
+          size="sm"
+          value={selectedGraphMeasure}
         />
-      )}
-    </div>
-  );
-};
+        {showForecastControls && (
+          <ForecastControls
+            enabled={forecastEnabled}
+            onToggle={onForecastToggle}
+            onYearsChange={onForecastYearsChange}
+            yearsAhead={forecastYearsAhead}
+          />
+        )}
+        <GraphHeatStressSummary
+          forecastEnabled={forecastEnabled}
+          forecastHeatStress={forecastHeatStress}
+          heatStressDescription={heatStressDescription}
+        />
+        {showMobileLegendToggle && onToggleMobileGraphLegend && (
+          <MobileLegendToggle
+            isMobileGraphLegendOpen={isMobileGraphLegendOpen}
+            onToggleMobileGraphLegend={onToggleMobileGraphLegend}
+          />
+        )}
+      </div>
+    );
+  }
+}
 
 export const GraphSection = memo<GraphSectionProperties>(
   ({

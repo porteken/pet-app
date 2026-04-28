@@ -6,10 +6,10 @@ const {
   mockFetchReferenceGraphData,
   mockFetchTrendGraphData,
 } = vi.hoisted(() => ({
-  mockCookies: vi.fn(),
-  mockFetchLocations: vi.fn(),
-  mockFetchReferenceGraphData: vi.fn(),
-  mockFetchTrendGraphData: vi.fn(),
+  mockCookies: mockFn(),
+  mockFetchLocations: mockFn(),
+  mockFetchReferenceGraphData: mockFn(),
+  mockFetchTrendGraphData: mockFn(),
 }));
 
 vi.mock("next/headers", () => ({

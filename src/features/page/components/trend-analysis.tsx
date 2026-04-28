@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 import { ForecastControls } from "@/components/app/forecast-controls";
 import { GenerateTrendGraph } from "@/features/graph";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
@@ -13,6 +11,7 @@ import {
   buildTrendAnalysisResult,
   type TrendGraphSnapshot,
 } from "@/lib/utils/trend-analysis";
+import React from "react";
 
 interface TrendAnalysisProperties {
   graphSeason: GraphSeason;
@@ -159,6 +158,10 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     [forecastEnabled],
   );
 
+  const handleToggleMobileLegend = React.useCallback(() => {
+    setIsMobileLegendOpen((previous) => !previous);
+  }, []);
+
   return (
     <div className="h-full min-h-0">
       <div className="glass-panel fade-in-up flex h-full min-h-0 flex-col rounded-3xl p-4 sm:px-5 sm:py-6">
@@ -256,7 +259,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
             aria-controls="trend-analysis-graph"
             aria-expanded={isMobileLegendOpen}
             className="border-border bg-background/80 text-foreground hover:bg-accent rounded-full border px-3 py-2 text-sm font-semibold shadow-sm transition"
-            onClick={() => setIsMobileLegendOpen((previous) => !previous)}
+            onClick={handleToggleMobileLegend}
             type="button"
           >
             {isMobileLegendOpen ? "Hide Graph Legend" : "Show Graph Legend"}

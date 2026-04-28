@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   CartesianGrid,
   Line,
@@ -17,19 +17,35 @@ const TEST_DATA = [
   { value: 24, year: "2003" },
 ];
 
+const CHART_DOT = { fill: "var(--graph-primary)", r: 4 };
+
+class ChartToggleButton extends React.PureComponent<{
+  setShow: React.Dispatch<React.SetStateAction<boolean>>;
+}> {
+  private readonly handleClick = () => {
+    this.props.setShow((previous) => !previous);
+  };
+
+  public render(): React.ReactNode {
+    return (
+      <button
+        className="border-border bg-background/80 text-foreground w-fit rounded-full border px-4 py-2 text-sm font-semibold"
+        id="toggle"
+        onClick={this.handleClick}
+        type="button"
+      >
+        Toggle
+      </button>
+    );
+  }
+}
+
 export default function Page() {
   const [show, setShow] = useState(true);
 
   return (
     <div className="mx-auto flex min-h-screen max-w-4xl flex-col gap-4 px-4 py-10">
-      <button
-        className="border-border bg-background/80 text-foreground w-fit rounded-full border px-4 py-2 text-sm font-semibold"
-        id="toggle"
-        onClick={() => setShow(!show)}
-        type="button"
-      >
-        Toggle
-      </button>
+      <ChartToggleButton setShow={setShow} />
       {show && (
         <div
           className="graph-surface-panel h-96 rounded-3xl p-4"
@@ -42,7 +58,7 @@ export default function Page() {
               <YAxis stroke="var(--graph-text)" />
               <Line
                 dataKey="value"
-                dot={{ fill: "var(--graph-primary)", r: 4 }}
+                dot={CHART_DOT}
                 stroke="var(--graph-primary)"
                 strokeWidth={2.5}
                 type="monotone"

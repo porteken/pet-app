@@ -4,20 +4,59 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+class MockForecastControls extends React.PureComponent<{
+  enabled: boolean;
+  onToggle: (enabled: boolean) => void;
+  onYearsChange: (years: number) => void;
+  yearsAhead: number;
+}> {
+  private readonly handleToggle = () => {
+    this.props.onToggle(!this.props.enabled);
+  };
+
+  private readonly handleYearsChange = (
+    event_: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    this.props.onYearsChange(Number(event_.target.value));
+  };
+
+  public render(): React.ReactNode {
+    const { enabled, yearsAhead } = this.props;
+
+    return (
+      <div data-testid="forecast-controls">
+        <button
+          data-testid="forecast-toggle"
+          onClick={this.handleToggle}
+          type="button"
+        >
+          {enabled ? "Disable" : "Enable"} Forecast
+        </button>
+        <input
+          data-testid="forecast-years"
+          onChange={this.handleYearsChange}
+          type="number"
+          value={yearsAhead}
+        />
+      </div>
+    );
+  }
+}
+
 vi.mock("@/features/graph", () => ({
-  GenerateTrendGraph: vi
-    .fn()
-    .mockReturnValue(<div data-testid="mock-trend-graph">Trend Graph</div>),
+  GenerateTrendGraph: mockFn().mockReturnValue(
+    <div data-testid="mock-trend-graph">Trend Graph</div>,
+  ),
 }));
 
 vi.mock("@/lib/api/fetch-client", () => ({
-  FetchForecastData: vi.fn().mockResolvedValue({
+  FetchForecastData: mockFn().mockResolvedValue({
     forecastValues: [28, 30, 32],
     forecastYears: [2025, 2026, 2027],
     lowerBound10: [26, 28, 30],
     upperBound90: [30, 32, 34],
   }),
-  FetchTrendGraphData: vi.fn().mockResolvedValue({
+  FetchTrendGraphData: mockFn().mockResolvedValue({
     increase_per_year: 0.5,
     trendline_pets: [20, 22, 24, 26],
     year_pets: [20, 22, 24, 26],
@@ -26,43 +65,33 @@ vi.mock("@/lib/api/fetch-client", () => ({
 }));
 
 vi.mock("@/lib/utils/thermal-stress", () => ({
-  getForecastHeatStressDescription: vi.fn((value, year, lower, upper) => ({
-    colorClass: "text-red-500",
-    confidenceRange: `(range: ${lower}-${upper})`,
-    prefix: "Forecast:",
-    value: "High",
-  })),
-  getHeatStressDescription: vi.fn((value, option, year) => ({
-    colorClass: "text-orange-500",
-    prefix: `${year} Thermal Stress:`,
-    value: "Moderate",
-  })),
+  getForecastHeatStressDescription: mockFn(
+    (value: number, year: number, lower: number, upper: number) => ({
+      colorClass: "text-red-500",
+      confidenceRange: `(range: ${lower}-${upper})`,
+      prefix: "Forecast:",
+      value: "High",
+    }),
+  ),
+  getHeatStressDescription: mockFn(
+    (value: number, option: string, year: number) => ({
+      colorClass: "text-orange-500",
+      prefix: `${year} Thermal Stress:`,
+      value: "Moderate",
+    }),
+  ),
 }));
 
 vi.mock("@/components/app/forecast-controls", () => ({
-  ForecastControls: vi.fn(
-    ({ enabled, onToggle, onYearsChange, yearsAhead }) => (
-      <div data-testid="forecast-controls">
-        <button
-          data-testid="forecast-toggle"
-          onClick={() => onToggle(!enabled)}
-          type="button"
-        >
-          {enabled ? "Disable" : "Enable"} Forecast
-        </button>
-        <input
-          data-testid="forecast-years"
-          onChange={(event_) => onYearsChange(Number(event_.target.value))}
-          type="number"
-          value={yearsAhead}
-        />
-      </div>
+  ForecastControls: mockFn(
+    (props: React.ComponentProps<typeof MockForecastControls>) => (
+      <MockForecastControls {...props} />
     ),
   ),
 }));
 
 vi.mock("@/lib/actions/actions", () => ({
-  setForecastPreferences: vi.fn().mockResolvedValue({}),
+  setForecastPreferences: mockFn().mockResolvedValue({}),
 }));
 
 import { GenerateTrendGraph } from "@/features/graph";
@@ -81,8 +110,8 @@ const defaultProps: React.ComponentProps<typeof TrendAnalysis> = {
   initialForecastEnabled: false,
   initialForecastYearsAhead: 10,
   initialGraphMeasure: "avg",
-  onMeasureChange: vi.fn().mockResolvedValue(Promise.resolve()),
-  onSeasonChange: vi.fn().mockResolvedValue(Promise.resolve()),
+  onMeasureChange: mockFn().mockResolvedValue(Promise.resolve()),
+  onSeasonChange: mockFn().mockResolvedValue(Promise.resolve()),
   referenceYear: "2000",
 };
 
@@ -96,15 +125,15 @@ describe("TrendAnalysis", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     Object.defineProperty(globalThis, "matchMedia", {
-      value: vi.fn().mockImplementation(() => ({
-        addEventListener: vi.fn(),
-        addListener: vi.fn(),
-        dispatchEvent: vi.fn(),
+      value: mockFn().mockImplementation(() => ({
+        addEventListener: mockFn(),
+        addListener: mockFn(),
+        dispatchEvent: mockFn(),
         matches: false,
         media: "(max-width: 639px)",
         onchange: undefined,
-        removeEventListener: vi.fn(),
-        removeListener: vi.fn(),
+        removeEventListener: mockFn(),
+        removeListener: mockFn(),
       })),
       writable: true,
     });
@@ -215,15 +244,15 @@ describe("TrendAnalysis", () => {
 
     it("should keep mobile graph legend collapsed by default and toggle open", async () => {
       Object.defineProperty(globalThis, "matchMedia", {
-        value: vi.fn().mockImplementation(() => ({
-          addEventListener: vi.fn(),
-          addListener: vi.fn(),
-          dispatchEvent: vi.fn(),
+        value: mockFn().mockImplementation(() => ({
+          addEventListener: mockFn(),
+          addListener: mockFn(),
+          dispatchEvent: mockFn(),
           matches: true,
           media: "(max-width: 639px)",
           onchange: undefined,
-          removeEventListener: vi.fn(),
-          removeListener: vi.fn(),
+          removeEventListener: mockFn(),
+          removeListener: mockFn(),
         })),
         writable: true,
       });
@@ -336,7 +365,7 @@ describe("TrendAnalysis", () => {
 
   describe("Graph Measure Change", () => {
     it("should change measure when select value changes", async () => {
-      const onMeasureChange = vi.fn().mockResolvedValue(Promise.resolve());
+      const onMeasureChange = mockFn().mockResolvedValue(Promise.resolve());
       render(
         <TrendAnalysis {...defaultProps} onMeasureChange={onMeasureChange} />,
       );
@@ -365,9 +394,9 @@ describe("TrendAnalysis", () => {
     });
 
     it("should ignore onMeasureChange persistence errors", async () => {
-      const onMeasureChange = vi
-        .fn()
-        .mockRejectedValue(new Error("Server error"));
+      const onMeasureChange = mockFn().mockRejectedValue(
+        new Error("Server error"),
+      );
 
       render(
         <TrendAnalysis {...defaultProps} onMeasureChange={onMeasureChange} />,

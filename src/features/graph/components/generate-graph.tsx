@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  DEFAULT_GRAPH_SEASON,
+  GRAPH_COLORS,
+  GRAPH_CONFIG,
+  type GraphSeason,
+} from "@/lib/constants";
 import * as React from "react";
 import {
   Area,
@@ -12,13 +18,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-import {
-  DEFAULT_GRAPH_SEASON,
-  GRAPH_COLORS,
-  GRAPH_CONFIG,
-  type GraphSeason,
-} from "@/lib/constants";
 
 interface TrendForecastData {
   forecastValues: number[];
@@ -136,6 +135,22 @@ const PET_FORMATTER = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 1,
 });
 
+const CHART_DOMAIN = ["dataMin", "dataMax"];
+const TOOLTIP_CURSOR_STYLE = { stroke: GRAPH_COLORS.grid };
+const LEGEND_WRAPPER_STYLE = { paddingTop: "0.75rem" };
+const TOOLTIP_CONTAINER_STYLE = {
+  background: GRAPH_COLORS.tooltipBackground,
+  borderColor: GRAPH_COLORS.tooltipBorder,
+};
+const TREND_ACTIVE_DOT = { fill: GRAPH_COLORS.primary, r: 4 };
+const REF_CURRENT_ACTIVE_DOT = { fill: GRAPH_COLORS.primary, r: 4 };
+const REF_REFERENCE_ACTIVE_DOT = { fill: GRAPH_COLORS.reference, r: 4 };
+
+const formatYAxisTick = (value: number) => `${value.toFixed(0)}°`;
+const formatLegendLabel = (value: string) => (
+  <span className="text-foreground/80 text-xs font-medium">{value}</span>
+);
+
 const getGraphFillHeightClass = (useCompactDesktopHeight: boolean): string =>
   useCompactDesktopHeight
     ? "h-full min-h-[clamp(220px,42vh,520px)] sm:min-h-[clamp(300px,45vh,500px)]"
@@ -147,12 +162,6 @@ const formatPetValue = (value?: number): string => {
   }
 
   return `${PET_FORMATTER.format(value)}°C`;
-};
-
-const formatLegendLabel = (value: string) => {
-  return (
-    <span className="text-foreground/80 text-xs font-medium">{value}</span>
-  );
 };
 
 const shouldAnimateCharts = (): boolean => {
@@ -315,6 +324,10 @@ const ChartShell = ({
   );
 };
 
+const getTooltipColorStyle = (color?: string) => ({
+  backgroundColor: color ?? GRAPH_COLORS.primary,
+});
+
 const ChartTooltip = ({
   active,
   label,
@@ -337,10 +350,7 @@ const ChartTooltip = ({
   return (
     <div
       className="rounded-xl border px-3 py-2 text-xs shadow-lg backdrop-blur"
-      style={{
-        background: GRAPH_COLORS.tooltipBackground,
-        borderColor: GRAPH_COLORS.tooltipBorder,
-      }}
+      style={TOOLTIP_CONTAINER_STYLE}
     >
       <p className="text-foreground mb-2 font-semibold">
         {point.tooltipLabel ?? String(label ?? "")}
@@ -354,7 +364,7 @@ const ChartTooltip = ({
             <span className="text-muted-foreground flex items-center gap-2">
               <span
                 className="inline-flex size-2 rounded-full"
-                style={{ backgroundColor: entry.color ?? GRAPH_COLORS.primary }}
+                style={getTooltipColorStyle(entry.color)}
               />
               {entry.name}
             </span>
@@ -386,7 +396,7 @@ const GraphLegend = ({
     <Legend
       formatter={formatLegendLabel}
       iconSize={10}
-      wrapperStyle={{ paddingTop: "0.75rem" }}
+      wrapperStyle={LEGEND_WRAPPER_STYLE}
     />
   );
 };
@@ -443,6 +453,28 @@ const TrendChartBody = ({
   shouldAnimate,
   showLegend,
 }: TrendChartBodyProperties): React.ReactElement => {
+  const tickStyle = React.useMemo(
+    () => ({
+      fill: GRAPH_COLORS.text,
+      fontSize: isMobileViewport ? 12 : 13,
+    }),
+    [isMobileViewport],
+  );
+
+  const dotStyle = React.useMemo(
+    () => ({
+      fill: GRAPH_COLORS.primary,
+      r: isMobileViewport ? 2.5 : 3,
+    }),
+    [isMobileViewport],
+  );
+
+  const tooltipContent = React.useMemo(() => <ChartTooltip />, []);
+  const chartMargin = React.useMemo(
+    () => getChartMargin({ isMobileViewport, showLegend }),
+    [isMobileViewport, showLegend],
+  );
+
   return (
     <div
       aria-label={`${graphType} ${season} PET trend chart`}
@@ -451,10 +483,7 @@ const TrendChartBody = ({
       role="img"
     >
       <ResponsiveContainer height="100%" width="100%">
-        <ComposedChart
-          data={chartData}
-          margin={getChartMargin({ isMobileViewport, showLegend })}
-        >
+        <ComposedChart data={chartData} margin={chartMargin}>
           <CartesianGrid
             stroke={GRAPH_COLORS.grid}
             strokeDasharray="4 4"
@@ -464,42 +493,30 @@ const TrendChartBody = ({
             allowDecimals={false}
             axisLine={false}
             dataKey="year"
-            domain={["dataMin", "dataMax"]}
+            domain={CHART_DOMAIN}
             minTickGap={24}
-            tick={{
-              fill: GRAPH_COLORS.text,
-              fontSize: isMobileViewport ? 12 : 13,
-            }}
+            tick={tickStyle}
             tickCount={isMobileViewport ? 6 : 8}
             tickLine={false}
             type="number"
           />
           <YAxis
             axisLine={false}
-            tick={{
-              fill: GRAPH_COLORS.text,
-              fontSize: isMobileViewport ? 12 : 13,
-            }}
-            tickFormatter={(value: number) => `${value.toFixed(0)}°`}
+            tick={tickStyle}
+            tickFormatter={formatYAxisTick}
             tickLine={false}
             width={isMobileViewport ? 42 : 56}
           />
-          <Tooltip
-            content={<ChartTooltip />}
-            cursor={{ stroke: GRAPH_COLORS.grid }}
-          />
+          <Tooltip content={tooltipContent} cursor={TOOLTIP_CURSOR_STYLE} />
           <GraphLegend showLegend={showLegend} />
           <TrendForecastSeries
             forecastData={forecastData}
             shouldAnimate={shouldAnimate}
           />
           <Line
-            activeDot={{ fill: GRAPH_COLORS.primary, r: 4 }}
+            activeDot={TREND_ACTIVE_DOT}
             dataKey="pet"
-            dot={{
-              fill: GRAPH_COLORS.primary,
-              r: isMobileViewport ? 2.5 : 3,
-            }}
+            dot={dotStyle}
             isAnimationActive={shouldAnimate}
             name="PET"
             stroke={GRAPH_COLORS.primary}
@@ -532,6 +549,20 @@ const ReferenceChartBody = ({
   shouldAnimate,
   showLegend,
 }: ReferenceChartBodyProperties): React.ReactElement => {
+  const tickStyle = React.useMemo(
+    () => ({
+      fill: GRAPH_COLORS.text,
+      fontSize: isMobileViewport ? 12 : 13,
+    }),
+    [isMobileViewport],
+  );
+
+  const tooltipContent = React.useMemo(() => <ChartTooltip />, []);
+  const chartMargin = React.useMemo(
+    () => getChartMargin({ isMobileViewport, showLegend }),
+    [isMobileViewport, showLegend],
+  );
+
   return (
     <div
       aria-label={`${season} PET reference comparison chart`}
@@ -540,10 +571,7 @@ const ReferenceChartBody = ({
       role="img"
     >
       <ResponsiveContainer height="100%" width="100%">
-        <ComposedChart
-          data={chartData}
-          margin={getChartMargin({ isMobileViewport, showLegend })}
-        >
+        <ComposedChart data={chartData} margin={chartMargin}>
           <CartesianGrid
             stroke={GRAPH_COLORS.grid}
             strokeDasharray="4 4"
@@ -554,29 +582,20 @@ const ReferenceChartBody = ({
             dataKey="label"
             interval="preserveStartEnd"
             minTickGap={isMobileViewport ? 28 : 16}
-            tick={{
-              fill: GRAPH_COLORS.text,
-              fontSize: isMobileViewport ? 12 : 13,
-            }}
+            tick={tickStyle}
             tickLine={false}
           />
           <YAxis
             axisLine={false}
-            tick={{
-              fill: GRAPH_COLORS.text,
-              fontSize: isMobileViewport ? 12 : 13,
-            }}
-            tickFormatter={(value: number) => `${value.toFixed(0)}°`}
+            tick={tickStyle}
+            tickFormatter={formatYAxisTick}
             tickLine={false}
             width={isMobileViewport ? 42 : 56}
           />
-          <Tooltip
-            content={<ChartTooltip />}
-            cursor={{ stroke: GRAPH_COLORS.grid }}
-          />
+          <Tooltip content={tooltipContent} cursor={TOOLTIP_CURSOR_STYLE} />
           <GraphLegend showLegend={showLegend} />
           <Line
-            activeDot={{ fill: GRAPH_COLORS.primary, r: 4 }}
+            activeDot={REF_CURRENT_ACTIVE_DOT}
             dataKey="currentPet"
             dot={false}
             isAnimationActive={shouldAnimate}
@@ -586,7 +605,7 @@ const ReferenceChartBody = ({
             type="monotone"
           />
           <Line
-            activeDot={{ fill: GRAPH_COLORS.reference, r: 4 }}
+            activeDot={REF_REFERENCE_ACTIVE_DOT}
             dataKey="referencePet"
             dot={false}
             isAnimationActive={shouldAnimate}

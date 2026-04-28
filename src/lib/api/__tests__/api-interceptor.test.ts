@@ -1,3 +1,4 @@
+import { server } from "@/testing/server";
 import {
   afterAll,
   afterEach,
@@ -9,40 +10,68 @@ import {
   vi,
 } from "vitest";
 
-import { server } from "@/testing/server";
-
 import {
   apiRequest,
   apiRequestWithRetry,
   handleApiResponse,
 } from "../api-interceptor";
 
-vi.mock("@/lib/utils/errors", () => ({
-  createError: vi.fn(),
-  NetworkError: vi.fn(
-    class MockNetworkError extends Error {
-      context: unknown;
-      originalError: unknown;
-      statusCode: number;
+vi.mock("@/lib/utils/errors", () => {
+  class MockNetworkError extends Error {
+    context: unknown;
+    originalError: unknown;
+    statusCode: number;
 
-      constructor(
-        message: string,
-        statusCode: number,
-        originalError?: unknown,
-        context?: unknown,
-      ) {
-        super(message);
-        this.name = "NetworkError";
-        this.statusCode = statusCode;
-        this.originalError = originalError;
-        this.context = context;
-      }
-    },
-  ),
-}));
+    constructor(
+      message: string,
+      statusCode: number,
+      originalError?: unknown,
+      context?: unknown,
+    ) {
+      super(message);
+      this.name = "NetworkError";
+      this.statusCode = statusCode;
+      this.originalError = originalError;
+      this.context = context;
+    }
+  }
 
-const mockFetch = vi.fn();
+  return {
+    createError: mockFn(),
+    NetworkError: mockFn(function createMockNetworkError(
+      message: string,
+      statusCode: number,
+      originalError?: unknown,
+      context?: unknown,
+    ) {
+      return new MockNetworkError(message, statusCode, originalError, context);
+    }),
+  };
+});
+
+const mockFetch = mockFn();
 globalThis.fetch = mockFetch;
+
+const createMockResponse = ({
+  jsonError,
+  jsonResult,
+  ok,
+  status,
+  url = "https://api.example.com/test",
+}: {
+  jsonError?: Error;
+  jsonResult?: unknown;
+  ok: boolean;
+  status?: number;
+  url?: string;
+}) => ({
+  json: jsonError
+    ? mockFn().mockRejectedValue(jsonError)
+    : mockFn().mockResolvedValue(jsonResult),
+  ok,
+  status,
+  url,
+});
 
 beforeAll(() => {
   server.close();
@@ -65,11 +94,10 @@ describe("handleApiResponse", () => {
 
   it("returns parsed JSON for successful responses", async () => {
     const mockData = { data: [1, 2, 3], message: "success" };
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue(mockData),
+    const mockResponse = createMockResponse({
+      jsonResult: mockData,
       ok: true,
-      url: "https://api.example.com/test",
-    };
+    });
 
     const result = await handleApiResponse(mockResponse as any);
 
@@ -79,12 +107,11 @@ describe("handleApiResponse", () => {
 
   it("throws error for failed responses", async () => {
     const errorMessage = "Not found";
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ message: errorMessage }),
+    const mockResponse = createMockResponse({
+      jsonResult: { message: errorMessage },
       ok: false,
       status: 404,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -105,12 +132,11 @@ describe("handleApiResponse", () => {
 
   it("includes context in error creation", async () => {
     const context = { action: "fetch", userId: 123 };
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ error: "Server error" }),
+    const mockResponse = createMockResponse({
+      jsonResult: { error: "Server error" },
       ok: false,
       status: 500,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -131,11 +157,10 @@ describe("handleApiResponse", () => {
   });
 
   it("handles JSON parsing errors", async () => {
-    const mockResponse = {
-      json: vi.fn().mockRejectedValue(new Error("Invalid JSON")),
+    const mockResponse = createMockResponse({
+      jsonError: new Error("Invalid JSON"),
       ok: true,
-      url: "https://api.example.com/test",
-    };
+    });
 
     await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
       "Failed to parse server response",
@@ -151,12 +176,11 @@ describe("handleApiResponse", () => {
 
   it("extracts error message from response.message", async () => {
     const errorMessage = "Validation failed";
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ message: errorMessage }),
+    const mockResponse = createMockResponse({
+      jsonResult: { message: errorMessage },
       ok: false,
       status: 400,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -175,12 +199,11 @@ describe("handleApiResponse", () => {
 
   it("extracts error message from response.error", async () => {
     const errorMessage = "Authentication failed";
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ error: errorMessage }),
+    const mockResponse = createMockResponse({
+      jsonResult: { error: errorMessage },
       ok: false,
       status: 401,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -199,12 +222,11 @@ describe("handleApiResponse", () => {
 
   it("extracts error message from response.detail", async () => {
     const errorMessage = "Resource not found";
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ detail: errorMessage }),
+    const mockResponse = createMockResponse({
+      jsonResult: { detail: errorMessage },
       ok: false,
       status: 404,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -223,12 +245,11 @@ describe("handleApiResponse", () => {
 
   it("handles string error responses", async () => {
     const errorMessage = "Server error";
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue(errorMessage),
+    const mockResponse = createMockResponse({
+      jsonResult: errorMessage,
       ok: false,
       status: 500,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -246,12 +267,11 @@ describe("handleApiResponse", () => {
   });
 
   it("handle Validation failed", async () => {
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+    const mockResponse = createMockResponse({
+      jsonResult: { unknown: "format" },
       ok: false,
       status: 422,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -268,12 +288,11 @@ describe("handleApiResponse", () => {
     );
   });
   it("uses default error message for unknown error format", async () => {
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+    const mockResponse = createMockResponse({
+      jsonResult: { unknown: "format" },
       ok: false,
       status: 654,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -290,12 +309,11 @@ describe("handleApiResponse", () => {
     );
   });
   it("uses service error when service is unavailable", async () => {
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+    const mockResponse = createMockResponse({
+      jsonResult: { unknown: "format" },
       ok: false,
       status: 503,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -312,12 +330,11 @@ describe("handleApiResponse", () => {
     );
   });
   it("uses gateway error when gateway is bad", async () => {
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+    const mockResponse = createMockResponse({
+      jsonResult: { unknown: "format" },
       ok: false,
       status: 502,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -334,12 +351,11 @@ describe("handleApiResponse", () => {
     );
   });
   it("uses internal error when Internal Service error", async () => {
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+    const mockResponse = createMockResponse({
+      jsonResult: { unknown: "format" },
       ok: false,
       status: 500,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -356,12 +372,11 @@ describe("handleApiResponse", () => {
     );
   });
   it("uses not found error when not found", async () => {
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+    const mockResponse = createMockResponse({
+      jsonResult: { unknown: "format" },
       ok: false,
       status: 404,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -378,12 +393,11 @@ describe("handleApiResponse", () => {
     );
   });
   it("uses access denied error when access denied", async () => {
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+    const mockResponse = createMockResponse({
+      jsonResult: { unknown: "format" },
       ok: false,
       status: 403,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -400,12 +414,11 @@ describe("handleApiResponse", () => {
     );
   });
   it("uses authentication required error when not authenticated", async () => {
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+    const mockResponse = createMockResponse({
+      jsonResult: { unknown: "format" },
       ok: false,
       status: 401,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -422,12 +435,11 @@ describe("handleApiResponse", () => {
     );
   });
   it("uses invalid request error when bad request", async () => {
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ unknown: "format" }),
+    const mockResponse = createMockResponse({
+      jsonResult: { unknown: "format" },
       ok: false,
       status: 400,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -445,12 +457,11 @@ describe("handleApiResponse", () => {
   });
 
   it("uses default error message when JSON parsing fails", async () => {
-    const mockResponse = {
-      json: vi.fn().mockRejectedValue(new Error("Invalid JSON")),
+    const mockResponse = createMockResponse({
+      jsonError: new Error("Invalid JSON"),
       ok: false,
       status: 429,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockCreateError.mockReturnValue(new Error("Custom error"));
 
@@ -481,11 +492,10 @@ describe("apiRequest", () => {
 
   it("makes successful API requests", async () => {
     const mockData = { result: "success" };
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue(mockData),
+    const mockResponse = createMockResponse({
+      jsonResult: mockData,
       ok: true,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockFetch.mockResolvedValue(mockResponse);
 
@@ -504,11 +514,10 @@ describe("apiRequest", () => {
 
   it("includes custom headers", async () => {
     const mockData = { result: "success" };
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue(mockData),
+    const mockResponse = createMockResponse({
+      jsonResult: mockData,
       ok: true,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockFetch.mockResolvedValue(mockResponse);
 
@@ -534,12 +543,11 @@ describe("apiRequest", () => {
   });
 
   it("includes method in context for error handling", async () => {
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue({ message: "Bad request" }),
+    const mockResponse = createMockResponse({
+      jsonResult: { message: "Bad request" },
       ok: false,
       status: 400,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockFetch.mockResolvedValue(mockResponse);
     mockCreateError.mockReturnValue(new Error("Custom error"));
@@ -607,11 +615,10 @@ describe("apiRequestWithRetry", () => {
 
   it("succeeds on first attempt", async () => {
     const mockData = { result: "success" };
-    const mockResponse = {
-      json: vi.fn().mockResolvedValue(mockData),
+    const mockResponse = createMockResponse({
+      jsonResult: mockData,
       ok: true,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockFetch.mockResolvedValue(mockResponse);
 
@@ -623,18 +630,16 @@ describe("apiRequestWithRetry", () => {
 
   it("retries on server errors", async () => {
     const mockData = { result: "success" };
-    const successResponse = {
-      json: vi.fn().mockResolvedValue(mockData),
+    const successResponse = createMockResponse({
+      jsonResult: mockData,
       ok: true,
-      url: "https://api.example.com/test",
-    };
+    });
 
-    const errorResponse = {
-      json: vi.fn().mockResolvedValue({ message: "Server error" }),
+    const errorResponse = createMockResponse({
+      jsonResult: { message: "Server error" },
       ok: false,
       status: 500,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockFetch
       .mockResolvedValueOnce(errorResponse)
@@ -656,12 +661,11 @@ describe("apiRequestWithRetry", () => {
   });
 
   it("does not retry client errors (except 429)", async () => {
-    const errorResponse = {
-      json: vi.fn().mockResolvedValue({ message: "Bad request" }),
+    const errorResponse = createMockResponse({
+      jsonResult: { message: "Bad request" },
       ok: false,
       status: 400,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockFetch.mockResolvedValue(errorResponse);
 
@@ -680,18 +684,16 @@ describe("apiRequestWithRetry", () => {
 
   it("retries on 429 (rate limiting)", async () => {
     const mockData = { result: "success" };
-    const successResponse = {
-      json: vi.fn().mockResolvedValue(mockData),
+    const successResponse = createMockResponse({
+      jsonResult: mockData,
       ok: true,
-      url: "https://api.example.com/test",
-    };
+    });
 
-    const rateLimitResponse = {
-      json: vi.fn().mockResolvedValue({ message: "Rate limited" }),
+    const rateLimitResponse = createMockResponse({
+      jsonResult: { message: "Rate limited" },
       ok: false,
       status: 429,
-      url: "https://api.example.com/test",
-    };
+    });
 
     mockFetch
       .mockResolvedValueOnce(rateLimitResponse)

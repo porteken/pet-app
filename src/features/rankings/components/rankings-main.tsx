@@ -1,8 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React, { useMemo, useState, useTransition } from "react";
-
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { Pagination } from "@/components/ui/pagination";
 import { Select } from "@/components/ui/select";
@@ -25,6 +22,8 @@ import {
   THERMAL_STRESS_LEGEND_ITEMS,
 } from "@/lib/utils/thermal-stress";
 import { type LocationOptionSection } from "@/types/types";
+import { useRouter } from "next/navigation";
+import React, { useMemo, useState, useTransition } from "react";
 
 const getPetRange = (p10: number, p90: number): string => {
   return `${p10.toFixed(1)}-${p90.toFixed(1)}`;
@@ -38,6 +37,11 @@ const colorMapping = (value: number) => {
 
   return "text-gray-600";
 };
+
+interface SelectOption {
+  label: string;
+  value: string;
+}
 
 const YEAR_OPTIONS = YearOptions().map(({ key, label }) => ({
   label,
@@ -134,32 +138,273 @@ interface RankingsMainProperties {
   shouldPersistInitialSeason?: boolean;
 }
 
-function SortHeader({
-  column,
-  currentColumn,
-  currentDirection,
-  label,
-  onSort,
-}: Readonly<{
+interface RankingsFiltersProperties {
+  heatStressFilter: string;
+  heatStressOptions: SelectOption[];
+  isPending: boolean;
+  selectedSeason: GraphSeason;
+  selectedYear: number;
+  setHeatStressFilter: React.Dispatch<React.SetStateAction<string>>;
+  setSelectedSeason: React.Dispatch<React.SetStateAction<GraphSeason>>;
+  setSelectedYear: React.Dispatch<React.SetStateAction<number>>;
+  setStateFilter: React.Dispatch<React.SetStateAction<string>>;
+  startTransition: React.TransitionStartFunction;
+  stateFilter: string;
+  stateOptions: SelectOption[];
+}
+
+class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
+  private readonly handleHeatStressChange = (value: string) => {
+    this.props.setHeatStressFilter(value);
+    this.props.startTransition(() => {
+      void setRankingsHeatStress(value);
+    });
+  };
+
+  private readonly handleHeatStressClear = () => {
+    this.props.setHeatStressFilter("");
+    this.props.startTransition(() => {
+      void setRankingsHeatStress("");
+    });
+  };
+
+  private readonly handleSeasonChange = (value: string) => {
+    const season = normalizeGraphSeason(value);
+    this.props.setSelectedSeason(season);
+    this.props.startTransition(() => {
+      void setRankingsSeason(season);
+    });
+  };
+
+  private readonly handleStateChange = (value: string) => {
+    this.props.setStateFilter(value);
+    this.props.startTransition(() => {
+      void setRankingsState(value);
+    });
+  };
+
+  private readonly handleStateClear = () => {
+    this.props.setStateFilter("");
+    this.props.startTransition(() => {
+      void setRankingsState("");
+    });
+  };
+
+  private readonly handleYearChange = (value: string) => {
+    if (!value) {
+      return;
+    }
+
+    const year = Number(value);
+    this.props.setSelectedYear(year);
+    this.props.startTransition(() => {
+      void setRankingsYear(year);
+    });
+  };
+
+  public render(): React.ReactElement {
+    const {
+      heatStressFilter,
+      heatStressOptions,
+      isPending,
+      selectedSeason,
+      selectedYear,
+      stateFilter,
+      stateOptions,
+    } = this.props;
+
+    return (
+      <section className="glass-panel fade-in-up mb-6 rounded-3xl p-4 [animation-delay:80ms] sm:p-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Select
+            className="w-full"
+            data={YEAR_OPTIONS}
+            disabled={isPending}
+            label="Year"
+            onChange={this.handleYearChange}
+            value={String(selectedYear)}
+          />
+          <Select
+            className="w-full"
+            data={SEASON_OPTIONS}
+            disabled={isPending}
+            label="Season"
+            onChange={this.handleSeasonChange}
+            value={selectedSeason}
+          />
+          <Select
+            className="w-full"
+            clearable
+            data={stateOptions}
+            disabled={isPending}
+            label="State"
+            onChange={this.handleStateChange}
+            onClear={this.handleStateClear}
+            placeholder="All states"
+            value={stateFilter}
+          />
+          <Select
+            className="w-full"
+            clearable
+            data={heatStressOptions}
+            disabled={isPending}
+            label="Avg Thermal Stress Level"
+            onChange={this.handleHeatStressChange}
+            onClear={this.handleHeatStressClear}
+            placeholder="All levels"
+            value={heatStressFilter}
+          />
+        </div>
+      </section>
+    );
+  }
+}
+
+class SortHeader extends React.PureComponent<{
   column: SortColumn;
   currentColumn: SortColumn;
   currentDirection: "asc" | "desc";
   label: string;
-  onSort: (column: SortColumn) => void;
-}>) {
-  return (
-    <th
-      className="text-muted-foreground hover:bg-accent/60 cursor-pointer px-6 py-4 text-left text-xs font-medium tracking-[0.2em] uppercase transition"
-      onClick={() => onSort(column)}
-    >
-      <div className="flex items-center gap-1">
-        {label}
-        {currentColumn === column && (
-          <span>{currentDirection === "asc" ? "↑" : "↓"}</span>
-        )}
-      </div>
-    </th>
-  );
+  setSortColumn: React.Dispatch<React.SetStateAction<SortColumn>>;
+  setSortDirection: React.Dispatch<React.SetStateAction<"asc" | "desc">>;
+}> {
+  private readonly handleClick = () => {
+    const {
+      column,
+      currentColumn,
+      currentDirection,
+      setSortColumn,
+      setSortDirection,
+    } = this.props;
+
+    if (currentColumn === column) {
+      setSortDirection(currentDirection === "asc" ? "desc" : "asc");
+      return;
+    }
+
+    setSortColumn(column);
+    setSortDirection("asc");
+  };
+
+  public render(): React.ReactElement {
+    const { column, currentColumn, currentDirection, label } = this.props;
+
+    return (
+      <th
+        className="text-muted-foreground hover:bg-accent/60 cursor-pointer px-6 py-4 text-left text-xs font-medium tracking-[0.2em] uppercase transition"
+        onClick={this.handleClick}
+      >
+        <div className="flex items-center gap-1">
+          {label}
+          {currentColumn === column && (
+            <span>{currentDirection === "asc" ? "↑" : "↓"}</span>
+          )}
+        </div>
+      </th>
+    );
+  }
+}
+
+class RankingRow extends React.PureComponent<{
+  item: RankingItem;
+  push: (href: string) => void;
+}> {
+  private readonly handleClick = () => {
+    this.props.push(`/${this.props.item.location_id}`);
+  };
+
+  public render(): React.ReactElement {
+    const {
+      item: {
+        avg_pet,
+        changePerDecade,
+        city,
+        FutureValueLower,
+        FutureValueUpper,
+        max_pet,
+        p10,
+        p90,
+        rank,
+        state,
+      },
+    } = this.props;
+    const avgHeatStressInfo = getHeatStressInfo(avg_pet);
+
+    return (
+      <tr
+        className="hover:bg-accent/45 even:bg-background/30 cursor-pointer transition hover:-translate-y-px"
+        onClick={this.handleClick}
+      >
+        <td className="text-foreground px-6 py-4 text-sm font-medium whitespace-nowrap">
+          <span
+            className={`inline-flex min-w-10 items-center justify-center rounded-full px-3 py-1 text-xs font-bold ${getRankBadgeClasses(rank)}`}
+          >
+            {rank}
+          </span>
+        </td>
+        <td className="text-foreground px-6 py-4 text-sm whitespace-nowrap">
+          {city}
+        </td>
+        <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
+          <span className="bg-background/80 text-foreground rounded-full px-2.5 py-1 font-medium">
+            {state}
+          </span>
+        </td>
+        <td className="px-6 py-4 text-sm whitespace-nowrap">
+          <span className={`font-semibold ${avgHeatStressInfo.color}`}>
+            {avg_pet.toFixed(1)}°C
+          </span>
+        </td>
+        <td className="px-6 py-4 text-sm whitespace-nowrap">
+          {max_pet === undefined ? (
+            <span className="text-muted-foreground">N/A</span>
+          ) : (
+            <span
+              className={`font-semibold ${getHeatStressInfo(max_pet).color}`}
+            >
+              {max_pet.toFixed(1)}°C
+            </span>
+          )}
+        </td>
+        <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
+          {p10 !== undefined && p90 !== undefined ? (
+            `${getPetRange(p10, p90)}°C`
+          ) : (
+            <span className="text-muted-foreground">N/A</span>
+          )}
+        </td>
+        <td className="px-6 py-4 text-sm whitespace-nowrap">
+          {changePerDecade === undefined ? (
+            <span className="text-muted-foreground">N/A</span>
+          ) : (
+            <span className={`font-semibold ${colorMapping(changePerDecade)}`}>
+              {changePerDecade > 0 ? "+" : ""}
+              {changePerDecade.toFixed(1)}°C
+            </span>
+          )}
+        </td>
+        <td className="px-6 py-4 text-sm whitespace-nowrap">
+          {FutureValueLower !== undefined && FutureValueUpper !== undefined ? (
+            <div>
+              <span
+                className={`font-semibold ${getHeatStressInfo(FutureValueLower).color}`}
+              >
+                {FutureValueLower.toFixed(1)}
+              </span>
+              <span className="text-muted-foreground"> - </span>
+              <span
+                className={`font-semibold ${getHeatStressInfo(FutureValueUpper).color}`}
+              >
+                {FutureValueUpper.toFixed(1)}°C
+              </span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">N/A</span>
+          )}
+        </td>
+      </tr>
+    );
+  }
 }
 
 export function RankingsMain({
@@ -251,61 +496,6 @@ export function RankingsMain({
     });
   }, [initialSeason, shouldPersistInitialSeason, startTransition]);
 
-  const handleYearChange = (value: string) => {
-    if (value) {
-      const year = Number(value);
-      setSelectedYear(year);
-      startTransition(() => {
-        void setRankingsYear(year);
-      });
-    }
-  };
-
-  const handleSeasonChange = (value: string) => {
-    const season = normalizeGraphSeason(value);
-    setSelectedSeason(season);
-    startTransition(() => {
-      void setRankingsSeason(season);
-    });
-  };
-
-  const handleHeatStressChange = (value: string) => {
-    setHeatStressFilter(value);
-    startTransition(() => {
-      void setRankingsHeatStress(value);
-    });
-  };
-
-  const handleHeatStressClear = () => {
-    setHeatStressFilter("");
-    startTransition(() => {
-      void setRankingsHeatStress("");
-    });
-  };
-
-  const handleStateChange = (value: string) => {
-    setStateFilter(value);
-    startTransition(() => {
-      void setRankingsState(value);
-    });
-  };
-
-  const handleStateClear = () => {
-    setStateFilter("");
-    startTransition(() => {
-      void setRankingsState("");
-    });
-  };
-
-  const handleSort = (column: SortColumn) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
-
   return (
     <div className="min-h-screen">
       <HeaderBar LocationOptions={LocationOptions} />
@@ -327,48 +517,20 @@ export function RankingsMain({
           </p>
         </section>
 
-        <section className="glass-panel fade-in-up mb-6 rounded-3xl p-4 [animation-delay:80ms] sm:p-5">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Select
-              className="w-full"
-              data={YEAR_OPTIONS}
-              disabled={isPending}
-              label="Year"
-              onChange={handleYearChange}
-              value={String(selectedYear)}
-            />
-            <Select
-              className="w-full"
-              data={SEASON_OPTIONS}
-              disabled={isPending}
-              label="Season"
-              onChange={handleSeasonChange}
-              value={selectedSeason}
-            />
-            <Select
-              className="w-full"
-              clearable
-              data={stateOptions}
-              disabled={isPending}
-              label="State"
-              onChange={handleStateChange}
-              onClear={handleStateClear}
-              placeholder="All states"
-              value={stateFilter}
-            />
-            <Select
-              className="w-full"
-              clearable
-              data={heatStressOptions}
-              disabled={isPending}
-              label="Avg Thermal Stress Level"
-              onChange={handleHeatStressChange}
-              onClear={handleHeatStressClear}
-              placeholder="All levels"
-              value={heatStressFilter}
-            />
-          </div>
-        </section>
+        <RankingsFilters
+          heatStressFilter={heatStressFilter}
+          heatStressOptions={heatStressOptions}
+          isPending={isPending}
+          selectedSeason={selectedSeason}
+          selectedYear={selectedYear}
+          setHeatStressFilter={setHeatStressFilter}
+          setSelectedSeason={setSelectedSeason}
+          setSelectedYear={setSelectedYear}
+          setStateFilter={setStateFilter}
+          startTransition={startTransition}
+          stateFilter={stateFilter}
+          stateOptions={stateOptions}
+        />
 
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-muted-foreground text-sm">
@@ -409,35 +571,40 @@ export function RankingsMain({
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       label="Rank"
-                      onSort={handleSort}
+                      setSortColumn={setSortColumn}
+                      setSortDirection={setSortDirection}
                     />
                     <SortHeader
                       column="city"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       label="City"
-                      onSort={handleSort}
+                      setSortColumn={setSortColumn}
+                      setSortDirection={setSortDirection}
                     />
                     <SortHeader
                       column="state"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       label="State"
-                      onSort={handleSort}
+                      setSortColumn={setSortColumn}
+                      setSortDirection={setSortDirection}
                     />
                     <SortHeader
                       column="avg_pet"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       label="Avg PET"
-                      onSort={handleSort}
+                      setSortColumn={setSortColumn}
+                      setSortDirection={setSortDirection}
                     />
                     <SortHeader
                       column="max_pet"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       label="Max PET"
-                      onSort={handleSort}
+                      setSortColumn={setSortColumn}
+                      setSortDirection={setSortDirection}
                     />
                     <th className="text-muted-foreground px-6 py-4 text-left text-xs font-medium tracking-[0.2em] uppercase">
                       PET Range (10th-90th percentile)
@@ -447,7 +614,8 @@ export function RankingsMain({
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       label="Change per Decade"
-                      onSort={handleSort}
+                      setSortColumn={setSortColumn}
+                      setSortDirection={setSortDirection}
                     />
                     <th className="text-muted-foreground px-6 py-4 text-left text-xs font-medium tracking-[0.2em] uppercase">
                       2100 Forecast Range
@@ -465,119 +633,13 @@ export function RankingsMain({
                       </td>
                     </tr>
                   ) : (
-                    paginatedRankings.map(
-                      ({
-                        avg_pet,
-                        changePerDecade,
-                        city,
-                        FutureValueLower,
-                        FutureValueUpper,
-                        location_id,
-                        max_pet,
-                        p10,
-                        p90,
-                        rank,
-                        state,
-                      }) => {
-                        const avgheatStressInfo = getHeatStressInfo(avg_pet);
-
-                        return (
-                          <tr
-                            className="hover:bg-accent/45 even:bg-background/30 cursor-pointer transition hover:-translate-y-px"
-                            key={location_id}
-                            onClick={() => router.push(`/${location_id}`)}
-                          >
-                            <td className="text-foreground px-6 py-4 text-sm font-medium whitespace-nowrap">
-                              <span
-                                className={`inline-flex min-w-10 items-center justify-center rounded-full px-3 py-1 text-xs font-bold ${getRankBadgeClasses(rank)}`}
-                              >
-                                {rank}
-                              </span>
-                            </td>
-                            <td className="text-foreground px-6 py-4 text-sm whitespace-nowrap">
-                              {city}
-                            </td>
-                            <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
-                              <span className="bg-background/80 text-foreground rounded-full px-2.5 py-1 font-medium">
-                                {state}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-sm whitespace-nowrap">
-                              <span
-                                className={`font-semibold ${avgheatStressInfo.color}`}
-                              >
-                                {avg_pet.toFixed(1)}°C
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-sm whitespace-nowrap">
-                              {max_pet === undefined ? (
-                                <span className="text-muted-foreground">
-                                  N/A
-                                </span>
-                              ) : (
-                                <span
-                                  className={`font-semibold ${getHeatStressInfo(max_pet).color}`}
-                                >
-                                  {max_pet.toFixed(1)}°C
-                                </span>
-                              )}
-                            </td>
-                            <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
-                              {p10 !== undefined && p90 !== undefined ? (
-                                `${getPetRange(p10, p90)}°C`
-                              ) : (
-                                <span className="text-muted-foreground">
-                                  N/A
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 text-sm whitespace-nowrap">
-                              {changePerDecade === undefined ? (
-                                <span className="text-muted-foreground">
-                                  N/A
-                                </span>
-                              ) : (
-                                <span
-                                  className={`font-semibold ${colorMapping(changePerDecade)}`}
-                                >
-                                  {changePerDecade > 0 ? "+" : ""}
-                                  {changePerDecade.toFixed(1)}°C
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 text-sm whitespace-nowrap">
-                              {FutureValueLower !== undefined &&
-                              FutureValueUpper !== undefined ? (
-                                <div>
-                                  <span
-                                    className={`font-semibold ${
-                                      getHeatStressInfo(FutureValueLower).color
-                                    }`}
-                                  >
-                                    {FutureValueLower.toFixed(1)}
-                                  </span>
-                                  <span className="text-muted-foreground">
-                                    {" "}
-                                    -{" "}
-                                  </span>
-                                  <span
-                                    className={`font-semibold ${
-                                      getHeatStressInfo(FutureValueUpper).color
-                                    }`}
-                                  >
-                                    {FutureValueUpper.toFixed(1)}°C
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="text-muted-foreground">
-                                  N/A
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      },
-                    )
+                    paginatedRankings.map((item) => (
+                      <RankingRow
+                        item={item}
+                        key={item.location_id}
+                        push={router.push}
+                      />
+                    ))
                   )}
                 </tbody>
               </table>

@@ -1,5 +1,8 @@
 "use client";
 
+import { PageLoader } from "@/components/app/page-loader";
+import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
+import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
 import { Icon } from "leaflet";
 import React, {
   ComponentType,
@@ -11,10 +14,6 @@ import React, {
   useMemo,
   useState,
 } from "react";
-
-import { PageLoader } from "@/components/app/page-loader";
-import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
-import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
 
 import { OptimizedMarker } from "./optimized-marker";
 
@@ -55,6 +54,41 @@ type TileLayerType = ComponentType<{
   attribution: string;
   url: string;
 }>;
+
+const MAP_CENTER: [number, number] = [39.5, -98.35];
+const MAP_STYLE: CSSProperties = { height: "100%", width: "100%" };
+
+interface LegendToggleButtonProperties {
+  ariaControls: string;
+  className: string;
+  closedLabel: string;
+  isLegendOpen: boolean;
+  openLabel: string;
+  setIsLegendOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+class LegendToggleButton extends React.PureComponent<LegendToggleButtonProperties> {
+  private readonly handleClick = () => {
+    this.props.setIsLegendOpen((previous) => !previous);
+  };
+
+  public render(): React.ReactElement {
+    const { ariaControls, className, closedLabel, isLegendOpen, openLabel } =
+      this.props;
+
+    return (
+      <button
+        aria-controls={ariaControls}
+        aria-expanded={isLegendOpen}
+        className={className}
+        onClick={this.handleClick}
+        type="button"
+      >
+        {isLegendOpen ? openLabel : closedLabel}
+      </button>
+    );
+  }
+}
 
 export const MapComponent = memo<MapComponentProperties>(
   ({
@@ -108,11 +142,12 @@ export const MapComponent = memo<MapComponentProperties>(
       return locations.map((loc) => (
         <OptimizedMarker
           icon={customIcon}
+          latitude={loc.lat}
+          longitude={loc.lng}
           key={loc.location_id}
           locationId={loc.location_id}
           MarkerComponent={Marker}
           onClick={onMarkerClick}
-          position={[loc.lat, loc.lng]}
           selectedGraphMeasure={selectedGraphMeasure}
           selectedGraphSeason={selectedGraphSeason}
         />
@@ -175,9 +210,9 @@ export const MapComponent = memo<MapComponentProperties>(
     return (
       <div className="relative h-full w-full">
         <MapContainer
-          center={[39.5, -98.35]}
+          center={MAP_CENTER}
           scrollWheelZoom
-          style={{ height: "100%", width: "100%" }}
+          style={MAP_STYLE}
           zoom={5}
         >
           <TileLayer
@@ -188,17 +223,14 @@ export const MapComponent = memo<MapComponentProperties>(
         </MapContainer>
         <div className="pointer-events-none absolute bottom-6 left-6 z-40 hidden sm:block">
           <div className="pointer-events-auto flex flex-col items-start gap-2">
-            <button
-              aria-controls="desktop-thermal-stress-legend"
-              aria-expanded={isLegendOpen}
+            <LegendToggleButton
+              ariaControls="desktop-thermal-stress-legend"
               className="glass-panel-muted text-foreground hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
-              onClick={() => setIsLegendOpen((previous) => !previous)}
-              type="button"
-            >
-              {isLegendOpen
-                ? "Hide Thermal Stress Index"
-                : "Show Thermal Stress Index"}
-            </button>
+              closedLabel="Show Thermal Stress Index"
+              isLegendOpen={isLegendOpen}
+              openLabel="Hide Thermal Stress Index"
+              setIsLegendOpen={setIsLegendOpen}
+            />
             {isLegendOpen && (
               <div id="desktop-thermal-stress-legend">
                 <HeatStressLegend />
@@ -216,15 +248,14 @@ export const MapComponent = memo<MapComponentProperties>(
                 <HeatStressLegend />
               </div>
             )}
-            <button
-              aria-controls="mobile-thermal-stress-legend"
-              aria-expanded={isLegendOpen}
+            <LegendToggleButton
+              ariaControls="mobile-thermal-stress-legend"
               className="glass-panel-muted text-foreground hover:bg-accent rounded-l-2xl border-r-0 px-3 py-3 text-xs font-semibold transition"
-              onClick={() => setIsLegendOpen((previous) => !previous)}
-              type="button"
-            >
-              {isLegendOpen ? "Close" : "Thermal Stress"}
-            </button>
+              closedLabel="Thermal Stress"
+              isLegendOpen={isLegendOpen}
+              openLabel="Close"
+              setIsLegendOpen={setIsLegendOpen}
+            />
           </div>
         </div>
       </div>

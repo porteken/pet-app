@@ -1,10 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { MoonStar, SunMedium } from "lucide-react";
 import { useTheme } from "next-themes";
 import * as React from "react";
-
-import { Button } from "@/components/ui/button";
 
 export const ThemeToggle = () => {
   const { resolvedTheme, setTheme } = useTheme();
@@ -19,11 +18,15 @@ export const ThemeToggle = () => {
   const themeLabel = isDarkMode ? "Light mode" : "Dark mode";
   const label = mounted ? `Switch to ${nextTheme} mode` : "Toggle color theme";
 
+  const handleToggle = React.useCallback(() => {
+    setTheme(isDarkMode ? "light" : "dark");
+  }, [setTheme, isDarkMode]);
+
   return (
     <Button
       aria-label={label}
       className="min-w-30 justify-center sm:min-w-35"
-      onClick={() => setTheme(isDarkMode ? "light" : "dark")}
+      onClick={handleToggle}
       size="sm"
       type="button"
       variant="outline"

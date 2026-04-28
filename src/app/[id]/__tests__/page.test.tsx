@@ -7,22 +7,22 @@ const {
   mockLoadLocationPageData,
   mockPage,
 } = vi.hoisted(() => ({
-  mockDatabaseError: vi.fn(
+  mockDatabaseError: mockFn(
     ({ message, title }: { message: string; title: string }) => (
       <div data-testid="database-error">
         {title}:{message}
       </div>
     ),
   ),
-  mockInvalidLocationError: vi.fn(
+  mockInvalidLocationError: mockFn(
     ({ message, title }: { message: string; title: string }) => (
       <div data-testid="invalid-location-error">
         {title}:{message}
       </div>
     ),
   ),
-  mockLoadLocationPageData: vi.fn(),
-  mockPage: vi.fn((_properties?: unknown) => (
+  mockLoadLocationPageData: mockFn(),
+  mockPage: mockFn((_properties?: unknown) => (
     <div data-testid="location-page">Location Page</div>
   )),
 }));
@@ -44,7 +44,7 @@ vi.mock("@/features/page", () => ({
 }));
 
 vi.mock("next/dynamic", () => ({
-  default: vi.fn(() => mockPage),
+  default: mockFn(() => mockPage),
 }));
 
 import LocationPage from "../page";

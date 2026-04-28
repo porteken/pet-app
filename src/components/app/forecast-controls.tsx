@@ -1,11 +1,10 @@
 "use client";
 
-import * as React from "react";
-
 import {
   MAX_FORECAST_YEARS_AHEAD,
   MIN_FORECAST_YEARS_AHEAD,
 } from "@/lib/constants";
+import * as React from "react";
 
 interface ForecastControlsProperties {
   enabled: boolean;
@@ -20,6 +19,20 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
   onYearsChange,
   yearsAhead,
 }) => {
+  const handleEnabledChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onToggle(event.target.checked);
+    },
+    [onToggle],
+  );
+
+  const handleYearsInputChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onYearsChange(Number(event.target.value));
+    },
+    [onYearsChange],
+  );
+
   return (
     <div className="glass-panel-muted space-y-3 rounded-2xl p-4">
       <div className="flex items-center justify-between gap-3">
@@ -27,7 +40,7 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
           <input
             checked={enabled}
             className="border-border bg-background text-primary focus-visible:ring-primary size-4 rounded border focus-visible:ring-2"
-            onChange={(event) => onToggle(event.target.checked)}
+            onChange={handleEnabledChange}
             type="checkbox"
           />
           <span>Show Forecast</span>
@@ -50,7 +63,7 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
             id="forecast-years"
             max={MAX_FORECAST_YEARS_AHEAD}
             min={MIN_FORECAST_YEARS_AHEAD}
-            onChange={(event) => onYearsChange(Number(event.target.value))}
+            onChange={handleYearsInputChange}
             step={1}
             type="range"
             value={yearsAhead}

@@ -1,12 +1,11 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import React, { useMemo } from "react";
-
 import { ThemeToggle } from "@/components/app/theme-toggle";
 import { Select } from "@/components/ui/select";
 import { APP_CONFIG } from "@/lib/constants";
 import { NavProperties } from "@/types/types";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useCallback, useMemo } from "react";
 
 import { NavButtons } from "./nav-buttons";
 
@@ -23,14 +22,30 @@ const HeaderBarComponent = ({
   const router = useRouter();
   const searchParameters = useSearchParams();
 
-  const buildUrl = (path: string, includeSearchParameters = true) => {
-    const baseUrl = path;
-    if (includeSearchParameters && searchParameters.toString() !== "") {
-      return `${baseUrl}?${searchParameters.toString()}`;
-    }
+  const buildUrl = useCallback(
+    (path: string, includeSearchParameters = true) => {
+      const baseUrl = path;
+      if (includeSearchParameters && searchParameters.toString() !== "") {
+        return `${baseUrl}?${searchParameters.toString()}`;
+      }
 
-    return baseUrl;
-  };
+      return baseUrl;
+    },
+    [searchParameters],
+  );
+
+  const handleCityChange = useCallback(
+    (value: string | null) => {
+      if (value) {
+        router.push(`/${value}`);
+      }
+    },
+    [router],
+  );
+
+  const handleClear = useCallback(() => {
+    router.push(buildUrl("/", true));
+  }, [router, buildUrl]);
 
   const groupedCities = useMemo(() => {
     const options = Array.isArray(LocationOptions) ? LocationOptions : [];
@@ -115,14 +130,8 @@ const HeaderBarComponent = ({
                 clearable
                 data={selectData}
                 data-testid="city-selector"
-                onChange={(value) => {
-                  if (value) {
-                    router.push(`/${value}`);
-                  }
-                }}
-                onClear={() => {
-                  router.push(buildUrl("/", true));
-                }}
+                onChange={handleCityChange}
+                onClear={handleClear}
                 placeholder={
                   id !== undefined && id >= 0 ? "Change City" : "Select City"
                 }

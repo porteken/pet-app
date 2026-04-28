@@ -21,7 +21,7 @@ export default function GlobalError({
             <p className="max-w-md text-base text-gray-600">{error.message}</p>
 
             <div className="flex w-full max-w-md flex-col gap-3">
-              <Button className="w-full" onClick={() => reset()} type="button">
+              <Button className="w-full" onClick={reset} type="button">
                 Try again
               </Button>
 

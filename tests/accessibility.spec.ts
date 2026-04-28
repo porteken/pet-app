@@ -152,9 +152,8 @@ test.describe("Accessibility", () => {
     await expect(heading.first()).toBeVisible();
 
     const labels = page.locator("label");
-    for (const label of await labels.all()) {
-      await expect(label).toBeVisible();
-    }
+    const allLabels = await labels.all();
+    await Promise.all(allLabels.map((label) => expect(label).toBeVisible()));
 
     const navElements = page.locator("nav a, header a, button");
     const visibleNavElements = await navElements.all();

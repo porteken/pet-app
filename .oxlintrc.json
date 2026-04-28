@@ -8,12 +8,14 @@
     "unicorn",
     "nextjs",
     "vitest",
-    "jsx-a11y"
+    "jsx-a11y",
+    "react-perf"
   ],
   "jsPlugins": ["eslint-plugin-sonarjs"],
   "categories": {
     "correctness": "error",
-    "suspicious": "warn"
+    "suspicious": "warn",
+    "perf": "warn"
   },
   "env": {
     "builtin": true,
@@ -35,6 +37,7 @@
   "ignorePatterns": [
     ".next/*",
     "next-env.d.ts",
+    "src/__tests__/utils/*",
     "coverage/*",
     "src/components/ui/*"
   ],
@@ -140,8 +143,7 @@
     "jsx-a11y/aria-proptypes": "warn",
     "jsx-a11y/aria-unsupported-elements": "warn",
     "jsx-a11y/role-has-required-aria-props": "warn",
-    "jsx-a11y/role-supports-aria-props": "warn",
-    "vitest/require-mock-type-parameters": "off"
+    "jsx-a11y/role-supports-aria-props": "warn"
   },
   "overrides": [
     {

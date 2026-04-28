@@ -1,7 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import { DatabaseError } from "@/lib/utils/errors";
 import { clearAllMocks, setupApiServerTest } from "@/testing/test-utilities";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import {
   FetchCityRankings,
@@ -55,11 +54,11 @@ const createEqQuery = <T>(
   const response = Promise.resolve({ data, error });
   let eqCallCount = 0;
   const query = {
-    eq: vi.fn(function () {
+    eq: mockFn(function () {
       eqCallCount += 1;
       return eqCallCount < resolveOnEqCall ? query : response;
     }),
-    select: vi.fn(function () {
+    select: mockFn(function () {
       return query;
     }),
   };
@@ -317,9 +316,10 @@ describe("fetch-server", () => {
       ];
 
       const mockQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: mockLocations, error: undefined }),
+        select: mockFn().mockResolvedValue({
+          data: mockLocations,
+          error: undefined,
+        }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -387,9 +387,10 @@ describe("fetch-server", () => {
         message: "column locations.id does not exist",
       };
       const initialQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: undefined, error: columnError }),
+        select: mockFn().mockResolvedValue({
+          data: undefined,
+          error: columnError,
+        }),
       };
       const fallbackLocations = [
         {
@@ -401,7 +402,7 @@ describe("fetch-server", () => {
         },
       ];
       const fallbackQuery = {
-        select: vi.fn().mockResolvedValue({
+        select: mockFn().mockResolvedValue({
           data: fallbackLocations,
           error: undefined,
         }),
@@ -448,9 +449,10 @@ describe("fetch-server", () => {
       ];
 
       const mockQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: mockLocations, error: undefined }),
+        select: mockFn().mockResolvedValue({
+          data: mockLocations,
+          error: undefined,
+        }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -490,9 +492,10 @@ describe("fetch-server", () => {
         "Failed to fetch location data from database",
       );
       const mockQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: undefined, error: mockError }),
+        select: mockFn().mockResolvedValue({
+          data: undefined,
+          error: mockError,
+        }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -507,9 +510,10 @@ describe("fetch-server", () => {
 
     it("should handle null data response", async () => {
       const mockQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: undefined, error: undefined }),
+        select: mockFn().mockResolvedValue({
+          data: undefined,
+          error: undefined,
+        }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -559,9 +563,9 @@ describe("fetch-server", () => {
       ];
 
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({ data: mockData, error: undefined }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -583,9 +587,12 @@ describe("fetch-server", () => {
     it("should handle database errors", async () => {
       const mockError = new Error("Database connection failed");
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({
+          data: undefined,
+          error: mockError,
+        }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -607,9 +614,9 @@ describe("fetch-server", () => {
       ];
 
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({ data: mockData, error: undefined }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -659,9 +666,9 @@ describe("fetch-server", () => {
 
     it("should return empty arrays when no data found", async () => {
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: [], error: undefined }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({ data: [], error: undefined }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -679,9 +686,12 @@ describe("fetch-server", () => {
     it("should handle database errors", async () => {
       const mockError = new Error("Database connection failed");
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({
+          data: undefined,
+          error: mockError,
+        }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -697,9 +707,9 @@ describe("fetch-server", () => {
     it("should handle both avg and max options", async () => {
       const mockData = [{ location_id: 1, pet: 25.5, year: 2020 }];
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({ data: mockData, error: undefined }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);

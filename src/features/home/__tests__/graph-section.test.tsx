@@ -4,45 +4,29 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockPush = vi.fn();
+const mockPush = mockFn();
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-  }),
-}));
+class MockSelectControl extends React.PureComponent<{
+  data: Array<{ label: string; value: string }>;
+  label?: string;
+  onChange?: (value: string) => void;
+  value?: string;
+}> {
+  private readonly handleChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    this.props.onChange?.(event.target.value);
+  };
 
-vi.mock("@/components/ui/button", () => ({
-  Button: vi.fn(({ children, disabled, onClick }) => (
-    <button
-      data-testid="view-details-button"
-      disabled={disabled}
-      onClick={onClick}
-      type="button"
-    >
-      {children}
-    </button>
-  )),
-}));
+  public render(): React.ReactNode {
+    const { data, label, value } = this.props;
 
-vi.mock("@/components/ui/select", () => ({
-  Select: vi.fn(
-    ({
-      data,
-      label,
-      onChange,
-      value,
-    }: {
-      data: Array<{ label: string; value: string }>;
-      label?: string;
-      onChange?: (value: string) => void;
-      value?: string;
-    }) => (
+    return (
       <div>
         {label && <label>{label}</label>}
         <select
           data-testid={label === "Season" ? "season-select" : "measure-select"}
-          onChange={(event) => onChange?.(event.target.value)}
+          onChange={this.handleChange}
           value={value}
         >
           {data.map((option) => (
@@ -52,36 +36,122 @@ vi.mock("@/components/ui/select", () => ({
           ))}
         </select>
       </div>
-    ),
-  ),
-}));
+    );
+  }
+}
 
-vi.mock("@/components/app/forecast-controls", () => ({
-  ForecastControls: vi.fn(
-    ({ enabled, onToggle, onYearsChange, yearsAhead }) => (
+class MockForecastControls extends React.PureComponent<{
+  enabled: boolean;
+  onToggle: (enabled: boolean) => void;
+  onYearsChange: (years: number) => void;
+  yearsAhead: number;
+}> {
+  private readonly handleToggle = () => {
+    this.props.onToggle(!this.props.enabled);
+  };
+
+  private readonly handleYearsChange = (
+    event_: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    this.props.onYearsChange(Number(event_.target.value));
+  };
+
+  public render(): React.ReactNode {
+    const { enabled, yearsAhead } = this.props;
+
+    return (
       <div data-testid="forecast-controls">
         <button
           data-testid="forecast-toggle"
-          onClick={() => onToggle(!enabled)}
+          onClick={this.handleToggle}
           type="button"
         >
           {enabled ? "Disable" : "Enable"} Forecast
         </button>
         <input
           data-testid="forecast-years"
-          onChange={(event_) => onYearsChange(Number(event_.target.value))}
+          onChange={this.handleYearsChange}
           type="number"
           value={yearsAhead}
         />
       </div>
+    );
+  }
+}
+
+const highHeatStressDescription = {
+  colorClass: "text-red-500",
+  prefix: "Current thermal stress:",
+  value: "High",
+};
+
+const moderateHeatStressDescription = {
+  colorClass: "text-orange-500",
+  prefix: "Current:",
+  value: "Moderate",
+};
+
+const extremeForecastHeatStress = {
+  colorClass: "text-red-600",
+  confidenceRange: "(range: 20-30)",
+  prefix: "Forecast:",
+  value: "Extreme",
+};
+
+const extremeForecastHeatStressWithoutRange = {
+  colorClass: "text-red-600",
+  confidenceRange: undefined,
+  prefix: "Forecast:",
+  value: "Extreme",
+};
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
+
+vi.mock("@/components/ui/button", () => ({
+  Button: mockFn(
+    ({
+      children,
+      disabled,
+      onClick,
+    }: {
+      children: React.ReactNode;
+      disabled?: boolean;
+      onClick?: () => void;
+    }) => (
+      <button
+        data-testid="view-details-button"
+        disabled={disabled}
+        onClick={onClick}
+        type="button"
+      >
+        {children}
+      </button>
+    ),
+  ),
+}));
+
+vi.mock("@/components/ui/select", () => ({
+  Select: mockFn((props: React.ComponentProps<typeof MockSelectControl>) => (
+    <MockSelectControl {...props} />
+  )),
+}));
+
+vi.mock("@/components/app/forecast-controls", () => ({
+  ForecastControls: mockFn(
+    (props: React.ComponentProps<typeof MockForecastControls>) => (
+      <MockForecastControls {...props} />
     ),
   ),
 }));
 
 vi.mock("@/features/graph", () => ({
-  GenerateTrendGraph: vi
-    .fn()
-    .mockReturnValue(<div data-testid="pet-graph">Mock Graph</div>),
+  GenerateTrendGraph: mockFn().mockReturnValue(
+    <div data-testid="pet-graph">Mock Graph</div>,
+  ),
 }));
 
 import { GraphSection } from "../components/graph-section";
@@ -93,10 +163,10 @@ const defaultProps: React.ComponentProps<typeof GraphSection> = {
   graphHasError: false,
   graphLoading: false,
   heatStressDescription: undefined,
-  onForecastToggle: vi.fn(),
-  onForecastYearsChange: vi.fn(),
-  onSeasonChange: vi.fn(),
-  onSelectChange: vi.fn(),
+  onForecastToggle: mockFn(),
+  onForecastYearsChange: mockFn(),
+  onSeasonChange: mockFn(),
+  onSelectChange: mockFn(),
   selectedGraphMeasure: "avg",
   selectedGraphSeason: "Annual",
   selectedLocation: { city: "New York", location_id: 1, state: "NY" },
@@ -177,16 +247,10 @@ describe("GraphSection", () => {
 
   describe("Thermal Stress Display", () => {
     it("should display thermal stress description when provided", () => {
-      const heatStressDescription = {
-        colorClass: "text-red-500",
-        prefix: "Current thermal stress:",
-        value: "High",
-      };
-
       render(
         <GraphSection
           {...defaultProps}
-          heatStressDescription={heatStressDescription}
+          heatStressDescription={highHeatStressDescription}
         />,
       );
 
@@ -206,24 +270,12 @@ describe("GraphSection", () => {
     });
 
     it("should display forecast thermal stress when enabled and provided", () => {
-      const heatStressDescription = {
-        colorClass: "text-orange-500",
-        prefix: "Current:",
-        value: "Moderate",
-      };
-      const forecastHeatStress = {
-        colorClass: "text-red-600",
-        confidenceRange: "(range: 20-30)",
-        prefix: "Forecast:",
-        value: "Extreme",
-      };
-
       render(
         <GraphSection
           {...defaultProps}
           forecastEnabled={true}
-          forecastHeatStress={forecastHeatStress}
-          heatStressDescription={heatStressDescription}
+          forecastHeatStress={extremeForecastHeatStress}
+          heatStressDescription={moderateHeatStressDescription}
         />,
       );
 
@@ -233,24 +285,12 @@ describe("GraphSection", () => {
     });
 
     it("should not display forecast thermal stress when forecast is disabled", () => {
-      const heatStressDescription = {
-        colorClass: "text-orange-500",
-        prefix: "Current:",
-        value: "Moderate",
-      };
-      const forecastHeatStress = {
-        colorClass: "text-red-600",
-        confidenceRange: "(range: 20-30)",
-        prefix: "Forecast:",
-        value: "Extreme",
-      };
-
       render(
         <GraphSection
           {...defaultProps}
           forecastEnabled={false}
-          forecastHeatStress={forecastHeatStress}
-          heatStressDescription={heatStressDescription}
+          forecastHeatStress={extremeForecastHeatStress}
+          heatStressDescription={moderateHeatStressDescription}
         />,
       );
 
@@ -276,7 +316,7 @@ describe("GraphSection", () => {
 
   describe("Interactions", () => {
     it("should call onSelectChange when measure is changed", () => {
-      const onSelectChange = vi.fn();
+      const onSelectChange = mockFn();
       render(
         <GraphSection {...defaultProps} onSelectChange={onSelectChange} />,
       );
@@ -288,7 +328,7 @@ describe("GraphSection", () => {
     });
 
     it("should not call onSelectChange when value is empty", () => {
-      const onSelectChange = vi.fn();
+      const onSelectChange = mockFn();
       render(
         <GraphSection {...defaultProps} onSelectChange={onSelectChange} />,
       );
@@ -300,7 +340,7 @@ describe("GraphSection", () => {
     });
 
     it("should call onForecastToggle when forecast toggle is clicked", () => {
-      const onForecastToggle = vi.fn();
+      const onForecastToggle = mockFn();
       render(
         <GraphSection
           {...defaultProps}
@@ -316,7 +356,7 @@ describe("GraphSection", () => {
     });
 
     it("should call onForecastYearsChange when years input changes", () => {
-      const onForecastYearsChange = vi.fn();
+      const onForecastYearsChange = mockFn();
       render(
         <GraphSection
           {...defaultProps}
@@ -354,7 +394,7 @@ describe("GraphSection", () => {
     });
 
     it("should show mobile legend toggle when in mobile viewport", () => {
-      const onToggleMobileGraphLegend = vi.fn();
+      const onToggleMobileGraphLegend = mockFn();
       render(
         <GraphSection
           {...defaultProps}
@@ -369,7 +409,7 @@ describe("GraphSection", () => {
     });
 
     it("should call onToggleMobileGraphLegend when mobile legend toggle is clicked", () => {
-      const onToggleMobileGraphLegend = vi.fn();
+      const onToggleMobileGraphLegend = mockFn();
       render(
         <GraphSection
           {...defaultProps}
@@ -397,24 +437,12 @@ describe("GraphSection", () => {
     });
 
     it("should handle missing confidence range in forecast thermal stress", () => {
-      const heatStressDescription = {
-        colorClass: "text-orange-500",
-        prefix: "Current:",
-        value: "Moderate",
-      };
-      const forecastHeatStress = {
-        colorClass: "text-red-600",
-        confidenceRange: undefined,
-        prefix: "Forecast:",
-        value: "Extreme",
-      };
-
       render(
         <GraphSection
           {...defaultProps}
           forecastEnabled={true}
-          forecastHeatStress={forecastHeatStress}
-          heatStressDescription={heatStressDescription}
+          forecastHeatStress={extremeForecastHeatStressWithoutRange}
+          heatStressDescription={moderateHeatStressDescription}
         />,
       );
 

@@ -6,9 +6,131 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const createDelay = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
-const mockPush = vi.fn();
+const mockPush = mockFn();
+
+class MockMapComponent extends React.PureComponent<{
+  locations: unknown[];
+  onMarkerClick: (locationId: number) => void;
+}> {
+  private readonly handleMarkerClick = () => {
+    this.props.onMarkerClick(1);
+  };
+
+  public render(): React.ReactNode {
+    const { locations } = this.props;
+
+    return (
+      <div data-testid="map-component">
+        Map with {locations.length} locations
+        <button
+          data-testid="marker-click"
+          onClick={this.handleMarkerClick}
+          type="button"
+        >
+          Click Marker 1
+        </button>
+      </div>
+    );
+  }
+}
+
+class MockSelectControl extends React.PureComponent<{
+  data: Array<{ label: string; value: string }>;
+  label?: string;
+  onChange?: (value: string) => void;
+  value?: string;
+}> {
+  private readonly handleChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    this.props.onChange?.(event.target.value);
+  };
+
+  public render(): React.ReactNode {
+    const { data, label, value } = this.props;
+
+    return (
+      <div>
+        <select
+          data-testid={
+            label === "Season" ? "graph-season-select" : "graph-measure-select"
+          }
+          onChange={this.handleChange}
+          value={value}
+        >
+          {data.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
+}
+
+class MockForecastControls extends React.PureComponent<{
+  enabled: boolean;
+  onToggle: (enabled: boolean) => void;
+  onYearsChange: (years: number) => void;
+  yearsAhead: number;
+}> {
+  private readonly handleToggle = () => {
+    this.props.onToggle(!this.props.enabled);
+  };
+
+  private readonly handleYearsChange = (
+    event_: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    this.props.onYearsChange(Number(event_.target.value));
+  };
+
+  public render(): React.ReactNode {
+    const { enabled, yearsAhead } = this.props;
+
+    return (
+      <div data-testid="forecast-controls">
+        <button
+          data-testid="forecast-toggle"
+          onClick={this.handleToggle}
+          type="button"
+        >
+          {enabled ? "Disable" : "Enable"} Forecast
+        </button>
+        <input
+          data-testid="forecast-years"
+          onChange={this.handleYearsChange}
+          type="number"
+          value={yearsAhead}
+        />
+      </div>
+    );
+  }
+}
+
+class MockButton extends React.PureComponent<{
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: string;
+}> {
+  public render(): React.ReactNode {
+    const { children, onClick, variant } = this.props;
+
+    return (
+      <button
+        data-testid="shadcn-button"
+        data-variant={variant}
+        onClick={onClick}
+        type="button"
+      >
+        {children}
+      </button>
+    );
+  }
+}
+
 const mockQueryClient = {
-  fetchQuery: vi.fn(async (options) => {
+  fetchQuery: mockFn(async (options: { queryFn: () => unknown }) => {
     return options.queryFn();
   }),
 };
@@ -22,25 +144,25 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
 });
 
 vi.mock("@/lib/actions/actions", () => ({
-  setForecastPreferences: vi.fn().mockResolvedValue({}),
-  setGraphMeasure: vi.fn().mockResolvedValue({}),
-  setGraphSeason: vi.fn().mockResolvedValue({}),
+  setForecastPreferences: mockFn().mockResolvedValue({}),
+  setGraphMeasure: mockFn().mockResolvedValue({}),
+  setGraphSeason: mockFn().mockResolvedValue({}),
 }));
 
 vi.mock("@/features/graph", () => ({
-  GenerateTrendGraph: vi
-    .fn()
-    .mockReturnValue(<div data-testid="mock-trend-graph">Trend Graph</div>),
+  GenerateTrendGraph: mockFn().mockReturnValue(
+    <div data-testid="mock-trend-graph">Trend Graph</div>,
+  ),
 }));
 
 vi.mock("@/lib/api/fetch-client", () => ({
-  FetchForecastData: vi.fn().mockResolvedValue({
+  FetchForecastData: mockFn().mockResolvedValue({
     forecastValues: [25, 26],
     forecastYears: [2003, 2004],
     lowerBound10: [24, 25],
     upperBound90: [26, 27],
   }),
-  FetchTrendGraphData: vi.fn().mockResolvedValue({
+  FetchTrendGraphData: mockFn().mockResolvedValue({
     increase_per_year: 0.5,
     trendline_pets: [20, 22, 24],
     year_pets: [20, 22, 24],
@@ -51,16 +173,16 @@ vi.mock("@/lib/api/fetch-client", () => ({
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
-    refresh: vi.fn(),
+    refresh: mockFn(),
   }),
   useSearchParams: () => ({
-    get: vi.fn(),
+    get: mockFn(),
     toString: () => "",
   }),
 }));
 
 vi.mock("@/features/header-bar", () => ({
-  HeaderBar: vi.fn(({ LocationOptions }) => (
+  HeaderBar: mockFn(({ LocationOptions }: { LocationOptions?: unknown[] }) => (
     <div data-testid="header-bar">
       HeaderBar with {LocationOptions?.length || 0} locations
     </div>
@@ -68,77 +190,48 @@ vi.mock("@/features/header-bar", () => ({
 }));
 
 vi.mock("@/components/ui/modal", () => ({
-  default: vi.fn(({ children, onClose, open, title }) =>
-    open ? (
-      <dialog data-testid="modal" open>
-        <div data-testid="modal-title">{title}</div>
-        <button data-testid="modal-close" onClick={onClose} type="button">
-          Close
-        </button>
-        {children}
-      </dialog>
-    ) : undefined,
+  default: mockFn(
+    ({
+      children,
+      onClose,
+      open,
+      title,
+    }: {
+      children?: React.ReactNode;
+      onClose?: () => void;
+      open?: boolean;
+      title?: string;
+    }) =>
+      open ? (
+        <dialog data-testid="modal" open>
+          <div data-testid="modal-title">{title}</div>
+          <button data-testid="modal-close" onClick={onClose} type="button">
+            Close
+          </button>
+          {children}
+        </dialog>
+      ) : undefined,
   ),
 }));
 
 vi.mock("../components/map-component", () => ({
-  MapComponent: vi.fn(({ locations, onMarkerClick }) => (
-    <div data-testid="map-component">
-      Map with {locations.length} locations
-      <button
-        data-testid="marker-click"
-        onClick={() => onMarkerClick(1)}
-        type="button"
-      >
-        Click Marker 1
-      </button>
-    </div>
-  )),
+  MapComponent: mockFn(
+    (props: React.ComponentProps<typeof MockMapComponent>) => (
+      <MockMapComponent {...props} />
+    ),
+  ),
 }));
 
 vi.mock("@/components/ui/button", () => ({
-  Button: vi.fn(({ children, onClick, variant }) => (
-    <button
-      data-testid="shadcn-button"
-      data-variant={variant}
-      onClick={onClick}
-      type="button"
-    >
-      {children}
-    </button>
+  Button: mockFn((props: React.ComponentProps<typeof MockButton>) => (
+    <MockButton {...props} />
   )),
 }));
 
 vi.mock("@/components/ui/select", () => ({
-  Select: vi.fn(
-    ({
-      data,
-      label,
-      onChange,
-      value,
-    }: {
-      data: Array<{ label: string; value: string }>;
-      label?: string;
-      onChange?: (value: string) => void;
-      value?: string;
-    }) => (
-      <div>
-        <select
-          data-testid={
-            label === "Season" ? "graph-season-select" : "graph-measure-select"
-          }
-          onChange={(event) => onChange?.(event.target.value)}
-          value={value}
-        >
-          {data.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    ),
-  ),
+  Select: mockFn((props: React.ComponentProps<typeof MockSelectControl>) => (
+    <MockSelectControl {...props} />
+  )),
 }));
 
 vi.mock("@/lib/utils/select-options", () => ({
@@ -154,23 +247,9 @@ vi.mock("@/lib/utils/select-options", () => ({
 }));
 
 vi.mock("@/components/app/forecast-controls", () => ({
-  ForecastControls: vi.fn(
-    ({ enabled, onToggle, onYearsChange, yearsAhead }) => (
-      <div data-testid="forecast-controls">
-        <button
-          data-testid="forecast-toggle"
-          onClick={() => onToggle(!enabled)}
-          type="button"
-        >
-          {enabled ? "Disable" : "Enable"} Forecast
-        </button>
-        <input
-          data-testid="forecast-years"
-          onChange={(event_) => onYearsChange(Number(event_.target.value))}
-          type="number"
-          value={yearsAhead}
-        />
-      </div>
+  ForecastControls: mockFn(
+    (props: React.ComponentProps<typeof MockForecastControls>) => (
+      <MockForecastControls {...props} />
     ),
   ),
 }));
@@ -207,6 +286,8 @@ const mockLocations = [
     state: "CA",
   },
 ];
+
+const emptyLocations: typeof mockLocations = [];
 
 const defaultProps: React.ComponentProps<typeof Home> = {
   initialForecastEnabled: false,
@@ -260,7 +341,7 @@ describe("Home", () => {
     });
 
     it("should handle empty locations array", () => {
-      render(<Home {...defaultProps} locations={[]} />);
+      render(<Home {...defaultProps} locations={emptyLocations} />);
 
       expect(screen.getByText("Map with 0 locations")).toBeInTheDocument();
     });
@@ -294,7 +375,7 @@ describe("Home", () => {
     });
 
     it("should show loading state during graph generation", async () => {
-      const slowFetch = vi.fn().mockImplementation(() => createDelay(100));
+      const slowFetch = mockFn().mockImplementation(() => createDelay(100));
       vi.mocked(FetchTrendGraphData).mockImplementation(slowFetch);
 
       render(<Home {...defaultProps} />);

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { reloadPage } from "../reload";
 
@@ -6,7 +6,7 @@ describe("Reload Utility", () => {
   beforeEach(() => {
     Object.defineProperty(globalThis, "location", {
       value: {
-        reload: vi.fn(),
+        reload: mockFn(),
       },
       writable: true,
     });

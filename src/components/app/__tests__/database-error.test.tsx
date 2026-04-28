@@ -5,7 +5,7 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/utils/reload", () => ({
-  reloadPage: vi.fn(),
+  reloadPage: mockFn(),
 }));
 
 import { reloadPage } from "@/utils/reload";

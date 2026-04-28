@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { OptimizedMarker } from "../components/optimized-marker";
 
 const mockQueryClient = {
-  prefetchQuery: vi.fn(),
+  prefetchQuery: mockFn(),
 };
 
 vi.mock("@tanstack/react-query", () => ({
@@ -15,27 +15,40 @@ vi.mock("@tanstack/react-query", () => ({
 }));
 
 vi.mock("@/lib/api/query-client", () => ({
-  prefetchTrendGraphData: vi.fn(),
+  prefetchTrendGraphData: mockFn(),
 }));
 
-const MockMarkerComponent = vi.fn(({ eventHandlers, icon, position }) => (
-  <button
-    data-icon={JSON.stringify(icon)}
-    data-position={JSON.stringify(position)}
-    data-testid="marker"
-    onClick={eventHandlers?.click}
-    onMouseEnter={eventHandlers?.mouseover}
-    type="button"
-  />
-));
+const MockMarkerComponent = mockFn(
+  ({
+    eventHandlers,
+    icon,
+    position,
+  }: {
+    eventHandlers?: { click?: () => void; mouseover?: () => void };
+    icon: unknown;
+    position: unknown;
+  }) => (
+    <button
+      data-icon={JSON.stringify(icon)}
+      data-position={JSON.stringify(position)}
+      data-testid="marker"
+      onClick={eventHandlers?.click}
+      onMouseEnter={eventHandlers?.mouseover}
+      type="button"
+    />
+  ),
+);
+
+const mockPosition: [number, number] = [40.7128, -74.006];
 
 describe("OptimizedMarker", () => {
   const mockProperties: React.ComponentProps<typeof OptimizedMarker> = {
     icon: { iconUrl: "test-icon.png" } as unknown as Icon,
+    latitude: mockPosition[0],
+    longitude: mockPosition[1],
     locationId: 123,
     MarkerComponent: MockMarkerComponent,
-    onClick: vi.fn(),
-    position: [40.7128, -74.006] as [number, number],
+    onClick: mockFn(),
     selectedGraphMeasure: "temperature",
     selectedGraphSeason: "Annual",
   };
@@ -55,7 +68,7 @@ describe("OptimizedMarker", () => {
     expect(marker).toBeInTheDocument();
     expect(marker).toHaveAttribute(
       "data-position",
-      JSON.stringify(mockProperties.position),
+      JSON.stringify(mockPosition),
     );
     expect(marker).toHaveAttribute(
       "data-icon",
@@ -163,7 +176,7 @@ describe("OptimizedMarker", () => {
           mouseover: expect.any(Function),
         }),
         icon: mockProperties.icon,
-        position: mockProperties.position,
+        position: mockPosition,
       }),
       undefined,
     );
@@ -171,7 +184,7 @@ describe("OptimizedMarker", () => {
 
   it("handles onClick prop changes", async () => {
     const user = userEvent.setup();
-    const newOnClick = vi.fn();
+    const newOnClick = mockFn();
 
     const { rerender } = render(<OptimizedMarker {...mockProperties} />);
 

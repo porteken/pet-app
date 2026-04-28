@@ -1,12 +1,11 @@
 "use client";
 
-import React from "react";
-
 import { GenerateReferenceGraph } from "@/features/graph";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
 import { DEFAULT_GRAPH_SEASON, GRAPH_CONFIG } from "@/lib/constants";
 import { YearOptions } from "@/lib/utils/select-options";
+import React from "react";
 
 interface ReferenceDataProperties {
   CurrentDates: Date[];
@@ -63,6 +62,10 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
     [onReferenceYearChange],
   );
 
+  const handleToggleMobileLegend = React.useCallback(() => {
+    setIsMobileLegendOpen((previous) => !previous);
+  }, []);
+
   React.useEffect(() => {
     generatePetReferenceGraph(referenceYear);
   }, [generatePetReferenceGraph, referenceYear]);
@@ -108,7 +111,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
             aria-controls="reference-data-graph"
             aria-expanded={isMobileLegendOpen}
             className="border-border bg-background/80 text-foreground hover:bg-accent rounded-full border px-3 py-2 text-sm font-semibold shadow-sm transition"
-            onClick={() => setIsMobileLegendOpen((previous) => !previous)}
+            onClick={handleToggleMobileLegend}
             type="button"
           >
             {isMobileLegendOpen ? "Hide Graph Legend" : "Show Graph Legend"}

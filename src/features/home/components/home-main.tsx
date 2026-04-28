@@ -1,9 +1,5 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
-import React, { FC, useCallback, useMemo, useState } from "react";
-
 import { HeaderBar } from "@/features/header-bar";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import {
@@ -21,6 +17,9 @@ import {
   type TrendGraphSnapshot,
 } from "@/lib/utils/trend-analysis";
 import { LocationProperties } from "@/types/types";
+import { useQueryClient } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
+import React, { FC, useCallback, useMemo, useState } from "react";
 
 import { MapProperties } from "../model/types";
 import { GraphSection } from "./graph-section";
@@ -197,6 +196,14 @@ const Home: FC<MapProperties> = ({
     [forecastEnabled],
   );
 
+  const handleModalClose = useCallback(() => {
+    setModalOpen(false);
+  }, []);
+
+  const handleToggleMobileGraphLegend = useCallback(() => {
+    setIsMobileGraphLegendOpen((previous) => !previous);
+  }, []);
+
   const desktopDialogHeightClass = useMemo(() => {
     if (graphLoading) {
       return "sm:!top-1/2 sm:!-translate-y-1/2 sm:!max-h-[94dvh] sm:!overflow-y-auto";
@@ -224,7 +231,7 @@ const Home: FC<MapProperties> = ({
       <Modal
         dialogClassName={desktopDialogHeightClass}
         mobileFullscreen
-        onClose={() => setModalOpen(false)}
+        onClose={handleModalClose}
         open={modalOpen}
         title={
           selectedLocation
@@ -245,9 +252,7 @@ const Home: FC<MapProperties> = ({
           onForecastYearsChange={handleForecastYearsChange}
           onSeasonChange={handleSeasonChange}
           onSelectChange={handleSelectChange}
-          onToggleMobileGraphLegend={() =>
-            setIsMobileGraphLegendOpen((previous) => !previous)
-          }
+          onToggleMobileGraphLegend={handleToggleMobileGraphLegend}
           selectedGraphMeasure={selectedGraphMeasure}
           selectedGraphSeason={selectedGraphSeason}
           selectedLocation={selectedLocation}

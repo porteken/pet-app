@@ -40,21 +40,41 @@ vi.mock("react-leaflet", () => {
 });
 
 vi.mock("leaflet", () => {
-  const MockIcon: any = vi.fn(() => ({}));
+  const MockIcon: any = mockFn(() => ({}));
   MockIcon.Default = {
-    mergeOptions: vi.fn(),
+    mergeOptions: mockFn(),
   };
 
   return {
     __esModule: true,
     default: {
       Icon: MockIcon,
-      icon: vi.fn(() => ({})),
+      icon: mockFn(() => ({})),
     },
     Icon: MockIcon,
-    icon: vi.fn(() => ({})),
+    icon: mockFn(() => ({})),
   };
 });
+
+const mockLocations = [
+  {
+    city: "New York",
+    lat: 40.7128,
+    lng: -74.006,
+    location_id: 1,
+    state: "NY",
+  },
+  {
+    city: "Los Angeles",
+    lat: 34.0522,
+    lng: -118.2437,
+    location_id: 2,
+    state: "CA",
+  },
+];
+
+const emptyLocations: typeof mockLocations = [];
+const noopMarkerClick = () => {};
 
 describe("MapComponent", () => {
   const renderWithQueryClient = (ui: React.ReactElement) => {
@@ -71,28 +91,11 @@ describe("MapComponent", () => {
     );
   };
 
-  const mockLocations = [
-    {
-      city: "New York",
-      lat: 40.7128,
-      lng: -74.006,
-      location_id: 1,
-      state: "NY",
-    },
-    {
-      city: "Los Angeles",
-      lat: 34.0522,
-      lng: -118.2437,
-      location_id: 2,
-      state: "CA",
-    },
-  ];
-
   it("should display a loading message on initial render", () => {
     renderWithQueryClient(
       <MapComponent
-        locations={[]}
-        onMarkerClick={() => {}}
+        locations={emptyLocations}
+        onMarkerClick={noopMarkerClick}
         selectedGraphMeasure="avg"
       />,
     );
@@ -102,8 +105,8 @@ describe("MapComponent", () => {
   it('should display "No Map Data Available" when no locations are provided', async () => {
     renderWithQueryClient(
       <MapComponent
-        locations={[]}
-        onMarkerClick={() => {}}
+        locations={emptyLocations}
+        onMarkerClick={noopMarkerClick}
         selectedGraphMeasure="avg"
       />,
     );
@@ -118,7 +121,7 @@ describe("MapComponent", () => {
     renderWithQueryClient(
       <MapComponent
         locations={mockLocations}
-        onMarkerClick={() => {}}
+        onMarkerClick={noopMarkerClick}
         selectedGraphMeasure="avg"
       />,
     );
@@ -132,7 +135,7 @@ describe("MapComponent", () => {
   });
 
   it("should call onMarkerClick with the correct location_id when a marker is clicked", async () => {
-    const onMarkerClick = vi.fn();
+    const onMarkerClick = mockFn();
     renderWithQueryClient(
       <MapComponent
         locations={mockLocations}
@@ -153,7 +156,7 @@ describe("MapComponent", () => {
     renderWithQueryClient(
       <MapComponent
         locations={mockLocations}
-        onMarkerClick={() => {}}
+        onMarkerClick={noopMarkerClick}
         selectedGraphMeasure="avg"
       />,
     );

@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-
 import { reloadPage } from "@/utils/reload";
+import React from "react";
 
 interface DatabaseErrorProperties {
   message?: string;
@@ -56,7 +55,7 @@ export const DatabaseError: React.FC<DatabaseErrorProperties> = ({
         <div className="mt-6">
           <button
             className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
-            onClick={() => reloadPage()}
+            onClick={reloadPage}
             type="button"
           >
             Try Again

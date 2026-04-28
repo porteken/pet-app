@@ -123,6 +123,7 @@ export const apiRequestWithRetry = async <T>(
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
+      // eslint-disable-next-line no-await-in-loop
       return await apiRequest<T>(url, options, { ...context, attempt });
     } catch (error) {
       lastError = error as Error;
@@ -137,6 +138,7 @@ export const apiRequestWithRetry = async <T>(
       }
 
       const delay = Math.min(1000 * 2 ** (attempt - 1), 5000);
+      // eslint-disable-next-line no-await-in-loop
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }

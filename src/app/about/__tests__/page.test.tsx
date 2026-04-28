@@ -2,17 +2,17 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { mockAbout, mockDatabaseError, mockFetchLocations } = vi.hoisted(() => ({
-  mockAbout: vi.fn(({ LocationOptions }: { LocationOptions: unknown[] }) => (
+  mockAbout: mockFn(({ LocationOptions }: { LocationOptions: unknown[] }) => (
     <div data-count={LocationOptions.length} data-testid="about-page" />
   )),
-  mockDatabaseError: vi.fn(
+  mockDatabaseError: mockFn(
     ({ message, title }: { message: string; title: string }) => (
       <div data-testid="database-error">
         {title}:{message}
       </div>
     ),
   ),
-  mockFetchLocations: vi.fn(),
+  mockFetchLocations: mockFn(),
 }));
 
 vi.mock("@/features/about", () => ({
@@ -28,7 +28,7 @@ vi.mock("@/lib/api/fetch-server", () => ({
 }));
 
 vi.mock("next/dynamic", () => ({
-  default: vi.fn(() => mockAbout),
+  default: mockFn(() => mockAbout),
 }));
 
 import Page from "../page";

@@ -4,22 +4,24 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/features/graph", () => ({
-  GenerateReferenceGraph: vi
-    .fn()
-    .mockImplementation(() => <div data-testid="reference-graph" />),
-  GenerateTrendGraph: vi
-    .fn()
-    .mockImplementation(() => <div data-testid="trend-graph" />),
+  GenerateReferenceGraph: mockFn().mockImplementation(() => (
+    <div data-testid="reference-graph" />
+  )),
+  GenerateTrendGraph: mockFn().mockImplementation(() => (
+    <div data-testid="trend-graph" />
+  )),
 }));
 
 vi.mock("@/features/header-bar", () => ({
-  HeaderBar: vi.fn(({ id, LocationOptions }) => (
-    <header
-      data-id={id}
-      data-options={JSON.stringify(LocationOptions)}
-      data-testid="header-bar"
-    />
-  )),
+  HeaderBar: mockFn(
+    ({ id, LocationOptions }: { id?: number; LocationOptions?: unknown[] }) => (
+      <header
+        data-id={id}
+        data-options={JSON.stringify(LocationOptions)}
+        data-testid="header-bar"
+      />
+    ),
+  ),
 }));
 
 vi.mock("@/config/supabase/client", () => ({
@@ -28,27 +30,27 @@ vi.mock("@/config/supabase/client", () => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
-    back: vi.fn(),
-    push: vi.fn(),
-    replace: vi.fn(),
+    back: mockFn(),
+    push: mockFn(),
+    replace: mockFn(),
   }),
   useSearchParams: () => ({
-    get: vi.fn(),
-    toString: vi.fn().mockReturnValue(""),
+    get: mockFn(),
+    toString: mockFn().mockReturnValue(""),
   }),
 }));
 
 vi.mock("@/lib/actions/actions", () => ({
-  setForecastPreferences: vi.fn().mockResolvedValue(undefined),
+  setForecastPreferences: mockFn().mockResolvedValue(undefined),
 }));
 
 vi.mock("@/lib/api/fetch-client", () => ({
-  FetchForecastData: vi.fn().mockResolvedValue(undefined),
-  FetchReferenceGraphData: vi.fn().mockResolvedValue({
+  FetchForecastData: mockFn().mockResolvedValue(undefined),
+  FetchReferenceGraphData: mockFn().mockResolvedValue({
     dates: [new Date("2023-01-01"), new Date("2023-02-01")],
     pets: [10, 20],
   }),
-  FetchTrendGraphData: vi.fn().mockResolvedValue({
+  FetchTrendGraphData: mockFn().mockResolvedValue({
     increase_per_year: 0.5,
     trendline_pets: [5, 10, 15],
     year_pets: [7, 12, 17],
@@ -94,7 +96,7 @@ describe("PageMain", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    fetchMock = mockFn().mockResolvedValue({ ok: true });
     vi.stubGlobal("fetch", fetchMock);
   });
 

@@ -5,15 +5,13 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/features/graph", () => ({
-  GenerateReferenceGraph: vi
-    .fn()
-    .mockReturnValue(
-      <div data-testid="mock-reference-graph">Reference Graph</div>,
-    ),
+  GenerateReferenceGraph: mockFn().mockReturnValue(
+    <div data-testid="mock-reference-graph">Reference Graph</div>,
+  ),
 }));
 
 vi.mock("@/lib/api/fetch-client", () => ({
-  FetchReferenceGraphData: vi.fn().mockResolvedValue({
+  FetchReferenceGraphData: mockFn().mockResolvedValue({
     dates: [new Date("2023-01-01"), new Date("2023-02-01")],
     pets: [10, 20],
   }),
@@ -29,7 +27,7 @@ const defaultProps: React.ComponentProps<typeof ReferenceData> = {
   CurrentPets: [22, 24],
   id: 1,
   initialReferenceYear: "2000",
-  onReferenceYearChange: vi.fn(),
+  onReferenceYearChange: mockFn(),
   referenceYear: "2000",
   ReferencePets: [18, 20],
 };
@@ -38,15 +36,15 @@ describe("ReferenceData", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     Object.defineProperty(globalThis, "matchMedia", {
-      value: vi.fn().mockImplementation(() => ({
-        addEventListener: vi.fn(),
-        addListener: vi.fn(),
-        dispatchEvent: vi.fn(),
+      value: mockFn().mockImplementation(() => ({
+        addEventListener: mockFn(),
+        addListener: mockFn(),
+        dispatchEvent: mockFn(),
         matches: false,
         media: "(max-width: 639px)",
         onchange: undefined,
-        removeEventListener: vi.fn(),
-        removeListener: vi.fn(),
+        removeEventListener: mockFn(),
+        removeListener: mockFn(),
       })),
       writable: true,
     });
@@ -72,15 +70,15 @@ describe("ReferenceData", () => {
 
   it("should keep mobile graph legend collapsed by default and toggle open", async () => {
     Object.defineProperty(globalThis, "matchMedia", {
-      value: vi.fn().mockImplementation(() => ({
-        addEventListener: vi.fn(),
-        addListener: vi.fn(),
-        dispatchEvent: vi.fn(),
+      value: mockFn().mockImplementation(() => ({
+        addEventListener: mockFn(),
+        addListener: mockFn(),
+        dispatchEvent: mockFn(),
         matches: true,
         media: "(max-width: 639px)",
         onchange: undefined,
-        removeEventListener: vi.fn(),
-        removeListener: vi.fn(),
+        removeEventListener: mockFn(),
+        removeListener: mockFn(),
       })),
       writable: true,
     });
@@ -114,7 +112,7 @@ describe("ReferenceData", () => {
   });
 
   it("should notify the parent and fetch selected annual reference year data", async () => {
-    const onReferenceYearChange = vi.fn();
+    const onReferenceYearChange = mockFn();
     const { rerender } = render(
       <ReferenceData
         {...defaultProps}

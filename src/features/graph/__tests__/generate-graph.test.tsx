@@ -29,6 +29,27 @@ import {
   GenerateTrendGraph,
 } from "../components/generate-graph";
 
+const mockTrendlinePets1 = [25, 26, 27];
+const mockYearPets1 = [25.2, 26.1, 27.4];
+const mockYears1 = [2020, 2021, 2022];
+
+const emptyPets: number[] = [];
+const emptyYears: number[] = [];
+const emptyDates: Date[] = [];
+
+const mockForecastData = {
+  forecastValues: [28.6, 29.1],
+  forecastYears: [2023, 2024],
+  lowerBound10: [27.8, 28.1],
+  upperBound90: [29.3, 30],
+};
+const mockTrendlinePets2 = [24.5, 25.5, 26.5];
+const mockYearPets2 = [24.8, 25.9, 26.7];
+
+const mockCurrentPets = [24, 26];
+const mockDates = [new Date("2025-01-01"), new Date("2025-02-01")];
+const mockReferencePets = [18, 20];
+
 describe("Graph Components", () => {
   describe("GenerateTrendGraph", () => {
     it("renders the chart shell and descriptive title", () => {
@@ -37,9 +58,9 @@ describe("Graph Components", () => {
           increasePerYear={0.5}
           option="avg"
           season="Annual"
-          trendlinePets={[25, 26, 27]}
-          yearPets={[25.2, 26.1, 27.4]}
-          years={[2020, 2021, 2022]}
+          trendlinePets={mockTrendlinePets1}
+          yearPets={mockYearPets1}
+          years={mockYears1}
         />,
       );
 
@@ -58,9 +79,9 @@ describe("Graph Components", () => {
         <GenerateTrendGraph
           increasePerYear={0}
           option="avg"
-          trendlinePets={[]}
-          yearPets={[]}
-          years={[]}
+          trendlinePets={emptyPets}
+          yearPets={emptyPets}
+          years={emptyYears}
         />,
       );
 
@@ -72,18 +93,13 @@ describe("Graph Components", () => {
     it("renders forecast-aware titles for maximum measure graphs", () => {
       render(
         <GenerateTrendGraph
-          forecastData={{
-            forecastValues: [28.6, 29.1],
-            forecastYears: [2023, 2024],
-            lowerBound10: [27.8, 28.1],
-            upperBound90: [29.3, 30],
-          }}
+          forecastData={mockForecastData}
           increasePerYear={0.42}
           option="max"
           season="Summer"
-          trendlinePets={[24.5, 25.5, 26.5]}
-          yearPets={[24.8, 25.9, 26.7]}
-          years={[2020, 2021, 2022]}
+          trendlinePets={mockTrendlinePets2}
+          yearPets={mockYearPets2}
+          years={mockYears1}
         />,
       );
 
@@ -96,10 +112,10 @@ describe("Graph Components", () => {
     it("renders the comparison chart title and wrapper", () => {
       render(
         <GenerateReferenceGraph
-          currentPets={[24, 26]}
+          currentPets={mockCurrentPets}
           currentYear={2025}
-          dates={[new Date("2025-01-01"), new Date("2025-02-01")]}
-          referencePets={[18, 20]}
+          dates={mockDates}
+          referencePets={mockReferencePets}
           referenceYear="2000"
           season="Annual"
         />,
@@ -114,9 +130,9 @@ describe("Graph Components", () => {
     it("renders the empty state when reference data is unavailable", () => {
       render(
         <GenerateReferenceGraph
-          currentPets={[]}
-          dates={[]}
-          referencePets={[]}
+          currentPets={emptyPets}
+          dates={emptyDates}
+          referencePets={emptyPets}
           referenceYear="2000"
         />,
       );

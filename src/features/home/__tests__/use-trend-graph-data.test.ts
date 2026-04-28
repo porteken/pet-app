@@ -3,12 +3,12 @@ import { renderHook, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { GraphSeason } from "@/lib/constants";
-
 import { useTrendGraphData } from "../hooks/use-trend-graph-data";
 
+import type { GraphSeason } from "@/lib/constants";
+
 vi.mock("@/lib/api/fetch-client", () => ({
-  FetchTrendGraphData: vi.fn(),
+  FetchTrendGraphData: mockFn(),
 }));
 
 vi.mock("@/lib/api/query-client", () => ({

@@ -7,53 +7,98 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { HeaderBar } from "../components/header-bar";
 
 Object.defineProperty(globalThis, "matchMedia", {
-  value: vi.fn().mockImplementation((query) => ({
-    addEventListener: vi.fn(),
-    addListener: vi.fn(),
-    dispatchEvent: vi.fn(),
+  value: mockFn().mockImplementation((query: string) => ({
+    addEventListener: mockFn(),
+    addListener: mockFn(),
+    dispatchEvent: mockFn(),
     matches: false,
     media: query,
     onchange: undefined,
-    removeEventListener: vi.fn(),
-    removeListener: vi.fn(),
+    removeEventListener: mockFn(),
+    removeListener: mockFn(),
   })),
   writable: true,
 });
 
-globalThis.ResizeObserver = vi.fn().mockImplementation(() => ({
-  disconnect: vi.fn(),
-  observe: vi.fn(),
-  unobserve: vi.fn(),
+globalThis.ResizeObserver = mockFn().mockImplementation(() => ({
+  disconnect: mockFn(),
+  observe: mockFn(),
+  unobserve: mockFn(),
 }));
 
-const mockUseSearchParameters = vi.fn();
-const mockGet = vi.fn();
-const mockPush = vi.fn();
-const mockToString = vi.fn().mockReturnValue("");
+const mockUseSearchParameters = mockFn();
+const mockGet = mockFn();
+const mockPush = mockFn();
+const mockToString = mockFn().mockReturnValue("");
+
+const mockLocationOptions = [
+  {
+    items: [
+      { key: 1, title: "New York" },
+      { key: 2, title: "Los Angeles" },
+    ],
+    title: "Test States",
+  },
+];
+
+const emptyLocationOptions: typeof mockLocationOptions = [];
+
+const unsortedLocationOptions = [
+  {
+    items: [
+      { key: 1, title: "Chicago" },
+      { key: 2, title: "Boston" },
+      { key: 3, title: "Austin" },
+    ],
+    title: "State 1",
+  },
+  {
+    items: [
+      { key: 4, title: "Denver" },
+      { key: 5, title: "Albany" },
+    ],
+    title: "State 2",
+  },
+];
+
+const emptyStateLocationOptions = [
+  {
+    items: [
+      { key: 1, title: "City One" },
+      { key: 2, title: "City Two" },
+    ],
+    title: "",
+  },
+];
+
+const mixedLocationOptions = [
+  {
+    items: [],
+    title: "State With No Items",
+  },
+  {
+    items: [{ key: 1, title: "Valid City" }],
+    title: "Valid State",
+  },
+];
+
+const titleOnlyLocationOptions = [{ title: "Test Section" }];
+
+const undefinedLocationOptions = undefined as unknown as never;
 
 vi.mock("next/navigation", () => ({
-  usePathname: vi.fn().mockReturnValue("/"),
+  usePathname: mockFn().mockReturnValue("/"),
   useRouter: () => ({
-    back: vi.fn(),
-    forward: vi.fn(),
+    back: mockFn(),
+    forward: mockFn(),
     push: mockPush,
-    refresh: vi.fn(),
-    replace: vi.fn(),
+    refresh: mockFn(),
+    replace: mockFn(),
   }),
   useSearchParams: () => mockUseSearchParameters(),
 }));
 
 describe("HeaderBar", () => {
-  const mockLocationOptions = [
-    {
-      items: [
-        { key: 1, title: "New York" },
-        { key: 2, title: "Los Angeles" },
-      ],
-      title: "Test States",
-    },
-  ];
-
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -94,69 +139,30 @@ describe("HeaderBar", () => {
 
   describe("Location Options Handling", () => {
     it("should handle empty LocationOptions", () => {
-      render(<HeaderBar LocationOptions={[]} />);
+      render(<HeaderBar LocationOptions={emptyLocationOptions} />);
       expect(screen.getByTestId("city-selector")).toBeInTheDocument();
     });
 
     it("should handle non-array LocationOptions gracefully", () => {
-      render(<HeaderBar LocationOptions={undefined as unknown as never} />);
+      render(<HeaderBar LocationOptions={undefinedLocationOptions} />);
       expect(screen.getByTestId("city-selector")).toBeInTheDocument();
     });
 
     it("should sort cities within states alphabetically", () => {
-      const locations = [
-        {
-          items: [
-            { key: 1, title: "Chicago" },
-            { key: 2, title: "Boston" },
-            { key: 3, title: "Austin" },
-          ],
-          title: "State 1",
-        },
-        {
-          items: [
-            { key: 4, title: "Denver" },
-            { key: 5, title: "Albany" },
-          ],
-          title: "State 2",
-        },
-      ];
-
-      render(<HeaderBar id={1} LocationOptions={locations} />);
+      render(<HeaderBar id={1} LocationOptions={unsortedLocationOptions} />);
 
       const selector = screen.getByTestId("city-selector");
       expect(selector).toBeInTheDocument();
     });
 
     it("should handle empty state grouping correctly", () => {
-      const locationsWithEmptyStates = [
-        {
-          items: [
-            { key: 1, title: "City One" },
-            { key: 2, title: "City Two" },
-          ],
-          title: "",
-        },
-      ];
-
       mockToString.mockReturnValue("");
-      render(<HeaderBar id={1} LocationOptions={locationsWithEmptyStates} />);
+      render(<HeaderBar id={1} LocationOptions={emptyStateLocationOptions} />);
       expect(screen.getByTestId("city-selector")).toBeInTheDocument();
     });
 
     it("should handle section with empty items array", () => {
-      const locations = [
-        {
-          items: [],
-          title: "State With No Items",
-        },
-        {
-          items: [{ key: 1, title: "Valid City" }],
-          title: "Valid State",
-        },
-      ];
-
-      render(<HeaderBar id={1} LocationOptions={locations} />);
+      render(<HeaderBar id={1} LocationOptions={mixedLocationOptions} />);
 
       const selector = screen.getByTestId("city-selector");
       expect(selector).toBeInTheDocument();
@@ -165,9 +171,11 @@ describe("HeaderBar", () => {
 
   describe("Edge Cases", () => {
     it("should handle section with items set to undefined", () => {
-      const locations = [{ title: "Test Section" }];
-
-      render(<HeaderBar LocationOptions={locations as unknown as never} />);
+      render(
+        <HeaderBar
+          LocationOptions={titleOnlyLocationOptions as unknown as never}
+        />,
+      );
 
       expect(document.body).toBeInTheDocument();
     });

@@ -11,7 +11,7 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("@/features/header-bar", () => ({
-  HeaderBar: vi.fn(({ LocationOptions }) => (
+  HeaderBar: mockFn(({ LocationOptions }: { LocationOptions: unknown[] }) => (
     <div data-testid="header-bar">
       HeaderBar with {LocationOptions?.length || 0} locations
     </div>
@@ -33,6 +33,8 @@ const mockLocationOptions = [
     title: "Other Cities",
   },
 ];
+
+const emptyLocationOptions: typeof mockLocationOptions = [];
 
 describe("AboutMain", () => {
   it("should render the header bar with location options", () => {
@@ -122,7 +124,7 @@ describe("AboutMain", () => {
   });
 
   it("should render without location options", () => {
-    render(<AboutMain LocationOptions={[]} />);
+    render(<AboutMain LocationOptions={emptyLocationOptions} />);
 
     const headerBar = screen.getByTestId("header-bar");
     expect(headerBar).toHaveTextContent("HeaderBar with 0 locations");

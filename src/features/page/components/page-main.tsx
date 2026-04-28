@@ -1,7 +1,5 @@
 "use client";
 
-import React, { FC } from "react";
-
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { HeaderBar } from "@/features/header-bar";
 import { type GraphSeason } from "@/lib/constants";
@@ -10,6 +8,7 @@ import {
   persistGraphSeasonPreference,
   persistReferenceYearPreference,
 } from "@/lib/utils/client-preferences";
+import React, { FC } from "react";
 
 import { PageProperties } from "../model/types";
 import { PageHeader } from "./page-header";
@@ -64,6 +63,10 @@ const Main: FC<PageProperties> = ({
     [],
   );
 
+  const handleToggleLegend = React.useCallback(() => {
+    setIsLegendOpen((previous) => !previous);
+  }, []);
+
   return (
     <div className="min-h-screen">
       <HeaderBar id={id} LocationOptions={LocationOptions} />
@@ -110,7 +113,7 @@ const Main: FC<PageProperties> = ({
               aria-controls="city-thermal-stress-legend"
               aria-expanded={isLegendOpen}
               className="glass-panel-muted text-foreground hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
-              onClick={() => setIsLegendOpen((previous) => !previous)}
+              onClick={handleToggleLegend}
               type="button"
             >
               {isLegendOpen

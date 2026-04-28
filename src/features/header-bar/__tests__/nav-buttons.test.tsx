@@ -12,23 +12,23 @@ interface MockLinkProperties extends React.AnchorHTMLAttributes<HTMLAnchorElemen
 
 beforeAll(() => {
   Object.defineProperty(globalThis, "matchMedia", {
-    value: vi.fn().mockImplementation((query) => ({
-      addEventListener: vi.fn(),
-      addListener: vi.fn(),
-      dispatchEvent: vi.fn(),
+    value: mockFn().mockImplementation((query: string) => ({
+      addEventListener: mockFn(),
+      addListener: mockFn(),
+      dispatchEvent: mockFn(),
       matches: false,
       media: query,
       onchange: undefined,
-      removeEventListener: vi.fn(),
-      removeListener: vi.fn(),
+      removeEventListener: mockFn(),
+      removeListener: mockFn(),
     })),
     writable: true,
   });
 
-  globalThis.ResizeObserver = vi.fn().mockImplementation(() => ({
-    disconnect: vi.fn(),
-    observe: vi.fn(),
-    unobserve: vi.fn(),
+  globalThis.ResizeObserver = mockFn().mockImplementation(() => ({
+    disconnect: mockFn(),
+    observe: mockFn(),
+    unobserve: mockFn(),
   }));
 });
 
@@ -42,11 +42,11 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("next/navigation", () => ({
-  usePathname: vi.fn().mockReturnValue("/"),
+  usePathname: mockFn().mockReturnValue("/"),
 }));
 
 describe("NavButtons", () => {
-  const mockBuildUrl = vi.fn().mockImplementation((path) => path);
+  const mockBuildUrl = mockFn().mockImplementation((path: string) => path);
 
   it("should render all navigation buttons", () => {
     render(<NavButtons buildUrl={mockBuildUrl} />);

@@ -14,7 +14,7 @@ import {
 } from "../errors";
 
 vi.mock("@sentry/nextjs", () => ({
-  captureException: vi.fn(),
+  captureException: mockFn(),
 }));
 
 describe("Error Classes", () => {

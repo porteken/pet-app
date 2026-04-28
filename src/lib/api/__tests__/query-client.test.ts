@@ -9,7 +9,7 @@ import {
 } from "../query-client";
 
 vi.mock("../fetch-client", () => ({
-  FetchTrendGraphData: vi.fn(),
+  FetchTrendGraphData: mockFn(),
 }));
 
 async function getMockFetchTrendGraphData() {

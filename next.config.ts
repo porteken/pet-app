@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 
 import initializeBundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
+
 import type { NextConfig } from "next";
 
 const withBundleAnalyzer = initializeBundleAnalyzer({

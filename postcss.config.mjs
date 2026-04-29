@@ -1,8 +1,7 @@
-import path from "path";
+import path from "node:path";
 
-// process.cwd() is reliably the project root because
-// scripts/run-next-from-project-root.mjs calls process.chdir(projectRoot)
-// before spawning Next.js, and the Turbopack PostCSS worker inherits it.
+// Next.js package scripts execute from the project root, and the Turbopack
+// PostCSS worker inherits that cwd.
 const projectRoot = process.cwd();
 
 /** @type {import('postcss-load-config').Config} */

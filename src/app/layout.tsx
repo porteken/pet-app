@@ -1,13 +1,13 @@
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
+import { AppProviders } from "@/components/app/providers";
+import { cn } from "@/lib/utils";
 import { Analytics } from "@vercel/analytics/next";
-import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import * as React from "react";
 
-import { AppProviders } from "@/components/app/providers";
-import { cn } from "@/lib/utils";
+import type { Metadata } from "next";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 

@@ -1,17 +1,11 @@
-import dynamic from "next/dynamic";
-
 import { LocationErrorHandler } from "@/components/app/error-handlers";
-import { PageLoader } from "@/components/app/page-loader";
+import Home from "@/features/home";
 import {
   getForecastPreferencesFromCookies,
   getGraphMeasureFromCookies,
   getGraphSeasonFromCookies,
   getLocationData,
 } from "@/lib/utils/app/page-helpers";
-
-const Home = dynamic(() => import("@/features/home"), {
-  loading: PageLoader,
-});
 
 const HomePage = async () => {
   try {

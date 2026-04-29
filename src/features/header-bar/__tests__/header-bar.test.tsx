@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
+// eslint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom";
 
 import { fireEvent, render, screen } from "@testing-library/react";
@@ -172,9 +174,8 @@ describe("HeaderBar", () => {
   describe("Edge Cases", () => {
     it("should handle section with items set to undefined", () => {
       render(
-        <HeaderBar
-          LocationOptions={titleOnlyLocationOptions as unknown as never}
-        />,
+        // @ts-expect-error - Testing invalid props
+        <HeaderBar LocationOptions={titleOnlyLocationOptions} />,
       );
 
       expect(document.body).toBeInTheDocument();

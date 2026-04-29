@@ -1,5 +1,11 @@
 import * as Sentry from "@sentry/nextjs";
 
+const HTTP_BAD_REQUEST = 400;
+const HTTP_UNAUTHORIZED = 401;
+const HTTP_FORBIDDEN = 403;
+const HTTP_NOT_FOUND = 404;
+const HTTP_INTERNAL_ERROR = 500;
+
 export type ErrorContext = Record<string, unknown> & {
   field?: string;
   resource?: string;
@@ -9,7 +15,7 @@ export class AppError extends Error {
   constructor(
     message: string,
     public readonly code: string,
-    public readonly statusCode = 500,
+    public readonly statusCode = HTTP_INTERNAL_ERROR,
     public readonly originalError?: unknown,
     public readonly context?: ErrorContext,
   ) {
@@ -37,14 +43,14 @@ export class AuthenticationError extends AppError {
     message: string = "Authentication failed",
     originalError?: unknown,
   ) {
-    super(message, "AUTHENTICATION_ERROR", 401, originalError);
+    super(message, "AUTHENTICATION_ERROR", HTTP_UNAUTHORIZED, originalError);
     this.name = "AuthenticationError";
   }
 }
 
 export class AuthorizationError extends AppError {
   constructor(message: string = "Access denied", originalError?: unknown) {
-    super(message, "AUTHORIZATION_ERROR", 403, originalError);
+    super(message, "AUTHORIZATION_ERROR", HTTP_FORBIDDEN, originalError);
     this.name = "AuthorizationError";
   }
 }
@@ -55,7 +61,13 @@ export class DatabaseError extends AppError {
     originalError?: unknown,
     context?: ErrorContext,
   ) {
-    super(message, "DATABASE_ERROR", 500, originalError, context);
+    super(
+      message,
+      "DATABASE_ERROR",
+      HTTP_INTERNAL_ERROR,
+      originalError,
+      context,
+    );
     this.name = "DatabaseError";
   }
 }
@@ -74,46 +86,50 @@ export class NetworkError extends AppError {
 
 export class FetchError extends NetworkError {
   constructor(message: string, originalError?: unknown) {
-    super(message, 500, originalError);
+    super(message, HTTP_INTERNAL_ERROR, originalError);
     this.name = "FetchError";
   }
 }
 
 export class NotFoundError extends AppError {
   constructor(message: string, resource?: string, originalError?: unknown) {
-    super(message, "NOT_FOUND_ERROR", 404, originalError, { resource });
+    super(message, "NOT_FOUND_ERROR", HTTP_NOT_FOUND, originalError, {
+      resource,
+    });
     this.name = "NotFoundError";
   }
 }
 
 export class ValidationError extends AppError {
   constructor(message: string, field?: string, originalError?: unknown) {
-    super(message, "VALIDATION_ERROR", 400, originalError, { field });
+    super(message, "VALIDATION_ERROR", HTTP_BAD_REQUEST, originalError, {
+      field,
+    });
     this.name = "ValidationError";
   }
 }
 
 export const createError = (
   message: string,
-  statusCode: number = 500,
+  statusCode: number = HTTP_INTERNAL_ERROR,
   _code?: string,
   originalError?: unknown,
   context?: ErrorContext,
 ): AppError => {
   switch (true) {
-    case statusCode === 400: {
+    case statusCode === HTTP_BAD_REQUEST: {
       return new ValidationError(message, context?.field, originalError);
     }
-    case statusCode === 401: {
+    case statusCode === HTTP_UNAUTHORIZED: {
       return new AuthenticationError(message, originalError);
     }
-    case statusCode === 403: {
+    case statusCode === HTTP_FORBIDDEN: {
       return new AuthorizationError(message, originalError);
     }
-    case statusCode === 404: {
+    case statusCode === HTTP_NOT_FOUND: {
       return new NotFoundError(message, context?.resource, originalError);
     }
-    case statusCode >= 500: {
+    case statusCode >= HTTP_INTERNAL_ERROR: {
       return new DatabaseError(message, originalError, context);
     }
     default: {
@@ -132,7 +148,12 @@ export const handleAsyncError = (
 
   if (error instanceof Error) {
     if (error.message.includes("network") || error.message.includes("fetch")) {
-      return new NetworkError(error.message, 500, error, context);
+      return new NetworkError(
+        error.message,
+        HTTP_INTERNAL_ERROR,
+        error,
+        context,
+      );
     }
 
     if (
@@ -142,10 +163,22 @@ export const handleAsyncError = (
       return new DatabaseError(error.message, error, context);
     }
 
-    return new AppError(error.message, "UNKNOWN_ERROR", 500, error, context);
+    return new AppError(
+      error.message,
+      "UNKNOWN_ERROR",
+      HTTP_INTERNAL_ERROR,
+      error,
+      context,
+    );
   }
 
   const message =
     typeof error === "string" ? error : "An unknown error occurred";
-  return new AppError(message, "UNKNOWN_ERROR", 500, error, context);
+  return new AppError(
+    message,
+    "UNKNOWN_ERROR",
+    HTTP_INTERNAL_ERROR,
+    error,
+    context,
+  );
 };

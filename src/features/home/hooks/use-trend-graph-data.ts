@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-
-import { FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { queryKeys } from "@/lib/api/query-client";
 import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
+import { useQuery } from "@tanstack/react-query";
+
+const STALE_TIME_MS = 1000 * 60 * 5;
 
 export const useTrendGraphData = (
   locationId: number | undefined,
@@ -11,9 +11,12 @@ export const useTrendGraphData = (
   enabled = true,
 ) => {
   return useQuery({
-    enabled: enabled && locationId !== undefined,
-    queryFn: () => FetchTrendGraphData(option, locationId!, season),
+    enabled: locationId !== undefined && enabled,
+    queryFn: async () => {
+      const { FetchTrendGraphData } = await import("@/lib/api/fetch-client");
+      return FetchTrendGraphData(option, locationId!, season);
+    },
     queryKey: queryKeys.trendGraph(locationId!, option, season),
-    staleTime: 1000 * 60 * 5,
+    staleTime: STALE_TIME_MS,
   });
 };

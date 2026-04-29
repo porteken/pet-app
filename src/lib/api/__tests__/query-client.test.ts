@@ -90,7 +90,7 @@ describe("prefetch/invalidate helpers", () => {
       .spyOn(queryClient, "prefetchQuery")
       .mockResolvedValue();
 
-    prefetchTrendGraphData(queryClient, 77, "avg");
+    void prefetchTrendGraphData(queryClient, 77, "avg");
 
     expect(prefetchSpy).toHaveBeenCalledWith({
       queryFn: expect.any(Function),
@@ -104,7 +104,7 @@ describe("prefetch/invalidate helpers", () => {
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue();
 
-    invalidateTrendGraphData(queryClient);
+    void invalidateTrendGraphData(queryClient);
 
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: ["trend-graph"],

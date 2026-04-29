@@ -1,7 +1,4 @@
 "use server";
-import { cookies } from "next/headers";
-import { cache } from "react";
-
 import { createClient } from "@/config/supabase/server";
 import {
   filterReferenceRowsBySeason,
@@ -27,6 +24,11 @@ import {
   validateTrendOption,
   validateYear,
 } from "@/lib/utils/validation";
+import { cookies } from "next/headers";
+import { cache } from "react";
+
+const MIN_YEAR = 2000;
+const MAX_YEAR = 2100;
 import {
   FetchLocationProperties,
   LocationOptionSection,
@@ -76,9 +78,9 @@ export async function FetchCityRankings(
 > {
   const resolvedSeason = normalizeGraphSeason(season);
 
-  if (!year || Number.isNaN(year) || year < 2000 || year > 2100) {
+  if (!year || Number.isNaN(year) || year < MIN_YEAR || year > MAX_YEAR) {
     throw new DatabaseError(
-      `Invalid year: ${year}. Must be between 2000 and 2100.`,
+      `Invalid year: ${year}. Must be between ${MIN_YEAR} and ${MAX_YEAR}.`,
     );
   }
 

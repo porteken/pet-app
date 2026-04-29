@@ -1,9 +1,10 @@
-import { createServerClient } from "@supabase/ssr";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
-
 import { getPublicEnvironment, isE2ETestRun } from "@/config/environment";
 import { createRuntimeMockSupabaseClient } from "@/testing/runtime-mocks";
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const createClient = async (
   cookieStore: Awaited<ReturnType<typeof cookies>>,

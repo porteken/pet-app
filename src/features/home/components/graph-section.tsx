@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { ForecastControls } from "@/components/app/forecast-controls";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";

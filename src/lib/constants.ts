@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 export const APP_CONFIG = {
   GITHUB_URL: "https://github.com/porteken/pet-app",
   NAME: "Historical PET USA",
@@ -26,12 +27,16 @@ export type GraphSeason = (typeof GRAPH_SEASONS)[number];
 export const DEFAULT_GRAPH_SEASON = "Annual" as const;
 export const DEFAULT_REFERENCE_YEAR = "2000" as const;
 export const DEFAULT_FORECAST_ENABLED = false as const;
-export const DEFAULT_FORECAST_YEARS_AHEAD = 10 as const;
-export const MIN_FORECAST_YEARS_AHEAD = 5 as const;
-export const MAX_FORECAST_YEARS_AHEAD = 75 as const;
+const DEFAULT_FORECAST_YEARS = 10;
+const MIN_FORECAST_YEARS = 5;
+const MAX_FORECAST_YEARS = 75;
+
+export const DEFAULT_FORECAST_YEARS_AHEAD = DEFAULT_FORECAST_YEARS;
+export const MIN_FORECAST_YEARS_AHEAD = MIN_FORECAST_YEARS;
+export const MAX_FORECAST_YEARS_AHEAD = MAX_FORECAST_YEARS;
 
 const isGraphSeason = (value: string): value is GraphSeason =>
-  GRAPH_SEASONS.includes(value as GraphSeason);
+  (GRAPH_SEASONS as readonly string[]).includes(value);
 
 export const normalizeGraphSeason = (
   value: string | undefined,

@@ -28,9 +28,17 @@ export function validateYearPets(yearPets: number[]): void {
   }
 }
 
+const MIN_VALID_YEAR = 1900;
+const MAX_VALID_YEAR = 2100;
+
 export function validateYears(years: number[]): void {
   if (
-    years.some((year) => !Number.isInteger(year) || year < 1900 || year > 2100)
+    years.some(
+      (year) =>
+        !Number.isInteger(year) ||
+        year < MIN_VALID_YEAR ||
+        year > MAX_VALID_YEAR,
+    )
   ) {
     throw new Error("Invalid year data detected");
   }

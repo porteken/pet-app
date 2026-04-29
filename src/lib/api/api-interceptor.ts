@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
+const RETRY_DELAY_BASE = 1000;
+const RETRY_DELAY_MAX = 5000;
 import {
   createError,
   type ErrorContext,
@@ -91,13 +94,22 @@ export const apiRequest = async <T>(
   options: RequestInit = {},
   context?: ErrorContext,
 ): Promise<T> => {
+  let headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (options.headers instanceof Headers) {
+    headers = { ...headers, ...Object.fromEntries(options.headers.entries()) };
+  } else if (Array.isArray(options.headers)) {
+    headers = { ...headers, ...Object.fromEntries(options.headers) };
+  } else if (options.headers) {
+    headers = { ...headers, ...options.headers };
+  }
+
   try {
     const response = await fetch(url, {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
+      headers,
     });
 
     return await handleApiResponse<T>(response, {
@@ -126,7 +138,7 @@ export const apiRequestWithRetry = async <T>(
       // eslint-disable-next-line no-await-in-loop
       return await apiRequest<T>(url, options, { ...context, attempt });
     } catch (error) {
-      lastError = error as Error;
+      lastError = error instanceof Error ? error : new Error(String(error));
 
       if (
         error instanceof NetworkError &&
@@ -137,7 +149,10 @@ export const apiRequestWithRetry = async <T>(
         throw error;
       }
 
-      const delay = Math.min(1000 * 2 ** (attempt - 1), 5000);
+      const delay = Math.min(
+        RETRY_DELAY_BASE * 2 ** (attempt - 1),
+        RETRY_DELAY_MAX,
+      );
       // eslint-disable-next-line no-await-in-loop
       await new Promise((resolve) => setTimeout(resolve, delay));
     }

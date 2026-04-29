@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { FetchError } from "@/lib/utils/errors";
 import { createMockLinearRegression } from "@/testing/mocks";
 import { clearAllMocks, setupApiClientTest } from "@/testing/test-utilities";
@@ -5,13 +6,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FetchForecastData, FetchTrendGraphData } from "../fetch-client";
 
-const createTrendQuery = <T>(data: T | undefined, error?: unknown) => ({
+const createTrendQuery = (data: unknown, error?: unknown) => ({
   eq: mockFn().mockReturnThis(),
   order: mockFn().mockResolvedValue({ data, error }),
   select: mockFn().mockReturnThis(),
 });
 
-const createHistoricalQuery = <T>(data: T | null | undefined) => ({
+const createHistoricalQuery = (data: unknown) => ({
   eq: mockFn().mockReturnThis(),
   limit: mockFn().mockReturnThis(),
   maybeSingle: mockFn().mockResolvedValue({ data }),
@@ -19,7 +20,7 @@ const createHistoricalQuery = <T>(data: T | null | undefined) => ({
   select: mockFn().mockReturnThis(),
 });
 
-const createForecastQuery = <T>(data: T | undefined, error?: unknown) => ({
+const createForecastQuery = (data: unknown, error?: unknown) => ({
   eq: mockFn().mockReturnThis(),
   gt: mockFn().mockReturnThis(),
   lte: mockFn().mockReturnThis(),

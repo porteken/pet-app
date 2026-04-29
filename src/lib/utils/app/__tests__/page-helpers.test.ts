@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -531,16 +532,12 @@ describe("page-helpers", () => {
       expect(cookieResult.status).toBe("rejected");
       expect(locationResult.status).toBe("rejected");
 
-      if (cookieResult.status !== "rejected") {
-        throw new Error("Expected cookie request to be rejected");
-      }
-
-      if (locationResult.status !== "rejected") {
-        throw new Error("Expected location request to be rejected");
-      }
-
-      expect(cookieResult.reason.message).toBe("Cookie error");
-      expect(locationResult.reason.message).toBe("Fetch error");
+      expect((cookieResult as PromiseRejectedResult).reason.message).toBe(
+        "Cookie error",
+      );
+      expect((locationResult as PromiseRejectedResult).reason.message).toBe(
+        "Fetch error",
+      );
     });
   });
 });

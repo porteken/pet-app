@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom";
 
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -314,7 +315,7 @@ describe("Home", () => {
     });
 
     it("should have correct display name or be anonymous function", () => {
-      expect(Home.name === "Home" || Home.name === "").toBe(true);
+      expect(["Home", ""]).toContain(Home.name);
     });
   });
 

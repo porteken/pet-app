@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom";
 
 import { render, screen } from "@testing-library/react";
@@ -9,28 +10,6 @@ interface MockLinkProperties extends React.AnchorHTMLAttributes<HTMLAnchorElemen
   children: React.ReactNode;
   href: string;
 }
-
-beforeAll(() => {
-  Object.defineProperty(globalThis, "matchMedia", {
-    value: mockFn().mockImplementation((query: string) => ({
-      addEventListener: mockFn(),
-      addListener: mockFn(),
-      dispatchEvent: mockFn(),
-      matches: false,
-      media: query,
-      onchange: undefined,
-      removeEventListener: mockFn(),
-      removeListener: mockFn(),
-    })),
-    writable: true,
-  });
-
-  globalThis.ResizeObserver = mockFn().mockImplementation(() => ({
-    disconnect: mockFn(),
-    observe: mockFn(),
-    unobserve: mockFn(),
-  }));
-});
 
 vi.mock("next/link", () => ({
   __esModule: true,
@@ -46,6 +25,28 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("NavButtons", () => {
+  beforeAll(() => {
+    Object.defineProperty(globalThis, "matchMedia", {
+      value: mockFn().mockImplementation((query: string) => ({
+        addEventListener: mockFn(),
+        addListener: mockFn(),
+        dispatchEvent: mockFn(),
+        matches: false,
+        media: query,
+        onchange: undefined,
+        removeEventListener: mockFn(),
+        removeListener: mockFn(),
+      })),
+      writable: true,
+    });
+
+    globalThis.ResizeObserver = mockFn().mockImplementation(() => ({
+      disconnect: mockFn(),
+      observe: mockFn(),
+      unobserve: mockFn(),
+    }));
+  });
+
   const mockBuildUrl = mockFn().mockImplementation((path: string) => path);
 
   it("should render all navigation buttons", () => {

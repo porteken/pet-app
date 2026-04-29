@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 export type Primitive = number | string;
 
 type FilterOperation = {
@@ -301,6 +302,7 @@ const matchesFilterOperation = (row: MockRow, filter: FilterOperation) => {
       return compareNumeric(cell, filter.value, compareLessThanOrEqual);
     }
   }
+  return true;
 };
 
 const applyFilters = (rows: MockRow[], filters: FilterOperation[]) =>

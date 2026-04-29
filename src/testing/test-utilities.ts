@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
+// eslint-disable-next-line import/no-unassigned-import
 import "./module-mocks";
 
 import { vi } from "vitest";

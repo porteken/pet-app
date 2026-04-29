@@ -145,6 +145,22 @@ const TOOLTIP_CONTAINER_STYLE = {
 const TREND_ACTIVE_DOT = { fill: GRAPH_COLORS.primary, r: 4 };
 const REF_CURRENT_ACTIVE_DOT = { fill: GRAPH_COLORS.primary, r: 4 };
 const REF_REFERENCE_ACTIVE_DOT = { fill: GRAPH_COLORS.reference, r: 4 };
+const TICK_FONT_SIZE_MOBILE = 12;
+const TICK_FONT_SIZE_DESKTOP = 13;
+const DOT_RADIUS_MOBILE = 2.5;
+const DOT_RADIUS_DESKTOP = 3;
+const TICK_COUNT_MOBILE = 6;
+const TICK_COUNT_DESKTOP = 8;
+const Y_AXIS_WIDTH_MOBILE = 42;
+const Y_AXIS_WIDTH_DESKTOP = 56;
+const MARGIN_TOP = 8;
+const MARGIN_BOTTOM_WITH_LEGEND = 4;
+const MARGIN_LEFT_MOBILE = -18;
+const MARGIN_LEFT_DESKTOP = -10;
+const MARGIN_RIGHT_MOBILE = 4;
+const MARGIN_RIGHT_DESKTOP = 12;
+const MIN_TICK_GAP_REFERENCE_MOBILE = 28;
+const MIN_TICK_GAP_REFERENCE_DESKTOP = 16;
 
 const formatYAxisTick = (value: number) => `${value.toFixed(0)}°`;
 const formatLegendLabel = (value: string) => (
@@ -258,10 +274,10 @@ const getChartMargin = ({
   showLegend,
 }: ChartMarginOptions) => {
   return {
-    bottom: showLegend ? 4 : 0,
-    left: isMobileViewport ? -18 : -10,
-    right: isMobileViewport ? 4 : 12,
-    top: 8,
+    bottom: showLegend ? MARGIN_BOTTOM_WITH_LEGEND : 0,
+    left: isMobileViewport ? MARGIN_LEFT_MOBILE : MARGIN_LEFT_DESKTOP,
+    right: isMobileViewport ? MARGIN_RIGHT_MOBILE : MARGIN_RIGHT_DESKTOP,
+    top: MARGIN_TOP,
   };
 };
 
@@ -456,7 +472,9 @@ const TrendChartBody = ({
   const tickStyle = React.useMemo(
     () => ({
       fill: GRAPH_COLORS.text,
-      fontSize: isMobileViewport ? 12 : 13,
+      fontSize: isMobileViewport
+        ? TICK_FONT_SIZE_MOBILE
+        : TICK_FONT_SIZE_DESKTOP,
     }),
     [isMobileViewport],
   );
@@ -464,7 +482,7 @@ const TrendChartBody = ({
   const dotStyle = React.useMemo(
     () => ({
       fill: GRAPH_COLORS.primary,
-      r: isMobileViewport ? 2.5 : 3,
+      r: isMobileViewport ? DOT_RADIUS_MOBILE : DOT_RADIUS_DESKTOP,
     }),
     [isMobileViewport],
   );
@@ -496,7 +514,9 @@ const TrendChartBody = ({
             domain={CHART_DOMAIN}
             minTickGap={24}
             tick={tickStyle}
-            tickCount={isMobileViewport ? 6 : 8}
+            tickCount={
+              isMobileViewport ? TICK_COUNT_MOBILE : TICK_COUNT_DESKTOP
+            }
             tickLine={false}
             type="number"
           />
@@ -505,7 +525,9 @@ const TrendChartBody = ({
             tick={tickStyle}
             tickFormatter={formatYAxisTick}
             tickLine={false}
-            width={isMobileViewport ? 42 : 56}
+            width={
+              isMobileViewport ? Y_AXIS_WIDTH_MOBILE : Y_AXIS_WIDTH_DESKTOP
+            }
           />
           <Tooltip content={tooltipContent} cursor={TOOLTIP_CURSOR_STYLE} />
           <GraphLegend showLegend={showLegend} />
@@ -552,7 +574,9 @@ const ReferenceChartBody = ({
   const tickStyle = React.useMemo(
     () => ({
       fill: GRAPH_COLORS.text,
-      fontSize: isMobileViewport ? 12 : 13,
+      fontSize: isMobileViewport
+        ? TICK_FONT_SIZE_MOBILE
+        : TICK_FONT_SIZE_DESKTOP,
     }),
     [isMobileViewport],
   );
@@ -581,7 +605,11 @@ const ReferenceChartBody = ({
             axisLine={false}
             dataKey="label"
             interval="preserveStartEnd"
-            minTickGap={isMobileViewport ? 28 : 16}
+            minTickGap={
+              isMobileViewport
+                ? MIN_TICK_GAP_REFERENCE_MOBILE
+                : MIN_TICK_GAP_REFERENCE_DESKTOP
+            }
             tick={tickStyle}
             tickLine={false}
           />
@@ -590,7 +618,9 @@ const ReferenceChartBody = ({
             tick={tickStyle}
             tickFormatter={formatYAxisTick}
             tickLine={false}
-            width={isMobileViewport ? 42 : 56}
+            width={
+              isMobileViewport ? Y_AXIS_WIDTH_MOBILE : Y_AXIS_WIDTH_DESKTOP
+            }
           />
           <Tooltip content={tooltipContent} cursor={TOOLTIP_CURSOR_STYLE} />
           <GraphLegend showLegend={showLegend} />

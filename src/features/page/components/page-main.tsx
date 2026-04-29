@@ -56,7 +56,7 @@ const Main: FC<PageProperties> = ({
     (referenceYear: string) => {
       setSelectedReferenceYear(referenceYear);
 
-      void persistReferenceYearPreference(referenceYear).catch(() => {
+      persistReferenceYearPreference(referenceYear).catch(() => {
         // Ignore persistence failures; the UI can continue with the selected value.
       });
     },

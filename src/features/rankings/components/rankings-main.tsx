@@ -1,5 +1,7 @@
 "use client";
 
+const RANK_THREE = 3;
+
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { Pagination } from "@/components/ui/pagination";
 import { Select } from "@/components/ui/select";
@@ -93,6 +95,7 @@ function compareRankingItems(
     case "state":
       return a.state.localeCompare(b.state);
   }
+  return 0;
 }
 
 function filterRanking(
@@ -121,7 +124,7 @@ function getRankBadgeClasses(rank: number): string {
     return "border border-slate-300 bg-slate-100 text-slate-900";
   }
 
-  if (rank === 3) {
+  if (rank === RANK_THREE) {
     return "border border-orange-300 bg-orange-100 text-orange-900";
   }
 
@@ -417,6 +420,12 @@ export function RankingsMain({
   shouldPersistInitialSeason = false,
 }: Readonly<RankingsMainProperties>) {
   const router = useRouter();
+  const handlePush = React.useCallback(
+    (url: string) => {
+      router.push(url);
+    },
+    [router],
+  );
   const [selectedSeason, setSelectedSeason] = useState(initialSeason);
   const [selectedYear, setSelectedYear] = useState(initialYear);
   const [isPending, startTransition] = useTransition();
@@ -637,7 +646,7 @@ export function RankingsMain({
                       <RankingRow
                         item={item}
                         key={item.location_id}
-                        push={router.push}
+                        push={handlePush}
                       />
                     ))
                   )}

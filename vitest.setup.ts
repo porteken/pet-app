@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom";
 
 import { mockFn } from "@/testing/mock-fn";
@@ -45,14 +46,17 @@ process.env.NEXT_PUBLIC_SUPABASE_URL ??= "https://mock-supabase.local";
 process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??=
   "mock-supabase-publishable-key";
 
+// eslint-disable-next-line eslint-plugin-vitest/require-top-level-describe
 beforeAll(() => {
   server.listen({ onUnhandledRequest: "bypass" });
 });
 
+// eslint-disable-next-line eslint-plugin-vitest/require-top-level-describe
 afterEach(() => {
   server.resetHandlers();
 });
 
+// eslint-disable-next-line eslint-plugin-vitest/require-top-level-describe
 afterAll(() => {
   server.close();
 });

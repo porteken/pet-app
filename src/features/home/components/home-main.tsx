@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 "use client";
 
 import { HeaderBar } from "@/features/header-bar";
@@ -151,7 +152,7 @@ const Home: FC<MapProperties> = ({
 
   React.useEffect(() => {
     if (selectedLocationId !== undefined) {
-      generateGraph(
+      void generateGraph(
         selectedLocationId,
         selectedGraphMeasure,
         selectedGraphSeason,

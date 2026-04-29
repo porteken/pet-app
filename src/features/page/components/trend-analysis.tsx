@@ -131,7 +131,9 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       graphSeason,
       forecastEnabled && forecastSupported,
       forecastYearsAhead,
-    );
+    ).catch(() => {
+      // Error is handled by the graph component's own error state
+    });
   }, [
     generatePetTrendGraph,
     selectedGraphMeasure,

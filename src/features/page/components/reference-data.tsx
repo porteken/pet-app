@@ -67,7 +67,9 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   }, []);
 
   React.useEffect(() => {
-    generatePetReferenceGraph(referenceYear);
+    generatePetReferenceGraph(referenceYear).catch(() => {
+      // Error is handled by the graph component's own error state
+    });
   }, [generatePetReferenceGraph, referenceYear]);
 
   return (

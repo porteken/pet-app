@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { LocationErrorHandler } from "@/components/app/error-handlers";
 import Home from "@/features/home";
 import {

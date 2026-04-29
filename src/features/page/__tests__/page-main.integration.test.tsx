@@ -17,7 +17,10 @@ class MockTrendAnalysis extends React.PureComponent<{
   private readonly handleChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    this.props.onMeasureChange(event.currentTarget.value);
+    const result = this.props.onMeasureChange(event.currentTarget.value);
+    if (result instanceof Promise) {
+      result.catch(() => {});
+    }
   };
 
   public render(): React.ReactNode {
@@ -48,7 +51,10 @@ class MockReferenceData extends React.PureComponent<{
   private readonly handleChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    this.props.onReferenceYearChange(event.currentTarget.value);
+    const result = this.props.onReferenceYearChange(event.currentTarget.value);
+    if (result instanceof Promise) {
+      result.catch(() => {});
+    }
   };
 
   public render(): React.ReactNode {
@@ -185,7 +191,9 @@ describe("PageMain Integration Tests", () => {
       const dataId = headerBar.dataset.id;
       expect(Number(dataId)).toBeGreaterThan(0);
 
-      const locationOptions = JSON.parse(headerBar.dataset.options || "[]");
+      const optionsData = headerBar.dataset.options;
+      expect(optionsData).toBeDefined();
+      const locationOptions = JSON.parse(optionsData!);
       expect(locationOptions).toEqual(defaultProps.LocationOptions);
     });
 

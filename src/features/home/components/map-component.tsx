@@ -16,6 +16,14 @@ import React, {
 } from "react";
 
 import { OptimizedMarker } from "./optimized-marker";
+const MAP_CENTER_LAT = 39.5;
+const MAP_CENTER_LNG = -98.35;
+const ICON_SIZE_WIDTH = 36;
+const ICON_SIZE_HEIGHT = 52;
+const ICON_ANCHOR_X = 18;
+const ICON_ANCHOR_Y = 52;
+const POPUP_ANCHOR_X = 0;
+const POPUP_ANCHOR_Y = -46;
 
 interface Location {
   city: string;
@@ -55,7 +63,7 @@ type TileLayerType = ComponentType<{
   url: string;
 }>;
 
-const MAP_CENTER: [number, number] = [39.5, -98.35];
+const MAP_CENTER: [number, number] = [MAP_CENTER_LAT, MAP_CENTER_LNG];
 const MAP_STYLE: CSSProperties = { height: "100%", width: "100%" };
 
 interface LegendToggleButtonProperties {
@@ -113,11 +121,11 @@ export const MapComponent = memo<MapComponentProperties>(
 
       const createdCustomIcon = L.icon({
         className: "pet-map-marker-icon",
-        iconAnchor: [18, 52],
+        iconAnchor: [ICON_ANCHOR_X, ICON_ANCHOR_Y],
         iconRetinaUrl: markerUrl,
-        iconSize: [36, 52],
+        iconSize: [ICON_SIZE_WIDTH, ICON_SIZE_HEIGHT],
         iconUrl: markerUrl,
-        popupAnchor: [0, -46],
+        popupAnchor: [POPUP_ANCHOR_X, POPUP_ANCHOR_Y],
       });
 
       setMapContainer(() => reactLeaflet.MapContainer);
@@ -130,13 +138,13 @@ export const MapComponent = memo<MapComponentProperties>(
 
     useEffect(() => {
       if (typeof document !== "undefined") {
-        loadMap();
+        void loadMap();
       }
     }, [loadMap]);
 
     const markers = useMemo(() => {
       if (!locations || !customIcon || !Marker) {
-        return;
+        return undefined;
       }
 
       return locations.map((loc) => (

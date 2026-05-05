@@ -1,5 +1,3 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-
 import { createClient } from "@/config/supabase/client";
 import { mapTrendRowsToGraphData } from "@/lib/api/graph-data";
 import {
@@ -19,9 +17,11 @@ import {
   validateLocationId,
   validateTrendOption,
 } from "@/lib/utils/validation";
-import type { TrendGraphDataProperties } from "@/types/types";
 
 import { apiRequest, hasError } from "./api-client";
+
+import type { TrendGraphDataProperties } from "@/types/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export async function FetchForecastData(
   locationId: number,
@@ -68,7 +68,7 @@ export async function FetchForecastData(
     }
 
     if (!historicalData) {
-      return;
+      return undefined;
     }
 
     const validatedHistoricalData = parseWithFetchError(
@@ -78,7 +78,7 @@ export async function FetchForecastData(
     );
 
     if (validatedHistoricalData.length === 0) {
-      return;
+      return undefined;
     }
 
     const lastHistoricalYear = validatedHistoricalData[0].year;
@@ -104,7 +104,7 @@ export async function FetchForecastData(
     );
 
     if (validatedForecastData.length === 0) {
-      return;
+      return undefined;
     }
 
     return {

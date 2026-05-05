@@ -99,7 +99,9 @@ test.describe("Rankings Page", () => {
     await firstRow.click();
 
     await expect(page).toHaveURL(/\/\d+$/);
-    await expect(page.getByText("Trend Analysis")).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: "Trend Analysis" }),
+    ).toBeVisible({
       timeout: 15_000,
     });
   });

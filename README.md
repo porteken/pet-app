@@ -1,16 +1,19 @@
 # Historical PET USA
 
-A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) that visualizes Physiological Equivalent Temperature (PET) data for the top 500 largest cities in the Contiguous United States from 2000 to the present. The data pipline for getting the data is [here](https://github.com/porteken/pet-data).
+A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) that visualizes Physiological Equivalent Temperature (PET) data for the top 500 largest cities in the Contiguous United States from 2000 to 2025. The data pipeline for getting the data is [here](https://github.com/porteken/pet-data).
 
 ## Features
 
 - **Contiguous US City Map**: View PET data across 500+ cities.
 - **City Trend Charts**: Open a city modal from the map and view PET trends.
+- **Seasonal Analysis**: Switch between annual, spring, summer, fall, and winter views.
 - **Measure Selection**: Switch between average and maximum PET.
 - **Forecasting**: Show 5-75 year forecasts for average PET with confidence ranges.
+- **Thermal Stress Context**: See thermal stress descriptions and legend details alongside trend data.
 - **City Detail Pages**: Open a city page with trend and reference charts.
 - **Reference Comparison**: Compare the current year's PET with a selected historical year.
-- **Rankings**: View cites ranked by PET.
+- **Rankings**: View cities ranked by PET with year, season, state, and thermal stress filters.
+- **Theme Support**: Toggle between light and dark themes.
 
 ## What is PET?
 
@@ -28,12 +31,11 @@ Based on [this study](https://bjsm.bmj.com/content/55/15/825), PET may provide b
 
 ## Tech Stack
 
-- **Frontend**: Next.js, React, TypeScript
-- **UI**: shadcn/ui, Tailwind CSS (v4)
+- **Frontend**: Next.js, React
+- **UI**: shadcn/ui
 - **Map**: Leaflet, React Leaflet, OpenStreetMap
-- **Charts**: Plotly.js
-- **Data**: Supabase, TanStack Query
+- **Charts**: Recharts
+- **Data**: Supabase
 - **Monitoring**: Sentry
-- **Testing**: Vitest, Playwright, Testing Library, MSW
-- **Quality**: Oxc (oxlint, oxfmt), Knip, Husky
+- **Testing**: Vitest, Playwright
 - **Deployment**: Vercel

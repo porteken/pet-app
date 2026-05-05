@@ -6,6 +6,7 @@ import {
   validateYearPets,
   validateYears,
 } from "@/lib/utils/validation";
+
 import type {
   ReferenceGraphDataProperties,
   TrendGraphDataProperties,
@@ -48,7 +49,7 @@ export const mapReferenceRowsToGraphData = (
   rows: ReferenceGraphRow[],
 ): ReferenceGraphDataProperties => {
   const dates = rows.map(({ date }) => new Date(date));
-  const pets = rows.map(({ pet }) => Number(pet));
+  const pets = rows.map(({ pet }) => pet);
 
   validateDates(dates);
   validatePets(pets);
@@ -60,7 +61,7 @@ export const mapTrendRowsToGraphData = (
   rows: TrendGraphRow[],
 ): TrendGraphDataProperties => {
   const years = rows.map(({ year }) => year);
-  const year_pets = rows.map(({ pet }) => Number(pet));
+  const year_pets = rows.map(({ pet }) => pet);
 
   if (years.length === 0 || year_pets.length === 0) {
     return {

@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 const { mockAppProviders } = vi.hoisted(() => ({
-  mockAppProviders: vi.fn(({ children }: { children: React.ReactNode }) => (
+  mockAppProviders: mockFn(({ children }: { children: React.ReactNode }) => (
     <div data-testid="app-providers">{children}</div>
   )),
 }));
@@ -84,7 +84,7 @@ describe("app shell and error pages", () => {
   });
 
   it("renders the root error page and retries on click", () => {
-    const reset = vi.fn();
+    const reset = mockFn();
 
     render(<ErrorPage error={new Error("Unexpected failure")} reset={reset} />);
 
@@ -100,7 +100,7 @@ describe("app shell and error pages", () => {
   });
 
   it("renders the global error page and retries on click", () => {
-    const reset = vi.fn();
+    const reset = mockFn();
     const globalErrorPage = GlobalErrorPage({
       error: new Error("Global failure"),
       reset,
@@ -121,7 +121,7 @@ describe("app shell and error pages", () => {
   });
 
   it("renders the about page error content", () => {
-    const reset = vi.fn();
+    const reset = mockFn();
 
     render(<AboutError error={new Error("About exploded")} reset={reset} />);
 
@@ -133,7 +133,7 @@ describe("app shell and error pages", () => {
   });
 
   it("renders the map error fallback content", () => {
-    render(<MapError error={new Error("Map load failed")} reset={vi.fn()} />);
+    render(<MapError error={new Error("Map load failed")} reset={mockFn()} />);
 
     expect(screen.getByText("Map Error")).toBeInTheDocument();
     expect(screen.getByText("Map load failed")).toBeInTheDocument();
@@ -143,7 +143,7 @@ describe("app shell and error pages", () => {
     render(
       <LocationError
         error={new Error("Location data load failed")}
-        reset={vi.fn()}
+        reset={mockFn()}
       />,
     );
 

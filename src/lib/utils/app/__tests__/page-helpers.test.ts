@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -7,11 +8,11 @@ import {
 } from "../page-helpers";
 
 vi.mock("next/headers", () => ({
-  cookies: vi.fn(),
+  cookies: mockFn(),
 }));
 
 vi.mock("@/lib/api/fetch-server", () => ({
-  FetchLocations: vi.fn(),
+  FetchLocations: mockFn(),
 }));
 
 async function getMockFetchLocations() {
@@ -45,7 +46,7 @@ describe("page-helpers", () => {
   describe("getGraphMeasureFromCookies", () => {
     it("returns value from cookie when present", async () => {
       const mockCookieStore = {
-        get: vi.fn().mockReturnValue({ value: "humidity" }),
+        get: mockFn().mockReturnValue({ value: "humidity" }),
       };
       mockCookies.mockResolvedValue(mockCookieStore);
 
@@ -58,7 +59,7 @@ describe("page-helpers", () => {
 
     it("returns default value when cookie value is null", async () => {
       const mockCookieStore = {
-        get: vi.fn().mockReturnValue({ value: undefined }),
+        get: mockFn().mockReturnValue({ value: undefined }),
       };
       mockCookies.mockResolvedValue(mockCookieStore);
 
@@ -71,7 +72,7 @@ describe("page-helpers", () => {
 
     it("returns default value when cookie value is empty string", async () => {
       const mockCookieStore = {
-        get: vi.fn().mockReturnValue({ value: "" }),
+        get: mockFn().mockReturnValue({ value: "" }),
       };
       mockCookies.mockResolvedValue(mockCookieStore);
 
@@ -89,14 +90,20 @@ describe("page-helpers", () => {
         { cookieValue: "visibility", expected: "visibility" },
       ];
 
-      for (const { cookieValue, expected } of testCases) {
-        const mockCookieStore = {
-          get: vi.fn().mockReturnValue({ value: cookieValue }),
-        };
-        mockCookies.mockResolvedValue(mockCookieStore);
+      const results = await Promise.all(
+        testCases.map(async ({ cookieValue, expected }) => {
+          const mockCookieStore = {
+            get: mockFn().mockReturnValue({ value: cookieValue }),
+          };
+          mockCookies.mockResolvedValue(mockCookieStore);
 
-        const result = await getGraphMeasureFromCookies();
+          const result = await getGraphMeasureFromCookies();
 
+          return { expected, result };
+        }),
+      );
+
+      for (const { expected, result } of results) {
         expect(result).toBe(expected);
       }
     });
@@ -113,7 +120,7 @@ describe("page-helpers", () => {
 
     it("handles cookie store get method throwing error", async () => {
       const mockCookieStore = {
-        get: vi.fn().mockImplementation(() => {
+        get: mockFn().mockImplementation(() => {
           throw new Error("Cookie access error");
         }),
       };
@@ -128,8 +135,8 @@ describe("page-helpers", () => {
 
     it("prefers the latest graph measure cookie when duplicates exist", async () => {
       const mockCookieStore = {
-        get: vi.fn().mockReturnValue({ value: "max" }),
-        getAll: vi.fn().mockReturnValue([
+        get: mockFn().mockReturnValue({ value: "max" }),
+        getAll: mockFn().mockReturnValue([
           { name: "graph-measure", value: "max" },
           { name: "graph-measure", value: "avg" },
         ]),
@@ -146,7 +153,7 @@ describe("page-helpers", () => {
   describe("getForecastPreferencesFromCookies", () => {
     it("returns defaults when cookies are missing", async () => {
       const mockCookieStore = {
-        get: vi.fn(
+        get: mockFn(
           (name: string) => (({}) as Record<string, { value: string }>)[name],
         ),
       };
@@ -164,7 +171,7 @@ describe("page-helpers", () => {
 
     it("returns parsed cookie values when valid", async () => {
       const mockCookieStore = {
-        get: vi.fn(
+        get: mockFn(
           (name: string) =>
             (
               ({
@@ -186,7 +193,7 @@ describe("page-helpers", () => {
 
     it("falls back to default years for invalid values", async () => {
       const mockCookieStore = {
-        get: vi.fn(
+        get: mockFn(
           (name: string) =>
             (
               ({
@@ -208,7 +215,7 @@ describe("page-helpers", () => {
 
     it("treats non-true enabled values as false", async () => {
       const mockCookieStore = {
-        get: vi.fn(
+        get: mockFn(
           (name: string) =>
             (
               ({
@@ -396,12 +403,18 @@ describe("page-helpers", () => {
 
       const mockFetchLocations = await getMockFetchLocations();
 
-      for (const { data } of testCases) {
-        mockFetchLocations.mockClear();
-        mockFetchLocations.mockResolvedValue(data);
+      const results = await Promise.all(
+        testCases.map(async ({ data }) => {
+          mockFetchLocations.mockClear();
+          mockFetchLocations.mockResolvedValue(data);
 
-        const result = await getLocationData();
+          const result = await getLocationData();
 
+          return { data, result };
+        }),
+      );
+
+      for (const { data, result } of results) {
         expect(result).toEqual(data);
         expect(mockFetchLocations).toHaveBeenCalled();
       }
@@ -477,7 +490,7 @@ describe("page-helpers", () => {
   describe("Integration scenarios", () => {
     it("both functions can be called independently", async () => {
       const mockCookieStore = {
-        get: vi.fn().mockReturnValue({ value: "pressure" }),
+        get: mockFn().mockReturnValue({ value: "pressure" }),
       };
       mockCookies.mockResolvedValue(mockCookieStore);
 
@@ -519,16 +532,12 @@ describe("page-helpers", () => {
       expect(cookieResult.status).toBe("rejected");
       expect(locationResult.status).toBe("rejected");
 
-      if (cookieResult.status !== "rejected") {
-        throw new Error("Expected cookie request to be rejected");
-      }
-
-      if (locationResult.status !== "rejected") {
-        throw new Error("Expected location request to be rejected");
-      }
-
-      expect(cookieResult.reason.message).toBe("Cookie error");
-      expect(locationResult.reason.message).toBe("Fetch error");
+      expect((cookieResult as PromiseRejectedResult).reason.message).toBe(
+        "Cookie error",
+      );
+      expect((locationResult as PromiseRejectedResult).reason.message).toBe(
+        "Fetch error",
+      );
     });
   });
 });

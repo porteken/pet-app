@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
-import { cookies } from "next/headers";
-
 import { RankingsMain } from "@/features/rankings";
 import { FetchCityRankings, FetchLocations } from "@/lib/api/fetch-server";
 import {
+  GRAPH_CONFIG,
   normalizeGraphSeason,
   RANKINGS_HEAT_STRESS_COOKIE_NAME,
   RANKINGS_SEASON_COOKIE_NAME,
   RANKINGS_STATE_COOKIE_NAME,
   RANKINGS_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
+import { cookies } from "next/headers";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   description: "City rankings by thermal stress (PET) values",
@@ -24,7 +25,7 @@ const yearMapping = (
   } else if (cookie_value) {
     return Number(cookie_value);
   }
-  return 2025;
+  return GRAPH_CONFIG.YEAR_RANGE.END;
 };
 
 export default async function RankingsPage({

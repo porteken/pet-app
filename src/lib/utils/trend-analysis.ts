@@ -4,6 +4,7 @@ import {
   getHeatStressDescription,
   type HeatStressDescription,
 } from "@/lib/utils/thermal-stress";
+
 import type { TrendGraphDataProperties } from "@/types/types";
 
 export interface TrendGraphSnapshot {
@@ -106,8 +107,16 @@ export const buildTrendAnalysisResult = async ({
     };
   }
 
-  const currentYear = snapshot.years.at(-1)!;
+  const currentYear = snapshot.years.at(-1);
   const currentPetValue = snapshot.year_pets[snapshot.years.length - 1];
+
+  if (currentYear === undefined || currentPetValue === undefined) {
+    return {
+      forecastHeatStress: undefined,
+      heatStressDescription: undefined,
+      snapshot,
+    };
+  }
 
   const forecastHeatStress =
     enableForecast && forecastData

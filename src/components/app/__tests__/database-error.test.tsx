@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom";
 
 import { fireEvent, render, screen } from "@testing-library/react";
@@ -5,7 +6,7 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/utils/reload", () => ({
-  reloadPage: vi.fn(),
+  reloadPage: mockFn(),
 }));
 
 import { reloadPage } from "@/utils/reload";

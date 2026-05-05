@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export function proxy(request: NextRequest) {
+import type { NextRequest } from "next/server";
+
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const staticFiles = ["/robots.txt", "/sitemap.xml"];

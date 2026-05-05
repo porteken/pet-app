@@ -11,8 +11,8 @@ import {
 } from "../actions";
 
 vi.mock("next/headers", () => ({
-  cookies: vi.fn().mockResolvedValue({
-    set: vi.fn(),
+  cookies: mockFn().mockResolvedValue({
+    set: mockFn(),
   }),
 }));
 
@@ -160,13 +160,13 @@ describe("setForecastPreferences", () => {
 });
 
 vi.mock("next/headers", () => ({
-  cookies: vi.fn().mockResolvedValue({
-    set: vi.fn(),
+  cookies: mockFn().mockResolvedValue({
+    set: mockFn(),
   }),
 }));
 
 vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
+  revalidatePath: mockFn(),
 }));
 
 describe("setRankingsYear", () => {

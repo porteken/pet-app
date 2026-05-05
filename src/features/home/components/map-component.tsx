@@ -1,22 +1,22 @@
 "use client";
 
-import { Icon } from "leaflet";
-import React, {
-  ComponentType,
-  CSSProperties,
-  memo,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
 import { PageLoader } from "@/components/app/page-loader";
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import { OptimizedMarker } from "./optimized-marker";
+
+import type { Icon } from "leaflet";
+import type { ComponentType, CSSProperties, ReactNode } from "react";
+const MAP_CENTER_LAT = 39.5;
+const MAP_CENTER_LNG = -98.35;
+const ICON_SIZE_WIDTH = 36;
+const ICON_SIZE_HEIGHT = 52;
+const ICON_ANCHOR_X = 18;
+const ICON_ANCHOR_Y = 52;
+const POPUP_ANCHOR_X = 0;
+const POPUP_ANCHOR_Y = -46;
 
 interface Location {
   city: string;
@@ -56,6 +56,41 @@ type TileLayerType = ComponentType<{
   url: string;
 }>;
 
+const MAP_CENTER: [number, number] = [MAP_CENTER_LAT, MAP_CENTER_LNG];
+const MAP_STYLE: CSSProperties = { height: "100%", width: "100%" };
+
+interface LegendToggleButtonProperties {
+  ariaControls: string;
+  className: string;
+  closedLabel: string;
+  isLegendOpen: boolean;
+  openLabel: string;
+  setIsLegendOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+class LegendToggleButton extends React.PureComponent<LegendToggleButtonProperties> {
+  private readonly handleClick = () => {
+    this.props.setIsLegendOpen((previous) => !previous);
+  };
+
+  public render(): React.ReactElement {
+    const { ariaControls, className, closedLabel, isLegendOpen, openLabel } =
+      this.props;
+
+    return (
+      <button
+        aria-controls={ariaControls}
+        aria-expanded={isLegendOpen}
+        className={className}
+        onClick={this.handleClick}
+        type="button"
+      >
+        {isLegendOpen ? openLabel : closedLabel}
+      </button>
+    );
+  }
+}
+
 export const MapComponent = memo<MapComponentProperties>(
   ({
     locations,
@@ -79,11 +114,11 @@ export const MapComponent = memo<MapComponentProperties>(
 
       const createdCustomIcon = L.icon({
         className: "pet-map-marker-icon",
-        iconAnchor: [18, 52],
+        iconAnchor: [ICON_ANCHOR_X, ICON_ANCHOR_Y],
         iconRetinaUrl: markerUrl,
-        iconSize: [36, 52],
+        iconSize: [ICON_SIZE_WIDTH, ICON_SIZE_HEIGHT],
         iconUrl: markerUrl,
-        popupAnchor: [0, -46],
+        popupAnchor: [POPUP_ANCHOR_X, POPUP_ANCHOR_Y],
       });
 
       setMapContainer(() => reactLeaflet.MapContainer);
@@ -96,23 +131,24 @@ export const MapComponent = memo<MapComponentProperties>(
 
     useEffect(() => {
       if (typeof document !== "undefined") {
-        loadMap();
+        loadMap().catch(() => {});
       }
     }, [loadMap]);
 
     const markers = useMemo(() => {
       if (!locations || !customIcon || !Marker) {
-        return;
+        return undefined;
       }
 
       return locations.map((loc) => (
         <OptimizedMarker
           icon={customIcon}
+          latitude={loc.lat}
+          longitude={loc.lng}
           key={loc.location_id}
           locationId={loc.location_id}
           MarkerComponent={Marker}
           onClick={onMarkerClick}
-          position={[loc.lat, loc.lng]}
           selectedGraphMeasure={selectedGraphMeasure}
           selectedGraphSeason={selectedGraphSeason}
         />
@@ -132,11 +168,11 @@ export const MapComponent = memo<MapComponentProperties>(
 
     if (!locations || locations.length === 0) {
       return (
-        <div className="flex h-full items-center justify-center bg-gray-50">
+        <div className="bg-background/30 flex h-full items-center justify-center px-4">
           <div className="mx-auto max-w-md p-6 text-center">
             <div className="mb-6">
               <svg
-                className="mx-auto size-12 text-red-500"
+                className="text-destructive mx-auto size-12"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -149,18 +185,18 @@ export const MapComponent = memo<MapComponentProperties>(
                 />
               </svg>
             </div>
-            <h1 className="mb-4 text-2xl font-bold text-gray-900">
+            <h1 className="text-foreground mb-4 text-2xl font-bold">
               No Map Data Available
             </h1>
-            <p className="mb-6 text-gray-600">
+            <p className="text-muted-foreground mb-6">
               Unable to load location data for the map. The database may be
               temporarily unavailable.
             </p>
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-              <p className="text-sm text-blue-800">
+            <div className="glass-panel-muted rounded-2xl p-4">
+              <p className="text-foreground text-sm">
                 <strong>Need help?</strong> Contact Kenneth Porter at{" "}
                 <a
-                  className="text-blue-600 underline hover:text-blue-800"
+                  className="text-primary hover:text-primary/80 underline underline-offset-4"
                   href="mailto:porteken@gmail.com"
                 >
                   porteken@gmail.com
@@ -175,9 +211,9 @@ export const MapComponent = memo<MapComponentProperties>(
     return (
       <div className="relative h-full w-full">
         <MapContainer
-          center={[39.5, -98.35]}
+          center={MAP_CENTER}
           scrollWheelZoom
-          style={{ height: "100%", width: "100%" }}
+          style={MAP_STYLE}
           zoom={5}
         >
           <TileLayer
@@ -188,17 +224,14 @@ export const MapComponent = memo<MapComponentProperties>(
         </MapContainer>
         <div className="pointer-events-none absolute bottom-6 left-6 z-40 hidden sm:block">
           <div className="pointer-events-auto flex flex-col items-start gap-2">
-            <button
-              aria-controls="desktop-thermal-stress-legend"
-              aria-expanded={isLegendOpen}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-md transition-colors hover:bg-gray-50"
-              onClick={() => setIsLegendOpen((previous) => !previous)}
-              type="button"
-            >
-              {isLegendOpen
-                ? "Hide Thermal Stress Index"
-                : "Show Thermal Stress Index"}
-            </button>
+            <LegendToggleButton
+              ariaControls="desktop-thermal-stress-legend"
+              className="glass-panel-muted text-foreground hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
+              closedLabel="Show Thermal Stress Index"
+              isLegendOpen={isLegendOpen}
+              openLabel="Hide Thermal Stress Index"
+              setIsLegendOpen={setIsLegendOpen}
+            />
             {isLegendOpen && (
               <div id="desktop-thermal-stress-legend">
                 <HeatStressLegend />
@@ -210,21 +243,20 @@ export const MapComponent = memo<MapComponentProperties>(
           <div className="pointer-events-auto flex items-center">
             {isLegendOpen && (
               <div
-                className="mr-2 max-w-[78vw] shadow-md"
+                className="glass-panel mr-2 max-w-[78vw] rounded-3xl p-2 shadow-md"
                 id="mobile-thermal-stress-legend"
               >
                 <HeatStressLegend />
               </div>
             )}
-            <button
-              aria-controls="mobile-thermal-stress-legend"
-              aria-expanded={isLegendOpen}
-              className="rounded-l-lg border border-r-0 border-gray-200 bg-white px-2 py-3 text-xs font-semibold text-gray-900 shadow-md transition-colors hover:bg-gray-50"
-              onClick={() => setIsLegendOpen((previous) => !previous)}
-              type="button"
-            >
-              {isLegendOpen ? "Close" : "Thermal Stress"}
-            </button>
+            <LegendToggleButton
+              ariaControls="mobile-thermal-stress-legend"
+              className="glass-panel-muted text-foreground hover:bg-accent rounded-l-2xl border-r-0 px-3 py-3 text-xs font-semibold transition"
+              closedLabel="Thermal Stress"
+              isLegendOpen={isLegendOpen}
+              openLabel="Close"
+              setIsLegendOpen={setIsLegendOpen}
+            />
           </div>
         </div>
       </div>

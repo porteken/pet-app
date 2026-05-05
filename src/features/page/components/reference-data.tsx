@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
-
 import { GenerateReferenceGraph } from "@/features/graph";
+import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
-import { DEFAULT_GRAPH_SEASON } from "@/lib/constants";
+import { DEFAULT_GRAPH_SEASON, GRAPH_CONFIG } from "@/lib/constants";
 import { YearOptions } from "@/lib/utils/select-options";
+import React from "react";
 
 interface ReferenceDataProperties {
   CurrentDates: Date[];
@@ -33,39 +33,12 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   ReferencePets,
 }) => {
   const REFERENCE_YEARS = React.useMemo(() => YearOptions(), []);
-  const [referenceGraph, setReferenceGraph] = React.useState<
-    React.ReactElement | undefined
-  >();
   const [referenceGraphSnapshot, setReferenceGraphSnapshot] =
     React.useState<ReferenceGraphSnapshot>();
-  const [isMobileViewport, setIsMobileViewport] = React.useState(() => {
-    if (typeof globalThis.matchMedia !== "function") {
-      return false;
-    }
-
-    return globalThis.matchMedia("(max-width: 639px)").matches;
-  });
+  const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
 
   const showReferenceLegend = !isMobileViewport || isMobileLegendOpen;
-
-  React.useEffect(() => {
-    if (typeof globalThis.matchMedia !== "function") {
-      return;
-    }
-
-    const mediaQuery = globalThis.matchMedia("(max-width: 639px)");
-    const updateIsMobileViewport = () => {
-      setIsMobileViewport(mediaQuery.matches);
-    };
-
-    updateIsMobileViewport();
-
-    mediaQuery.addEventListener("change", updateIsMobileViewport);
-    return () => {
-      mediaQuery.removeEventListener("change", updateIsMobileViewport);
-    };
-  }, []);
 
   const generatePetReferenceGraph = React.useCallback(
     async (year: string) => {
@@ -89,61 +62,38 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
     [onReferenceYearChange],
   );
 
+  const handleToggleMobileLegend = React.useCallback(() => {
+    setIsMobileLegendOpen((previous) => !previous);
+  }, []);
+
   React.useEffect(() => {
-    generatePetReferenceGraph(referenceYear);
+    generatePetReferenceGraph(referenceYear).catch(() => {
+      // Error is handled by the graph component's own error state
+    });
   }, [generatePetReferenceGraph, referenceYear]);
-
-  React.useEffect(() => {
-    if (!referenceGraphSnapshot) {
-      return;
-    }
-
-    let isCancelled = false;
-    const renderGraph = async () => {
-      const graph = await GenerateReferenceGraph(
-        referenceGraphSnapshot.year,
-        referenceGraphSnapshot.dates,
-        referenceGraphSnapshot.pets,
-        CurrentPets,
-        showReferenceLegend,
-        isMobileViewport,
-        DEFAULT_GRAPH_SEASON,
-        CurrentDates.at(-1)?.getFullYear() ?? 2025,
-      );
-
-      if (!isCancelled) {
-        setReferenceGraph(graph);
-      }
-    };
-
-    void renderGraph();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [
-    CurrentDates,
-    CurrentPets,
-    isMobileViewport,
-    referenceGraphSnapshot,
-    showReferenceLegend,
-  ]);
 
   return (
     <div className="h-full min-h-0">
-      <div className="flex h-full min-h-0 flex-col rounded-lg bg-white p-3 shadow-md sm:px-4 sm:py-5">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">
-          Reference Data
-        </h2>
-        <div className="mb-4 space-y-4">
+      <div className="glass-panel fade-in-up flex h-full min-h-0 flex-col rounded-3xl p-4 sm:px-5 sm:py-6">
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-primary mb-1 text-xs font-semibold tracking-[0.24em] uppercase">
+              Historical comparison
+            </p>
+            <h2 className="text-foreground text-lg font-semibold sm:text-xl">
+              Reference Data
+            </h2>
+          </div>
+        </div>
+        <div className="mb-5 space-y-4">
           <label
-            className="mb-2 block text-sm font-medium text-gray-700"
+            className="text-foreground mb-2 block text-sm font-medium"
             htmlFor="reference-year"
           >
             Reference Year
           </label>
           <select
-            className="h-10 w-full rounded-md border border-gray-300 px-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+            className="border-border bg-background/80 text-foreground focus:border-primary focus:ring-primary/20 h-11 w-full rounded-xl border px-3 shadow-sm transition outline-none focus:ring-2"
             id="reference-year"
             onChange={handleReferenceYearChange}
             value={referenceYear}
@@ -159,8 +109,8 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
           <button
             aria-controls="reference-data-graph"
             aria-expanded={isMobileLegendOpen}
-            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50"
-            onClick={() => setIsMobileLegendOpen((previous) => !previous)}
+            className="border-border bg-background/80 text-foreground hover:bg-accent rounded-full border px-3 py-2 text-sm font-semibold shadow-sm transition"
+            onClick={handleToggleMobileLegend}
             type="button"
           >
             {isMobileLegendOpen ? "Hide Graph Legend" : "Show Graph Legend"}
@@ -170,7 +120,25 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
           className="min-h-[clamp(220px,42vh,520px)] flex-1 overflow-hidden sm:min-h-[clamp(450px,70vh,850px)]"
           id="reference-data-graph"
         >
-          {referenceGraph}
+          {referenceGraphSnapshot ? (
+            <GenerateReferenceGraph
+              currentPets={CurrentPets}
+              currentYear={
+                CurrentDates.at(-1)?.getFullYear() ??
+                GRAPH_CONFIG.YEAR_RANGE.END
+              }
+              dates={referenceGraphSnapshot.dates}
+              isMobileViewport={isMobileViewport}
+              referencePets={referenceGraphSnapshot.pets}
+              referenceYear={referenceGraphSnapshot.year}
+              season={DEFAULT_GRAPH_SEASON}
+              showLegend={showReferenceLegend}
+            />
+          ) : (
+            <div className="graph-surface-panel text-muted-foreground flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm">
+              Loading chart…
+            </div>
+          )}
         </div>
       </div>
     </div>

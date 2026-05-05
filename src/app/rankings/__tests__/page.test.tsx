@@ -7,10 +7,10 @@ const {
   mockFetchLocations,
   mockRankingsMain,
 } = vi.hoisted(() => ({
-  mockCookies: vi.fn(),
-  mockFetchCityRankings: vi.fn(),
-  mockFetchLocations: vi.fn(),
-  mockRankingsMain: vi.fn((_properties?: unknown) => (
+  mockCookies: mockFn(),
+  mockFetchCityRankings: mockFn(),
+  mockFetchLocations: mockFn(),
+  mockRankingsMain: mockFn((_properties?: unknown) => (
     <div data-testid="rankings-main">Rankings</div>
   )),
 }));

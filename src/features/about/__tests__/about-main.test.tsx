@@ -11,7 +11,9 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("@/features/header-bar", () => ({
-  HeaderBar: vi.fn(({ LocationOptions }) => (
+  HeaderBar: mockFn<
+    ({ LocationOptions }: { LocationOptions: unknown[] }) => React.ReactNode
+  >(({ LocationOptions }: { LocationOptions: unknown[] }) => (
     <div data-testid="header-bar">
       HeaderBar with {LocationOptions?.length || 0} locations
     </div>
@@ -34,6 +36,8 @@ const mockLocationOptions = [
   },
 ];
 
+const emptyLocationOptions: typeof mockLocationOptions = [];
+
 describe("AboutMain", () => {
   it("should render the header bar with location options", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
@@ -46,40 +50,23 @@ describe("AboutMain", () => {
   it("should render the main content container", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    const container = screen
-      .getByText("Purpose of the Application")
-      .closest("div.mx-auto");
+    const container = screen.getByRole("main");
     expect(container).toBeInTheDocument();
-    expect(container).toHaveClass(
-      "mx-auto",
-      "flex",
-      "flex-col",
-      "gap-5",
-      "p-8",
-      "px-4",
-    );
+    expect(container).toHaveClass("mx-auto", "px-4", "py-8");
   });
 
-  it("should display the purpose section with correct heading", () => {
+  it("should display the purpose section label", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    const purposeHeading = screen.getByRole("heading", {
-      name: /purpose of the application/i,
-    });
-    expect(purposeHeading).toBeInTheDocument();
-    expect(purposeHeading).toHaveClass("text-2xl", "font-extrabold");
+    expect(screen.getByText(/purpose of the application/i)).toBeInTheDocument();
   });
 
-  it("should display the purpose description", () => {
+  it("should keep the page heading accessible", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    const purposeText = screen.getByText(
-      /this application shows how the physiological equivalent temperature/i,
-    );
-    expect(purposeText).toBeInTheDocument();
-    expect(purposeText).toHaveTextContent("from 2000 to 2013");
-    expect(purposeText).toHaveTextContent("top 500 largest cities");
-    expect(purposeText).toHaveTextContent("Contiguous United States");
+    const heading = screen.getByRole("heading", { name: "About" });
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveClass("sr-only");
   });
 
   it("should display the 'What is PET?' section with correct heading", () => {
@@ -87,14 +74,19 @@ describe("AboutMain", () => {
 
     const petHeading = screen.getByRole("heading", { name: /what is pet\?/i });
     expect(petHeading).toBeInTheDocument();
-    expect(petHeading).toHaveClass("text-2xl", "font-extrabold");
+    expect(petHeading).toHaveClass(
+      "text-primary",
+      "text-sm",
+      "font-semibold",
+      "uppercase",
+    );
   });
 
   it("should display the PET definition", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
     const petDefinition = screen.getByText(
-      /the technical definition of the pet/i,
+      /pet \(physiological equivalent temperature\) is a method to measure/i,
     );
     expect(petDefinition).toBeInTheDocument();
     expect(petDefinition).toHaveTextContent(
@@ -116,13 +108,13 @@ describe("AboutMain", () => {
   it("should render a link to the research study", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    const studyLink = screen.getByRole("link", { name: /this/i });
+    const studyLink = screen.getByRole("link", { name: /this study/i });
     expect(studyLink).toBeInTheDocument();
     expect(studyLink).toHaveAttribute(
       "href",
       "https://bjsm.bmj.com/content/55/15/825",
     );
-    expect(studyLink).toHaveClass("text-blue-600");
+    expect(studyLink).toHaveClass("text-primary");
   });
 
   it("should mention the study's findings about PET", () => {
@@ -137,7 +129,7 @@ describe("AboutMain", () => {
   });
 
   it("should render without location options", () => {
-    render(<AboutMain LocationOptions={[]} />);
+    render(<AboutMain LocationOptions={emptyLocationOptions} />);
 
     const headerBar = screen.getByTestId("header-bar");
     expect(headerBar).toHaveTextContent("HeaderBar with 0 locations");

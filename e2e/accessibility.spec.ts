@@ -3,6 +3,10 @@ import { expect, test } from "@playwright/test";
 import { waitForLocationDetailsPage } from "./utils/map-page";
 
 const MARKER_SELECTOR = ".pet-map-marker-icon, .leaflet-marker-icon";
+const LOCATION_CHARTS =
+  '[data-testid="trend-chart"], [data-testid="reference-chart"]';
+const TREND_ANALYSIS_HEADING = { name: "Trend Analysis" } as const;
+const REFERENCE_DATA_HEADING = { name: "Reference Data" } as const;
 
 test.describe("Accessibility", () => {
   test("keyboard navigation: complete user journey using only keyboard", async ({
@@ -24,7 +28,7 @@ test.describe("Accessibility", () => {
     await page.keyboard.press("ArrowDown");
     await page.keyboard.press("Enter");
 
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+    await expect(page.locator(LOCATION_CHARTS)).toHaveCount(2, {
       timeout: 10_000,
     });
   });
@@ -65,8 +69,12 @@ test.describe("Accessibility", () => {
 
     await page.goto("/1");
 
-    await expect(page.getByText("Trend Analysis")).toBeVisible();
-    await expect(page.getByText("Reference Data")).toBeVisible();
+    await expect(
+      page.getByRole("heading", TREND_ANALYSIS_HEADING),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", REFERENCE_DATA_HEADING),
+    ).toBeVisible();
 
     const graphMeasure = page.locator("select#graph-measure");
     await expect(graphMeasure).toBeVisible();
@@ -90,17 +98,17 @@ test.describe("Accessibility", () => {
 
     await page.goto("/1");
 
-    await expect(page.locator(".js-plotly-plot").first()).toBeVisible({
+    await expect(page.locator(LOCATION_CHARTS).first()).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+    await expect(page.locator(LOCATION_CHARTS)).toHaveCount(2, {
       timeout: 15_000,
     });
 
     const graphMeasure = page.locator("select#graph-measure");
     await graphMeasure.selectOption("max");
 
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+    await expect(page.locator(LOCATION_CHARTS)).toHaveCount(2, {
       timeout: 10_000,
     });
   });
@@ -114,14 +122,18 @@ test.describe("Accessibility", () => {
 
     await expect(page.locator("select#graph-measure")).toBeVisible();
 
-    await expect(page.getByText("Trend Analysis")).toBeVisible();
-    await expect(page.getByText("Reference Data")).toBeVisible();
+    await expect(
+      page.getByRole("heading", TREND_ANALYSIS_HEADING),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", REFERENCE_DATA_HEADING),
+    ).toBeVisible();
 
     const graphMeasure = page.locator("select#graph-measure");
     await expect(graphMeasure).toBeVisible();
     await graphMeasure.selectOption("max");
 
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+    await expect(page.locator(LOCATION_CHARTS)).toHaveCount(2, {
       timeout: 10_000,
     });
 
@@ -140,9 +152,8 @@ test.describe("Accessibility", () => {
     await expect(heading.first()).toBeVisible();
 
     const labels = page.locator("label");
-    for (const label of await labels.all()) {
-      await expect(label).toBeVisible();
-    }
+    const allLabels = await labels.all();
+    await Promise.all(allLabels.map((label) => expect(label).toBeVisible()));
 
     const navElements = page.locator("nav a, header a, button");
     const visibleNavElements = await navElements.all();
@@ -164,15 +175,17 @@ test.describe("Accessibility", () => {
     const firstSelect = selectElements.first();
     const box = await firstSelect.boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.height).toBeGreaterThanOrEqual(40);
+    expect(box?.height).toBeGreaterThanOrEqual(40);
 
-    await expect(page.getByText("Trend Analysis")).toBeVisible();
+    await expect(
+      page.getByRole("heading", TREND_ANALYSIS_HEADING),
+    ).toBeVisible();
 
     const graphMeasure = page.locator("select#graph-measure");
     await graphMeasure.click();
     await graphMeasure.selectOption("max");
 
-    await expect(page.locator(".js-plotly-plot")).toHaveCount(2, {
+    await expect(page.locator(LOCATION_CHARTS)).toHaveCount(2, {
       timeout: 15_000,
     });
   });

@@ -1,7 +1,5 @@
 "use server";
 
-import { cookies } from "next/headers";
-
 import {
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
@@ -13,6 +11,7 @@ import {
   RANKINGS_STATE_COOKIE_NAME,
   RANKINGS_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
+import { cookies } from "next/headers";
 
 export async function setForecastPreferences(
   forecastEnabled: boolean,

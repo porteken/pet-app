@@ -1,7 +1,4 @@
 "use server";
-import { cookies } from "next/headers";
-import { cache } from "react";
-
 import { createClient } from "@/config/supabase/server";
 import {
   filterReferenceRowsBySeason,
@@ -23,6 +20,16 @@ import {
 } from "@/lib/constants";
 import { DatabaseError } from "@/lib/utils/errors";
 import {
+  validateLocationId,
+  validateTrendOption,
+  validateYear,
+} from "@/lib/utils/validation";
+import { cookies } from "next/headers";
+import { cache } from "react";
+
+const MIN_YEAR = 2000;
+const MAX_YEAR = 2100;
+import type {
   FetchLocationProperties,
   LocationOptionSection,
   ReferenceGraphDataProperties,
@@ -39,7 +46,7 @@ type LocationQueryRow = {
 };
 
 const CITY_RANKINGS_COLUMNS =
-  "avg_pet, change_per_decade, city, future_lower, future_upper, location_id, max_pet, p10, p90, state, year";
+  "avg_pet, change_from_2000, city, future_lower, future_upper, location_id, max_pet, p10, p90, state, year";
 
 function assertQueryData<T>(
   label: string,
@@ -57,7 +64,7 @@ export async function FetchCityRankings(
 ): Promise<
   Array<{
     avg_pet: number;
-    changePerDecade: number | undefined;
+    changeFrom2000: number | undefined;
     city: string;
     FutureValueLower: number | undefined;
     FutureValueUpper: number | undefined;
@@ -71,13 +78,13 @@ export async function FetchCityRankings(
 > {
   const resolvedSeason = normalizeGraphSeason(season);
 
-  if (!year || Number.isNaN(year) || year < 2000 || year > 2100) {
+  if (!year || Number.isNaN(year) || year < MIN_YEAR || year > MAX_YEAR) {
     throw new DatabaseError(
-      `Invalid year: ${year}. Must be between 2000 and 2100.`,
+      `Invalid year: ${year}. Must be between ${MIN_YEAR} and ${MAX_YEAR}.`,
     );
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = await createClient(cookieStore);
 
   const { data, error } = await fetchCityRankingsRows(
@@ -98,7 +105,7 @@ export async function FetchCityRankings(
     .toSorted((a, b) => b.avg_pet - a.avg_pet)
     .map((row, index) => ({
       avg_pet: row.avg_pet,
-      changePerDecade: row.change_per_decade ?? undefined,
+      changeFrom2000: row.change_from_2000 ?? undefined,
       city: row.city,
       FutureValueLower: row.future_lower ?? undefined,
       FutureValueUpper: row.future_upper ?? undefined,
@@ -136,7 +143,7 @@ async function fetchCityRankingsRows(
 
 export const FetchLocations = cache(
   async (): Promise<FetchLocationProperties> => {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = await createClient(cookieStore);
 
     const locations = await fetchLocationRows(supabase);
@@ -253,17 +260,17 @@ export async function FetchReferenceGraphData(
 ): Promise<ReferenceGraphDataProperties> {
   const resolvedSeason = normalizeGraphSeason(season);
 
-  if (!isValidLocationId(locationId)) {
+  if (!validateLocationId(locationId)) {
     throw new DatabaseError(`Invalid locationId: ${locationId}`);
   }
 
-  if (!isValidYear(year)) {
+  if (!validateYear(year)) {
     throw new DatabaseError(
       `Invalid year format: ${year}. Must be a 4-digit year.`,
     );
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = await createClient(cookieStore);
 
   const { data, error } = await supabase
@@ -298,17 +305,17 @@ export async function FetchTrendGraphData(
 ): Promise<TrendGraphDataProperties> {
   const resolvedSeason = normalizeGraphSeason(season);
 
-  if (!isValidLocationId(locationId)) {
+  if (!validateLocationId(locationId)) {
     throw new DatabaseError(`Invalid locationId: ${locationId}`);
   }
 
-  if (!isValidTrendOption(option)) {
+  if (!validateTrendOption(option)) {
     throw new DatabaseError(
       `Invalid option: ${option}. Must be 'avg' or 'max'`,
     );
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = await createClient(cookieStore);
 
   const { data, error } = await supabase
@@ -343,18 +350,6 @@ function filterRowsWithPositiveLocationId<
     const locationId = Number(row.location_id);
     return Number.isInteger(locationId) && locationId > 0;
   });
-}
-
-function isValidLocationId(locationId: number): boolean {
-  return Number.isInteger(locationId) && locationId > 0;
-}
-
-function isValidTrendOption(option: string): boolean {
-  return option === "avg" || option === "max";
-}
-
-function isValidYear(year: string): boolean {
-  return /^\d{4}$/.test(year);
 }
 
 const parseWithDatabaseError = <T>(

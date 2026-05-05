@@ -1,17 +1,18 @@
 "use client";
 
-import React from "react";
-
+import { ForecastControls } from "@/components/app/forecast-controls";
 import { GenerateTrendGraph } from "@/features/graph";
+import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
-import { ForecastControls } from "@/lib/utils/forecast-controls";
-import { type HeatStressDescription } from "@/lib/utils/thermal-stress";
 import {
   buildTrendAnalysisResult,
   type TrendGraphSnapshot,
 } from "@/lib/utils/trend-analysis";
+import React from "react";
+
+import type { HeatStressDescription } from "@/lib/utils/thermal-stress";
 
 interface TrendAnalysisProperties {
   graphSeason: GraphSeason;
@@ -36,9 +37,6 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
 }) => {
   const [selectedGraphMeasure, setSelectedGraphMeasure] =
     React.useState(initialGraphMeasure);
-  const [trendGraph, setTrendGraph] = React.useState<
-    React.ReactElement | undefined
-  >();
   const [forecastEnabled, setForecastEnabled] = React.useState(
     () => initialForecastEnabled,
   );
@@ -53,34 +51,10 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   >();
   const [trendGraphSnapshot, setTrendGraphSnapshot] =
     React.useState<TrendGraphSnapshot>();
-  const [isMobileViewport, setIsMobileViewport] = React.useState(() => {
-    if (typeof globalThis.matchMedia !== "function") {
-      return false;
-    }
-
-    return globalThis.matchMedia("(max-width: 639px)").matches;
-  });
+  const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
 
   const showTrendLegend = !isMobileViewport || isMobileLegendOpen;
-
-  React.useEffect(() => {
-    if (typeof globalThis.matchMedia !== "function") {
-      return;
-    }
-
-    const mediaQuery = globalThis.matchMedia("(max-width: 639px)");
-    const updateIsMobileViewport = () => {
-      setIsMobileViewport(mediaQuery.matches);
-    };
-
-    updateIsMobileViewport();
-
-    mediaQuery.addEventListener("change", updateIsMobileViewport);
-    return () => {
-      mediaQuery.removeEventListener("change", updateIsMobileViewport);
-    };
-  }, []);
 
   const generatePetTrendGraph = React.useCallback(
     async (
@@ -158,7 +132,9 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       graphSeason,
       forecastEnabled && forecastSupported,
       forecastYearsAhead,
-    );
+    ).catch(() => {
+      // Error is handled by the graph component's own error state
+    });
   }, [
     generatePetTrendGraph,
     selectedGraphMeasure,
@@ -185,73 +161,66 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     [forecastEnabled],
   );
 
-  React.useEffect(() => {
-    if (!trendGraphSnapshot) {
-      return;
-    }
-
-    setTrendGraph(
-      GenerateTrendGraph({
-        forecastData: trendGraphSnapshot.forecastData,
-        increasePerYear: trendGraphSnapshot.increase_per_year,
-        isMobileViewport,
-        option: trendGraphSnapshot.option,
-        season: trendGraphSnapshot.season,
-        showLegend: showTrendLegend,
-        trendlinePets: trendGraphSnapshot.trendline_pets,
-        yearPets: trendGraphSnapshot.year_pets,
-        years: trendGraphSnapshot.years,
-      }),
-    );
-  }, [isMobileViewport, showTrendLegend, trendGraphSnapshot]);
+  const handleToggleMobileLegend = React.useCallback(() => {
+    setIsMobileLegendOpen((previous) => !previous);
+  }, []);
 
   return (
     <div className="h-full min-h-0">
-      <div className="flex h-full min-h-0 flex-col rounded-lg bg-white p-3 shadow-md sm:px-4 sm:py-5">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">
-          Trend Analysis
-        </h2>
-        <div className="mb-4 space-y-4">
+      <div className="glass-panel fade-in-up flex h-full min-h-0 flex-col rounded-3xl p-4 sm:px-5 sm:py-6">
+        <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <label
-              className="mb-2 block text-sm font-medium text-gray-700"
-              htmlFor="graph-season"
-            >
-              Season
-            </label>
-            <select
-              className="h-10 w-full rounded-md border border-gray-300 px-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-              id="graph-season"
-              onChange={handleSeasonChange}
-              value={graphSeason}
-            >
-              <option value="Annual">Annual</option>
-              <option value="Spring">Spring</option>
-              <option value="Summer">Summer</option>
-              <option value="Fall">Fall</option>
-              <option value="Winter">Winter</option>
-            </select>
+            <p className="text-primary mb-1 text-xs font-semibold tracking-[0.24em] uppercase">
+              Historical trend
+            </p>
+            <h2 className="text-foreground text-lg font-semibold sm:text-xl">
+              Trend Analysis
+            </h2>
           </div>
-          <div>
-            <label
-              className="mb-2 block text-sm font-medium text-gray-700"
-              htmlFor="graph-measure"
-            >
-              Graph Measure
-            </label>
-            <select
-              className="h-10 w-full rounded-md border border-gray-300 px-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-              id="graph-measure"
-              onChange={handleGraphMeasureChange}
-              value={selectedGraphMeasure}
-            >
-              <option key="measure-avg" value="avg">
-                Average
-              </option>
-              <option key="measure-max" value="max">
-                Maximum
-              </option>
-            </select>
+        </div>
+        <div className="mb-5 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label
+                className="text-foreground mb-2 block text-sm font-medium"
+                htmlFor="graph-season"
+              >
+                Season
+              </label>
+              <select
+                className="border-border bg-background/80 text-foreground focus:border-primary focus:ring-primary/20 h-11 w-full rounded-xl border px-3 shadow-sm transition outline-none focus:ring-2"
+                id="graph-season"
+                onChange={handleSeasonChange}
+                value={graphSeason}
+              >
+                <option value="Annual">Annual</option>
+                <option value="Spring">Spring</option>
+                <option value="Summer">Summer</option>
+                <option value="Fall">Fall</option>
+                <option value="Winter">Winter</option>
+              </select>
+            </div>
+            <div>
+              <label
+                className="text-foreground mb-2 block text-sm font-medium"
+                htmlFor="graph-measure"
+              >
+                Graph Measure
+              </label>
+              <select
+                className="border-border bg-background/80 text-foreground focus:border-primary focus:ring-primary/20 h-11 w-full rounded-xl border px-3 shadow-sm transition outline-none focus:ring-2"
+                id="graph-measure"
+                onChange={handleGraphMeasureChange}
+                value={selectedGraphMeasure}
+              >
+                <option key="measure-avg" value="avg">
+                  Average
+                </option>
+                <option key="measure-max" value="max">
+                  Maximum
+                </option>
+              </select>
+            </div>
           </div>
           {forecastSupported && (
             <ForecastControls
@@ -263,21 +232,21 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           )}
         </div>
         {currentHeatStress && (
-          <div className="mb-4 rounded-lg bg-blue-50 p-4">
-            <p className="text-sm font-medium text-gray-900">
+          <div className="glass-panel-muted mb-5 rounded-2xl p-4">
+            <p className="text-foreground text-sm font-medium">
               {currentHeatStress.prefix}{" "}
               <span className={`font-bold ${currentHeatStress.colorClass}`}>
                 {currentHeatStress.value}
               </span>
             </p>
             {forecastEnabled && forecastHeatStress && (
-              <p className="mt-2 text-sm font-medium text-gray-900">
+              <p className="text-foreground mt-2 text-sm font-medium">
                 {forecastHeatStress.prefix}{" "}
                 <span className={`font-bold ${forecastHeatStress.colorClass}`}>
                   {forecastHeatStress.value}
                 </span>
                 {forecastHeatStress.confidenceRange && (
-                  <span className="ml-2 text-xs text-gray-600">
+                  <span className="text-muted-foreground ml-2 text-xs">
                     {forecastHeatStress.confidenceRange}
                   </span>
                 )}
@@ -289,8 +258,8 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           <button
             aria-controls="trend-analysis-graph"
             aria-expanded={isMobileLegendOpen}
-            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50"
-            onClick={() => setIsMobileLegendOpen((previous) => !previous)}
+            className="border-border bg-background/80 text-foreground hover:bg-accent rounded-full border px-3 py-2 text-sm font-semibold shadow-sm transition"
+            onClick={handleToggleMobileLegend}
             type="button"
           >
             {isMobileLegendOpen ? "Hide Graph Legend" : "Show Graph Legend"}
@@ -300,7 +269,23 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           className="min-h-[clamp(220px,42vh,520px)] flex-1 overflow-hidden sm:min-h-[clamp(450px,70vh,850px)]"
           id="trend-analysis-graph"
         >
-          {trendGraph}
+          {trendGraphSnapshot ? (
+            <GenerateTrendGraph
+              forecastData={trendGraphSnapshot.forecastData}
+              increasePerYear={trendGraphSnapshot.increase_per_year}
+              isMobileViewport={isMobileViewport}
+              option={trendGraphSnapshot.option}
+              season={trendGraphSnapshot.season}
+              showLegend={showTrendLegend}
+              trendlinePets={trendGraphSnapshot.trendline_pets}
+              yearPets={trendGraphSnapshot.year_pets}
+              years={trendGraphSnapshot.years}
+            />
+          ) : (
+            <div className="graph-surface-panel text-muted-foreground flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm">
+              Loading chart…
+            </div>
+          )}
         </div>
       </div>
     </div>

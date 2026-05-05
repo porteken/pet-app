@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
+// eslint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom";
 
 import {
@@ -10,27 +12,108 @@ import {
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockPush = vi.fn();
+const mockPush = mockFn();
+
+class MockSelectControl extends React.PureComponent<{
+  data: Array<{ label: string; value: string }>;
+  disabled?: boolean;
+  label?: string;
+  onChange?: (value: string) => void;
+  placeholder?: string;
+  value?: string;
+}> {
+  private readonly handleChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    this.props.onChange?.(event.target.value);
+  };
+
+  public render(): React.ReactNode {
+    const { data, disabled, label, placeholder, value } = this.props;
+    const testId = `${label?.toLowerCase().replaceAll(/\s/g, "-") ?? "select"}-select`;
+
+    return (
+      <div>
+        {label && <label htmlFor={testId}>{label}</label>}
+        <select
+          data-testid={testId}
+          disabled={disabled}
+          id={testId}
+          onChange={this.handleChange}
+          value={value}
+        >
+          {placeholder && <option value="">{placeholder}</option>}
+          {data.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
+}
+
+class MockPaginationControl extends React.PureComponent<{
+  onChange: (value: number) => void;
+  total: number;
+  value: number;
+}> {
+  private readonly handleNext = () => {
+    this.props.onChange(Math.min(this.props.total, this.props.value + 1));
+  };
+
+  private readonly handlePrevious = () => {
+    this.props.onChange(Math.max(1, this.props.value - 1));
+  };
+
+  public render(): React.ReactNode {
+    const { total, value } = this.props;
+
+    return (
+      <div data-testid="pagination">
+        <button
+          data-testid="prev-page"
+          disabled={value <= 1}
+          onClick={this.handlePrevious}
+          type="button"
+        >
+          Previous
+        </button>
+        <span data-testid="current-page">{value}</span>
+        <span data-testid="total-pages">{total}</span>
+        <button
+          data-testid="next-page"
+          disabled={value >= total}
+          onClick={this.handleNext}
+          type="button"
+        >
+          Next
+        </button>
+      </div>
+    );
+  }
+}
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
   }),
   useSearchParams: () => ({
-    get: vi.fn(),
+    get: mockFn(),
     toString: () => "",
   }),
 }));
 
 vi.mock("@/lib/actions/actions", () => ({
-  setRankingsHeatStress: vi.fn(),
-  setRankingsSeason: vi.fn(),
-  setRankingsState: vi.fn(),
-  setRankingsYear: vi.fn(),
+  setRankingsHeatStress: mockFn(),
+  setRankingsSeason: mockFn(),
+  setRankingsState: mockFn(),
+  setRankingsYear: mockFn(),
 }));
 
 vi.mock("@/features/header-bar", () => ({
-  HeaderBar: vi.fn(({ LocationOptions }) => (
+  HeaderBar: mockFn(({ LocationOptions }: { LocationOptions?: unknown[] }) => (
     <div data-testid="header-bar">
       HeaderBar with {LocationOptions?.length || 0} locations
     </div>
@@ -38,69 +121,17 @@ vi.mock("@/features/header-bar", () => ({
 }));
 
 vi.mock("@/components/ui/select", () => ({
-  Select: vi.fn(
-    ({
-      data,
-      disabled,
-      label,
-      onChange,
-      placeholder,
-      value,
-    }: {
-      data: Array<{ label: string; value: string }>;
-      disabled?: boolean;
-      label?: string;
-      onChange?: (value: string) => void;
-      placeholder?: string;
-      value?: string;
-    }) => {
-      const testId = `${label?.toLowerCase().replaceAll(/\s/g, "-") ?? "select"}-select`;
-      return (
-        <div>
-          {label && <label htmlFor={testId}>{label}</label>}
-          <select
-            data-testid={testId}
-            disabled={disabled}
-            id={testId}
-            onChange={(event) => onChange?.(event.target.value)}
-            value={value}
-          >
-            {placeholder && <option value="">{placeholder}</option>}
-            {data.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      );
-    },
-  ),
+  Select: mockFn((props: React.ComponentProps<typeof MockSelectControl>) => (
+    <MockSelectControl {...props} />
+  )),
 }));
 
 vi.mock("@/components/ui/pagination", () => ({
-  Pagination: vi.fn(({ onChange, total, value }) => (
-    <div data-testid="pagination">
-      <button
-        data-testid="prev-page"
-        disabled={value <= 1}
-        onClick={() => onChange(Math.max(1, value - 1))}
-        type="button"
-      >
-        Previous
-      </button>
-      <span data-testid="current-page">{value}</span>
-      <span data-testid="total-pages">{total}</span>
-      <button
-        data-testid="next-page"
-        disabled={value >= total}
-        onClick={() => onChange(Math.min(total, value + 1))}
-        type="button"
-      >
-        Next
-      </button>
-    </div>
-  )),
+  Pagination: mockFn(
+    (props: React.ComponentProps<typeof MockPaginationControl>) => (
+      <MockPaginationControl {...props} />
+    ),
+  ),
 }));
 
 import { setRankingsSeason, setRankingsYear } from "@/lib/actions/actions";
@@ -119,7 +150,7 @@ const mockLocationOptions = [
 
 const createMockRankingItem = (overrides = {}) => ({
   avg_pet: 30.5,
-  changePerDecade: 0.5,
+  changeFrom2000: 0.5,
   city: "Test City",
   FutureValueLower: 32,
   FutureValueUpper: 38,
@@ -311,6 +342,45 @@ const mockRankings = [
   }),
 ];
 
+const hotCityRankings = [
+  createMockRankingItem({ changeFrom2000: 1.5, city: "Hot City" }),
+];
+
+const coolCityRankings = [
+  createMockRankingItem({ changeFrom2000: -0.5, city: "Cool City" }),
+];
+
+const noDataCityRankings = [
+  createMockRankingItem({ changeFrom2000: undefined, city: "No Data City" }),
+];
+
+const rangeCityRankings = [
+  createMockRankingItem({ city: "Range City", p10: 20.5, p90: 30.5 }),
+];
+
+const futureCityRankings = [
+  createMockRankingItem({
+    city: "Future City",
+    FutureValueLower: 35,
+    FutureValueUpper: 42,
+  }),
+];
+
+const noFutureCityRankings = [
+  createMockRankingItem({
+    city: "No Future City",
+    FutureValueLower: undefined,
+    FutureValueUpper: undefined,
+  }),
+];
+
+const stableCityRankings = [
+  createMockRankingItem({ changeFrom2000: 0, city: "Stable City" }),
+];
+
+const emptyRankings: Array<ReturnType<typeof createMockRankingItem>> = [];
+const topFiveRankings = mockRankings.slice(0, 5);
+
 const defaultProps = {
   initialHeatStress: "",
   initialSeason: "Annual" as const,
@@ -405,7 +475,7 @@ describe("RankingsMain", () => {
       expect(
         within(table).getByText("PET Range (10th-90th percentile)"),
       ).toBeInTheDocument();
-      expect(within(table).getByText("Change per Decade")).toBeInTheDocument();
+      expect(within(table).getByText("Change from 2000")).toBeInTheDocument();
       expect(
         within(table).getByText("2100 Forecast Range"),
       ).toBeInTheDocument();
@@ -558,12 +628,12 @@ describe("RankingsMain", () => {
       expect(rows[1]).toHaveTextContent("AZ");
     });
 
-    it("should sort by change when Change per Decade header is clicked", () => {
+    it("should sort by change when Change from 2000 header is clicked", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const table = screen.getByRole("table");
       const changeHeader = requireElement(
-        within(table).getByText("Change per Decade").closest("th"),
+        within(table).getByText("Change from 2000").closest("th"),
       );
       fireEvent.click(changeHeader);
 
@@ -630,75 +700,33 @@ describe("RankingsMain", () => {
   });
 
   describe("Data Display", () => {
-    it("should display change per decade with positive indicator", () => {
-      render(
-        <RankingsMain
-          {...defaultProps}
-          rankings={[
-            createMockRankingItem({ changePerDecade: 1.5, city: "Hot City" }),
-          ]}
-        />,
-      );
+    it("should display change from 2000 with positive indicator", () => {
+      render(<RankingsMain {...defaultProps} rankings={hotCityRankings} />);
 
       expect(screen.getByText("+1.5°C")).toBeInTheDocument();
     });
 
-    it("should display change per decade with negative indicator", () => {
-      render(
-        <RankingsMain
-          {...defaultProps}
-          rankings={[
-            createMockRankingItem({ changePerDecade: -0.5, city: "Cool City" }),
-          ]}
-        />,
-      );
+    it("should display change from 2000 with negative indicator", () => {
+      render(<RankingsMain {...defaultProps} rankings={coolCityRankings} />);
 
       expect(screen.getByText("-0.5°C")).toBeInTheDocument();
     });
 
-    it("should display N/A for undefined change per decade", () => {
-      render(
-        <RankingsMain
-          {...defaultProps}
-          rankings={[
-            createMockRankingItem({
-              changePerDecade: undefined,
-              city: "No Data City",
-            }),
-          ]}
-        />,
-      );
+    it("should display N/A for undefined change from 2000", () => {
+      render(<RankingsMain {...defaultProps} rankings={noDataCityRankings} />);
 
       const naElements = screen.getAllByText("N/A");
       expect(naElements.length).toBeGreaterThan(0);
     });
 
     it("should display PET range correctly", () => {
-      render(
-        <RankingsMain
-          {...defaultProps}
-          rankings={[
-            createMockRankingItem({ city: "Range City", p10: 20.5, p90: 30.5 }),
-          ]}
-        />,
-      );
+      render(<RankingsMain {...defaultProps} rankings={rangeCityRankings} />);
 
       expect(screen.getByText("20.5-30.5°C")).toBeInTheDocument();
     });
 
     it("should display 2100 forecast range when available", () => {
-      render(
-        <RankingsMain
-          {...defaultProps}
-          rankings={[
-            createMockRankingItem({
-              city: "Future City",
-              FutureValueLower: 35,
-              FutureValueUpper: 42,
-            }),
-          ]}
-        />,
-      );
+      render(<RankingsMain {...defaultProps} rankings={futureCityRankings} />);
 
       expect(screen.getByText("35.0")).toBeInTheDocument();
       expect(screen.getByText("42.0°C")).toBeInTheDocument();
@@ -706,16 +734,7 @@ describe("RankingsMain", () => {
 
     it("should display N/A for undefined 2100 forecast", () => {
       render(
-        <RankingsMain
-          {...defaultProps}
-          rankings={[
-            createMockRankingItem({
-              city: "No Future City",
-              FutureValueLower: undefined,
-              FutureValueUpper: undefined,
-            }),
-          ]}
-        />,
+        <RankingsMain {...defaultProps} rankings={noFutureCityRankings} />,
       );
 
       const naElements = screen.getAllByText("N/A");
@@ -725,7 +744,7 @@ describe("RankingsMain", () => {
 
   describe("Empty State", () => {
     it("should handle empty rankings array", () => {
-      render(<RankingsMain {...defaultProps} rankings={[]} />);
+      render(<RankingsMain {...defaultProps} rankings={emptyRankings} />);
 
       expect(
         screen.getByText("Cities ranked by Average PET"),
@@ -734,9 +753,7 @@ describe("RankingsMain", () => {
     });
 
     it("should show no results message when filter excludes all", () => {
-      render(
-        <RankingsMain {...defaultProps} rankings={mockRankings.slice(0, 5)} />,
-      );
+      render(<RankingsMain {...defaultProps} rankings={topFiveRankings} />);
 
       expect(screen.getByText(/Showing 1-5 of 5 cities/)).toBeInTheDocument();
     });
@@ -744,45 +761,24 @@ describe("RankingsMain", () => {
 
   describe("Helper Functions", () => {
     it("should apply correct color for positive change values", () => {
-      render(
-        <RankingsMain
-          {...defaultProps}
-          rankings={[
-            createMockRankingItem({ changePerDecade: 1.5, city: "Hot City" }),
-          ]}
-        />,
-      );
+      render(<RankingsMain {...defaultProps} rankings={hotCityRankings} />);
 
       const changeCell = screen.getByText("+1.5°C");
       expect(changeCell).toHaveClass("text-red-600");
     });
 
     it("should apply correct color for negative change values", () => {
-      render(
-        <RankingsMain
-          {...defaultProps}
-          rankings={[
-            createMockRankingItem({ changePerDecade: -0.5, city: "Cool City" }),
-          ]}
-        />,
-      );
+      render(<RankingsMain {...defaultProps} rankings={coolCityRankings} />);
 
       const changeCell = screen.getByText("-0.5°C");
       expect(changeCell).toHaveClass("text-blue-600");
     });
 
     it("should apply correct color for zero change values", () => {
-      render(
-        <RankingsMain
-          {...defaultProps}
-          rankings={[
-            createMockRankingItem({ changePerDecade: 0, city: "Stable City" }),
-          ]}
-        />,
-      );
+      render(<RankingsMain {...defaultProps} rankings={stableCityRankings} />);
 
       const changeCell = screen.getByText("0.0°C");
-      expect(changeCell).toHaveClass("text-grey-600");
+      expect(changeCell).toHaveClass("text-gray-600");
     });
   });
 

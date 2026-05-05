@@ -1,7 +1,6 @@
-import * as React from "react";
-
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utilities";
+import * as React from "react";
 
 interface PaginationProperties {
   className?: string;

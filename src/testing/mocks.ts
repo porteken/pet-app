@@ -1,5 +1,4 @@
 import { drop, factory, primaryKey } from "@mswjs/data";
-import { vi } from "vitest";
 
 let locationCounter = 1;
 let petDataCounter = 1;
@@ -42,42 +41,42 @@ export const resetDatabase = () => {
 };
 
 export const createMockSupabaseClient = () => ({
-  from: vi.fn().mockImplementation((_table) => {
+  from: mockFn().mockImplementation((_table: string) => {
     return createMockSupabaseQuery();
   }),
-  rpc: vi.fn().mockImplementation(() => createMockSupabaseQuery()),
+  rpc: mockFn().mockImplementation(() => createMockSupabaseQuery()),
 });
 
 const createMockSupabaseQuery = () => ({
-  eq: vi.fn().mockReturnThis(),
-  gt: vi.fn().mockReturnThis(),
-  gte: vi.fn().mockReturnThis(),
-  limit: vi.fn().mockReturnThis(),
-  lt: vi.fn().mockReturnThis(),
-  lte: vi.fn().mockReturnThis(),
-  maybeSingle: vi.fn(),
-  order: vi.fn().mockReturnThis(),
-  select: vi.fn().mockReturnThis(),
-  single: vi.fn(),
+  eq: mockFn().mockReturnThis(),
+  gt: mockFn().mockReturnThis(),
+  gte: mockFn().mockReturnThis(),
+  limit: mockFn().mockReturnThis(),
+  lt: mockFn().mockReturnThis(),
+  lte: mockFn().mockReturnThis(),
+  maybeSingle: mockFn(),
+  order: mockFn().mockReturnThis(),
+  select: mockFn().mockReturnThis(),
+  single: mockFn(),
 });
 
 export const createMockCookieStore = () => ({
-  get: vi.fn(),
-  set: vi.fn(),
+  get: mockFn(),
+  set: mockFn(),
 });
 
 export const createMockLinearRegression = () => ({
-  predict: vi.fn(),
+  predict: mockFn(),
   slope: 0,
 });
 export const createMockValidation = () => ({
-  validateDates: vi.fn(),
-  validateLocationId: vi.fn(),
-  validatePets: vi.fn(),
-  validateTrendOption: vi.fn(),
-  validateYear: vi.fn(),
-  validateYearPets: vi.fn(),
-  validateYears: vi.fn(),
+  validateDates: mockFn(),
+  validateLocationId: mockFn(),
+  validatePets: mockFn(),
+  validateTrendOption: mockFn(),
+  validateYear: mockFn(),
+  validateYearPets: mockFn(),
+  validateYears: mockFn(),
 });
 
 export const setupSuccessfulValidations = (

@@ -1,6 +1,3 @@
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-
 import {
   DEFAULT_REFERENCE_YEAR,
   GRAPH_MEASURE_COOKIE_NAME,
@@ -9,6 +6,9 @@ import {
   REFERENCE_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
 import { validateTrendOption, validateYear } from "@/lib/utils/validation";
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 interface GraphPreferencesPayload {
   graphMeasure?: string;
@@ -16,7 +16,17 @@ interface GraphPreferencesPayload {
   referenceYear?: string;
 }
 
-const ONE_YEAR_IN_MILLISECONDS = 365 * 24 * 60 * 60 * 1000;
+const DAYS_IN_YEAR = 365;
+const HOURS_IN_DAY = 24;
+const MINUTES_IN_HOUR = 60;
+const SECONDS_IN_MINUTE = 60;
+const MILLISECONDS_IN_SECOND = 1000;
+const ONE_YEAR_IN_MILLISECONDS =
+  DAYS_IN_YEAR *
+  HOURS_IN_DAY *
+  MINUTES_IN_HOUR *
+  SECONDS_IN_MINUTE *
+  MILLISECONDS_IN_SECOND;
 
 const buildCookieOptions = () => ({
   expires: new Date(Date.now() + ONE_YEAR_IN_MILLISECONDS),
@@ -29,7 +39,24 @@ export async function POST(request: Request) {
   let payload: GraphPreferencesPayload;
 
   try {
-    payload = (await request.json()) as GraphPreferencesPayload;
+    const json = await request.json();
+    if (!json || typeof json !== "object") {
+      throw new Error("Invalid payload");
+    }
+    payload = {
+      graphMeasure:
+        typeof (json as Record<string, unknown>).graphMeasure === "string"
+          ? String((json as Record<string, unknown>).graphMeasure)
+          : undefined,
+      graphSeason:
+        typeof (json as Record<string, unknown>).graphSeason === "string"
+          ? String((json as Record<string, unknown>).graphSeason)
+          : undefined,
+      referenceYear:
+        typeof (json as Record<string, unknown>).referenceYear === "string"
+          ? String((json as Record<string, unknown>).referenceYear)
+          : undefined,
+    };
   } catch {
     return NextResponse.json(
       { error: "Invalid JSON payload" },

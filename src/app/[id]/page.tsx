@@ -1,10 +1,7 @@
-import dynamic from "next/dynamic";
-
 import { DatabaseError } from "@/components/app/database-error";
+import Page from "@/features/page";
 import { InvalidLocationError } from "@/features/page/components/invalid-location-error";
 import { loadLocationPageData } from "@/features/page/server/location-page-data";
-
-const Page = dynamic(() => import("@/features/page"));
 
 export default async function LocationPage({
   params,

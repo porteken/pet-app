@@ -1,5 +1,3 @@
-import { cookies } from "next/headers";
-
 import {
   FetchLocations,
   FetchReferenceGraphData,
@@ -13,6 +11,7 @@ import {
   DEFAULT_GRAPH_MEASURE,
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
+  GRAPH_CONFIG,
   GRAPH_MEASURE_COOKIE_NAME,
   GRAPH_SEASON_COOKIE_NAME,
   REFERENCE_YEAR_COOKIE_NAME,
@@ -23,9 +22,10 @@ import {
 } from "@/lib/constants";
 import { getLatestCookieValue } from "@/lib/utils/server-cookies";
 import { validateYear } from "@/lib/utils/validation";
-import type { LocationOptionSection, LocationProperties } from "@/types/types";
+import { cookies } from "next/headers";
 
 import type { PageProperties } from "../model/types";
+import type { LocationOptionSection, LocationProperties } from "@/types/types";
 
 interface GraphData {
   dates: Date[];
@@ -119,13 +119,13 @@ const fetchGraphData = async (
   season: GraphSeason,
   referenceYear: string,
 ): Promise<GraphData> => {
-  const trendData = await FetchTrendGraphData("avg", locationId, season);
-
-  const latestYear =
-    trendData.years.length > 0 ? String(trendData.years.at(-1)) : "2024";
-
-  const [currentData, referenceData] = await Promise.all([
-    FetchReferenceGraphData(latestYear, locationId, DEFAULT_GRAPH_SEASON),
+  const [trendData, currentData, referenceData] = await Promise.all([
+    FetchTrendGraphData("avg", locationId, season),
+    FetchReferenceGraphData(
+      String(GRAPH_CONFIG.YEAR_RANGE.END),
+      locationId,
+      DEFAULT_GRAPH_SEASON,
+    ),
     FetchReferenceGraphData(referenceYear, locationId, DEFAULT_GRAPH_SEASON),
   ]);
 

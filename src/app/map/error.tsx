@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function MapError({
   error,
@@ -21,7 +20,7 @@ export default function MapError({
         </p>
 
         <div className="flex w-full max-w-md flex-col gap-3">
-          <Button className="w-full" onClick={() => reset()} type="button">
+          <Button className="w-full" onClick={reset} type="button">
             Try again
           </Button>
           <Button asChild className="w-full" variant="outline">

@@ -1,17 +1,17 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import { FetchError } from "@/lib/utils/errors";
 import { clearAllMocks, setupApiClientTest } from "@/testing/test-utilities";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { FetchReferenceGraphData } from "../reference-graph-data";
 
+import type {
+  createMockSupabaseClient,
+  createMockValidation,
+} from "@/testing/mocks";
+
 describe("reference-graph-data", () => {
-  let mockSupabaseClient: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
-  >;
-  let mockValidation: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockValidation"]
-  >;
+  let mockSupabaseClient: ReturnType<typeof createMockSupabaseClient>;
+  let mockValidation: ReturnType<typeof createMockValidation>;
 
   beforeEach(async () => {
     clearAllMocks();
@@ -28,9 +28,9 @@ describe("reference-graph-data", () => {
       ];
 
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({ data: mockData, error: undefined }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -78,9 +78,9 @@ describe("reference-graph-data", () => {
 
     it("should return empty arrays when no data is found", async () => {
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: [], error: undefined }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({ data: [], error: undefined }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -94,9 +94,12 @@ describe("reference-graph-data", () => {
     it("should handle database errors", async () => {
       const mockError = { message: "Database connection failed" };
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({
+          data: undefined,
+          error: mockError,
+        }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -111,9 +114,12 @@ describe("reference-graph-data", () => {
 
     it("should handle null data response", async () => {
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: undefined, error: undefined }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({
+          data: undefined,
+          error: undefined,
+        }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -126,9 +132,9 @@ describe("reference-graph-data", () => {
 
     it("should handle unexpected errors during data fetching", async () => {
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockRejectedValue(new Error("Network error")),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockRejectedValue(new Error("Network error")),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -144,9 +150,9 @@ describe("reference-graph-data", () => {
       ];
 
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({ data: mockData, error: undefined }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -161,9 +167,9 @@ describe("reference-graph-data", () => {
 
     it("should rethrow FetchErrors from data fetching", async () => {
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockRejectedValue(new FetchError("Custom fetch error")),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockRejectedValue(new FetchError("Custom fetch error")),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);

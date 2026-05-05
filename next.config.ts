@@ -1,13 +1,15 @@
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import initializeBundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
+
 import type { NextConfig } from "next";
 
 const withBundleAnalyzer = initializeBundleAnalyzer({
   enabled: process.env.BUNDLE_ANALYZER_ENABLED === "true",
 });
-const projectRoot = fileURLToPath(new URL(".", import.meta.url));
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   images: {
@@ -23,6 +25,7 @@ const nextConfig: NextConfig = {
     ],
   },
   output: "standalone",
+  outputFileTracingRoot: projectRoot,
   outputFileTracingIncludes: {
     "/*": ["./registry/**/*"],
   },

@@ -17,6 +17,7 @@ export interface LocationProperties {
 }
 
 export interface NavProperties {
+  compact?: boolean;
   id?: number;
   LocationOptions: LocationOptionSection[];
   name?: string;

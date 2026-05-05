@@ -1,9 +1,8 @@
-import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
-
 import { FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { FetchReferenceGraphData } from "@/lib/api/reference-graph-data";
 import { server } from "@/testing/server";
+import { http, HttpResponse } from "msw";
+import { describe, expect, it } from "vitest";
 
 describe("Supabase MSW integration", () => {
   it("fetches trend graph data through MSW-backed Supabase responses", async () => {

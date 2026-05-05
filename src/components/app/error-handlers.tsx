@@ -1,7 +1,6 @@
-import React, { memo, useMemo } from "react";
-
 import { DatabaseError } from "@/components/app/database-error";
 import { ERROR_MESSAGES, ERROR_TITLES } from "@/lib/constants";
+import React, { memo, useMemo } from "react";
 
 interface ErrorHandlerProperties {
   error: Error;

@@ -1,10 +1,38 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { FetchError } from "@/lib/utils/errors";
 import { createMockLinearRegression } from "@/testing/mocks";
 import { clearAllMocks, setupApiClientTest } from "@/testing/test-utilities";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FetchForecastData, FetchTrendGraphData } from "../fetch-client";
+
+import type { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
+import type {
+  createMockSupabaseClient,
+  createMockValidation,
+} from "@/testing/mocks";
+
+const createTrendQuery = (data: unknown, error?: unknown) => ({
+  eq: mockFn().mockReturnThis(),
+  order: mockFn().mockResolvedValue({ data, error }),
+  select: mockFn().mockReturnThis(),
+});
+
+const createHistoricalQuery = (data: unknown) => ({
+  eq: mockFn().mockReturnThis(),
+  limit: mockFn().mockReturnThis(),
+  maybeSingle: mockFn().mockResolvedValue({ data }),
+  order: mockFn().mockReturnThis(),
+  select: mockFn().mockReturnThis(),
+});
+
+const createForecastQuery = (data: unknown, error?: unknown) => ({
+  eq: mockFn().mockReturnThis(),
+  gt: mockFn().mockReturnThis(),
+  lte: mockFn().mockReturnThis(),
+  order: mockFn().mockResolvedValue({ data, error }),
+  select: mockFn().mockReturnThis(),
+});
 
 describe("FetchTrendGraphData", () => {
   it("should throw error when called in non-browser environment", async () => {
@@ -18,12 +46,8 @@ describe("FetchTrendGraphData", () => {
 
     globalThis.window = originalWindow;
   });
-  let mockSupabaseClient: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
-  >;
-  let mockValidation: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockValidation"]
-  >;
+  let mockSupabaseClient: ReturnType<typeof createMockSupabaseClient>;
+  let mockValidation: ReturnType<typeof createMockValidation>;
   let mockLinearRegression: ReturnType<typeof createMockLinearRegression>;
 
   beforeEach(async () => {
@@ -38,7 +62,7 @@ describe("FetchTrendGraphData", () => {
       await import("@/lib/utils/simple-linear-regression");
     vi.mocked(SimpleLinearRegression).mockImplementation(
       function MockSimpleLinearRegression() {
-        return mockLinearRegression as any;
+        return mockLinearRegression as unknown as SimpleLinearRegression;
       },
     );
   });
@@ -65,11 +89,7 @@ describe("FetchTrendGraphData", () => {
       { location_id: 1, pet: 26.2, year: 2021 },
     ];
 
-    const mockQuery = {
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockQuery = createTrendQuery(mockData);
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
     mockLinearRegression.predict.mockImplementation(
@@ -96,11 +116,7 @@ describe("FetchTrendGraphData", () => {
       { location_id: 1, pet: 31.2, year: 2021 },
     ];
 
-    const mockQuery = {
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockQuery = createTrendQuery(mockData);
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
     mockLinearRegression.predict.mockImplementation(
@@ -118,11 +134,7 @@ describe("FetchTrendGraphData", () => {
   });
 
   it("should return empty graph data when no rows are found", async () => {
-    const mockQuery = {
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: [], error: undefined }),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockQuery = createTrendQuery([]);
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
 
@@ -136,11 +148,7 @@ describe("FetchTrendGraphData", () => {
 
   it("should handle database errors", async () => {
     const mockError = new Error("Database connection failed");
-    const mockQuery = {
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockQuery = createTrendQuery(undefined, mockError);
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
 
@@ -152,11 +160,7 @@ describe("FetchTrendGraphData", () => {
   it("should handle FetchError during data processing", async () => {
     const mockData = [{ location_id: 1, pet: 25.5, year: 2020 }];
 
-    const mockQuery = {
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockQuery = createTrendQuery(mockData);
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
     mockValidation.validateYearPets.mockImplementation(() => {
@@ -171,11 +175,7 @@ describe("FetchTrendGraphData", () => {
   it("should handle unexpected errors", async () => {
     const mockData = [{ location_id: 1, pet: 25.5, year: 2020 }];
 
-    const mockQuery = {
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockQuery = createTrendQuery(mockData);
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
 
@@ -189,11 +189,7 @@ describe("FetchTrendGraphData", () => {
   });
 
   it("should handle database response with null data", async () => {
-    const mockQuery = {
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: undefined, error: undefined }),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockQuery = createTrendQuery(undefined);
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
 
@@ -207,12 +203,8 @@ describe("FetchTrendGraphData", () => {
 });
 
 describe("FetchForecastData", () => {
-  let mockSupabaseClient: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
-  >;
-  let mockValidation: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockValidation"]
-  >;
+  let mockSupabaseClient: ReturnType<typeof createMockSupabaseClient>;
+  let mockValidation: ReturnType<typeof createMockValidation>;
 
   beforeEach(async () => {
     clearAllMocks();
@@ -249,23 +241,9 @@ describe("FetchForecastData", () => {
       { lower: 29, pet: 31, upper: 33, year: 2027 },
     ];
 
-    const mockHistoricalQuery = {
-      eq: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: mockHistoricalData[0] }),
-      order: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockHistoricalQuery = createHistoricalQuery(mockHistoricalData[0]);
 
-    const mockForecastQuery = {
-      eq: vi.fn().mockReturnThis(),
-      gt: vi.fn().mockReturnThis(),
-      lte: vi.fn().mockReturnThis(),
-      order: vi
-        .fn()
-        .mockResolvedValue({ data: mockForecastData, error: undefined }),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockForecastQuery = createForecastQuery(mockForecastData);
 
     mockSupabaseClient.from
       .mockReturnValueOnce(mockHistoricalQuery)
@@ -292,23 +270,9 @@ describe("FetchForecastData", () => {
       { lower: 10.5, pet: 12.5, upper: 14.5, year: 2026 },
     ];
 
-    const mockHistoricalQuery = {
-      eq: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: mockHistoricalData[0] }),
-      order: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockHistoricalQuery = createHistoricalQuery(mockHistoricalData[0]);
 
-    const mockForecastQuery = {
-      eq: vi.fn().mockReturnThis(),
-      gt: vi.fn().mockReturnThis(),
-      lte: vi.fn().mockReturnThis(),
-      order: vi
-        .fn()
-        .mockResolvedValue({ data: mockForecastData, error: undefined }),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockForecastQuery = createForecastQuery(mockForecastData);
 
     mockSupabaseClient.from
       .mockReturnValueOnce(mockHistoricalQuery)
@@ -321,13 +285,7 @@ describe("FetchForecastData", () => {
   });
 
   it("should return undefined when no historical data found", async () => {
-    const mockHistoricalQuery = {
-      eq: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: null }),
-      order: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockHistoricalQuery = createHistoricalQuery(null);
 
     mockSupabaseClient.from.mockReturnValue(mockHistoricalQuery);
 
@@ -339,21 +297,9 @@ describe("FetchForecastData", () => {
   it("should return undefined when no forecast data found", async () => {
     const mockHistoricalData = [{ year: 2025 }];
 
-    const mockHistoricalQuery = {
-      eq: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: mockHistoricalData[0] }),
-      order: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockHistoricalQuery = createHistoricalQuery(mockHistoricalData[0]);
 
-    const mockForecastQuery = {
-      eq: vi.fn().mockReturnThis(),
-      gt: vi.fn().mockReturnThis(),
-      lte: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: [], error: undefined }),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockForecastQuery = createForecastQuery([]);
 
     mockSupabaseClient.from
       .mockReturnValueOnce(mockHistoricalQuery)
@@ -368,21 +314,9 @@ describe("FetchForecastData", () => {
     const mockHistoricalData = [{ year: 2025 }];
     const mockError = new Error("Database connection failed");
 
-    const mockHistoricalQuery = {
-      eq: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: mockHistoricalData[0] }),
-      order: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockHistoricalQuery = createHistoricalQuery(mockHistoricalData[0]);
 
-    const mockForecastQuery = {
-      eq: vi.fn().mockReturnThis(),
-      gt: vi.fn().mockReturnThis(),
-      lte: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockForecastQuery = createForecastQuery(undefined, mockError);
 
     mockSupabaseClient.from
       .mockReturnValueOnce(mockHistoricalQuery)
@@ -400,23 +334,9 @@ describe("FetchForecastData", () => {
       { lower: 30, pet: 32, upper: 34, year: 2025 },
     ];
 
-    const mockHistoricalQuery = {
-      eq: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: mockHistoricalData[0] }),
-      order: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockHistoricalQuery = createHistoricalQuery(mockHistoricalData[0]);
 
-    const mockForecastQuery = {
-      eq: vi.fn().mockReturnThis(),
-      gt: vi.fn().mockReturnThis(),
-      lte: vi.fn().mockReturnThis(),
-      order: vi
-        .fn()
-        .mockResolvedValue({ data: mockForecastData, error: undefined }),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockForecastQuery = createForecastQuery(mockForecastData);
 
     mockSupabaseClient.from
       .mockReturnValueOnce(mockHistoricalQuery)
@@ -434,23 +354,9 @@ describe("FetchForecastData", () => {
       { lower: "28.5", pet: "30.5", upper: "32.5", year: 2026 },
     ];
 
-    const mockHistoricalQuery = {
-      eq: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: mockHistoricalData[0] }),
-      order: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockHistoricalQuery = createHistoricalQuery(mockHistoricalData[0]);
 
-    const mockForecastQuery = {
-      eq: vi.fn().mockReturnThis(),
-      gt: vi.fn().mockReturnThis(),
-      lte: vi.fn().mockReturnThis(),
-      order: vi
-        .fn()
-        .mockResolvedValue({ data: mockForecastData, error: undefined }),
-      select: vi.fn().mockReturnThis(),
-    };
+    const mockForecastQuery = createForecastQuery(mockForecastData);
 
     mockSupabaseClient.from
       .mockReturnValueOnce(mockHistoricalQuery)

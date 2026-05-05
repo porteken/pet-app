@@ -6,10 +6,10 @@ const {
   mockFetchReferenceGraphData,
   mockFetchTrendGraphData,
 } = vi.hoisted(() => ({
-  mockCookies: vi.fn(),
-  mockFetchLocations: vi.fn(),
-  mockFetchReferenceGraphData: vi.fn(),
-  mockFetchTrendGraphData: vi.fn(),
+  mockCookies: mockFn(),
+  mockFetchLocations: mockFn(),
+  mockFetchReferenceGraphData: mockFn(),
+  mockFetchTrendGraphData: mockFn(),
 }));
 
 vi.mock("next/headers", () => ({
@@ -222,7 +222,7 @@ describe("loadLocationPageData", () => {
     expect(mockFetchTrendGraphData).toHaveBeenCalledWith("avg", 7, "Winter");
     expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
       1,
-      "2024",
+      "2025",
       7,
       "Annual",
     );
@@ -282,7 +282,7 @@ describe("loadLocationPageData", () => {
     });
     expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
       1,
-      "2024",
+      "2025",
       7,
       "Annual",
     );

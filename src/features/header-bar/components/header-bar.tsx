@@ -1,13 +1,15 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import React, { useMemo } from "react";
-
+import { ThemeToggle } from "@/components/app/theme-toggle";
+import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { APP_CONFIG } from "@/lib/constants";
-import { NavProperties } from "@/types/types";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useCallback, useMemo } from "react";
 
 import { NavButtons } from "./nav-buttons";
+
+import type { NavProperties } from "@/types/types";
 
 interface LocationItem {
   key: number;
@@ -15,21 +17,67 @@ interface LocationItem {
   title: string;
 }
 
+const GitHubMark = (): React.ReactElement => (
+  <svg
+    aria-hidden="true"
+    className="size-4"
+    fill="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.27-.01-1.17-.02-2.12-3.2.69-3.88-1.36-3.88-1.36-.52-1.33-1.27-1.68-1.27-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.52-2.55-.29-5.24-1.27-5.24-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.47.11-3.06 0 0 .97-.31 3.17 1.18a10.9 10.9 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.24 2.77.12 3.06.74.81 1.18 1.83 1.18 3.09 0 4.42-2.69 5.38-5.25 5.67.41.35.78 1.04.78 2.1 0 1.52-.02 2.74-.02 3.11 0 .31.21.68.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z" />
+  </svg>
+);
+
+const HeaderActions = (): React.ReactElement => (
+  <div className="flex items-center gap-2">
+    <Button
+      aria-label="View source code on GitHub"
+      asChild
+      size="sm"
+      variant="outline"
+    >
+      <a href={APP_CONFIG.GITHUB_URL} rel="noopener noreferrer" target="_blank">
+        <GitHubMark />
+        <span className="hidden sm:inline">GitHub</span>
+        <span className="sm:hidden">Code</span>
+      </a>
+    </Button>
+    <ThemeToggle />
+  </div>
+);
+
 const HeaderBarComponent = ({
+  compact = false,
   id,
   LocationOptions,
 }: NavProperties): React.ReactElement => {
   const router = useRouter();
   const searchParameters = useSearchParams();
 
-  const buildUrl = (path: string, includeSearchParameters = true) => {
-    const baseUrl = path;
-    if (includeSearchParameters && searchParameters.toString() !== "") {
-      return `${baseUrl}?${searchParameters.toString()}`;
-    }
+  const buildUrl = useCallback(
+    (path: string, includeSearchParameters = true) => {
+      const baseUrl = path;
+      if (includeSearchParameters && searchParameters.toString() !== "") {
+        return `${baseUrl}?${searchParameters.toString()}`;
+      }
 
-    return baseUrl;
-  };
+      return baseUrl;
+    },
+    [searchParameters],
+  );
+
+  const handleCityChange = useCallback(
+    (value: string | null) => {
+      if (value) {
+        router.push(`/${value}`);
+      }
+    },
+    [router],
+  );
+
+  const handleClear = useCallback(() => {
+    router.push(buildUrl("/", true));
+  }, [router, buildUrl]);
 
   const groupedCities = useMemo(() => {
     const options = Array.isArray(LocationOptions) ? LocationOptions : [];
@@ -64,7 +112,7 @@ const HeaderBarComponent = ({
 
   const currentCity = useMemo(() => {
     if (!id) {
-      return;
+      return undefined;
     }
     return groupedCities
       .flatMap((group) => group.items)
@@ -84,37 +132,55 @@ const HeaderBarComponent = ({
   }, [groupedCities]);
 
   return (
-    <header className="relative z-10 w-full border-b border-gray-200 bg-white">
-      <div className="mx-auto max-w-4xl px-4">
-        <div className="py-1.5 text-center">
-          <h1 className="text-xl font-extrabold dark:text-white">
-            {APP_CONFIG.NAME}
-          </h1>
-        </div>
-        <div className="rounded-md bg-white p-2 sm:p-3">
-          <div className="flex flex-wrap justify-center gap-2">
-            <Select
-              className="w-full sm:w-75"
-              clearable
-              data={selectData}
-              data-testid="city-selector"
-              onChange={(value) => {
-                if (value) {
-                  router.push(`/${value}`);
-                }
-              }}
-              onClear={() => {
-                router.push(buildUrl("/", true));
-              }}
-              placeholder={id! >= 0 ? "Change City" : "Select City"}
-              searchable
-              value={currentCity?.key.toString()}
-              w={300}
-            />
-
-            <NavButtons buildUrl={buildUrl} />
+    <header className="border-border/70 bg-background/80 sticky top-0 z-20 w-full border-b backdrop-blur-xl">
+      <div className="via-primary/60 absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent to-transparent" />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {compact ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 py-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <NavButtons buildUrl={buildUrl} />
+            </div>
+            <HeaderActions />
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-col gap-4 py-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h1 className="text-primary text-2xl font-black tracking-tight">
+                  {APP_CONFIG.NAME}
+                </h1>
+              </div>
+              <div className="hidden sm:block">
+                <HeaderActions />
+              </div>
+            </div>
+
+            <div className="glass-panel-muted rounded-3xl p-3 sm:p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <Select
+                  className="w-full lg:max-w-xl"
+                  clearable
+                  data={selectData}
+                  data-testid="city-selector"
+                  onChange={handleCityChange}
+                  onClear={handleClear}
+                  placeholder={
+                    id !== undefined && id >= 0 ? "Change City" : "Select City"
+                  }
+                  searchable
+                  value={currentCity?.key.toString()}
+                />
+
+                <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-start">
+                  <NavButtons buildUrl={buildUrl} />
+                  <div className="sm:hidden">
+                    <HeaderActions />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

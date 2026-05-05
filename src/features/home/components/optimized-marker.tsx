@@ -1,9 +1,9 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { Icon } from "leaflet";
-import React, { memo, useCallback } from "react";
-
 import { prefetchTrendGraphData } from "@/lib/api/query-client";
 import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
+import { useQueryClient } from "@tanstack/react-query";
+import React, { memo, useCallback } from "react";
+
+import type { Icon } from "leaflet";
 
 interface MarkerProperties {
   eventHandlers: {
@@ -17,10 +17,11 @@ interface MarkerProperties {
 
 interface OptimizedMarkerProperties {
   icon: Icon;
+  latitude: number;
+  longitude: number;
   locationId: number;
   MarkerComponent: React.ComponentType<MarkerProperties>;
   onClick: (locationId: number) => void;
-  position: [number, number];
   selectedGraphMeasure: string;
   selectedGraphSeason?: GraphSeason;
 }
@@ -28,14 +29,19 @@ interface OptimizedMarkerProperties {
 export const OptimizedMarker = memo<OptimizedMarkerProperties>(
   ({
     icon,
+    latitude,
+    longitude,
     locationId,
     MarkerComponent: Marker,
     onClick,
-    position,
     selectedGraphMeasure,
     selectedGraphSeason = DEFAULT_GRAPH_SEASON,
   }) => {
     const queryClient = useQueryClient();
+    const position = React.useMemo(
+      () => [latitude, longitude] as [number, number],
+      [latitude, longitude],
+    );
 
     const handleMouseEnter = useCallback(() => {
       Promise.resolve()
@@ -54,15 +60,16 @@ export const OptimizedMarker = memo<OptimizedMarkerProperties>(
       onClick(locationId);
     }, [onClick, locationId]);
 
+    const eventHandlers = React.useMemo(
+      () => ({
+        click: handleClick,
+        mouseover: handleMouseEnter,
+      }),
+      [handleClick, handleMouseEnter],
+    );
+
     return (
-      <Marker
-        eventHandlers={{
-          click: handleClick,
-          mouseover: handleMouseEnter,
-        }}
-        icon={icon}
-        position={position}
-      />
+      <Marker eventHandlers={eventHandlers} icon={icon} position={position} />
     );
   },
 );

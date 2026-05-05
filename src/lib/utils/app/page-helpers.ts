@@ -1,5 +1,3 @@
-import { cookies } from "next/headers";
-
 import { FetchLocations } from "@/lib/api/fetch-server";
 import {
   DEFAULT_FORECAST_ENABLED,
@@ -16,6 +14,7 @@ import {
   normalizeGraphSeason,
 } from "@/lib/constants";
 import { getLatestCookieValue } from "@/lib/utils/server-cookies";
+import { cookies } from "next/headers";
 
 export const getGraphMeasureFromCookies = async (): Promise<string> => {
   const cookieStore = await cookies();

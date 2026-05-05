@@ -1,90 +1,136 @@
+import { database, resetDatabase } from "@/testing/mocks";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { database, resetDatabase } from "@/testing/mocks";
-
 import { PageMain } from "../components/page-main";
+
 import type { PageProperties } from "../model/types";
 
 let fetchMock: ReturnType<typeof vi.fn>;
 
+class MockTrendAnalysis extends React.PureComponent<{
+  initialGraphMeasure: string;
+  onMeasureChange: (value: string) => void | Promise<void>;
+}> {
+  private readonly handleChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const result = this.props.onMeasureChange(event.currentTarget.value);
+    if (result instanceof Promise) {
+      result.catch(() => {});
+    }
+  };
+
+  public render(): React.ReactNode {
+    const { initialGraphMeasure } = this.props;
+
+    return (
+      <div data-testid="trend-analysis">
+        <h2>Trend Analysis</h2>
+        <label htmlFor="graph-measure">Graph Measure</label>
+        <select
+          defaultValue={initialGraphMeasure}
+          id="graph-measure"
+          onChange={this.handleChange}
+        >
+          <option value="avg">Average</option>
+          <option value="max">Maximum</option>
+        </select>
+        <div data-testid="trend-graph">Trend Graph</div>
+      </div>
+    );
+  }
+}
+
+class MockReferenceData extends React.PureComponent<{
+  onReferenceYearChange: (value: string) => void | Promise<void>;
+  referenceYear: string;
+}> {
+  private readonly handleChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const result = this.props.onReferenceYearChange(event.currentTarget.value);
+    if (result instanceof Promise) {
+      result.catch(() => {});
+    }
+  };
+
+  public render(): React.ReactNode {
+    const { referenceYear } = this.props;
+
+    return (
+      <div data-testid="reference-data">
+        <h2>Reference Data</h2>
+        <label htmlFor="reference-year">Reference Year</label>
+        <select
+          id="reference-year"
+          onChange={this.handleChange}
+          value={referenceYear}
+        >
+          {Array.from({ length: 23 }, (_, index) => 2000 + index).map(
+            (year) => (
+              <option key={year} value={year.toString()}>
+                {year}
+              </option>
+            ),
+          )}
+        </select>
+        <div data-testid="reference-graph">Reference Graph</div>
+      </div>
+    );
+  }
+}
+
 vi.mock("@/features/graph", () => ({
-  GenerateReferenceGraph: vi
-    .fn()
-    .mockImplementation(() => (
-      <div data-testid="reference-graph">Reference Graph</div>
-    )),
-  GenerateTrendGraph: vi
-    .fn()
-    .mockImplementation(() => <div data-testid="trend-graph">Trend Graph</div>),
+  GenerateReferenceGraph: mockFn().mockImplementation(() => (
+    <div data-testid="reference-graph">Reference Graph</div>
+  )),
+  GenerateTrendGraph: mockFn().mockImplementation(() => (
+    <div data-testid="trend-graph">Trend Graph</div>
+  )),
 }));
 
 vi.mock("@/features/header-bar", () => ({
-  HeaderBar: vi.fn(({ id, LocationOptions }) => (
-    <header
-      data-id={id}
-      data-options={JSON.stringify(LocationOptions)}
-      data-testid="header-bar"
-    >
-      HeaderBar
-    </header>
-  )),
+  HeaderBar: mockFn(
+    ({ id, LocationOptions }: { id?: number; LocationOptions?: unknown[] }) => (
+      <header
+        data-id={id}
+        data-options={JSON.stringify(LocationOptions)}
+        data-testid="header-bar"
+      >
+        HeaderBar
+      </header>
+    ),
+  ),
 }));
 
 vi.mock("@/features/page/components/trend-analysis", () => ({
-  TrendAnalysis: vi.fn(({ initialGraphMeasure, onMeasureChange }) => (
-    <div data-testid="trend-analysis">
-      <h2>Trend Analysis</h2>
-      <label htmlFor="graph-measure">Graph Measure</label>
-      <select
-        defaultValue={initialGraphMeasure}
-        id="graph-measure"
-        onChange={(event) => {
-          onMeasureChange(event.currentTarget.value);
-        }}
-      >
-        <option value="avg">Average</option>
-        <option value="max">Maximum</option>
-      </select>
-      <div data-testid="trend-graph">Trend Graph</div>
-    </div>
-  )),
+  TrendAnalysis: mockFn(
+    (props: React.ComponentProps<typeof MockTrendAnalysis>) => (
+      <MockTrendAnalysis {...props} />
+    ),
+  ),
 }));
 
 vi.mock("@/features/page/components/reference-data", () => ({
-  ReferenceData: vi.fn(({ onReferenceYearChange, referenceYear }) => (
-    <div data-testid="reference-data">
-      <h2>Reference Data</h2>
-      <label htmlFor="reference-year">Reference Year</label>
-      <select
-        id="reference-year"
-        onChange={(event) => {
-          onReferenceYearChange(event.currentTarget.value);
-        }}
-        value={referenceYear}
-      >
-        {Array.from({ length: 23 }, (_, index) => 2000 + index).map((year) => (
-          <option key={year} value={year.toString()}>
-            {year}
-          </option>
-        ))}
-      </select>
-      <div data-testid="reference-graph">Reference Graph</div>
-    </div>
-  )),
+  ReferenceData: mockFn(
+    (props: React.ComponentProps<typeof MockReferenceData>) => (
+      <MockReferenceData {...props} />
+    ),
+  ),
 }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
-    back: vi.fn(),
-    push: vi.fn(),
-    replace: vi.fn(),
+    back: mockFn(),
+    push: mockFn(),
+    replace: mockFn(),
   }),
   useSearchParams: () => ({
-    get: vi.fn(),
-    toString: vi.fn().mockReturnValue(""),
+    get: mockFn(),
+    toString: mockFn().mockReturnValue(""),
   }),
 }));
 
@@ -94,7 +140,7 @@ describe("PageMain Integration Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     resetDatabase();
-    fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    fetchMock = mockFn().mockResolvedValue({ ok: true });
     vi.stubGlobal("fetch", fetchMock);
 
     const location = database.location.create({
@@ -145,7 +191,9 @@ describe("PageMain Integration Tests", () => {
       const dataId = headerBar.dataset.id;
       expect(Number(dataId)).toBeGreaterThan(0);
 
-      const locationOptions = JSON.parse(headerBar.dataset.options || "[]");
+      const optionsData = headerBar.dataset.options;
+      const locationOptions = JSON.parse(String(optionsData));
+      expect(optionsData).toBeDefined();
       expect(locationOptions).toEqual(defaultProps.LocationOptions);
     });
 

@@ -1,3 +1,12 @@
+const T_VALUE_MAP: Record<number, number> = {
+  0.5: 0.674,
+  0.8: 1.282,
+  0.95: 1.96,
+  0.99: 2.576,
+};
+const DEFAULT_CONFIDENCE_LEVEL = 0.8;
+const DEFAULT_T_VALUE = T_VALUE_MAP[DEFAULT_CONFIDENCE_LEVEL];
+
 export class SimpleLinearRegression {
   public readonly slope: number;
   private readonly intercept: number;
@@ -37,7 +46,7 @@ export class SimpleLinearRegression {
 
   predictWithConfidence(
     x: number,
-    confidenceLevel: number = 0.8,
+    confidenceLevel: number = DEFAULT_CONFIDENCE_LEVEL,
   ): { lowerBound: number; prediction: number; upperBound: number } {
     const prediction = this.predict(x);
     const n = this.xData.length;
@@ -46,13 +55,7 @@ export class SimpleLinearRegression {
       this.standardError *
       Math.sqrt(1 + 1 / n + (x - this.xMean) ** 2 / (n * this.xVariance));
 
-    const tValueMap: Record<number, number> = {
-      0.5: 0.674,
-      0.8: 1.282,
-      0.95: 1.96,
-      0.99: 2.576,
-    };
-    const tValue = tValueMap[confidenceLevel] ?? 1.282;
+    const tValue = T_VALUE_MAP[confidenceLevel] ?? DEFAULT_T_VALUE;
 
     const margin = tValue * predictionError;
 

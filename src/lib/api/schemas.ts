@@ -1,10 +1,12 @@
+const MIN_YEAR = 1900;
+const MAX_YEAR = 2200;
 import { z, ZodError } from "zod";
 
 const finiteNumberSchema = z.coerce
   .number()
   .refine(Number.isFinite, "Expected a finite number");
 const positiveIntegerSchema = z.coerce.number().int().positive();
-const yearSchema = z.coerce.number().int().min(1900).max(2200);
+const yearSchema = z.coerce.number().int().min(MIN_YEAR).max(MAX_YEAR);
 
 const trendGraphRowSchema = z.object({
   location_id: positiveIntegerSchema,
@@ -44,7 +46,7 @@ const locationRowSchema = z.object({
 
 const rankingViewRowSchema = z.object({
   avg_pet: finiteNumberSchema,
-  change_per_decade: finiteNumberSchema.nullable(),
+  change_from_2000: finiteNumberSchema.nullable(),
   city: z.string().min(1),
   future_lower: finiteNumberSchema.nullable(),
   future_upper: finiteNumberSchema.nullable(),

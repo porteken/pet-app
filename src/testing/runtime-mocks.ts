@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 export type Primitive = number | string;
 
 type FilterOperation = {
@@ -103,7 +104,10 @@ const LOCATIONS = [
 const round = (value: number) => Math.round(value * 100) / 100;
 
 const getAveragePet = (locationId: number, year: number) => {
-  const location = LOCATIONS.find((item) => item.location_id === locationId)!;
+  const location = LOCATIONS.find((item) => item.location_id === locationId);
+  if (location === undefined) {
+    throw new Error(`Unknown location id: ${locationId}`);
+  }
   const delta = year - 2000;
   return round(location.year2000Avg + delta * location.trendPerYear);
 };
@@ -151,7 +155,7 @@ const MOCK_TABLES: Record<string, MockRow[]> = {
         );
         return {
           avg_pet: avg,
-          change_per_decade: round(location.trendPerYear * 10),
+          change_from_2000: round((year - 2000) * location.trendPerYear),
           city: location.city,
           future_lower: round(forecastPet - 2.2),
           future_upper: round(forecastPet + 2.2),
@@ -299,6 +303,9 @@ const matchesFilterOperation = (row: MockRow, filter: FilterOperation) => {
     }
     case "lte": {
       return compareNumeric(cell, filter.value, compareLessThanOrEqual);
+    }
+    default: {
+      return true;
     }
   }
 };

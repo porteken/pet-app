@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React, { useMemo, useState, useTransition } from "react";
+const RANK_THREE = 3;
 
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { Pagination } from "@/components/ui/pagination";
@@ -18,28 +17,37 @@ import {
   normalizeGraphSeason,
   type GraphSeason,
 } from "@/lib/constants";
+import { YearOptions } from "@/lib/utils/select-options";
 import {
   getHeatStressInfo,
   THERMAL_STRESS_LEGEND_ITEMS,
 } from "@/lib/utils/thermal-stress";
-import { type LocationOptionSection } from "@/types/types";
+import { useRouter } from "next/navigation";
+import React, { useMemo, useState, useTransition } from "react";
+
+import type { LocationOptionSection } from "@/types/types";
 
 const getPetRange = (p10: number, p90: number): string => {
   return `${p10.toFixed(1)}-${p90.toFixed(1)}`;
 };
-const color_mapping = (value: number) => {
+const colorMapping = (value: number) => {
   if (value > 0) {
     return "text-red-600";
   } else if (value < 0) {
     return "text-blue-600";
   }
 
-  return "text-grey-600";
+  return "text-gray-600";
 };
 
-const YEAR_OPTIONS = Array.from({ length: 26 }, (_, index) => ({
-  label: String(2000 + index),
-  value: String(2000 + index),
+interface SelectOption {
+  label: string;
+  value: string;
+}
+
+const YEAR_OPTIONS = YearOptions().map(({ key, label }) => ({
+  label,
+  value: key,
 }));
 
 const ALL_THERMAL_STRESS_LEVELS = THERMAL_STRESS_LEGEND_ITEMS.map((item) => ({
@@ -54,7 +62,7 @@ const SEASON_OPTIONS = GRAPH_SEASONS.map((season) => ({
 
 interface RankingItem {
   avg_pet: number;
-  changePerDecade: number | undefined;
+  changeFrom2000: number | undefined;
   city: string;
   FutureValueLower: number | undefined;
   FutureValueUpper: number | undefined;
@@ -77,7 +85,7 @@ function compareRankingItems(
     case "avg_pet":
       return a.avg_pet - b.avg_pet;
     case "change":
-      return (a.changePerDecade ?? 0) - (b.changePerDecade ?? 0);
+      return (a.changeFrom2000 ?? 0) - (b.changeFrom2000 ?? 0);
     case "city":
       return a.city.localeCompare(b.city);
     case "max_pet":
@@ -86,6 +94,8 @@ function compareRankingItems(
       return a.rank - b.rank;
     case "state":
       return a.state.localeCompare(b.state);
+    default:
+      return 0;
   }
 }
 
@@ -106,6 +116,22 @@ function filterRanking(
   return true;
 }
 
+function getRankBadgeClasses(rank: number): string {
+  if (rank === 1) {
+    return "border border-amber-300 bg-amber-100 text-amber-900";
+  }
+
+  if (rank === 2) {
+    return "border border-slate-300 bg-slate-100 text-slate-900";
+  }
+
+  if (rank === RANK_THREE) {
+    return "border border-orange-300 bg-orange-100 text-orange-900";
+  }
+
+  return "border border-border bg-background/80 text-foreground";
+}
+
 interface RankingsMainProperties {
   initialHeatStress: string;
   initialSeason: GraphSeason;
@@ -116,32 +142,273 @@ interface RankingsMainProperties {
   shouldPersistInitialSeason?: boolean;
 }
 
-function SortHeader({
-  column,
-  currentColumn,
-  currentDirection,
-  label,
-  onSort,
-}: Readonly<{
+interface RankingsFiltersProperties {
+  heatStressFilter: string;
+  heatStressOptions: SelectOption[];
+  isPending: boolean;
+  selectedSeason: GraphSeason;
+  selectedYear: number;
+  setHeatStressFilter: React.Dispatch<React.SetStateAction<string>>;
+  setSelectedSeason: React.Dispatch<React.SetStateAction<GraphSeason>>;
+  setSelectedYear: React.Dispatch<React.SetStateAction<number>>;
+  setStateFilter: React.Dispatch<React.SetStateAction<string>>;
+  startTransition: React.TransitionStartFunction;
+  stateFilter: string;
+  stateOptions: SelectOption[];
+}
+
+class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
+  private readonly handleHeatStressChange = (value: string) => {
+    this.props.setHeatStressFilter(value);
+    this.props.startTransition(() => {
+      void setRankingsHeatStress(value);
+    });
+  };
+
+  private readonly handleHeatStressClear = () => {
+    this.props.setHeatStressFilter("");
+    this.props.startTransition(() => {
+      void setRankingsHeatStress("");
+    });
+  };
+
+  private readonly handleSeasonChange = (value: string) => {
+    const season = normalizeGraphSeason(value);
+    this.props.setSelectedSeason(season);
+    this.props.startTransition(() => {
+      void setRankingsSeason(season);
+    });
+  };
+
+  private readonly handleStateChange = (value: string) => {
+    this.props.setStateFilter(value);
+    this.props.startTransition(() => {
+      void setRankingsState(value);
+    });
+  };
+
+  private readonly handleStateClear = () => {
+    this.props.setStateFilter("");
+    this.props.startTransition(() => {
+      void setRankingsState("");
+    });
+  };
+
+  private readonly handleYearChange = (value: string) => {
+    if (!value) {
+      return;
+    }
+
+    const year = Number(value);
+    this.props.setSelectedYear(year);
+    this.props.startTransition(() => {
+      void setRankingsYear(year);
+    });
+  };
+
+  public render(): React.ReactElement {
+    const {
+      heatStressFilter,
+      heatStressOptions,
+      isPending,
+      selectedSeason,
+      selectedYear,
+      stateFilter,
+      stateOptions,
+    } = this.props;
+
+    return (
+      <section className="glass-panel fade-in-up mb-6 rounded-3xl p-4 [animation-delay:80ms] sm:p-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Select
+            className="w-full"
+            data={YEAR_OPTIONS}
+            disabled={isPending}
+            label="Year"
+            onChange={this.handleYearChange}
+            value={String(selectedYear)}
+          />
+          <Select
+            className="w-full"
+            data={SEASON_OPTIONS}
+            disabled={isPending}
+            label="Season"
+            onChange={this.handleSeasonChange}
+            value={selectedSeason}
+          />
+          <Select
+            className="w-full"
+            clearable
+            data={stateOptions}
+            disabled={isPending}
+            label="State"
+            onChange={this.handleStateChange}
+            onClear={this.handleStateClear}
+            placeholder="All states"
+            value={stateFilter}
+          />
+          <Select
+            className="w-full"
+            clearable
+            data={heatStressOptions}
+            disabled={isPending}
+            label="Avg Thermal Stress Level"
+            onChange={this.handleHeatStressChange}
+            onClear={this.handleHeatStressClear}
+            placeholder="All levels"
+            value={heatStressFilter}
+          />
+        </div>
+      </section>
+    );
+  }
+}
+
+class SortHeader extends React.PureComponent<{
   column: SortColumn;
   currentColumn: SortColumn;
   currentDirection: "asc" | "desc";
   label: string;
-  onSort: (column: SortColumn) => void;
-}>) {
-  return (
-    <th
-      className="cursor-pointer px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase hover:bg-gray-100"
-      onClick={() => onSort(column)}
-    >
-      <div className="flex items-center gap-1">
-        {label}
-        {currentColumn === column && (
-          <span>{currentDirection === "asc" ? "↑" : "↓"}</span>
-        )}
-      </div>
-    </th>
-  );
+  setSortColumn: React.Dispatch<React.SetStateAction<SortColumn>>;
+  setSortDirection: React.Dispatch<React.SetStateAction<"asc" | "desc">>;
+}> {
+  private readonly handleClick = () => {
+    const {
+      column,
+      currentColumn,
+      currentDirection,
+      setSortColumn,
+      setSortDirection,
+    } = this.props;
+
+    if (currentColumn === column) {
+      setSortDirection(currentDirection === "asc" ? "desc" : "asc");
+      return;
+    }
+
+    setSortColumn(column);
+    setSortDirection("asc");
+  };
+
+  public render(): React.ReactElement {
+    const { column, currentColumn, currentDirection, label } = this.props;
+
+    return (
+      <th
+        className="text-muted-foreground hover:bg-accent/60 cursor-pointer px-6 py-4 text-left text-xs font-medium tracking-[0.2em] uppercase transition"
+        onClick={this.handleClick}
+      >
+        <div className="flex items-center gap-1">
+          {label}
+          {currentColumn === column && (
+            <span>{currentDirection === "asc" ? "↑" : "↓"}</span>
+          )}
+        </div>
+      </th>
+    );
+  }
+}
+
+class RankingRow extends React.PureComponent<{
+  item: RankingItem;
+  push: (href: string) => void;
+}> {
+  private readonly handleClick = () => {
+    this.props.push(`/${this.props.item.location_id}`);
+  };
+
+  public render(): React.ReactElement {
+    const {
+      item: {
+        avg_pet,
+        changeFrom2000,
+        city,
+        FutureValueLower,
+        FutureValueUpper,
+        max_pet,
+        p10,
+        p90,
+        rank,
+        state,
+      },
+    } = this.props;
+    const avgHeatStressInfo = getHeatStressInfo(avg_pet);
+
+    return (
+      <tr
+        className="hover:bg-accent/45 even:bg-background/30 cursor-pointer transition hover:-translate-y-px"
+        onClick={this.handleClick}
+      >
+        <td className="text-foreground px-6 py-4 text-sm font-medium whitespace-nowrap">
+          <span
+            className={`inline-flex min-w-10 items-center justify-center rounded-full px-3 py-1 text-xs font-bold ${getRankBadgeClasses(rank)}`}
+          >
+            {rank}
+          </span>
+        </td>
+        <td className="text-foreground px-6 py-4 text-sm whitespace-nowrap">
+          {city}
+        </td>
+        <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
+          <span className="bg-background/80 text-foreground rounded-full px-2.5 py-1 font-medium">
+            {state}
+          </span>
+        </td>
+        <td className="px-6 py-4 text-sm whitespace-nowrap">
+          <span className={`font-semibold ${avgHeatStressInfo.color}`}>
+            {avg_pet.toFixed(1)}°C
+          </span>
+        </td>
+        <td className="px-6 py-4 text-sm whitespace-nowrap">
+          {max_pet === undefined ? (
+            <span className="text-muted-foreground">N/A</span>
+          ) : (
+            <span
+              className={`font-semibold ${getHeatStressInfo(max_pet).color}`}
+            >
+              {max_pet.toFixed(1)}°C
+            </span>
+          )}
+        </td>
+        <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
+          {p10 !== undefined && p90 !== undefined ? (
+            `${getPetRange(p10, p90)}°C`
+          ) : (
+            <span className="text-muted-foreground">N/A</span>
+          )}
+        </td>
+        <td className="px-6 py-4 text-sm whitespace-nowrap">
+          {changeFrom2000 === undefined ? (
+            <span className="text-muted-foreground">N/A</span>
+          ) : (
+            <span className={`font-semibold ${colorMapping(changeFrom2000)}`}>
+              {changeFrom2000 > 0 ? "+" : ""}
+              {changeFrom2000.toFixed(1)}°C
+            </span>
+          )}
+        </td>
+        <td className="px-6 py-4 text-sm whitespace-nowrap">
+          {FutureValueLower !== undefined && FutureValueUpper !== undefined ? (
+            <div>
+              <span
+                className={`font-semibold ${getHeatStressInfo(FutureValueLower).color}`}
+              >
+                {FutureValueLower.toFixed(1)}
+              </span>
+              <span className="text-muted-foreground"> - </span>
+              <span
+                className={`font-semibold ${getHeatStressInfo(FutureValueUpper).color}`}
+              >
+                {FutureValueUpper.toFixed(1)}°C
+              </span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">N/A</span>
+          )}
+        </td>
+      </tr>
+    );
+  }
 }
 
 export function RankingsMain({
@@ -154,6 +421,12 @@ export function RankingsMain({
   shouldPersistInitialSeason = false,
 }: Readonly<RankingsMainProperties>) {
   const router = useRouter();
+  const handlePush = React.useCallback(
+    (url: string) => {
+      router.push(url);
+    },
+    [router],
+  );
   const [selectedSeason, setSelectedSeason] = useState(initialSeason);
   const [selectedYear, setSelectedYear] = useState(initialYear);
   const [isPending, startTransition] = useTransition();
@@ -233,114 +506,38 @@ export function RankingsMain({
     });
   }, [initialSeason, shouldPersistInitialSeason, startTransition]);
 
-  const handleYearChange = (value: string) => {
-    if (value) {
-      const year = Number(value);
-      setSelectedYear(year);
-      startTransition(() => {
-        void setRankingsYear(year);
-      });
-    }
-  };
-
-  const handleSeasonChange = (value: string) => {
-    const season = normalizeGraphSeason(value);
-    setSelectedSeason(season);
-    startTransition(() => {
-      void setRankingsSeason(season);
-    });
-  };
-
-  const handleHeatStressChange = (value: string) => {
-    setHeatStressFilter(value);
-    startTransition(() => {
-      void setRankingsHeatStress(value);
-    });
-  };
-
-  const handleHeatStressClear = () => {
-    setHeatStressFilter("");
-    startTransition(() => {
-      void setRankingsHeatStress("");
-    });
-  };
-
-  const handleStateChange = (value: string) => {
-    setStateFilter(value);
-    startTransition(() => {
-      void setRankingsState(value);
-    });
-  };
-
-  const handleStateClear = () => {
-    setStateFilter("");
-    startTransition(() => {
-      void setRankingsState("");
-    });
-  };
-
-  const handleSort = (column: SortColumn) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <HeaderBar LocationOptions={LocationOptions} />
-      <main className="mx-auto max-w-7xl px-4 py-8" id="main-content">
-        <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">
-            Cities ranked by Average PET
-          </h1>
-        </div>
+    <div className="min-h-screen">
+      <HeaderBar compact LocationOptions={LocationOptions} />
+      <main
+        className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
+        id="main-content"
+      >
+        <section className="glass-panel fade-in-up mb-8 overflow-hidden rounded-4xl">
+          <div className="bg-primary px-6 py-5 sm:px-8 sm:py-6">
+            <h1 className="text-primary-foreground text-3xl font-black tracking-tight sm:text-4xl">
+              Cities ranked by Average PET
+            </h1>
+          </div>
+        </section>
 
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Select
-            className="w-full"
-            data={YEAR_OPTIONS}
-            disabled={isPending}
-            label="Year"
-            onChange={handleYearChange}
-            value={String(selectedYear)}
-          />
-          <Select
-            className="w-full"
-            data={SEASON_OPTIONS}
-            disabled={isPending}
-            label="Season"
-            onChange={handleSeasonChange}
-            value={selectedSeason}
-          />
-          <Select
-            className="w-full"
-            clearable
-            data={stateOptions}
-            disabled={isPending}
-            label="State"
-            onChange={handleStateChange}
-            onClear={handleStateClear}
-            placeholder="All states"
-            value={stateFilter}
-          />
-          <Select
-            className="w-full"
-            clearable
-            data={heatStressOptions}
-            disabled={isPending}
-            label="Avg Thermal Stress Level"
-            onChange={handleHeatStressChange}
-            onClear={handleHeatStressClear}
-            placeholder="All levels"
-            value={heatStressFilter}
-          />
-        </div>
+        <RankingsFilters
+          heatStressFilter={heatStressFilter}
+          heatStressOptions={heatStressOptions}
+          isPending={isPending}
+          selectedSeason={selectedSeason}
+          selectedYear={selectedYear}
+          setHeatStressFilter={setHeatStressFilter}
+          setSelectedSeason={setSelectedSeason}
+          setSelectedYear={setSelectedYear}
+          setStateFilter={setStateFilter}
+          startTransition={startTransition}
+          stateFilter={stateFilter}
+          stateOptions={stateOptions}
+        />
 
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-gray-600">
+          <div className="text-muted-foreground text-sm">
             Showing{" "}
             {filteredAndSortedRankings.length === 0
               ? 0
@@ -354,167 +551,99 @@ export function RankingsMain({
             {filteredAndSortedRankings.length !== rankings.length &&
               ` (filtered from ${rankings.length} total)`}
           </div>
+          {isPending && (
+            <div className="rounded-full bg-(--pill-surface) px-3 py-1 text-xs font-semibold text-(--pill-foreground)">
+              Refreshing filters…
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-6 xl:flex-row">
           <div className="w-full xl:w-64 xl:shrink-0">
-            <div className="rounded-lg bg-white p-6 shadow xl:sticky xl:top-4">
+            <div className="glass-panel rounded-3xl p-6 xl:sticky xl:top-28">
               <HeatStressLegend />
             </div>
           </div>
 
-          <div className="flex-1 overflow-hidden rounded-lg bg-white shadow">
+          <div className="glass-panel flex-1 overflow-hidden rounded-3xl">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="divide-border/70 min-w-full divide-y">
+                <thead className="bg-background/55 backdrop-blur-xl">
                   <tr>
                     <SortHeader
                       column="rank"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       label="Rank"
-                      onSort={handleSort}
+                      setSortColumn={setSortColumn}
+                      setSortDirection={setSortDirection}
                     />
                     <SortHeader
                       column="city"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       label="City"
-                      onSort={handleSort}
+                      setSortColumn={setSortColumn}
+                      setSortDirection={setSortDirection}
                     />
                     <SortHeader
                       column="state"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       label="State"
-                      onSort={handleSort}
+                      setSortColumn={setSortColumn}
+                      setSortDirection={setSortDirection}
                     />
                     <SortHeader
                       column="avg_pet"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       label="Avg PET"
-                      onSort={handleSort}
+                      setSortColumn={setSortColumn}
+                      setSortDirection={setSortDirection}
                     />
                     <SortHeader
                       column="max_pet"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       label="Max PET"
-                      onSort={handleSort}
+                      setSortColumn={setSortColumn}
+                      setSortDirection={setSortDirection}
                     />
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    <th className="text-muted-foreground px-6 py-4 text-left text-xs font-medium tracking-[0.2em] uppercase">
                       PET Range (10th-90th percentile)
                     </th>
                     <SortHeader
                       column="change"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
-                      label="Change per Decade"
-                      onSort={handleSort}
+                      label="Change from 2000"
+                      setSortColumn={setSortColumn}
+                      setSortDirection={setSortDirection}
                     />
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    <th className="text-muted-foreground px-6 py-4 text-left text-xs font-medium tracking-[0.2em] uppercase">
                       2100 Forecast Range
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {paginatedRankings.map(
-                    ({
-                      avg_pet,
-                      changePerDecade,
-                      city,
-                      FutureValueLower,
-                      FutureValueUpper,
-                      location_id,
-                      max_pet,
-                      p10,
-                      p90,
-                      rank,
-                      state,
-                    }) => {
-                      const avgheatStressInfo = getHeatStressInfo(avg_pet);
-
-                      return (
-                        <tr
-                          className="hover:bg-gray-50"
-                          key={location_id}
-                          onClick={() => router.push(`/${location_id}`)}
-                          style={{ cursor: "pointer" }}
-                        >
-                          <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
-                            {rank}
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
-                            {city}
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                            {state}
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            <span
-                              className={`font-semibold ${avgheatStressInfo.color}`}
-                            >
-                              {avg_pet.toFixed(1)}°C
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            {max_pet === undefined ? (
-                              <span className="text-gray-400">N/A</span>
-                            ) : (
-                              <span
-                                className={`font-semibold ${getHeatStressInfo(max_pet).color}`}
-                              >
-                                {max_pet.toFixed(1)}°C
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
-                            {p10 !== undefined && p90 !== undefined ? (
-                              `${getPetRange(p10, p90)}°C`
-                            ) : (
-                              <span className="text-gray-400">N/A</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            {changePerDecade === undefined ? (
-                              <span className="text-gray-400">N/A</span>
-                            ) : (
-                              <span
-                                className={`font-semibold ${color_mapping(changePerDecade)}`}
-                              >
-                                {changePerDecade > 0 ? "+" : ""}
-                                {changePerDecade.toFixed(1)}°C
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-sm whitespace-nowrap">
-                            {FutureValueLower !== undefined &&
-                            FutureValueUpper !== undefined ? (
-                              <div>
-                                <span
-                                  className={`font-semibold ${
-                                    getHeatStressInfo(FutureValueLower).color
-                                  }`}
-                                >
-                                  {FutureValueLower.toFixed(1)}
-                                </span>
-                                <span> - </span>
-                                <span
-                                  className={`font-semibold ${
-                                    getHeatStressInfo(FutureValueUpper).color
-                                  }`}
-                                >
-                                  {FutureValueUpper.toFixed(1)}°C
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="text-gray-400">N/A</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    },
+                <tbody className="divide-border/70 divide-y bg-transparent">
+                  {paginatedRankings.length === 0 ? (
+                    <tr>
+                      <td
+                        className="text-muted-foreground px-6 py-12 text-center text-sm"
+                        colSpan={8}
+                      >
+                        No cities match the current filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedRankings.map((item) => (
+                      <RankingRow
+                        item={item}
+                        key={item.location_id}
+                        push={handlePush}
+                      />
+                    ))
                   )}
                 </tbody>
               </table>

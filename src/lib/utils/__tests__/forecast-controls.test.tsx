@@ -1,8 +1,9 @@
+// eslint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom";
 
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { ForecastControls } from "../forecast-controls";
 
@@ -11,8 +12,8 @@ describe("ForecastControls", () => {
     render(
       <ForecastControls
         enabled={false}
-        onToggle={vi.fn()}
-        onYearsChange={vi.fn()}
+        onToggle={mockFn()}
+        onYearsChange={mockFn()}
         yearsAhead={10}
       />,
     );
@@ -26,8 +27,8 @@ describe("ForecastControls", () => {
     render(
       <ForecastControls
         enabled={false}
-        onToggle={vi.fn()}
-        onYearsChange={vi.fn()}
+        onToggle={mockFn()}
+        onYearsChange={mockFn()}
         yearsAhead={10}
       />,
     );
@@ -42,8 +43,8 @@ describe("ForecastControls", () => {
     render(
       <ForecastControls
         enabled={true}
-        onToggle={vi.fn()}
-        onYearsChange={vi.fn()}
+        onToggle={mockFn()}
+        onYearsChange={mockFn()}
         yearsAhead={10}
       />,
     );
@@ -60,13 +61,13 @@ describe("ForecastControls", () => {
   });
 
   it("calls onToggle with checked state when checkbox changes", () => {
-    const onToggle = vi.fn();
+    const onToggle = mockFn();
 
     render(
       <ForecastControls
         enabled={false}
         onToggle={onToggle}
-        onYearsChange={vi.fn()}
+        onYearsChange={mockFn()}
         yearsAhead={10}
       />,
     );
@@ -77,12 +78,12 @@ describe("ForecastControls", () => {
   });
 
   it("calls onYearsChange with a number when slider changes", () => {
-    const onYearsChange = vi.fn();
+    const onYearsChange = mockFn();
 
     render(
       <ForecastControls
         enabled={true}
-        onToggle={vi.fn()}
+        onToggle={mockFn()}
         onYearsChange={onYearsChange}
         yearsAhead={10}
       />,
@@ -97,8 +98,8 @@ describe("ForecastControls", () => {
     render(
       <ForecastControls
         enabled={true}
-        onToggle={vi.fn()}
-        onYearsChange={vi.fn()}
+        onToggle={mockFn()}
+        onYearsChange={mockFn()}
         yearsAhead={1}
       />,
     );

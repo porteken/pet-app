@@ -16,8 +16,11 @@ export async function clickClickableMarker(page: Page): Promise<void> {
   for (const index of candidateIndices) {
     const marker = markers.nth(index);
     try {
+      // eslint-disable-next-line no-await-in-loop
       await marker.scrollIntoViewIfNeeded();
+      // eslint-disable-next-line no-await-in-loop
       await marker.click({ timeout: MARKER_CLICK_TIMEOUT, trial: true });
+      // eslint-disable-next-line no-await-in-loop
       await marker.click();
       return;
     } catch {
@@ -47,7 +50,7 @@ async function getCandidateMarkerIndices(page: Page): Promise<number[]> {
         const visibleHeight = bottom - top;
 
         if (visibleWidth <= 0 || visibleHeight <= 0) {
-          return;
+          return undefined;
         }
 
         const centerX = left + visibleWidth / 2;
@@ -62,7 +65,7 @@ async function getCandidateMarkerIndices(page: Page): Promise<number[]> {
             element.contains(topElement)
           )
         ) {
-          return;
+          return undefined;
         }
 
         return {

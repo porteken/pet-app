@@ -1,4 +1,8 @@
-import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
+import {
+  DEFAULT_GRAPH_SEASON,
+  GRAPH_CONFIG,
+  type GraphSeason,
+} from "@/lib/constants";
 
 export interface HeatStressDescription {
   colorClass: string;
@@ -22,6 +26,7 @@ interface ThermalStressLegendItem {
   colorClass: string;
   fillClass: string;
   level: ThermalStressLevel;
+  max?: number;
   rangeLabel: string;
 }
 
@@ -30,48 +35,56 @@ export const THERMAL_STRESS_LEGEND_ITEMS: readonly ThermalStressLegendItem[] = [
     colorClass: "text-blue-900",
     fillClass: "bg-blue-900",
     level: "Extreme Cold Stress",
+    max: 4,
     rangeLabel: "< 4°C",
   },
   {
     colorClass: "text-blue-700",
     fillClass: "bg-blue-700",
     level: "Strong Cold Stress",
+    max: 8,
     rangeLabel: "4–8°C",
   },
   {
     colorClass: "text-sky-700",
     fillClass: "bg-sky-600",
     level: "Moderate Cold Stress",
+    max: 13,
     rangeLabel: "8–13°C",
   },
   {
     colorClass: "text-cyan-600",
     fillClass: "bg-cyan-400",
     level: "Slight Cold Stress",
+    max: 18,
     rangeLabel: "13–18°C",
   },
   {
     colorClass: "text-green-600",
     fillClass: "bg-green-500",
     level: "No Thermal Stress",
+    max: 23,
     rangeLabel: "18–23°C",
   },
   {
     colorClass: "text-yellow-600",
     fillClass: "bg-yellow-400",
     level: "Slight Heat Stress",
+    max: 29,
     rangeLabel: "23–29°C",
   },
   {
     colorClass: "text-amber-600",
     fillClass: "bg-amber-500",
     level: "Moderate Heat Stress",
+    max: 35,
     rangeLabel: "29–35°C",
   },
   {
     colorClass: "text-orange-600",
     fillClass: "bg-orange-500",
     level: "Strong Heat Stress",
+    max: 41,
     rangeLabel: "35–41°C",
   },
   {
@@ -87,6 +100,8 @@ interface HeatStressInfo {
   level: ThermalStressLevel;
   value: string;
 }
+
+const MIN_CONFIDENCE_INTERVAL = 0.1;
 
 function buildHeatStressInfo(
   item: ThermalStressLegendItem,
@@ -112,7 +127,7 @@ export function getForecastHeatStressDescription(
     upperBound90 !== undefined &&
     !Number.isNaN(lowerBound10) &&
     !Number.isNaN(upperBound90) &&
-    Math.abs(upperBound90 - lowerBound10) > 0.1;
+    Math.abs(upperBound90 - lowerBound10) > MIN_CONFIDENCE_INTERVAL;
 
   const confidenceRange = hasValidBounds
     ? `(10-90%: ${lowerBound10.toFixed(1)}-${upperBound90.toFixed(1)}°C)`
@@ -129,7 +144,7 @@ export function getForecastHeatStressDescription(
 export function getHeatStressDescription(
   petValue: number,
   measureType: string,
-  year: number = 2025,
+  year: number = GRAPH_CONFIG.YEAR_RANGE.END,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
 ): HeatStressDescription {
   const info = getHeatStressInfo(petValue);
@@ -145,30 +160,18 @@ export function getHeatStressDescription(
 }
 
 export function getHeatStressInfo(petValue: number): HeatStressInfo {
-  if (petValue < 4) {
-    return buildHeatStressInfo(THERMAL_STRESS_LEGEND_ITEMS[0], petValue);
-  }
-  if (petValue <= 8) {
-    return buildHeatStressInfo(THERMAL_STRESS_LEGEND_ITEMS[1], petValue);
-  }
-  if (petValue <= 13) {
-    return buildHeatStressInfo(THERMAL_STRESS_LEGEND_ITEMS[2], petValue);
-  }
-  if (petValue <= 18) {
-    return buildHeatStressInfo(THERMAL_STRESS_LEGEND_ITEMS[3], petValue);
-  }
-  if (petValue <= 23) {
-    return buildHeatStressInfo(THERMAL_STRESS_LEGEND_ITEMS[4], petValue);
-  }
-  if (petValue <= 29) {
-    return buildHeatStressInfo(THERMAL_STRESS_LEGEND_ITEMS[5], petValue);
-  }
-  if (petValue <= 35) {
-    return buildHeatStressInfo(THERMAL_STRESS_LEGEND_ITEMS[6], petValue);
-  }
-  if (petValue <= 41) {
-    return buildHeatStressInfo(THERMAL_STRESS_LEGEND_ITEMS[7], petValue);
+  const foundItem = THERMAL_STRESS_LEGEND_ITEMS.find((legendItem, index) => {
+    if (legendItem.max === undefined) {
+      return true;
+    }
+    return index === 0 ? petValue < legendItem.max : petValue <= legendItem.max;
+  });
+
+  const item = foundItem ?? THERMAL_STRESS_LEGEND_ITEMS.at(-1);
+
+  if (!item) {
+    throw new Error("Thermal stress legend items are empty or invalid");
   }
 
-  return buildHeatStressInfo(THERMAL_STRESS_LEGEND_ITEMS[8], petValue);
+  return buildHeatStressInfo(item, petValue);
 }

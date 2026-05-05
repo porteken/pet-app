@@ -1,7 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import { DatabaseError } from "@/lib/utils/errors";
 import { clearAllMocks, setupApiServerTest } from "@/testing/test-utilities";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import {
   FetchCityRankings,
@@ -10,9 +9,15 @@ import {
   FetchTrendGraphData,
 } from "../fetch-server";
 
+import type {
+  createMockLinearRegression,
+  createMockSupabaseClient,
+  createMockValidation,
+} from "@/testing/mocks";
+
 type RankingViewRow = {
   avg_pet: number;
-  change_per_decade: number | null;
+  change_from_2000: number | null;
   city: string;
   future_lower: number | null;
   future_upper: number | null;
@@ -24,9 +29,7 @@ type RankingViewRow = {
   year: number;
 };
 
-type MockSupabaseClient = ReturnType<
-  (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
->;
+type MockSupabaseClient = ReturnType<typeof createMockSupabaseClient>;
 
 type QueryResponse<T> = {
   data: T | undefined;
@@ -55,11 +58,11 @@ const createEqQuery = <T>(
   const response = Promise.resolve({ data, error });
   let eqCallCount = 0;
   const query = {
-    eq: vi.fn(function () {
+    eq: mockFn(function () {
       eqCallCount += 1;
       return eqCallCount < resolveOnEqCall ? query : response;
     }),
-    select: vi.fn(function () {
+    select: mockFn(function () {
       return query;
     }),
   };
@@ -71,7 +74,7 @@ const createViewRow = (
   overrides: Partial<RankingViewRow> = {},
 ): RankingViewRow => ({
   avg_pet: 35.5,
-  change_per_decade: 1.5,
+  change_from_2000: 1.5,
   city: "Phoenix",
   future_lower: 38,
   future_upper: 42,
@@ -97,9 +100,8 @@ const queueCityRankingsViewResponse = (
 
 describe("fetch-server", () => {
   let mockSupabaseClient: MockSupabaseClient;
-  let mockLinearRegression: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockLinearRegression"]
-  >;
+  let mockLinearRegression: ReturnType<typeof createMockLinearRegression>;
+  let mockValidation: ReturnType<typeof createMockValidation>;
 
   beforeEach(async () => {
     clearAllMocks();
@@ -107,6 +109,7 @@ describe("fetch-server", () => {
     const setup = await setupApiServerTest();
     mockSupabaseClient = setup.mockSupabaseClient;
     mockLinearRegression = setup.mockLinearRegression;
+    mockValidation = setup.mockValidation;
   });
 
   describe("FetchCityRankings", () => {
@@ -125,7 +128,7 @@ describe("fetch-server", () => {
           max_pet: 38.2,
           p10: 28,
           p90: 34,
-          change_per_decade: 1.2,
+          change_from_2000: 1.2,
           future_lower: 33,
           future_upper: 37,
           state: "Texas",
@@ -144,7 +147,7 @@ describe("fetch-server", () => {
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
         avg_pet: 35.5,
-        changePerDecade: 1.5,
+        changeFrom2000: 1.5,
         city: "Phoenix",
         FutureValueLower: 38,
         FutureValueUpper: 42,
@@ -210,7 +213,7 @@ describe("fetch-server", () => {
     });
 
     it("should handle rows with null change values", async () => {
-      const rows = [createViewRow({ change_per_decade: null })];
+      const rows = [createViewRow({ change_from_2000: null })];
       queueCityRankingsViewResponse(
         mockSupabaseClient,
         createSuccessResponse(rows),
@@ -218,7 +221,7 @@ describe("fetch-server", () => {
 
       const result = await FetchCityRankings(2024);
 
-      expect(result[0].changePerDecade).toBeUndefined();
+      expect(result[0].changeFrom2000).toBeUndefined();
     });
 
     it("should sort by avg_pet descending and assign ranks", async () => {
@@ -313,9 +316,10 @@ describe("fetch-server", () => {
       ];
 
       const mockQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: mockLocations, error: undefined }),
+        select: mockFn().mockResolvedValue({
+          data: mockLocations,
+          error: undefined,
+        }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -383,9 +387,10 @@ describe("fetch-server", () => {
         message: "column locations.id does not exist",
       };
       const initialQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: undefined, error: columnError }),
+        select: mockFn().mockResolvedValue({
+          data: undefined,
+          error: columnError,
+        }),
       };
       const fallbackLocations = [
         {
@@ -397,7 +402,7 @@ describe("fetch-server", () => {
         },
       ];
       const fallbackQuery = {
-        select: vi.fn().mockResolvedValue({
+        select: mockFn().mockResolvedValue({
           data: fallbackLocations,
           error: undefined,
         }),
@@ -444,9 +449,10 @@ describe("fetch-server", () => {
       ];
 
       const mockQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: mockLocations, error: undefined }),
+        select: mockFn().mockResolvedValue({
+          data: mockLocations,
+          error: undefined,
+        }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -486,9 +492,10 @@ describe("fetch-server", () => {
         "Failed to fetch location data from database",
       );
       const mockQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: undefined, error: mockError }),
+        select: mockFn().mockResolvedValue({
+          data: undefined,
+          error: mockError,
+        }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -503,9 +510,10 @@ describe("fetch-server", () => {
 
     it("should handle null data response", async () => {
       const mockQuery = {
-        select: vi
-          .fn()
-          .mockResolvedValue({ data: undefined, error: undefined }),
+        select: mockFn().mockResolvedValue({
+          data: undefined,
+          error: undefined,
+        }),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -518,6 +526,8 @@ describe("fetch-server", () => {
 
   describe("FetchReferenceGraphData", () => {
     it("should throw error for invalid location ID", async () => {
+      mockValidation.validateLocationId.mockReturnValue(false);
+
       await expect(FetchReferenceGraphData("2023", 0)).rejects.toThrow(
         new DatabaseError("Invalid locationId: 0"),
       );
@@ -532,6 +542,8 @@ describe("fetch-server", () => {
     });
 
     it("should throw error for invalid year format", async () => {
+      mockValidation.validateYear.mockReturnValue(false);
+
       await expect(FetchReferenceGraphData("abc", 1)).rejects.toThrow(
         new DatabaseError("Invalid year format: abc. Must be a 4-digit year."),
       );
@@ -551,9 +563,9 @@ describe("fetch-server", () => {
       ];
 
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({ data: mockData, error: undefined }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -575,9 +587,12 @@ describe("fetch-server", () => {
     it("should handle database errors", async () => {
       const mockError = new Error("Database connection failed");
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({
+          data: undefined,
+          error: mockError,
+        }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -599,9 +614,9 @@ describe("fetch-server", () => {
       ];
 
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({ data: mockData, error: undefined }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -624,6 +639,8 @@ describe("fetch-server", () => {
     });
 
     it("should throw error for invalid location ID", async () => {
+      mockValidation.validateLocationId.mockReturnValue(false);
+
       await expect(FetchTrendGraphData("avg", 0)).rejects.toThrow(
         new DatabaseError("Invalid locationId: 0"),
       );
@@ -636,6 +653,8 @@ describe("fetch-server", () => {
     });
 
     it("should throw error for invalid option", async () => {
+      mockValidation.validateTrendOption.mockReturnValue(false);
+
       await expect(FetchTrendGraphData("invalid", 1)).rejects.toThrow(
         new DatabaseError("Invalid option: invalid. Must be 'avg' or 'max'"),
       );
@@ -647,9 +666,9 @@ describe("fetch-server", () => {
 
     it("should return empty arrays when no data found", async () => {
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: [], error: undefined }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({ data: [], error: undefined }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -667,9 +686,12 @@ describe("fetch-server", () => {
     it("should handle database errors", async () => {
       const mockError = new Error("Database connection failed");
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: undefined, error: mockError }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({
+          data: undefined,
+          error: mockError,
+        }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
@@ -685,9 +707,9 @@ describe("fetch-server", () => {
     it("should handle both avg and max options", async () => {
       const mockData = [{ location_id: 1, pet: 25.5, year: 2020 }];
       const mockQuery = {
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValue({ data: mockData, error: undefined }),
-        select: vi.fn().mockReturnThis(),
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({ data: mockData, error: undefined }),
+        select: mockFn().mockReturnThis(),
       };
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);

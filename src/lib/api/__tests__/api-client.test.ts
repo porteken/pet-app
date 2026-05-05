@@ -1,11 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import { FetchError } from "@/lib/utils/errors";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { apiRequest, type ApiResponse, hasError } from "../api-client";
 
 vi.mock("@sentry/nextjs", () => ({
-  captureException: vi.fn(),
+  captureException: mockFn(),
 }));
 
 vi.mock("@/lib/utils/errors", () => ({
@@ -28,7 +27,7 @@ describe("api-client", () => {
   describe("apiRequest", () => {
     it("should return successful response when request succeeds", async () => {
       const mockData = { id: 1, name: "Test Data" };
-      const mockRequestFunction = vi.fn().mockResolvedValue(mockData);
+      const mockRequestFunction = mockFn().mockResolvedValue(mockData);
 
       const result = await apiRequest(mockRequestFunction);
 
@@ -41,7 +40,7 @@ describe("api-client", () => {
 
     it("should return error response when request fails with Error", async () => {
       const mockError = new Error("Test error message");
-      const mockRequestFunction = vi.fn().mockRejectedValue(mockError);
+      const mockRequestFunction = mockFn().mockRejectedValue(mockError);
 
       const result = await apiRequest(mockRequestFunction);
 
@@ -58,7 +57,7 @@ describe("api-client", () => {
 
     it("should return error response when request fails with FetchError", async () => {
       const mockError = new FetchError("Fetch failed");
-      const mockRequestFunction = vi.fn().mockRejectedValue(mockError);
+      const mockRequestFunction = mockFn().mockRejectedValue(mockError);
 
       const result = await apiRequest(mockRequestFunction);
 
@@ -75,7 +74,7 @@ describe("api-client", () => {
 
     it("should return error response when request fails with non-Error object", async () => {
       const mockError = "String error";
-      const mockRequestFunction = vi.fn().mockRejectedValue(mockError);
+      const mockRequestFunction = mockFn().mockRejectedValue(mockError);
 
       const result = await apiRequest(mockRequestFunction);
 
@@ -92,8 +91,8 @@ describe("api-client", () => {
 
     it("should call error handler when provided and error is an Error instance", async () => {
       const mockError = new Error("Test error");
-      const mockRequestFunction = vi.fn().mockRejectedValue(mockError);
-      const mockErrorHandler = vi.fn();
+      const mockRequestFunction = mockFn().mockRejectedValue(mockError);
+      const mockErrorHandler = mockFn();
 
       await apiRequest(mockRequestFunction, mockErrorHandler);
 
@@ -103,8 +102,8 @@ describe("api-client", () => {
 
     it("should call error handler when provided and error is a FetchError instance", async () => {
       const mockError = new FetchError("Fetch error");
-      const mockRequestFunction = vi.fn().mockRejectedValue(mockError);
-      const mockErrorHandler = vi.fn();
+      const mockRequestFunction = mockFn().mockRejectedValue(mockError);
+      const mockErrorHandler = mockFn();
 
       await apiRequest(mockRequestFunction, mockErrorHandler);
 
@@ -114,8 +113,8 @@ describe("api-client", () => {
 
     it("should not call error handler when error is not an Error instance", async () => {
       const mockError = "String error";
-      const mockRequestFunction = vi.fn().mockRejectedValue(mockError);
-      const mockErrorHandler = vi.fn();
+      const mockRequestFunction = mockFn().mockRejectedValue(mockError);
+      const mockErrorHandler = mockFn();
 
       await apiRequest(mockRequestFunction, mockErrorHandler);
 
@@ -124,7 +123,7 @@ describe("api-client", () => {
 
     it("should not call error handler when not provided", async () => {
       const mockError = new Error("Test error");
-      const mockRequestFunction = vi.fn().mockRejectedValue(mockError);
+      const mockRequestFunction = mockFn().mockRejectedValue(mockError);
 
       const result = await apiRequest(mockRequestFunction);
 
@@ -142,10 +141,16 @@ describe("api-client", () => {
         { data: undefined },
       ];
 
-      for (const testCase of testCases) {
-        const mockRequestFunction = vi.fn().mockResolvedValue(testCase.data);
-        const result = await apiRequest(mockRequestFunction);
+      const results = await Promise.all(
+        testCases.map(async (testCase) => {
+          const mockRequestFunction = mockFn().mockResolvedValue(testCase.data);
+          const result = await apiRequest(mockRequestFunction);
 
+          return { result, testCase };
+        }),
+      );
+
+      for (const { result, testCase } of results) {
         expect(result).toEqual({
           data: testCase.data,
           error: undefined,
@@ -156,8 +161,8 @@ describe("api-client", () => {
     it("should handle multiple concurrent requests", async () => {
       const mockData1 = { id: 1 };
       const mockData2 = { id: 2 };
-      const mockRequestFunction1 = vi.fn().mockResolvedValue(mockData1);
-      const mockRequestFunction2 = vi.fn().mockResolvedValue(mockData2);
+      const mockRequestFunction1 = mockFn().mockResolvedValue(mockData1);
+      const mockRequestFunction2 = mockFn().mockResolvedValue(mockData2);
 
       const [result1, result2] = await Promise.all([
         apiRequest(mockRequestFunction1),
@@ -172,7 +177,7 @@ describe("api-client", () => {
 
     it("should handle async request function correctly", async () => {
       const mockData = { async: true };
-      const mockRequestFunction = vi.fn(async () => {
+      const mockRequestFunction = mockFn(async () => {
         await createDelay(10);
         return mockData;
       });

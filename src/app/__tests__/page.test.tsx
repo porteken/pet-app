@@ -10,17 +10,17 @@ const {
   mockLocationErrorHandler,
   mockPageLoader,
 } = vi.hoisted(() => ({
-  mockGetForecastPreferencesFromCookies: vi.fn(),
-  mockGetGraphMeasureFromCookies: vi.fn(),
-  mockGetGraphSeasonFromCookies: vi.fn(),
-  mockGetLocationData: vi.fn(),
-  mockHome: vi.fn((_properties?: any) => (
+  mockGetForecastPreferencesFromCookies: mockFn(),
+  mockGetGraphMeasureFromCookies: mockFn(),
+  mockGetGraphSeasonFromCookies: mockFn(),
+  mockGetLocationData: mockFn(),
+  mockHome: mockFn((_properties?: any) => (
     <div data-testid="home-component">Home Component</div>
   )),
-  mockLocationErrorHandler: vi.fn((_properties?: any) => (
+  mockLocationErrorHandler: mockFn((_properties?: any) => (
     <div data-testid="error-handler">Error Handler</div>
   )),
-  mockPageLoader: vi.fn(() => <div data-testid="page-loader">Loading...</div>),
+  mockPageLoader: mockFn(() => <div data-testid="page-loader">Loading...</div>),
 }));
 
 vi.mock("@/features/home", () => ({
@@ -43,16 +43,18 @@ vi.mock("@/components/app/page-loader", () => ({
 }));
 
 vi.mock("next/dynamic", () => ({
-  default: vi.fn((_importFunction, options) => {
-    const DynamicComponent = (properties: any) => {
-      if (options?.loading) {
+  default: mockFn(
+    (_importFunction: unknown, options?: { loading?: unknown }) => {
+      const DynamicComponent = (properties: any) => {
+        if (options?.loading) {
+          return mockHome(properties);
+        }
         return mockHome(properties);
-      }
-      return mockHome(properties);
-    };
-    DynamicComponent.displayName = "DynamicHome";
-    return DynamicComponent;
-  }),
+      };
+      DynamicComponent.displayName = "DynamicHome";
+      return DynamicComponent;
+    },
+  ),
 }));
 
 import Page from "../page";

@@ -1,12 +1,11 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utilities";
+import { Code2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
-
-import { Button } from "@/components/ui/button";
-import { APP_CONFIG } from "@/lib/constants";
-import { cn } from "@/lib/utilities";
 
 interface NavButtonsProperties {
   buildUrl: (path: string, includeSearchParameters?: boolean) => string;
@@ -23,8 +22,8 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
         <Link
           aria-current={isActivePath("/") ? "page" : undefined}
           className={cn(
-            "rounded-md px-1",
-            isActivePath("/") && "bg-gray-100 font-semibold text-gray-900",
+            "rounded-full px-3 py-2",
+            isActivePath("/") && "bg-accent font-semibold text-foreground",
           )}
           href={buildUrl("/")}
         >
@@ -36,9 +35,9 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
         <Link
           aria-current={isActivePath("/rankings") ? "page" : undefined}
           className={cn(
-            "rounded-md px-1",
+            "rounded-full px-3 py-2",
             isActivePath("/rankings") &&
-              "bg-gray-100 font-semibold text-gray-900",
+              "bg-accent font-semibold text-foreground",
           )}
           href="/rankings"
         >
@@ -50,8 +49,8 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
         <Link
           aria-current={isActivePath("/about") ? "page" : undefined}
           className={cn(
-            "rounded-md px-1",
-            isActivePath("/about") && "bg-gray-100 font-semibold text-gray-900",
+            "rounded-full px-3 py-2",
+            isActivePath("/about") && "bg-accent font-semibold text-foreground",
           )}
           href="/about"
         >
@@ -59,15 +58,20 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
         </Link>
       </Button>
 
-      <Button aria-label="View source code on GitHub" asChild variant="ghost">
-        <a
-          href={APP_CONFIG.GITHUB_URL}
+      <Button
+        aria-label="View source code on GitHub"
+        asChild
+        className="rounded-full"
+        size="icon"
+        variant="ghost"
+      >
+        <Link
+          href="https://github.com/porteken/pet-app"
           rel="noopener noreferrer"
           target="_blank"
         >
-          <span className="sm:hidden">GitHub</span>
-          <span className="hidden sm:inline">GitHub Repository</span>
-        </a>
+          <Code2 className="h-4 w-4" />
+        </Link>
       </Button>
     </>
   );

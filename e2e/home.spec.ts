@@ -25,6 +25,8 @@ test.describe("Home Page", () => {
     page,
   }) => {
     await navigateToLocationDetailsFromMap(page, "/");
-    await expect(page.getByText("Trend Analysis")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Trend Analysis" }),
+    ).toBeVisible();
   });
 });

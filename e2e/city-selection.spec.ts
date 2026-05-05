@@ -3,7 +3,7 @@ import { expect, type Locator, test } from "@playwright/test";
 const getRequiredTextContent = async (locator: Locator): Promise<string> => {
   const text = await locator.textContent();
   expect(text).not.toBeNull();
-  return text as string;
+  return text || "";
 };
 
 test.describe("City Selection", () => {

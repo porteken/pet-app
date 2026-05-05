@@ -1,8 +1,7 @@
 "use client";
 
-import { QueryClient } from "@tanstack/react-query";
-
 import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
+import { QueryClient } from "@tanstack/react-query";
 
 import { FetchTrendGraphData } from "./fetch-client";
 

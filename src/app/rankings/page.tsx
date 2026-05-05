@@ -1,6 +1,3 @@
-import type { Metadata } from "next";
-import { cookies } from "next/headers";
-
 import { RankingsMain } from "@/features/rankings";
 import { FetchCityRankings, FetchLocations } from "@/lib/api/fetch-server";
 import {
@@ -11,6 +8,9 @@ import {
   RANKINGS_STATE_COOKIE_NAME,
   RANKINGS_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
+import { cookies } from "next/headers";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   description: "City rankings by thermal stress (PET) values",

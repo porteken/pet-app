@@ -1,6 +1,5 @@
-import * as React from "react";
-
 import { cn } from "@/lib/utilities";
+import * as React from "react";
 
 interface SearchableOptionButtonProperties {
   onSelect: (value: string) => void;

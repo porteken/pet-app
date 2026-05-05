@@ -1,5 +1,3 @@
-import { cookies } from "next/headers";
-
 import {
   FetchLocations,
   FetchReferenceGraphData,
@@ -24,9 +22,10 @@ import {
 } from "@/lib/constants";
 import { getLatestCookieValue } from "@/lib/utils/server-cookies";
 import { validateYear } from "@/lib/utils/validation";
-import type { LocationOptionSection, LocationProperties } from "@/types/types";
+import { cookies } from "next/headers";
 
 import type { PageProperties } from "../model/types";
+import type { LocationOptionSection, LocationProperties } from "@/types/types";
 
 interface GraphData {
   dates: Date[];

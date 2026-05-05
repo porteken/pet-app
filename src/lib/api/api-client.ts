@@ -1,6 +1,5 @@
-import * as Sentry from "@sentry/nextjs";
-
 import { FetchError } from "@/lib/utils/errors";
+import * as Sentry from "@sentry/nextjs";
 
 export type ApiResponse<T> =
   | {

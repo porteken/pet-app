@@ -1,0 +1,92 @@
+import { expect, type Page } from "@playwright/test";
+
+export const MARKER_SELECTOR = ".pet-map-marker-icon, .leaflet-marker-icon";
+
+const MARKER_CLICK_TIMEOUT = 2000;
+const MARKER_VISIBILITY_TIMEOUT = 10_000;
+
+export async function clickClickableMarker(page: Page): Promise<void> {
+  const markers = page.locator(MARKER_SELECTOR);
+  await expect(markers.first()).toBeVisible({
+    timeout: MARKER_VISIBILITY_TIMEOUT,
+  });
+
+  const candidateIndices = await getCandidateMarkerIndices(page);
+
+  for (const index of candidateIndices) {
+    const marker = markers.nth(index);
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      await marker.scrollIntoViewIfNeeded();
+      // eslint-disable-next-line no-await-in-loop
+      await marker.click({ timeout: MARKER_CLICK_TIMEOUT, trial: true });
+      // eslint-disable-next-line no-await-in-loop
+      await marker.click();
+      return;
+    } catch {
+      // Try the next marker if this one is not interactable.
+    }
+  }
+
+  throw new Error("Unable to click a map marker without using force.");
+}
+
+async function getCandidateMarkerIndices(page: Page): Promise<number[]> {
+  const markers = page.locator(MARKER_SELECTOR);
+  const markerCount = await markers.count();
+
+  const prioritizedIndices = await markers.evaluateAll((elements) => {
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+    const candidates = elements
+      .map((element, index) => {
+        const rectangle = element.getBoundingClientRect();
+        const left = Math.max(rectangle.left, 0);
+        const right = Math.min(rectangle.right, viewportWidth);
+        const top = Math.max(rectangle.top, 0);
+        const bottom = Math.min(rectangle.bottom, viewportHeight);
+        const visibleWidth = right - left;
+        const visibleHeight = bottom - top;
+
+        if (visibleWidth <= 0 || visibleHeight <= 0) {
+          return undefined;
+        }
+
+        const centerX = left + visibleWidth / 2;
+        const centerY = top + visibleHeight / 2;
+        const topElement = document.elementFromPoint(centerX, centerY);
+
+        if (
+          !topElement ||
+          !(
+            topElement === element ||
+            topElement.contains(element) ||
+            element.contains(topElement)
+          )
+        ) {
+          return undefined;
+        }
+
+        return {
+          index,
+          visibleArea: visibleWidth * visibleHeight,
+        };
+      })
+      .filter(
+        (value): value is { index: number; visibleArea: number } =>
+          value !== undefined,
+      )
+      .toSorted((a, b) => b.visibleArea - a.visibleArea);
+
+    return candidates.map((candidate) => candidate.index);
+  });
+
+  const prioritizedIndexSet = new Set(prioritizedIndices);
+  const fallbackIndices = Array.from(
+    { length: markerCount },
+    (_, index) => index,
+  ).filter((index) => !prioritizedIndexSet.has(index));
+
+  return [...prioritizedIndices, ...fallbackIndices];
+}

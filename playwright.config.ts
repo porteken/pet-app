@@ -64,7 +64,7 @@ export default defineConfig({
   ],
   reporter: process.env.CI ? "html" : "line",
   retries: process.env.CI ? CI_RETRIES : LOCAL_RETRIES,
-  testDir: "./tests",
+  testDir: "./e2e",
   timeout: GLOBAL_TIMEOUT,
   use: {
     actionTimeout: ACTION_TIMEOUT,

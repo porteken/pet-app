@@ -155,7 +155,7 @@ const MOCK_TABLES: Record<string, MockRow[]> = {
         );
         return {
           avg_pet: avg,
-          change_per_decade: round(location.trendPerYear * 10),
+          change_from_2000: round((year - 2000) * location.trendPerYear),
           city: location.city,
           future_lower: round(forecastPet - 2.2),
           future_upper: round(forecastPet + 2.2),

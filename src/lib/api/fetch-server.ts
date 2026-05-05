@@ -46,7 +46,7 @@ type LocationQueryRow = {
 };
 
 const CITY_RANKINGS_COLUMNS =
-  "avg_pet, change_per_decade, city, future_lower, future_upper, location_id, max_pet, p10, p90, state, year";
+  "avg_pet, change_from_2000, city, future_lower, future_upper, location_id, max_pet, p10, p90, state, year";
 
 function assertQueryData<T>(
   label: string,
@@ -64,7 +64,7 @@ export async function FetchCityRankings(
 ): Promise<
   Array<{
     avg_pet: number;
-    changePerDecade: number | undefined;
+    changeFrom2000: number | undefined;
     city: string;
     FutureValueLower: number | undefined;
     FutureValueUpper: number | undefined;
@@ -105,7 +105,7 @@ export async function FetchCityRankings(
     .toSorted((a, b) => b.avg_pet - a.avg_pet)
     .map((row, index) => ({
       avg_pet: row.avg_pet,
-      changePerDecade: row.change_per_decade ?? undefined,
+      changeFrom2000: row.change_from_2000 ?? undefined,
       city: row.city,
       FutureValueLower: row.future_lower ?? undefined,
       FutureValueUpper: row.future_upper ?? undefined,

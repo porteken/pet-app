@@ -142,9 +142,6 @@ const TOOLTIP_CONTAINER_STYLE = {
   background: GRAPH_COLORS.tooltipBackground,
   borderColor: GRAPH_COLORS.tooltipBorder,
 };
-const TREND_ACTIVE_DOT = { fill: GRAPH_COLORS.primary, r: 4 };
-const REF_CURRENT_ACTIVE_DOT = { fill: GRAPH_COLORS.primary, r: 4 };
-const REF_REFERENCE_ACTIVE_DOT = { fill: GRAPH_COLORS.reference, r: 4 };
 const TICK_FONT_SIZE_MOBILE = 12;
 const TICK_FONT_SIZE_DESKTOP = 13;
 const DOT_RADIUS_MOBILE = 2.5;
@@ -161,6 +158,20 @@ const MARGIN_RIGHT_MOBILE = 4;
 const MARGIN_RIGHT_DESKTOP = 12;
 const MIN_TICK_GAP_REFERENCE_MOBILE = 28;
 const MIN_TICK_GAP_REFERENCE_DESKTOP = 16;
+const Y_AXIS_STEP = 2;
+const Y_AXIS_LOWER_PADDING = 2;
+const Y_AXIS_UPPER_PADDING = 1;
+
+const getActiveDotStyle = (color: string) => ({
+  fill: color,
+  r: 4,
+  stroke: color,
+  strokeWidth: 1.5,
+});
+
+const TREND_ACTIVE_DOT = getActiveDotStyle(GRAPH_COLORS.primary);
+const REF_CURRENT_ACTIVE_DOT = getActiveDotStyle(GRAPH_COLORS.primary);
+const REF_REFERENCE_ACTIVE_DOT = getActiveDotStyle(GRAPH_COLORS.reference);
 
 const formatYAxisTick = (value: number) => `${value.toFixed(0)}°`;
 const formatLegendLabel = (value: string) => (
@@ -297,6 +308,39 @@ const hasReferenceGraphData = (
   return dates.length > 0 && referencePets.length > 0 && currentPets.length > 0;
 };
 
+const roundDownToStep = (value: number, step: number): number => {
+  return Math.floor(value / step) * step;
+};
+
+const roundUpToStep = (value: number, step: number): number => {
+  return Math.ceil(value / step) * step;
+};
+
+const getYAxisDomain = (values: (number | undefined)[]): [number, number] => {
+  const numericValues = values.filter(
+    (value): value is number =>
+      typeof value === "number" && Number.isFinite(value),
+  );
+
+  if (numericValues.length === 0) {
+    return [0, Y_AXIS_STEP];
+  }
+
+  const dataMin = Math.min(...numericValues);
+  const dataMax = Math.max(...numericValues);
+  const lowerBound = roundDownToStep(
+    dataMin - Y_AXIS_LOWER_PADDING,
+    Y_AXIS_STEP,
+  );
+  const upperBound = roundUpToStep(dataMax + Y_AXIS_UPPER_PADDING, Y_AXIS_STEP);
+
+  if (lowerBound === upperBound) {
+    return [lowerBound, upperBound + Y_AXIS_STEP];
+  }
+
+  return [lowerBound, upperBound];
+};
+
 const getTrendGraphType = (option: string): string => {
   return option === GRAPH_CONFIG.TREND_OPTIONS.AVG ? "Average" : "Maximum";
 };
@@ -365,7 +409,7 @@ const ChartTooltip = ({
 
   return (
     <div
-      className="rounded-xl border px-3 py-2 text-xs shadow-lg backdrop-blur"
+      className="rounded-xl border px-3 py-2 text-xs shadow-lg"
       style={TOOLTIP_CONTAINER_STYLE}
     >
       <p className="text-foreground mb-2 font-semibold">
@@ -469,6 +513,18 @@ const TrendChartBody = ({
   shouldAnimate,
   showLegend,
 }: TrendChartBodyProperties): React.ReactElement => {
+  const yAxisDomain = React.useMemo(
+    () =>
+      getYAxisDomain(
+        chartData.flatMap((point) => [
+          point.pet,
+          point.trendline,
+          point.forecast,
+        ]),
+      ),
+    [chartData],
+  );
+
   const tickStyle = React.useMemo(
     () => ({
       fill: GRAPH_COLORS.text,
@@ -521,7 +577,9 @@ const TrendChartBody = ({
             type="number"
           />
           <YAxis
+            allowDataOverflow
             axisLine={false}
+            domain={yAxisDomain}
             tick={tickStyle}
             tickFormatter={formatYAxisTick}
             tickLine={false}
@@ -571,6 +629,14 @@ const ReferenceChartBody = ({
   shouldAnimate,
   showLegend,
 }: ReferenceChartBodyProperties): React.ReactElement => {
+  const yAxisDomain = React.useMemo(
+    () =>
+      getYAxisDomain(
+        chartData.flatMap((point) => [point.currentPet, point.referencePet]),
+      ),
+    [chartData],
+  );
+
   const tickStyle = React.useMemo(
     () => ({
       fill: GRAPH_COLORS.text,
@@ -614,7 +680,9 @@ const ReferenceChartBody = ({
             tickLine={false}
           />
           <YAxis
+            allowDataOverflow
             axisLine={false}
+            domain={yAxisDomain}
             tick={tickStyle}
             tickFormatter={formatYAxisTick}
             tickLine={false}

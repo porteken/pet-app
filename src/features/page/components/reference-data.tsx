@@ -84,9 +84,6 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
               Reference Data
             </h2>
           </div>
-          <span className="rounded-full bg-(--pill-surface) px-3 py-1 text-xs font-semibold text-(--pill-foreground)">
-            Day-by-day
-          </span>
         </div>
         <div className="mb-5 space-y-4">
           <label

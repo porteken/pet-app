@@ -11,7 +11,9 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("@/features/header-bar", () => ({
-  HeaderBar: mockFn(({ LocationOptions }: { LocationOptions: unknown[] }) => (
+  HeaderBar: mockFn<
+    ({ LocationOptions }: { LocationOptions: unknown[] }) => React.ReactNode
+  >(({ LocationOptions }: { LocationOptions: unknown[] }) => (
     <div data-testid="header-bar">
       HeaderBar with {LocationOptions?.length || 0} locations
     </div>
@@ -59,14 +61,12 @@ describe("AboutMain", () => {
     expect(screen.getByText(/purpose of the application/i)).toBeInTheDocument();
   });
 
-  it("should display the purpose description", () => {
+  it("should keep the page heading accessible", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    const purposeText = screen.getByText(/explore how pet changed from/i);
-    expect(purposeText).toBeInTheDocument();
-    expect(purposeText).toHaveTextContent("from 2000 to 2025");
-    expect(purposeText).toHaveTextContent("top 500 largest cities");
-    expect(purposeText).toHaveTextContent("Contiguous United States");
+    const heading = screen.getByRole("heading", { name: "About" });
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveClass("sr-only");
   });
 
   it("should display the 'What is PET?' section with correct heading", () => {
@@ -74,14 +74,19 @@ describe("AboutMain", () => {
 
     const petHeading = screen.getByRole("heading", { name: /what is pet\?/i });
     expect(petHeading).toBeInTheDocument();
-    expect(petHeading).toHaveClass("text-2xl", "font-bold");
+    expect(petHeading).toHaveClass(
+      "text-primary",
+      "text-sm",
+      "font-semibold",
+      "uppercase",
+    );
   });
 
   it("should display the PET definition", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
     const petDefinition = screen.getByText(
-      /the technical definition of the pet/i,
+      /pet \(physiological equivalent temperature\) is a method to measure/i,
     );
     expect(petDefinition).toBeInTheDocument();
     expect(petDefinition).toHaveTextContent(

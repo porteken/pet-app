@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-
 import { THERMAL_STRESS_LEGEND_ITEMS } from "@/lib/utils/thermal-stress";
+import React from "react";
 
 interface HeatStressLegendProperties {
   title?: string;
@@ -19,7 +18,7 @@ const HeatStressLegendComponent: React.FC<HeatStressLegendProperties> = ({
           <li className="flex items-center gap-3" key={item.level}>
             <div
               aria-label={`${item.level} marker`}
-              className={`border-border h-5 w-5 rounded border ${item.fillClass}`}
+              className={`h-5 w-5 rounded ${item.fillClass}`}
             />
             <div className="flex flex-col">
               <span className="text-muted-foreground text-xs font-medium">

@@ -177,9 +177,6 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
               Trend Analysis
             </h2>
           </div>
-          <span className="rounded-full bg-(--pill-surface) px-3 py-1 text-xs font-semibold text-(--pill-foreground)">
-            Forecast-ready
-          </span>
         </div>
         <div className="mb-5 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">

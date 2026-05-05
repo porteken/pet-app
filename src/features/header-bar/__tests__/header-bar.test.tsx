@@ -125,9 +125,11 @@ describe("HeaderBar", () => {
 
     it("should render GitHub link", () => {
       render(<HeaderBar LocationOptions={mockLocationOptions} />);
-      const githubLink = screen.getByLabelText("View source code on GitHub");
-      expect(githubLink).toBeInTheDocument();
-      expect(githubLink.closest("a")).toHaveAttribute(
+      const githubLinks = screen.getAllByLabelText(
+        "View source code on GitHub",
+      );
+      expect(githubLinks.length).toBeGreaterThan(0);
+      expect(githubLinks[0]).toHaveAttribute(
         "href",
         "https://github.com/porteken/pet-app",
       );

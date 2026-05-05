@@ -217,10 +217,10 @@ const Home: FC<MapProperties> = ({
 
   const desktopDialogHeightClass = useMemo(() => {
     if (graphLoading) {
-      return "sm:!top-1/2 sm:!-translate-y-1/2 sm:!max-h-[94dvh] sm:!overflow-y-auto";
+      return "sm:!max-h-[94dvh] sm:!overflow-y-auto";
     }
 
-    return "sm:!top-1/2 sm:!-translate-y-1/2 sm:!h-[96dvh] sm:!max-h-[99dvh] sm:!w-[95vw] sm:!max-w-5xl sm:!overflow-y-auto";
+    return "sm:!h-[96dvh] sm:!max-h-[99dvh] sm:!w-[95vw] sm:!max-w-5xl sm:!overflow-y-auto";
   }, [graphLoading]);
 
   return (
@@ -240,7 +240,7 @@ const Home: FC<MapProperties> = ({
         />
       </main>
       <Modal
-        dialogClassName={desktopDialogHeightClass}
+        dialogClassName={`${desktopDialogHeightClass} !bg-background !backdrop-blur-none`}
         mobileFullscreen
         onClose={handleModalClose}
         open={modalOpen}

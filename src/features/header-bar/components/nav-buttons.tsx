@@ -1,12 +1,11 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utilities";
+import { Code2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
-
-import { Button } from "@/components/ui/button";
-import { APP_CONFIG } from "@/lib/constants";
-import { cn } from "@/lib/utilities";
 
 interface NavButtonsProperties {
   buildUrl: (path: string, includeSearchParameters?: boolean) => string;
@@ -59,16 +58,20 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
         </Link>
       </Button>
 
-      <Button aria-label="View source code on GitHub" asChild variant="outline">
-        <a
-          className="rounded-full"
-          href={APP_CONFIG.GITHUB_URL}
+      <Button
+        aria-label="View source code on GitHub"
+        asChild
+        className="rounded-full"
+        size="icon"
+        variant="ghost"
+      >
+        <Link
+          href="https://github.com/porteken/pet-app"
           rel="noopener noreferrer"
           target="_blank"
         >
-          <span className="sm:hidden">GitHub</span>
-          <span className="hidden sm:inline">GitHub Repository</span>
-        </a>
+          <Code2 className="h-4 w-4" />
+        </Link>
       </Button>
     </>
   );

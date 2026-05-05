@@ -46,7 +46,7 @@ const locationRowSchema = z.object({
 
 const rankingViewRowSchema = z.object({
   avg_pet: finiteNumberSchema,
-  change_per_decade: finiteNumberSchema.nullable(),
+  change_from_2000: finiteNumberSchema.nullable(),
   city: z.string().min(1),
   future_lower: finiteNumberSchema.nullable(),
   future_upper: finiteNumberSchema.nullable(),

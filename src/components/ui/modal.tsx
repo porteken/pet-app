@@ -1,9 +1,8 @@
 "use client";
 
+import { cn } from "@/lib/utilities";
 import { X } from "lucide-react";
 import React, { memo, useEffect, useId, useRef, type ReactNode } from "react";
-
-import { cn } from "@/lib/utilities";
 
 interface ModalProperties {
   children: ReactNode;
@@ -84,13 +83,21 @@ const Modal = memo<ModalProperties>(
         : "absolute inset-0";
     }
 
-    let dialogPositionClass = "fixed";
+    let dialogPositionClass = "relative";
     if (constrainToParent) {
-      dialogPositionClass = mobileFullscreen ? "fixed sm:absolute" : "absolute";
+      dialogPositionClass = mobileFullscreen ? "fixed sm:static" : "static";
     }
 
     return (
-      <div className={cn("z-11000 bg-black/60", overlayPositionClass)}>
+      <div
+        className={cn(
+          "z-11000 bg-black/60",
+          overlayPositionClass,
+          mobileFullscreen
+            ? "sm:flex sm:items-center sm:justify-center sm:p-4"
+            : "flex items-center justify-center p-2 sm:p-4",
+        )}
+      >
         <button
           aria-label="Close dialog"
           className="absolute inset-0 cursor-default focus:outline-none"
@@ -102,8 +109,8 @@ const Modal = memo<ModalProperties>(
           aria-modal="true"
           className={cn(
             mobileFullscreen
-              ? "inset-0 flex h-dvh max-h-dvh w-screen max-w-none translate-x-0 translate-y-0 flex-col overflow-y-auto rounded-none border-0 bg-background/95 p-3 shadow-lg backdrop-blur-xl sm:top-1/2 sm:left-1/2 sm:h-auto sm:max-h-[95dvh] sm:w-[calc(100%-2rem)] sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl sm:border sm:border-border sm:p-4 lg:p-5"
-              : "top-1/2 left-1/2 flex max-h-[86dvh] w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-3xl border border-border bg-background/95 p-3 shadow-lg backdrop-blur-xl sm:max-h-[90dvh] sm:w-[calc(100%-2rem)] sm:p-6",
+              ? "inset-0 flex h-dvh max-h-dvh w-screen max-w-none flex-col overflow-y-auto rounded-none border-0 bg-background/95 p-3 shadow-lg backdrop-blur-xl sm:h-auto sm:max-h-[95dvh] sm:w-[calc(100%-2rem)] sm:max-w-3xl sm:rounded-3xl sm:border sm:border-border sm:p-4 lg:p-5"
+              : "flex max-h-[86dvh] w-[calc(100%-1rem)] max-w-3xl flex-col overflow-y-auto rounded-3xl border border-border bg-background/95 p-3 shadow-lg backdrop-blur-xl sm:max-h-[90dvh] sm:w-[calc(100%-2rem)] sm:p-6",
             dialogPositionClass,
             dialogClassName,
           )}

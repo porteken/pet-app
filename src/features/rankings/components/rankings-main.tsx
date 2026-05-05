@@ -13,7 +13,6 @@ import {
   setRankingsYear,
 } from "@/lib/actions/actions";
 import {
-  APP_CONFIG,
   GRAPH_SEASONS,
   normalizeGraphSeason,
   type GraphSeason,
@@ -63,7 +62,7 @@ const SEASON_OPTIONS = GRAPH_SEASONS.map((season) => ({
 
 interface RankingItem {
   avg_pet: number;
-  changePerDecade: number | undefined;
+  changeFrom2000: number | undefined;
   city: string;
   FutureValueLower: number | undefined;
   FutureValueUpper: number | undefined;
@@ -86,7 +85,7 @@ function compareRankingItems(
     case "avg_pet":
       return a.avg_pet - b.avg_pet;
     case "change":
-      return (a.changePerDecade ?? 0) - (b.changePerDecade ?? 0);
+      return (a.changeFrom2000 ?? 0) - (b.changeFrom2000 ?? 0);
     case "city":
       return a.city.localeCompare(b.city);
     case "max_pet":
@@ -322,7 +321,7 @@ class RankingRow extends React.PureComponent<{
     const {
       item: {
         avg_pet,
-        changePerDecade,
+        changeFrom2000,
         city,
         FutureValueLower,
         FutureValueUpper,
@@ -379,12 +378,12 @@ class RankingRow extends React.PureComponent<{
           )}
         </td>
         <td className="px-6 py-4 text-sm whitespace-nowrap">
-          {changePerDecade === undefined ? (
+          {changeFrom2000 === undefined ? (
             <span className="text-muted-foreground">N/A</span>
           ) : (
-            <span className={`font-semibold ${colorMapping(changePerDecade)}`}>
-              {changePerDecade > 0 ? "+" : ""}
-              {changePerDecade.toFixed(1)}°C
+            <span className={`font-semibold ${colorMapping(changeFrom2000)}`}>
+              {changeFrom2000 > 0 ? "+" : ""}
+              {changeFrom2000.toFixed(1)}°C
             </span>
           )}
         </td>
@@ -509,23 +508,17 @@ export function RankingsMain({
 
   return (
     <div className="min-h-screen">
-      <HeaderBar LocationOptions={LocationOptions} />
+      <HeaderBar compact LocationOptions={LocationOptions} />
       <main
         className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
         id="main-content"
       >
-        <section className="climate-hero fade-in-up mb-8 rounded-4xl p-6 sm:p-8">
-          <p className="mb-2 text-xs font-semibold tracking-[0.24em] text-white/80 uppercase">
-            City rankings
-          </p>
-          <h1 className="mb-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
-            Cities ranked by Average PET
-          </h1>
-          <p className="max-w-3xl text-sm text-white/85 sm:text-base">
-            Compare thermal stress conditions across cities, filter by season or
-            state, and trace which places are warming fastest.{" "}
-            {APP_CONFIG.TAGLINE}
-          </p>
+        <section className="glass-panel fade-in-up mb-8 overflow-hidden rounded-4xl">
+          <div className="bg-primary px-6 py-5 sm:px-8 sm:py-6">
+            <h1 className="text-primary-foreground text-3xl font-black tracking-tight sm:text-4xl">
+              Cities ranked by Average PET
+            </h1>
+          </div>
         </section>
 
         <RankingsFilters
@@ -624,7 +617,7 @@ export function RankingsMain({
                       column="change"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
-                      label="Change per Decade"
+                      label="Change from 2000"
                       setSortColumn={setSortColumn}
                       setSortDirection={setSortDirection}
                     />

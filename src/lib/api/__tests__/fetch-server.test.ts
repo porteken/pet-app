@@ -17,7 +17,7 @@ import type {
 
 type RankingViewRow = {
   avg_pet: number;
-  change_per_decade: number | null;
+  change_from_2000: number | null;
   city: string;
   future_lower: number | null;
   future_upper: number | null;
@@ -74,7 +74,7 @@ const createViewRow = (
   overrides: Partial<RankingViewRow> = {},
 ): RankingViewRow => ({
   avg_pet: 35.5,
-  change_per_decade: 1.5,
+  change_from_2000: 1.5,
   city: "Phoenix",
   future_lower: 38,
   future_upper: 42,
@@ -128,7 +128,7 @@ describe("fetch-server", () => {
           max_pet: 38.2,
           p10: 28,
           p90: 34,
-          change_per_decade: 1.2,
+          change_from_2000: 1.2,
           future_lower: 33,
           future_upper: 37,
           state: "Texas",
@@ -147,7 +147,7 @@ describe("fetch-server", () => {
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
         avg_pet: 35.5,
-        changePerDecade: 1.5,
+        changeFrom2000: 1.5,
         city: "Phoenix",
         FutureValueLower: 38,
         FutureValueUpper: 42,
@@ -213,7 +213,7 @@ describe("fetch-server", () => {
     });
 
     it("should handle rows with null change values", async () => {
-      const rows = [createViewRow({ change_per_decade: null })];
+      const rows = [createViewRow({ change_from_2000: null })];
       queueCityRankingsViewResponse(
         mockSupabaseClient,
         createSuccessResponse(rows),
@@ -221,7 +221,7 @@ describe("fetch-server", () => {
 
       const result = await FetchCityRankings(2024);
 
-      expect(result[0].changePerDecade).toBeUndefined();
+      expect(result[0].changeFrom2000).toBeUndefined();
     });
 
     it("should sort by avg_pet descending and assign ranks", async () => {

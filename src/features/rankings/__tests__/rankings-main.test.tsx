@@ -150,7 +150,7 @@ const mockLocationOptions = [
 
 const createMockRankingItem = (overrides = {}) => ({
   avg_pet: 30.5,
-  changePerDecade: 0.5,
+  changeFrom2000: 0.5,
   city: "Test City",
   FutureValueLower: 32,
   FutureValueUpper: 38,
@@ -343,15 +343,15 @@ const mockRankings = [
 ];
 
 const hotCityRankings = [
-  createMockRankingItem({ changePerDecade: 1.5, city: "Hot City" }),
+  createMockRankingItem({ changeFrom2000: 1.5, city: "Hot City" }),
 ];
 
 const coolCityRankings = [
-  createMockRankingItem({ changePerDecade: -0.5, city: "Cool City" }),
+  createMockRankingItem({ changeFrom2000: -0.5, city: "Cool City" }),
 ];
 
 const noDataCityRankings = [
-  createMockRankingItem({ changePerDecade: undefined, city: "No Data City" }),
+  createMockRankingItem({ changeFrom2000: undefined, city: "No Data City" }),
 ];
 
 const rangeCityRankings = [
@@ -375,7 +375,7 @@ const noFutureCityRankings = [
 ];
 
 const stableCityRankings = [
-  createMockRankingItem({ changePerDecade: 0, city: "Stable City" }),
+  createMockRankingItem({ changeFrom2000: 0, city: "Stable City" }),
 ];
 
 const emptyRankings: Array<ReturnType<typeof createMockRankingItem>> = [];
@@ -475,7 +475,7 @@ describe("RankingsMain", () => {
       expect(
         within(table).getByText("PET Range (10th-90th percentile)"),
       ).toBeInTheDocument();
-      expect(within(table).getByText("Change per Decade")).toBeInTheDocument();
+      expect(within(table).getByText("Change from 2000")).toBeInTheDocument();
       expect(
         within(table).getByText("2100 Forecast Range"),
       ).toBeInTheDocument();
@@ -628,12 +628,12 @@ describe("RankingsMain", () => {
       expect(rows[1]).toHaveTextContent("AZ");
     });
 
-    it("should sort by change when Change per Decade header is clicked", () => {
+    it("should sort by change when Change from 2000 header is clicked", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const table = screen.getByRole("table");
       const changeHeader = requireElement(
-        within(table).getByText("Change per Decade").closest("th"),
+        within(table).getByText("Change from 2000").closest("th"),
       );
       fireEvent.click(changeHeader);
 
@@ -700,19 +700,19 @@ describe("RankingsMain", () => {
   });
 
   describe("Data Display", () => {
-    it("should display change per decade with positive indicator", () => {
+    it("should display change from 2000 with positive indicator", () => {
       render(<RankingsMain {...defaultProps} rankings={hotCityRankings} />);
 
       expect(screen.getByText("+1.5°C")).toBeInTheDocument();
     });
 
-    it("should display change per decade with negative indicator", () => {
+    it("should display change from 2000 with negative indicator", () => {
       render(<RankingsMain {...defaultProps} rankings={coolCityRankings} />);
 
       expect(screen.getByText("-0.5°C")).toBeInTheDocument();
     });
 
-    it("should display N/A for undefined change per decade", () => {
+    it("should display N/A for undefined change from 2000", () => {
       render(<RankingsMain {...defaultProps} rankings={noDataCityRankings} />);
 
       const naElements = screen.getAllByText("N/A");

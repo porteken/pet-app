@@ -192,8 +192,8 @@ describe("PageMain Integration Tests", () => {
       expect(Number(dataId)).toBeGreaterThan(0);
 
       const optionsData = headerBar.dataset.options;
+      const locationOptions = JSON.parse(String(optionsData));
       expect(optionsData).toBeDefined();
-      const locationOptions = JSON.parse(optionsData!);
       expect(locationOptions).toEqual(defaultProps.LocationOptions);
     });
 

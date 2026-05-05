@@ -1,6 +1,6 @@
 "use strict";
 
-const path = require("path");
+const path = require("node:path");
 
 /**
  * Turbopack doesn't set `opts.from` when invoking PostCSS plugins. Without it,

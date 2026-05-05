@@ -44,12 +44,9 @@ describe("Error Classes", () => {
 
     it("should create an AppError with original error", () => {
       const originalError = new Error("Original error");
-      const error = new AppError(
-        "Wrapped error",
-        "WRAP_ERROR",
-        500,
+      const error = new AppError("Wrapped error", "WRAP_ERROR", 500, {
         originalError,
-      );
+      });
 
       expect(error.message).toBe("Wrapped error");
       expect(error.code).toBe("WRAP_ERROR");
@@ -214,13 +211,9 @@ describe("Error Classes", () => {
   describe("AppError with context", () => {
     it("should create an AppError with context", () => {
       const context = { action: "delete", userId: 123 };
-      const error = new AppError(
-        "Context test",
-        "TEST_CODE",
-        500,
-        undefined,
+      const error = new AppError("Context test", "TEST_CODE", 500, {
         context,
-      );
+      });
 
       expect(error.message).toBe("Context test");
       expect(error.code).toBe("TEST_CODE");
@@ -258,7 +251,7 @@ describe("Error Classes", () => {
       });
 
       it("should create a ValidationError with field context", () => {
-        const error = createError("Invalid input", 400, undefined, undefined, {
+        const error = createError("Invalid input", 400, undefined, {
           field: "username",
         });
 
@@ -294,7 +287,7 @@ describe("Error Classes", () => {
       });
 
       it("should create a NotFoundError with resource context", () => {
-        const error = createError("Not found", 404, undefined, undefined, {
+        const error = createError("Not found", 404, undefined, {
           resource: "user",
         });
 
@@ -333,14 +326,14 @@ describe("Error Classes", () => {
 
       it("should pass original error to created error", () => {
         const originalError = new Error("Original");
-        const error = createError("Wrapped", 400, undefined, originalError);
+        const error = createError("Wrapped", 400, originalError);
 
         expect(error.originalError).toBe(originalError);
       });
 
       it("should pass context to created error", () => {
         const context = { test: "value" };
-        const error = createError("Test", 400, undefined, undefined, context);
+        const error = createError("Test", 400, undefined, context);
 
         expect(error.context).toEqual({ field: undefined });
       });

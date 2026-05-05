@@ -23,9 +23,10 @@ import {
   getHeatStressInfo,
   THERMAL_STRESS_LEGEND_ITEMS,
 } from "@/lib/utils/thermal-stress";
-import { type LocationOptionSection } from "@/types/types";
 import { useRouter } from "next/navigation";
 import React, { useMemo, useState, useTransition } from "react";
+
+import type { LocationOptionSection } from "@/types/types";
 
 const getPetRange = (p10: number, p90: number): string => {
   return `${p10.toFixed(1)}-${p90.toFixed(1)}`;
@@ -94,8 +95,9 @@ function compareRankingItems(
       return a.rank - b.rank;
     case "state":
       return a.state.localeCompare(b.state);
+    default:
+      return 0;
   }
-  return 0;
 }
 
 function filterRanking(

@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 
-type MockFunction = (...args: any[]) => any;
+type MockFunction = (...args: unknown[]) => unknown;
 
 export function mockFn<T extends MockFunction = MockFunction>(
   implementation?: T,

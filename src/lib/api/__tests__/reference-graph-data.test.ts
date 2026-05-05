@@ -4,13 +4,14 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { FetchReferenceGraphData } from "../reference-graph-data";
 
+import type {
+  createMockSupabaseClient,
+  createMockValidation,
+} from "@/testing/mocks";
+
 describe("reference-graph-data", () => {
-  let mockSupabaseClient: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
-  >;
-  let mockValidation: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockValidation"]
-  >;
+  let mockSupabaseClient: ReturnType<typeof createMockSupabaseClient>;
+  let mockValidation: ReturnType<typeof createMockValidation>;
 
   beforeEach(async () => {
     clearAllMocks();

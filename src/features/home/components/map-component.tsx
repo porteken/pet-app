@@ -3,19 +3,12 @@
 import { PageLoader } from "@/components/app/page-loader";
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
-import { Icon } from "leaflet";
-import React, {
-  ComponentType,
-  CSSProperties,
-  memo,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import { OptimizedMarker } from "./optimized-marker";
+
+import type { Icon } from "leaflet";
+import type { ComponentType, CSSProperties, ReactNode } from "react";
 const MAP_CENTER_LAT = 39.5;
 const MAP_CENTER_LNG = -98.35;
 const ICON_SIZE_WIDTH = 36;

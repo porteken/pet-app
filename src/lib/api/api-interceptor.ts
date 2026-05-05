@@ -13,7 +13,7 @@ export const handleApiResponse = async <T>(
 ): Promise<T> => {
   if (!response.ok) {
     const errorMessage = await extractErrorMessage(response);
-    throw createError(errorMessage, response.status, undefined, undefined, {
+    throw createError(errorMessage, response.status, undefined, {
       ...context,
       url: response.url,
     });

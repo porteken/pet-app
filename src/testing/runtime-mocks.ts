@@ -104,7 +104,10 @@ const LOCATIONS = [
 const round = (value: number) => Math.round(value * 100) / 100;
 
 const getAveragePet = (locationId: number, year: number) => {
-  const location = LOCATIONS.find((item) => item.location_id === locationId)!;
+  const location = LOCATIONS.find((item) => item.location_id === locationId);
+  if (location === undefined) {
+    throw new Error(`Unknown location id: ${locationId}`);
+  }
   const delta = year - 2000;
   return round(location.year2000Avg + delta * location.trendPerYear);
 };
@@ -301,8 +304,10 @@ const matchesFilterOperation = (row: MockRow, filter: FilterOperation) => {
     case "lte": {
       return compareNumeric(cell, filter.value, compareLessThanOrEqual);
     }
+    default: {
+      return true;
+    }
   }
-  return true;
 };
 
 const applyFilters = (rows: MockRow[], filters: FilterOperation[]) =>

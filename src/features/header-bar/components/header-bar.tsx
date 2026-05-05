@@ -3,11 +3,12 @@
 import { ThemeToggle } from "@/components/app/theme-toggle";
 import { Select } from "@/components/ui/select";
 import { APP_CONFIG } from "@/lib/constants";
-import { NavProperties } from "@/types/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useMemo } from "react";
 
 import { NavButtons } from "./nav-buttons";
+
+import type { NavProperties } from "@/types/types";
 
 interface LocationItem {
   key: number;

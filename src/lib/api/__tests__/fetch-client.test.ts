@@ -6,6 +6,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FetchForecastData, FetchTrendGraphData } from "../fetch-client";
 
+import type { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
+import type {
+  createMockSupabaseClient,
+  createMockValidation,
+} from "@/testing/mocks";
+
 const createTrendQuery = (data: unknown, error?: unknown) => ({
   eq: mockFn().mockReturnThis(),
   order: mockFn().mockResolvedValue({ data, error }),
@@ -40,12 +46,8 @@ describe("FetchTrendGraphData", () => {
 
     globalThis.window = originalWindow;
   });
-  let mockSupabaseClient: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
-  >;
-  let mockValidation: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockValidation"]
-  >;
+  let mockSupabaseClient: ReturnType<typeof createMockSupabaseClient>;
+  let mockValidation: ReturnType<typeof createMockValidation>;
   let mockLinearRegression: ReturnType<typeof createMockLinearRegression>;
 
   beforeEach(async () => {
@@ -60,7 +62,7 @@ describe("FetchTrendGraphData", () => {
       await import("@/lib/utils/simple-linear-regression");
     vi.mocked(SimpleLinearRegression).mockImplementation(
       function MockSimpleLinearRegression() {
-        return mockLinearRegression as any;
+        return mockLinearRegression as unknown as SimpleLinearRegression;
       },
     );
   });
@@ -201,12 +203,8 @@ describe("FetchTrendGraphData", () => {
 });
 
 describe("FetchForecastData", () => {
-  let mockSupabaseClient: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
-  >;
-  let mockValidation: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockValidation"]
-  >;
+  let mockSupabaseClient: ReturnType<typeof createMockSupabaseClient>;
+  let mockValidation: ReturnType<typeof createMockValidation>;
 
   beforeEach(async () => {
     clearAllMocks();

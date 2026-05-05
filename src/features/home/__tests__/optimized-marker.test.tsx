@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Icon } from "leaflet";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { OptimizedMarker } from "../components/optimized-marker";
+
+import type { Icon } from "leaflet";
 
 const mockQueryClient = {
   prefetchQuery: mockFn(),

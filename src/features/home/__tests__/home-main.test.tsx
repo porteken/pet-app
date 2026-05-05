@@ -5,6 +5,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type * as TanstackReactQuery from "@tanstack/react-query";
+
 const createDelay = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 const mockPush = mockFn();
@@ -137,7 +139,7 @@ const mockQueryClient = {
 };
 
 vi.mock("@tanstack/react-query", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@tanstack/react-query")>();
+  const actual = await importOriginal<typeof TanstackReactQuery>();
   return {
     ...actual,
     useQueryClient: () => mockQueryClient,

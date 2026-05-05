@@ -12,23 +12,33 @@ import { FetchForecastData } from "@/lib/api/fetch-client";
 import { getTrendGraphQueryOptions } from "@/lib/api/query-client";
 import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
 import { GraphOptions, SeasonOptions } from "@/lib/utils/select-options";
-import { type HeatStressDescription } from "@/lib/utils/thermal-stress";
 import {
   buildTrendAnalysisResult,
   type TrendGraphSnapshot,
 } from "@/lib/utils/trend-analysis";
-import { LocationProperties } from "@/types/types";
 import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import React, { FC, useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
-import { MapProperties } from "../model/types";
 import { GraphSection } from "./graph-section";
 import { MapComponent } from "./map-component";
+
+import type { MapProperties } from "../model/types";
+import type { HeatStressDescription } from "@/lib/utils/thermal-stress";
+import type { LocationProperties } from "@/types/types";
+import type { FC } from "react";
 
 const Modal = dynamic(() => import("@/components/ui/modal"), {
   ssr: false,
 });
+
+interface GenerateGraphOptions {
+  enableForecast: boolean;
+  locationId: number;
+  option: string;
+  season: GraphSeason;
+  yearsAhead: number;
+}
 
 const Home: FC<MapProperties> = ({
   initialForecastEnabled,
@@ -89,13 +99,13 @@ const Home: FC<MapProperties> = ({
   );
 
   const generateGraph = useCallback(
-    async (
-      locationId: number,
-      option: string,
-      season: GraphSeason,
-      enableForecast: boolean,
-      yearsAhead: number,
-    ) => {
+    async ({
+      enableForecast,
+      locationId,
+      option,
+      season,
+      yearsAhead,
+    }: GenerateGraphOptions) => {
       setGraphLoading(true);
       setGraphHasError(false);
       try {
@@ -152,13 +162,13 @@ const Home: FC<MapProperties> = ({
 
   React.useEffect(() => {
     if (selectedLocationId !== undefined) {
-      void generateGraph(
-        selectedLocationId,
-        selectedGraphMeasure,
-        selectedGraphSeason,
-        forecastEnabled && forecastSupported,
-        forecastYearsAhead,
-      );
+      void generateGraph({
+        enableForecast: forecastEnabled && forecastSupported,
+        locationId: selectedLocationId,
+        option: selectedGraphMeasure,
+        season: selectedGraphSeason,
+        yearsAhead: forecastYearsAhead,
+      });
     }
   }, [
     selectedLocationId,

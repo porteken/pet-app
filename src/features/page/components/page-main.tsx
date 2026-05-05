@@ -2,18 +2,20 @@
 
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { HeaderBar } from "@/features/header-bar";
-import { type GraphSeason } from "@/lib/constants";
 import {
   persistGraphMeasurePreference,
   persistGraphSeasonPreference,
   persistReferenceYearPreference,
 } from "@/lib/utils/client-preferences";
-import React, { FC } from "react";
+import React from "react";
 
-import { PageProperties } from "../model/types";
 import { PageHeader } from "./page-header";
 import { ReferenceData } from "./reference-data";
 import { TrendAnalysis } from "./trend-analysis";
+
+import type { PageProperties } from "../model/types";
+import type { GraphSeason } from "@/lib/constants";
+import type { FC } from "react";
 
 const handleMeasureChange = async (measure: string): Promise<void> => {
   try {

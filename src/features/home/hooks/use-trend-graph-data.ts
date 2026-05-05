@@ -10,13 +10,15 @@ export const useTrendGraphData = (
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
   enabled = true,
 ) => {
+  const resolvedLocationId = locationId ?? 0;
+
   return useQuery({
     enabled: locationId !== undefined && enabled,
     queryFn: async () => {
       const { FetchTrendGraphData } = await import("@/lib/api/fetch-client");
-      return FetchTrendGraphData(option, locationId!, season);
+      return FetchTrendGraphData(option, resolvedLocationId, season);
     },
-    queryKey: queryKeys.trendGraph(locationId!, option, season),
+    queryKey: queryKeys.trendGraph(resolvedLocationId, option, season),
     staleTime: STALE_TIME_MS,
   });
 };

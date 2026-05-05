@@ -17,11 +17,11 @@ import {
   validateLocationId,
   validateTrendOption,
 } from "@/lib/utils/validation";
-import { SupabaseClient } from "@supabase/supabase-js";
 
 import { apiRequest, hasError } from "./api-client";
 
 import type { TrendGraphDataProperties } from "@/types/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export async function FetchForecastData(
   locationId: number,

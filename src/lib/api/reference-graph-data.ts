@@ -1,5 +1,3 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-
 import { createClient } from "@/config/supabase/client";
 import {
   filterReferenceRowsBySeason,
@@ -17,7 +15,9 @@ import {
 } from "@/lib/constants";
 import { FetchError } from "@/lib/utils/errors";
 import { validateLocationId, validateYear } from "@/lib/utils/validation";
+
 import type { ReferenceGraphDataProperties } from "@/types/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export async function FetchReferenceGraphData(
   year: string,

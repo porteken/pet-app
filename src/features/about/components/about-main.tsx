@@ -1,13 +1,13 @@
 "use client";
 
-import { Database, MapPinned, ThermometerSun } from "lucide-react";
-import Link from "next/link";
-import React, { FC } from "react";
-
 import { HeaderBar } from "@/features/header-bar";
 import { APP_CONFIG, GRAPH_CONFIG } from "@/lib/constants";
+import { Database, MapPinned, ThermometerSun } from "lucide-react";
+import Link from "next/link";
+import React from "react";
 
-import { AboutProperties } from "../model/types";
+import type { AboutProperties } from "../model/types";
+import type { FC } from "react";
 const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => {
   const { END, START } = GRAPH_CONFIG.YEAR_RANGE;
 

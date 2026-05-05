@@ -1,8 +1,9 @@
 import { prefetchTrendGraphData } from "@/lib/api/query-client";
 import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
 import { useQueryClient } from "@tanstack/react-query";
-import { Icon } from "leaflet";
 import React, { memo, useCallback } from "react";
+
+import type { Icon } from "leaflet";
 
 interface MarkerProperties {
   eventHandlers: {

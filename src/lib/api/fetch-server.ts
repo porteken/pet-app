@@ -29,7 +29,7 @@ import { cache } from "react";
 
 const MIN_YEAR = 2000;
 const MAX_YEAR = 2100;
-import {
+import type {
   FetchLocationProperties,
   LocationOptionSection,
   ReferenceGraphDataProperties,

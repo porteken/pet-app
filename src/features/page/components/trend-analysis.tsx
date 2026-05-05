@@ -6,12 +6,13 @@ import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
-import { type HeatStressDescription } from "@/lib/utils/thermal-stress";
 import {
   buildTrendAnalysisResult,
   type TrendGraphSnapshot,
 } from "@/lib/utils/trend-analysis";
 import React from "react";
+
+import type { HeatStressDescription } from "@/lib/utils/thermal-stress";
 
 interface TrendAnalysisProperties {
   graphSeason: GraphSeason;

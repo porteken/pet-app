@@ -1,5 +1,5 @@
 import type { GraphSeason } from "@/lib/constants";
-import { LocationOptionSection, LocationProperties } from "@/types/types";
+import type { LocationOptionSection, LocationProperties } from "@/types/types";
 
 export interface PageProperties {
   CurrentDates: Date[];

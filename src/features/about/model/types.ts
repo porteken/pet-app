@@ -1,4 +1,4 @@
-import { LocationOptionSection } from "@/types/types";
+import type { LocationOptionSection } from "@/types/types";
 
 export interface AboutProperties {
   LocationOptions: LocationOptionSection[];

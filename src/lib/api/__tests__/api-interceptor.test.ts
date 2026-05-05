@@ -125,7 +125,6 @@ describe("API Interceptor", () => {
         errorMessage,
         404,
         undefined,
-        undefined,
         {
           url: "https://api.example.com/test",
         },
@@ -149,7 +148,6 @@ describe("API Interceptor", () => {
       expect(mockCreateError).toHaveBeenCalledWith(
         "Server error",
         500,
-        undefined,
         undefined,
         {
           ...context,
@@ -194,7 +192,6 @@ describe("API Interceptor", () => {
         errorMessage,
         400,
         undefined,
-        undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
     });
@@ -216,7 +213,6 @@ describe("API Interceptor", () => {
       expect(mockCreateError).toHaveBeenCalledWith(
         errorMessage,
         401,
-        undefined,
         undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
@@ -240,7 +236,6 @@ describe("API Interceptor", () => {
         errorMessage,
         404,
         undefined,
-        undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
     });
@@ -263,7 +258,6 @@ describe("API Interceptor", () => {
         errorMessage,
         500,
         undefined,
-        undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
     });
@@ -285,7 +279,6 @@ describe("API Interceptor", () => {
         "Validation failed. Please check your input.",
         422,
         undefined,
-        undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
     });
@@ -305,7 +298,6 @@ describe("API Interceptor", () => {
       expect(mockCreateError).toHaveBeenCalledWith(
         `Request failed with status 654`,
         654,
-        undefined,
         undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
@@ -327,7 +319,6 @@ describe("API Interceptor", () => {
         `Service unavailable. Please try again later.`,
         503,
         undefined,
-        undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
     });
@@ -347,7 +338,6 @@ describe("API Interceptor", () => {
       expect(mockCreateError).toHaveBeenCalledWith(
         `Bad gateway. The server is temporarily unavailable.`,
         502,
-        undefined,
         undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
@@ -369,7 +359,6 @@ describe("API Interceptor", () => {
         `Internal server error. Please try again later.`,
         500,
         undefined,
-        undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
     });
@@ -389,7 +378,6 @@ describe("API Interceptor", () => {
       expect(mockCreateError).toHaveBeenCalledWith(
         `The requested resource was not found.`,
         404,
-        undefined,
         undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
@@ -411,7 +399,6 @@ describe("API Interceptor", () => {
         `Access denied. You don't have permission to perform this action.`,
         403,
         undefined,
-        undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
     });
@@ -431,7 +418,6 @@ describe("API Interceptor", () => {
       expect(mockCreateError).toHaveBeenCalledWith(
         `Authentication required. Please log in.`,
         401,
-        undefined,
         undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
@@ -453,7 +439,6 @@ describe("API Interceptor", () => {
         `Invalid request. Please check your input.`,
         400,
         undefined,
-        undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
     });
@@ -474,7 +459,6 @@ describe("API Interceptor", () => {
       expect(mockCreateError).toHaveBeenCalledWith(
         "Too many requests. Please try again later.",
         429,
-        undefined,
         undefined,
         expect.objectContaining({ url: "https://api.example.com/test" }),
       );
@@ -563,7 +547,6 @@ describe("API Interceptor", () => {
       expect(mockCreateError).toHaveBeenCalledWith(
         "Bad request",
         400,
-        undefined,
         undefined,
         expect.objectContaining({
           method: "POST",

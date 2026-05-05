@@ -9,6 +9,12 @@ import {
   FetchTrendGraphData,
 } from "../fetch-server";
 
+import type {
+  createMockLinearRegression,
+  createMockSupabaseClient,
+  createMockValidation,
+} from "@/testing/mocks";
+
 type RankingViewRow = {
   avg_pet: number;
   change_per_decade: number | null;
@@ -23,9 +29,7 @@ type RankingViewRow = {
   year: number;
 };
 
-type MockSupabaseClient = ReturnType<
-  (typeof import("@/testing/mocks"))["createMockSupabaseClient"]
->;
+type MockSupabaseClient = ReturnType<typeof createMockSupabaseClient>;
 
 type QueryResponse<T> = {
   data: T | undefined;
@@ -96,12 +100,8 @@ const queueCityRankingsViewResponse = (
 
 describe("fetch-server", () => {
   let mockSupabaseClient: MockSupabaseClient;
-  let mockLinearRegression: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockLinearRegression"]
-  >;
-  let mockValidation: ReturnType<
-    (typeof import("@/testing/mocks"))["createMockValidation"]
-  >;
+  let mockLinearRegression: ReturnType<typeof createMockLinearRegression>;
+  let mockValidation: ReturnType<typeof createMockValidation>;
 
   beforeEach(async () => {
     clearAllMocks();

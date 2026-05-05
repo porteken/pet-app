@@ -11,16 +11,25 @@ export type ErrorContext = Record<string, unknown> & {
   resource?: string;
 };
 
+interface AppErrorOptions {
+  context?: ErrorContext;
+  originalError?: unknown;
+}
+
 export class AppError extends Error {
+  public readonly originalError?: unknown;
+  public readonly context?: ErrorContext;
+
   constructor(
     message: string,
     public readonly code: string,
     public readonly statusCode = HTTP_INTERNAL_ERROR,
-    public readonly originalError?: unknown,
-    public readonly context?: ErrorContext,
+    options?: AppErrorOptions,
   ) {
     super(message);
     this.name = "AppError";
+    this.originalError = options?.originalError;
+    this.context = options?.context;
 
     Sentry.captureException(this, {
       contexts: {
@@ -43,14 +52,16 @@ export class AuthenticationError extends AppError {
     message: string = "Authentication failed",
     originalError?: unknown,
   ) {
-    super(message, "AUTHENTICATION_ERROR", HTTP_UNAUTHORIZED, originalError);
+    super(message, "AUTHENTICATION_ERROR", HTTP_UNAUTHORIZED, {
+      originalError,
+    });
     this.name = "AuthenticationError";
   }
 }
 
 export class AuthorizationError extends AppError {
   constructor(message: string = "Access denied", originalError?: unknown) {
-    super(message, "AUTHORIZATION_ERROR", HTTP_FORBIDDEN, originalError);
+    super(message, "AUTHORIZATION_ERROR", HTTP_FORBIDDEN, { originalError });
     this.name = "AuthorizationError";
   }
 }
@@ -61,13 +72,10 @@ export class DatabaseError extends AppError {
     originalError?: unknown,
     context?: ErrorContext,
   ) {
-    super(
-      message,
-      "DATABASE_ERROR",
-      HTTP_INTERNAL_ERROR,
-      originalError,
+    super(message, "DATABASE_ERROR", HTTP_INTERNAL_ERROR, {
       context,
-    );
+      originalError,
+    });
     this.name = "DatabaseError";
   }
 }
@@ -79,7 +87,7 @@ export class NetworkError extends AppError {
     originalError?: unknown,
     context?: ErrorContext,
   ) {
-    super(message, "NETWORK_ERROR", statusCode, originalError, context);
+    super(message, "NETWORK_ERROR", statusCode, { context, originalError });
     this.name = "NetworkError";
   }
 }
@@ -93,8 +101,9 @@ export class FetchError extends NetworkError {
 
 export class NotFoundError extends AppError {
   constructor(message: string, resource?: string, originalError?: unknown) {
-    super(message, "NOT_FOUND_ERROR", HTTP_NOT_FOUND, originalError, {
-      resource,
+    super(message, "NOT_FOUND_ERROR", HTTP_NOT_FOUND, {
+      context: { resource },
+      originalError,
     });
     this.name = "NotFoundError";
   }
@@ -102,8 +111,9 @@ export class NotFoundError extends AppError {
 
 export class ValidationError extends AppError {
   constructor(message: string, field?: string, originalError?: unknown) {
-    super(message, "VALIDATION_ERROR", HTTP_BAD_REQUEST, originalError, {
-      field,
+    super(message, "VALIDATION_ERROR", HTTP_BAD_REQUEST, {
+      context: { field },
+      originalError,
     });
     this.name = "ValidationError";
   }
@@ -112,7 +122,6 @@ export class ValidationError extends AppError {
 export const createError = (
   message: string,
   statusCode: number = HTTP_INTERNAL_ERROR,
-  _code?: string,
   originalError?: unknown,
   context?: ErrorContext,
 ): AppError => {
@@ -163,22 +172,16 @@ export const handleAsyncError = (
       return new DatabaseError(error.message, error, context);
     }
 
-    return new AppError(
-      error.message,
-      "UNKNOWN_ERROR",
-      HTTP_INTERNAL_ERROR,
-      error,
+    return new AppError(error.message, "UNKNOWN_ERROR", HTTP_INTERNAL_ERROR, {
       context,
-    );
+      originalError: error,
+    });
   }
 
   const message =
     typeof error === "string" ? error : "An unknown error occurred";
-  return new AppError(
-    message,
-    "UNKNOWN_ERROR",
-    HTTP_INTERNAL_ERROR,
-    error,
+  return new AppError(message, "UNKNOWN_ERROR", HTTP_INTERNAL_ERROR, {
     context,
-  );
+    originalError: error,
+  });
 };

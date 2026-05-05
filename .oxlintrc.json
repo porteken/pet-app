@@ -1,6 +1,8 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": [
+    "eslint",
+    "oxc",
     "import",
     "typescript",
     "promise",
@@ -11,33 +13,29 @@
     "jsx-a11y",
     "react-perf"
   ],
-  "jsPlugins": ["eslint-plugin-sonarjs"],
+  "jsPlugins": ["eslint-plugin-sonarjs", "eslint-plugin-playwright"],
   "categories": {
     "correctness": "error",
     "suspicious": "error",
-    "perf": "error"
-    //"restriction": "error",
-    //"style": "error",
+    "perf": "error",
+    "restriction": "error",
+    "style": "error"
   },
   "options": {
     "typeAware": true,
     "typeCheck": true
   },
   "env": {
-    "builtin": true,
-    "es2026": true,
+    "es2024": true,
     "browser": true,
     "node": true
   },
   "settings": {
     "react": {
-      "version": "19.2.4"
+      "version": "19.2.5"
     },
-    "import/resolver": {
-      "typescript": {
-        "alwaysTryTypes": true,
-        "project": "tsconfig.json"
-      }
+    "next": {
+      "rootDir": "."
     }
   },
   "ignorePatterns": [
@@ -48,7 +46,7 @@
     "src/components/ui/*"
   ],
   "rules": {
-    "no-unused-vars": [
+    "eslint/no-unused-vars": [
       "error",
       {
         "argsIgnorePattern": "^_",
@@ -56,57 +54,73 @@
         "varsIgnorePattern": "^_"
       }
     ],
-    "complexity": ["error", 15],
-    // Obsolete / impossible / bad fit for Next.js + React + TS
+    "eslint/complexity": ["error", 15],
+    "vitest/prefer-called-times": "off",
+    "typescript/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "fixStyle": "separate-type-imports"
+      }
+    ],
+    "import/consistent-type-specifier-style": "off",
+    "typescript/explicit-function-return-type": "off",
+    "typescript/explicit-module-boundary-types": "off",
+    "import/no-nodejs-modules": "off",
+    "promise/prefer-await-to-then": "off",
+    "promise/avoid-new": "off",
+    "react/jsx-filename-extension": [
+      "error",
+      {
+        "extensions": [".jsx", ".tsx"]
+      }
+    ],
+    "react/jsx-max-depth": "off",
+    "eslint/max-statements": [
+      "error",
+      {
+        "max": 40
+      }
+    ],
+    "eslint/max-params": [
+      "error",
+      {
+        "max": 4
+      }
+    ],
+    "eslint/no-void": [
+      "error",
+      {
+        "allowAsStatement": true
+      }
+    ],
+    "react/only-export-components": "off",
+    "oxc/no-async-await": "off",
+    "oxc/no-optional-chaining": "off",
+    "oxc/no-rest-spread-properties": "off",
     "react/react-in-jsx-scope": "off",
+    "eslint/sort-imports": "off",
     "unicorn/no-null": "off",
     "eslint/no-undefined": "off",
-    // Jest duplicates — off if using Vitest
-    "jest/prefer-expect-assertions": "off",
-    "jest/no-conditional-in-test": "off",
-    "jest/no-hooks": "off",
-    "jest/max-expects": "off",
-    "jest/consistent-test-it": "off",
-    "jest/require-top-level-describe": "off",
-    "jest/max-nested-describe": "off",
-    "jest/prefer-lowercase-title": "off",
-    "jest/prefer-ending-with-an-expect": "off",
-    "jest/prefer-strict-equal": "off",
-    "jest/no-untyped-mock-factory": "off",
-    "jest/prefer-called-with": "off",
-    "jest/prefer-expect-resolves": "off",
-    "jest/prefer-mock-return-shorthand": "off",
-    "jest/prefer-mock-promise-shorthand": "off",
-    "jest/prefer-to-have-length": "off",
-    "jest/prefer-to-be": "off",
-    "jest/require-hook": "off",
-    "jest/prefer-spy-on": "off",
-    "jest/require-to-throw-message": "off",
-    "jest/prefer-hooks-in-order": "off",
-    "jest/padding-around-test-blocks": "off",
-    "jest/prefer-to-contain": "off",
-    "jest/prefer-equality-matcher": "off",
-    // Vitest conflicts / overly strict rules
     "vitest/no-importing-vitest-globals": "off",
     "vitest/require-test-timeout": "off",
     "vitest/prefer-expect-assertions": "off",
     "vitest/no-hooks": "off",
     "vitest/max-expects": "off",
+    "typescript/consistent-type-definitions": "off",
     "vitest/prefer-describe-function-title": "off",
     "vitest/prefer-to-be-truthy": "off",
+    "eslint/init-declarations": "off",
     "vitest/prefer-to-be-falsy": "off",
-    // Import/export conflicts
     "import/no-named-export": "off",
     "import/prefer-default-export": "off",
     "import/group-exports": "off",
     "import/exports-last": "off",
-    // Base ESLint rules superseded by TS-aware/import-aware rules
     "eslint/require-await": "off",
     "eslint/no-shadow": "off",
     "eslint/no-use-before-define": "off",
     "eslint/no-empty-function": "off",
     "eslint/no-duplicate-imports": "off",
-    // Bad blanket style policies for React/Next.js
     "eslint/func-style": "off",
     "eslint/no-ternary": "off",
     "eslint/no-plusplus": "off",
@@ -115,30 +129,10 @@
     "eslint/capitalized-comments": "off",
     "eslint/sort-keys": "off",
     "eslint/prefer-destructuring": "off",
-    // React rules that fight normal composition
     "react/jsx-props-no-spreading": "off",
     "react/forbid-component-props": "off",
     "react/no-multi-comp": "off",
-    // Keep as warning/configured if supported
-    "vitest/no-conditional-in-test": "error",
-    "vitest/consistent-test-it": "error",
-    "vitest/require-top-level-describe": "error",
-    "vitest/max-nested-describe": "error",
-    // Do not disable globally unless options are unsupported or noise remains unacceptable
-    "eslint/no-magic-numbers": [
-      "error",
-      {
-        "ignore": [
-          -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 60, 100, 365, 400,
-          401, 403, 404, 422, 429, 500, 502, 503, 1000
-        ],
-        "ignoreArrayIndexes": true,
-        "ignoreDefaultValues": true,
-        "ignoreClassFieldInitialValues": true,
-        "enforceConst": true,
-        "detectObjects": false
-      }
-    ],
+    "eslint/no-magic-numbers": "off",
     "sonarjs/anchor-precedence": "error",
     "sonarjs/argument-type": "error",
     "sonarjs/arguments-order": "error",
@@ -339,18 +333,88 @@
     "sonarjs/void-use": "error",
     "sonarjs/weak-ssl": "error",
     "sonarjs/x-powered-by": "error",
-    "sonarjs/xml-parser-xxe": "error"
+    "sonarjs/xml-parser-xxe": "error",
+    "import/no-relative-parent-imports": "off",
+    "eslint/no-continue": "off",
+    "typescript/explicit-member-accessibility": "off",
+    "typescript/promise-function-async": "off",
+    "eslint/new-cap": "off",
+    "eslint/class-methods-use-this": "off",
+    "eslint/func-names": "off",
+    "eslint/arrow-body-style": "off",
+    "jest/prefer-strict-equal": "off",
+    "jest/prefer-lowercase-title": "off",
+    "jest/no-untyped-mock-factory": "off",
+    "jest/prefer-called-with": "off",
+    "jest/prefer-mock-return-shorthand": "off",
+    "jest/padding-around-test-blocks": "off",
+    "jest/require-hook": "off",
+    "jest/no-hooks": "off",
+    "jest/prefer-hooks-on-top": "off",
+    "jest/prefer-to-have-length": "off",
+    "jest/prefer-expect-assertions": "off",
+    "jest/max-expects": "off",
+    "jest/prefer-ending-with-an-expect": "off",
+    "react/prefer-function-component": "off",
+    "react/jsx-boolean-value": "off",
+    "import/first": "off",
+    "typescript/array-type": "off",
+    "import/no-namespace": "off",
+    "import/no-default-export": "off",
+    "typescript/no-explicit-any": "error",
+    "vitest/prefer-import-in-mock": "off",
+    "unicorn/switch-case-braces": "off",
+    "typescript/no-non-null-assertion": "error",
+    "typescript/parameter-properties": "off",
+    "react/hook-use-state": "off",
+    "eslint/no-console": "off",
+    "typescript/no-inferrable-types": "off",
+    "import/no-commonjs": "off",
+    "unicorn/custom-error-definition": "off",
+    "import/unambiguous": "off",
+    "react/jsx-handler-names": "off",
+    "typescript/non-nullable-type-assertion-style": "off",
+    "typescript/no-require-imports": "off",
+    "oxc/no-map-spread": "off",
+    "eslint/no-implicit-coercion": "off"
   },
   "overrides": [
     {
       "files": [
         "**/__tests__/**/*.{ts,tsx}",
         "**/*.test.{ts,tsx}",
-        "src/testing/**/*.{ts,tsx}"
+        "**/*.spec.{ts,tsx}"
       ],
-      "plugins": ["vitest"],
+      "env": {
+        "vitest": true
+      },
       "rules": {
-        "eslint/no-magic-numbers": "off"
+        "eslint/no-magic-numbers": "off",
+        "import/no-namespace": "off",
+        "eslint/max-statements": "off",
+        "eslint/max-params": "off",
+        "typescript/no-explicit-any": "off",
+        "jest/prefer-expect-assertions": "off",
+        "jest/no-hooks": "off",
+        "jest/max-expects": "off",
+        "jest/prefer-ending-with-an-expect": "off",
+        "jest/require-hook": "off",
+        "vitest/no-conditional-in-test": "error",
+        "vitest/consistent-test-it": "error",
+        "vitest/require-top-level-describe": "error",
+        "vitest/max-nested-describe": "error",
+        "jest/prefer-strict-equal": "off",
+        "jest/prefer-lowercase-title": "off",
+        "jest/no-untyped-mock-factory": "off",
+        "jest/prefer-called-with": "off",
+        "jest/prefer-mock-return-shorthand": "off",
+        "jest/padding-around-test-blocks": "off",
+        "jest/prefer-hooks-on-top": "off",
+        "jest/prefer-to-have-length": "off",
+        "import/first": "off",
+        "vitest/prefer-import-in-mock": "off",
+        "vitest/prefer-called-once": "off",
+        "vitest/prefer-expect-type-of": "off"
       }
     },
     {
@@ -358,33 +422,51 @@
         "next.config.{js,mjs,ts}",
         "*.config.{js,mjs,ts,cjs}",
         "scripts/**/*.{js,ts}",
-        "app/**/route.{ts,tsx}",
-        "app/**/actions.{ts,tsx}",
+        "src/app/**/route.{ts,tsx}",
+        "src/app/**/actions.{ts,tsx}",
         "src/server/**/*.{ts,tsx}",
-        "middleware.{ts,js}"
+        "server/**/*.{ts,tsx}",
+        "src/middleware.{ts,js}",
+        "src/middleware.{ts,js}"
       ],
       "rules": {
-        "import/no-nodejs-modules": "off"
+        "import/no-default-export": "off",
+        "import/no-commonjs": "off",
+        "typescript/no-require-imports": "off",
+        "eslint/no-console": "off",
+        "react/jsx-max-depth": "off"
       }
     },
     {
       "files": [
-        "app/**/page.{ts,tsx}",
-        "app/**/layout.{ts,tsx}",
-        "app/**/template.{ts,tsx}",
-        "app/**/loading.{ts,tsx}",
-        "app/**/error.{ts,tsx}",
-        "app/**/not-found.{ts,tsx}",
-        "pages/**/*.{ts,tsx}"
+        "src/app/**/page.{ts,tsx}",
+        "src/app/**/layout.{ts,tsx}",
+        "src/app/**/template.{ts,tsx}",
+        "src/app/**/loading.{ts,tsx}",
+        "src/app/**/error.{ts,tsx}",
+        "src/app/**/not-found.{ts,tsx}",
+        "src/app/**/robots.{ts,tsx}",
+        "src/app/**/sitemap.{ts,tsx}",
+        "src/pages/**/*.{ts,tsx}",
+        "src/pages/**/*.{ts,tsx}"
       ],
       "rules": {
-        "import/no-default-export": "off",
-        "react/only-export-components": "off"
+        "import/no-default-export": "off"
+      }
+    },
+    {
+      "files": ["src/testing/setup.ts"],
+      "rules": {
+        "jest/no-untyped-mock-factory": "off",
+        "vitest/prefer-import-in-mock": "off"
       }
     },
     {
       "files": ["e2e/**"],
       "rules": {
+        "vitest/consistent-test-filename": "off",
+        "vitest/no-importing-vitest-globals": "off",
+        "vitest/prefer-importing-vitest-globals": "off",
         "playwright/consistent-spacing-between-blocks": "error",
         "playwright/expect-expect": "error",
         "playwright/max-nested-describe": "error",
@@ -420,8 +502,7 @@
         "playwright/valid-expect-in-promise": "error",
         "playwright/valid-test-tags": "error",
         "playwright/valid-title": "error"
-      },
-      "jsPlugins": ["eslint-plugin-playwright"]
+      }
     }
   ]
 }

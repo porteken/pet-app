@@ -160,15 +160,18 @@ export function getHeatStressDescription(
 }
 
 export function getHeatStressInfo(petValue: number): HeatStressInfo {
-  const item =
-    THERMAL_STRESS_LEGEND_ITEMS.find((legendItem, index) => {
-      if (legendItem.max === undefined) {
-        return true;
-      }
-      return index === 0
-        ? petValue < legendItem.max
-        : petValue <= legendItem.max;
-    }) || THERMAL_STRESS_LEGEND_ITEMS[THERMAL_STRESS_LEGEND_ITEMS.length - 1];
+  const foundItem = THERMAL_STRESS_LEGEND_ITEMS.find((legendItem, index) => {
+    if (legendItem.max === undefined) {
+      return true;
+    }
+    return index === 0 ? petValue < legendItem.max : petValue <= legendItem.max;
+  });
+
+  const item = foundItem ?? THERMAL_STRESS_LEGEND_ITEMS.at(-1);
+
+  if (!item) {
+    throw new Error("Thermal stress legend items are empty or invalid");
+  }
 
   return buildHeatStressInfo(item, petValue);
 }

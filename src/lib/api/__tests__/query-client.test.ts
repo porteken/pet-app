@@ -84,13 +84,13 @@ describe("prefetch/invalidate helpers", () => {
     vi.clearAllMocks();
   });
 
-  it("prefetchTrendGraphData forwards to queryClient.prefetchQuery", () => {
+  it("prefetchTrendGraphData forwards to queryClient.prefetchQuery", async () => {
     const queryClient = createQueryClient();
     const prefetchSpy = vi
       .spyOn(queryClient, "prefetchQuery")
       .mockResolvedValue();
 
-    void prefetchTrendGraphData(queryClient, 77, "avg");
+    await prefetchTrendGraphData(queryClient, 77, "avg");
 
     expect(prefetchSpy).toHaveBeenCalledWith({
       queryFn: expect.any(Function),
@@ -98,13 +98,13 @@ describe("prefetch/invalidate helpers", () => {
     });
   });
 
-  it("invalidateTrendGraphData forwards to queryClient.invalidateQueries", () => {
+  it("invalidateTrendGraphData forwards to queryClient.invalidateQueries", async () => {
     const queryClient = createQueryClient();
     const invalidateSpy = vi
       .spyOn(queryClient, "invalidateQueries")
       .mockResolvedValue();
 
-    void invalidateTrendGraphData(queryClient);
+    await invalidateTrendGraphData(queryClient);
 
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: ["trend-graph"],

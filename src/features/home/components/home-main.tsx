@@ -162,13 +162,13 @@ const Home: FC<MapProperties> = ({
 
   React.useEffect(() => {
     if (selectedLocationId !== undefined) {
-      void generateGraph({
+      generateGraph({
         enableForecast: forecastEnabled && forecastSupported,
         locationId: selectedLocationId,
         option: selectedGraphMeasure,
         season: selectedGraphSeason,
         yearsAhead: forecastYearsAhead,
-      });
+      }).catch(() => {});
     }
   }, [
     selectedLocationId,

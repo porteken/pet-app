@@ -131,7 +131,7 @@ export const MapComponent = memo<MapComponentProperties>(
 
     useEffect(() => {
       if (typeof document !== "undefined") {
-        void loadMap();
+        loadMap().catch(() => {});
       }
     }, [loadMap]);
 

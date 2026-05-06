@@ -1,3 +1,4 @@
+/* oxlint-disable typescript/no-non-null-assertion, vitest/no-conditional-in-test */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -59,7 +60,11 @@ describe("setGraphMeasure", () => {
       }),
     );
 
-    const cookieOptions = mockSet.mock.calls[0][2];
+    const call = mockSet.mock.calls[0];
+    if (!call) {
+      throw new Error("No call to mockSet found");
+    }
+    const cookieOptions = call[2];
     const expirationDate = cookieOptions.expires;
     const afterCall = Date.now();
 
@@ -139,8 +144,13 @@ describe("setForecastPreferences", () => {
 
     await setForecastPreferences(false, 15);
 
-    const enabledCookieOptions = mockSet.mock.calls[0][2];
-    const yearsCookieOptions = mockSet.mock.calls[1][2];
+    const call0 = mockSet.mock.calls[0];
+    const call1 = mockSet.mock.calls[1];
+    if (!call0 || !call1) {
+      throw new Error("Expected two calls to mockSet");
+    }
+    const enabledCookieOptions = call0[2];
+    const yearsCookieOptions = call1[2];
     const afterCall = Date.now();
     const fiveMinutesMs = 5 * 60 * 1000;
 

@@ -1,3 +1,4 @@
+/* oxlint-disable typescript/no-non-null-assertion, vitest/no-conditional-in-test */
 import { DatabaseError } from "@/lib/utils/errors";
 import { clearAllMocks, setupApiServerTest } from "@/testing/test-utilities";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -158,7 +159,11 @@ describe("fetch-server", () => {
         rank: 1,
         state: "Arizona",
       });
-      expect(result[1].rank).toBe(2);
+      const secondResult = result[1];
+      if (!secondResult) {
+        throw new Error("Expected at least two results");
+      }
+      expect(secondResult.rank).toBe(2);
     });
 
     it("should throw error for invalid year", async () => {
@@ -208,8 +213,12 @@ describe("fetch-server", () => {
 
       const result = await FetchCityRankings(2024);
 
-      expect(result[0].FutureValueLower).toBeUndefined();
-      expect(result[0].FutureValueUpper).toBeUndefined();
+      const firstResult = result[0];
+      if (!firstResult) {
+        throw new Error("Expected at least one result");
+      }
+      expect(firstResult.FutureValueLower).toBeUndefined();
+      expect(firstResult.FutureValueUpper).toBeUndefined();
     });
 
     it("should handle rows with null change values", async () => {
@@ -221,7 +230,11 @@ describe("fetch-server", () => {
 
       const result = await FetchCityRankings(2024);
 
-      expect(result[0].changeFrom2000).toBeUndefined();
+      const firstResult = result[0];
+      if (!firstResult) {
+        throw new Error("Expected at least one result");
+      }
+      expect(firstResult.changeFrom2000).toBeUndefined();
     });
 
     it("should sort by avg_pet descending and assign ranks", async () => {

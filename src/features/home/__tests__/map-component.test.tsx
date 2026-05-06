@@ -1,3 +1,4 @@
+/* oxlint-disable typescript/no-non-null-assertion, vitest/no-conditional-in-test */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
@@ -146,10 +147,18 @@ describe("mapComponent", () => {
 
     const markers = await screen.findAllByTestId("marker");
 
-    fireEvent.click(markers[0]);
+    const firstMarker = markers[0];
+    if (!firstMarker) {
+      throw new Error("No marker found");
+    }
+    fireEvent.click(firstMarker);
 
     expect(onMarkerClick).toHaveBeenCalledTimes(1);
-    expect(onMarkerClick).toHaveBeenCalledWith(mockLocations[0].location_id);
+    const firstLocation = mockLocations[0];
+    if (!firstLocation) {
+      throw new Error("No location found");
+    }
+    expect(onMarkerClick).toHaveBeenCalledWith(firstLocation.location_id);
   });
 
   it("should keep the thermal stress legend collapsed by default and toggle open", async () => {

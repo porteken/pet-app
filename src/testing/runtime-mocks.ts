@@ -384,7 +384,7 @@ const createMockSupabaseQuery = (table: string): MockSupabaseQuery => {
       rows = rows.slice(0, Math.max(0, limitValue));
     }
 
-    return applyColumnSelection(rows, selectedColumns);
+    return applyColumnSelection(rows, selectedColumns) as any;
   };
 
   const asResult = (): MockListResult => ({

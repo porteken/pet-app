@@ -384,7 +384,8 @@ const ChartTooltip = ({
     return null;
   }
 
-  const point = payload[0]?.payload as Partial<
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+  const point = (payload[0]?.payload ?? {}) as Partial<
     ReferenceChartPoint & TrendChartPoint
   >;
   const visiblePayload = payload.filter(

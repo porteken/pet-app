@@ -81,7 +81,11 @@ export async function FetchForecastData(
       return undefined;
     }
 
-    const lastHistoricalYear = validatedHistoricalData[0].year;
+    const firstHistorical = validatedHistoricalData[0];
+    if (!firstHistorical) {
+      return undefined;
+    }
+    const lastHistoricalYear = firstHistorical.year;
     const targetYear = lastHistoricalYear + yearsAhead;
 
     const { data, error } = await supabase

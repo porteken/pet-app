@@ -50,7 +50,8 @@ export const Pagination: React.FC<PaginationProperties> = ({
 
       {pages.map((page, index) => {
         const previousPage = pages[index - 1];
-        const shouldShowGap = index > 0 && page - previousPage > 1;
+        const shouldShowGap =
+          index > 0 && previousPage !== undefined && page - previousPage > 1;
 
         return (
           <React.Fragment key={page}>

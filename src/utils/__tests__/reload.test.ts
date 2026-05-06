@@ -1,4 +1,3 @@
-/* oxlint-disable @typescript-eslint/unbound-method */
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { reloadPage } from "../reload";

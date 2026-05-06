@@ -1,4 +1,3 @@
-/* oxlint-disable vitest/require-hook */
 import { drop, factory, primaryKey } from "@mswjs/data";
 
 let locationCounter = 1;

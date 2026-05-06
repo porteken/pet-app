@@ -1,4 +1,3 @@
-// oxlint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom";
 
 import { render, screen } from "@testing-library/react";

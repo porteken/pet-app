@@ -1,15 +1,14 @@
-/* oxlint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { ForecastControls } from "@/components/app/forecast-controls";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { GenerateTrendGraph } from "@/features/graph";
+import { type GraphSeason, normalizeGraphSeason } from "@/lib/constants";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { memo, useCallback } from "react";
 
 import { ErrorGraphDisplay } from "./error-graph-display";
 
-import type { GraphSeason } from "@/lib/constants";
 import type { HeatStressDescription } from "@/lib/utils/thermal-stress";
 import type { TrendGraphSnapshot } from "@/lib/utils/trend-analysis";
 
@@ -135,7 +134,7 @@ const handleSeasonSelectChange = (
     return;
   }
 
-  onSeasonChange(value as GraphSeason);
+  onSeasonChange(normalizeGraphSeason(value));
 };
 
 const handleMeasureSelectChange = (

@@ -1,4 +1,3 @@
-/* oxlint-disable @typescript-eslint/no-unsafe-type-assertion */
 const RETRY_DELAY_BASE = 1000;
 const RETRY_DELAY_MAX = 5000;
 import {
@@ -135,7 +134,6 @@ export const apiRequestWithRetry = async <T>(
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      // oxlint-disable-next-line no-await-in-loop
       return await apiRequest<T>(url, options, { ...context, attempt });
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
@@ -153,7 +151,6 @@ export const apiRequestWithRetry = async <T>(
         RETRY_DELAY_BASE * 2 ** (attempt - 1),
         RETRY_DELAY_MAX,
       );
-      // oxlint-disable-next-line no-await-in-loop
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }

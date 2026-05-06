@@ -1,4 +1,3 @@
-/* oxlint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { FetchError } from "@/lib/utils/errors";
 import { createMockLinearRegression } from "@/testing/mocks";
 import { clearAllMocks, setupApiClientTest } from "@/testing/test-utilities";

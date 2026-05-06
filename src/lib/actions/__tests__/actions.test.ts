@@ -1,4 +1,3 @@
-/* oxlint-disable typescript/no-non-null-assertion, vitest/no-conditional-in-test */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {

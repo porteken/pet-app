@@ -1,4 +1,3 @@
-/* oxlint-disable typescript/no-non-null-assertion, vitest/no-conditional-in-test */
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";

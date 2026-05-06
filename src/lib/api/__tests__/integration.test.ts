@@ -56,7 +56,6 @@ describe("aPI Integration Tests", () => {
 
       vi.mocked(FetchTrendGraphData).mockImplementation(
         (_option, locationId) => {
-          // oxlint-disable-next-line vitest/no-conditional-in-test
           if (locationId <= 0) {
             return Promise.reject(new Error("Invalid location ID"));
           }

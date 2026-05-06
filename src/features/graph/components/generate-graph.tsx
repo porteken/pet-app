@@ -384,7 +384,6 @@ const ChartTooltip = ({
     return null;
   }
 
-  // oxlint-disable-next-line typescript/no-unsafe-type-assertion
   const point = (payload[0]?.payload ?? {}) as Partial<
     ReferenceChartPoint & TrendChartPoint
   >;

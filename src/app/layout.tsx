@@ -1,6 +1,4 @@
-// oxlint-disable-next-line import/no-unassigned-import
 import "leaflet/dist/leaflet.css";
-// oxlint-disable-next-line import/no-unassigned-import
 import "./globals.css";
 
 import { AppProviders } from "@/components/app/providers";

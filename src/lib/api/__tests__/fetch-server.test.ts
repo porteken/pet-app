@@ -1,4 +1,3 @@
-/* oxlint-disable typescript/no-non-null-assertion, vitest/no-conditional-in-test */
 import { DatabaseError } from "@/lib/utils/errors";
 import { clearAllMocks, setupApiServerTest } from "@/testing/test-utilities";
 import { beforeEach, describe, expect, it } from "vitest";

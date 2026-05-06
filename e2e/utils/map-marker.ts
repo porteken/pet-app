@@ -16,11 +16,8 @@ export async function clickClickableMarker(page: Page): Promise<void> {
   for (const index of candidateIndices) {
     const marker = markers.nth(index);
     try {
-      // oxlint-disable-next-line no-await-in-loop
       await marker.scrollIntoViewIfNeeded();
-      // oxlint-disable-next-line no-await-in-loop
       await marker.click({ timeout: MARKER_CLICK_TIMEOUT, trial: true });
-      // oxlint-disable-next-line no-await-in-loop
       await marker.click();
       return;
     } catch {

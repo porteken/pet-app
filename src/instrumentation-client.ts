@@ -1,5 +1,3 @@
-/* oxlint-disable import/namespace */
-
 import * as Sentry from "@sentry/nextjs";
 
 const isE2ETestRun = process.env.NEXT_PUBLIC_E2E_TEST === "true";

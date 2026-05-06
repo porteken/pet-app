@@ -6,7 +6,6 @@ import {
   REFERENCE_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
 import { validateTrendOption, validateYear } from "@/lib/utils/validation";
-/* oxlint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -35,27 +34,26 @@ const buildCookieOptions = () => ({
   sameSite: "lax" as const,
 });
 
+const isRecord = (val: unknown): val is Record<string, unknown> =>
+  typeof val === "object" && val !== null && !Array.isArray(val);
+
 export async function POST(request: Request) {
   let payload: GraphPreferencesPayload;
 
   try {
     const json = await request.json();
-    if (!json || typeof json !== "object") {
+
+    if (!isRecord(json)) {
       throw new Error("Invalid payload");
     }
+
     payload = {
       graphMeasure:
-        typeof (json as Record<string, unknown>).graphMeasure === "string"
-          ? String((json as Record<string, unknown>).graphMeasure)
-          : undefined,
+        typeof json.graphMeasure === "string" ? json.graphMeasure : undefined,
       graphSeason:
-        typeof (json as Record<string, unknown>).graphSeason === "string"
-          ? String((json as Record<string, unknown>).graphSeason)
-          : undefined,
+        typeof json.graphSeason === "string" ? json.graphSeason : undefined,
       referenceYear:
-        typeof (json as Record<string, unknown>).referenceYear === "string"
-          ? String((json as Record<string, unknown>).referenceYear)
-          : undefined,
+        typeof json.referenceYear === "string" ? json.referenceYear : undefined,
     };
   } catch {
     return NextResponse.json(

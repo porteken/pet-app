@@ -158,6 +158,15 @@ interface RankingsFiltersProperties {
 }
 
 class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
+  private readonly resetHeatStressFilter = (): boolean => {
+    if (this.props.heatStressFilter === "") {
+      return false;
+    }
+
+    this.props.setHeatStressFilter("");
+    return true;
+  };
+
   private readonly handleHeatStressChange = (value: string) => {
     this.props.setHeatStressFilter(value);
     this.props.startTransition(() => {
@@ -174,8 +183,14 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
 
   private readonly handleSeasonChange = (value: string) => {
     const season = normalizeGraphSeason(value);
+    const shouldResetHeatStress = this.resetHeatStressFilter();
+
     this.props.setSelectedSeason(season);
     this.props.startTransition(() => {
+      if (shouldResetHeatStress) {
+        void setRankingsHeatStress("");
+      }
+
       void setRankingsSeason(season);
     });
   };
@@ -200,8 +215,14 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
     }
 
     const year = Number(value);
+    const shouldResetHeatStress = this.resetHeatStressFilter();
+
     this.props.setSelectedYear(year);
     this.props.startTransition(() => {
+      if (shouldResetHeatStress) {
+        void setRankingsHeatStress("");
+      }
+
       void setRankingsYear(year);
     });
   };

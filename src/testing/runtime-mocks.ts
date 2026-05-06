@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
+/* oxlint-disable @typescript-eslint/no-unsafe-type-assertion */
 export type Primitive = number | string;
 
 interface FilterOperation {

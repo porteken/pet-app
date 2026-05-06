@@ -6,7 +6,7 @@ import {
   REFERENCE_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
 import { validateTrendOption, validateYear } from "@/lib/utils/validation";
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
+/* oxlint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 

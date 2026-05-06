@@ -1,4 +1,4 @@
-// eslint-disable-next-line import/no-unassigned-import
+// oxlint-disable-next-line import/no-unassigned-import
 import "dotenv/config";
 
 import path from "node:path";

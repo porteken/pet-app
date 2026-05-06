@@ -1,4 +1,4 @@
-/* eslint-disable promise/prefer-await-to-callbacks, @typescript-eslint/no-unsafe-type-assertion */
+/* oxlint-disable promise/prefer-await-to-callbacks, @typescript-eslint/no-unsafe-type-assertion */
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 

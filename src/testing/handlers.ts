@@ -2,7 +2,7 @@ import {
   getRuntimeMockTableRows,
   type Primitive,
 } from "@/testing/runtime-mocks";
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
+/* oxlint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { http, HttpResponse } from "msw";
 
 type FilterOperator = "eq" | "gt" | "gte" | "lt" | "lte";

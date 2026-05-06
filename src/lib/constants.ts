@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
+/* oxlint-disable @typescript-eslint/no-unsafe-type-assertion */
 export const APP_CONFIG = {
   GITHUB_URL: "https://github.com/porteken/pet-app",
   NAME: "Historical PET USA",

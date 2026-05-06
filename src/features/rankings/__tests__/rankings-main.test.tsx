@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
-// eslint-disable-next-line import/no-unassigned-import
+/* oxlint-disable @typescript-eslint/no-unsafe-type-assertion */
+// oxlint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom";
 
 import {

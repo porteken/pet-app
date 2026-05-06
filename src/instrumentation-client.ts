@@ -1,4 +1,4 @@
-/* eslint-disable import/namespace */
+/* oxlint-disable import/namespace */
 
 import * as Sentry from "@sentry/nextjs";
 

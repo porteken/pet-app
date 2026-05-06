@@ -552,7 +552,7 @@ const TrendChartBody = ({
   return (
     <div
       aria-label={`${graphType} ${season} PET trend chart`}
-      className="h-full w-full"
+      className="size-full"
       data-testid="trend-chart"
       role="img"
     >
@@ -656,7 +656,7 @@ const ReferenceChartBody = ({
   return (
     <div
       aria-label={`${season} PET reference comparison chart`}
-      className="h-full w-full"
+      className="size-full"
       data-testid="reference-chart"
       role="img"
     >

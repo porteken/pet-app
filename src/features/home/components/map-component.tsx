@@ -209,7 +209,7 @@ export const MapComponent = memo<MapComponentProperties>(
     }
 
     return (
-      <div className="relative h-full w-full">
+      <div className="relative size-full">
         <MapContainer
           center={MAP_CENTER}
           scrollWheelZoom
@@ -226,7 +226,7 @@ export const MapComponent = memo<MapComponentProperties>(
           <div className="pointer-events-auto flex flex-col items-start gap-2">
             <LegendToggleButton
               ariaControls="desktop-thermal-stress-legend"
-              className="glass-panel-muted text-foreground hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
+              className="text-foreground glass-panel-muted hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
               closedLabel="Show Thermal Stress Index"
               isLegendOpen={isLegendOpen}
               openLabel="Hide Thermal Stress Index"
@@ -251,7 +251,7 @@ export const MapComponent = memo<MapComponentProperties>(
             )}
             <LegendToggleButton
               ariaControls="mobile-thermal-stress-legend"
-              className="glass-panel-muted text-foreground hover:bg-accent rounded-l-2xl border-r-0 px-3 py-3 text-xs font-semibold transition"
+              className="text-foreground glass-panel-muted hover:bg-accent rounded-l-2xl border-r-0 p-3 text-xs font-semibold transition"
               closedLabel="Thermal Stress"
               isLegendOpen={isLegendOpen}
               openLabel="Close"

@@ -218,7 +218,7 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
     } = this.props;
 
     return (
-      <section className="glass-panel fade-in-up mb-6 rounded-3xl p-4 [animation-delay:80ms] sm:p-5">
+      <section className="fade-in-up glass-panel mb-6 rounded-3xl p-4 [animation-delay:80ms] sm:p-5">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Select
             className="w-full"
@@ -336,7 +336,7 @@ class RankingRow extends React.PureComponent<{
 
     return (
       <tr
-        className="hover:bg-accent/45 even:bg-background/30 cursor-pointer transition hover:-translate-y-px"
+        className="even:bg-background/30 hover:bg-accent/45 cursor-pointer transition hover:-translate-y-px"
         onClick={this.handleClick}
       >
         <td className="text-foreground px-6 py-4 text-sm font-medium whitespace-nowrap">
@@ -513,7 +513,7 @@ export function RankingsMain({
         className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
         id="main-content"
       >
-        <section className="glass-panel fade-in-up mb-8 overflow-hidden rounded-4xl">
+        <section className="fade-in-up glass-panel mb-8 overflow-hidden rounded-4xl">
           <div className="bg-primary px-6 py-5 sm:px-8 sm:py-6">
             <h1 className="text-primary-foreground text-3xl font-black tracking-tight sm:text-4xl">
               Cities ranked by Average PET

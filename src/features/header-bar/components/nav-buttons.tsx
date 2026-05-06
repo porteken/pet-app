@@ -70,7 +70,7 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
           rel="noopener noreferrer"
           target="_blank"
         >
-          <Code2 className="h-4 w-4" />
+          <Code2 className="size-4" />
         </Link>
       </Button>
     </>

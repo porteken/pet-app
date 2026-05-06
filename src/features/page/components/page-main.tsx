@@ -114,7 +114,7 @@ const Main: FC<PageProperties> = ({
             <button
               aria-controls="city-thermal-stress-legend"
               aria-expanded={isLegendOpen}
-              className="glass-panel-muted text-foreground hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
+              className="text-foreground glass-panel-muted hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
               onClick={handleToggleLegend}
               type="button"
             >

@@ -167,7 +167,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
 
   return (
     <div className="h-full min-h-0">
-      <div className="glass-panel fade-in-up flex h-full min-h-0 flex-col rounded-3xl p-4 sm:px-5 sm:py-6">
+      <div className="fade-in-up glass-panel flex h-full min-h-0 flex-col rounded-3xl p-4 sm:px-5 sm:py-6">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <p className="text-primary mb-1 text-xs font-semibold tracking-[0.24em] uppercase">
@@ -282,7 +282,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
               years={trendGraphSnapshot.years}
             />
           ) : (
-            <div className="graph-surface-panel text-muted-foreground flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm">
+            <div className="text-muted-foreground graph-surface-panel flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm">
               Loading chart…
             </div>
           )}

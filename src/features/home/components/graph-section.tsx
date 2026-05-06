@@ -91,7 +91,7 @@ const GraphLoadingState = (): React.ReactElement => {
 
 const GraphEmptyState = (): React.ReactElement => {
   return (
-    <div className="graph-surface-panel text-muted-foreground flex size-full items-center justify-center rounded-2xl px-4 text-center text-sm">
+    <div className="text-muted-foreground graph-surface-panel flex size-full items-center justify-center rounded-2xl px-4 text-center text-sm">
       Select a city to view PET trend data.
     </div>
   );
@@ -314,7 +314,7 @@ export const GraphSection = memo<GraphSectionProperties>(
     }, [router, selectedLocation]);
 
     return (
-      <div className="flex h-full w-full max-w-full min-w-0 flex-col items-center gap-4 sm:min-h-0 sm:max-w-[95vw] sm:min-w-[320px] sm:flex-1 sm:gap-5">
+      <div className="flex size-full max-w-full min-w-0 flex-col items-center gap-4 sm:min-h-0 sm:max-w-[95vw] sm:min-w-[320px] sm:flex-1 sm:gap-5">
         <GraphControlsPanel
           forecastEnabled={forecastEnabled}
           forecastHeatStress={forecastHeatStress}

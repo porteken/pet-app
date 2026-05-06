@@ -13,7 +13,7 @@ interface PageHeaderProperties {
 
 export const PageHeader: React.FC<PageHeaderProperties> = ({ location }) => {
   return (
-    <div className="climate-hero fade-in-up mb-8 rounded-4xl p-6 sm:p-8">
+    <div className="fade-in-up climate-hero mb-8 rounded-4xl p-6 sm:p-8">
       <h1 className="mb-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
         {location.city}, {location.state}
       </h1>

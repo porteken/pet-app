@@ -18,7 +18,7 @@ const HeatStressLegendComponent: React.FC<HeatStressLegendProperties> = ({
           <li className="flex items-center gap-3" key={item.level}>
             <div
               aria-label={`${item.level} marker`}
-              className={`h-5 w-5 rounded ${item.fillClass}`}
+              className={`size-5 rounded-sm ${item.fillClass}`}
             />
             <div className="flex flex-col">
               <span className="text-muted-foreground text-xs font-medium">

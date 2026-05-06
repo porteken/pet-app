@@ -76,26 +76,22 @@ interface MobileLegendToggleProperties {
   onToggleMobileGraphLegend: () => void;
 }
 
-const GraphLoadingState = (): React.ReactElement => {
-  return (
-    <div className="graph-surface-panel flex size-full flex-col items-center justify-center rounded-2xl">
-      <Loader2
-        aria-label="Loading graph"
-        className="text-primary size-6 animate-spin"
-        data-testid="graph-loader"
-      />
-      <span className="text-muted-foreground mt-2">Loading graph...</span>
-    </div>
-  );
-};
+const GraphLoadingState = (): React.ReactElement => (
+  <div className="graph-surface-panel flex size-full flex-col items-center justify-center rounded-2xl">
+    <Loader2
+      aria-label="Loading graph"
+      className="text-primary size-6 animate-spin"
+      data-testid="graph-loader"
+    />
+    <span className="text-muted-foreground mt-2">Loading graph...</span>
+  </div>
+);
 
-const GraphEmptyState = (): React.ReactElement => {
-  return (
-    <div className="text-muted-foreground graph-surface-panel flex size-full items-center justify-center rounded-2xl px-4 text-center text-sm">
-      Select a city to view PET trend data.
-    </div>
-  );
-};
+const GraphEmptyState = (): React.ReactElement => (
+  <div className="text-muted-foreground graph-surface-panel flex size-full items-center justify-center rounded-2xl px-4 text-center text-sm">
+    Select a city to view PET trend data.
+  </div>
+);
 
 const GraphContent = ({
   graphHasError = false,
@@ -194,21 +190,19 @@ const GraphHeatStressSummary = ({
 const MobileLegendToggle = ({
   isMobileGraphLegendOpen,
   onToggleMobileGraphLegend,
-}: MobileLegendToggleProperties): React.ReactElement => {
-  return (
-    <div className="sm:hidden">
-      <Button
-        aria-controls="mobile-trend-graph"
-        aria-expanded={isMobileGraphLegendOpen}
-        onClick={onToggleMobileGraphLegend}
-        type="button"
-        variant="outline"
-      >
-        {isMobileGraphLegendOpen ? "Hide Graph Legend" : "Show Graph Legend"}
-      </Button>
-    </div>
-  );
-};
+}: MobileLegendToggleProperties): React.ReactElement => (
+  <div className="sm:hidden">
+    <Button
+      aria-controls="mobile-trend-graph"
+      aria-expanded={isMobileGraphLegendOpen}
+      onClick={onToggleMobileGraphLegend}
+      type="button"
+      variant="outline"
+    >
+      {isMobileGraphLegendOpen ? "Hide Graph Legend" : "Show Graph Legend"}
+    </Button>
+  </div>
+);
 
 class GraphControlsPanel extends React.PureComponent<GraphControlsPanelProperties> {
   private readonly handleMeasureChange = (value: string | undefined) => {

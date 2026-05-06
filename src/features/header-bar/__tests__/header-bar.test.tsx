@@ -4,29 +4,9 @@ import "@testing-library/jest-dom";
 
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { HeaderBar } from "../components/header-bar";
-
-Object.defineProperty(globalThis, "matchMedia", {
-  value: mockFn().mockImplementation((query: string) => ({
-    addEventListener: mockFn(),
-    addListener: mockFn(),
-    dispatchEvent: mockFn(),
-    matches: false,
-    media: query,
-    onchange: undefined,
-    removeEventListener: mockFn(),
-    removeListener: mockFn(),
-  })),
-  writable: true,
-});
-
-globalThis.ResizeObserver = mockFn().mockImplementation(() => ({
-  disconnect: mockFn(),
-  observe: mockFn(),
-  unobserve: mockFn(),
-}));
 
 const mockUseSearchParameters = mockFn();
 const mockGet = mockFn();
@@ -100,7 +80,29 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParameters(),
 }));
 
-describe("HeaderBar", () => {
+describe("headerBar", () => {
+  beforeAll(() => {
+    Object.defineProperty(globalThis, "matchMedia", {
+      value: mockFn().mockImplementation((query: string) => ({
+        addEventListener: mockFn(),
+        addListener: mockFn(),
+        dispatchEvent: mockFn(),
+        matches: false,
+        media: query,
+        onchange: undefined,
+        removeEventListener: mockFn(),
+        removeListener: mockFn(),
+      })),
+      writable: true,
+    });
+
+    globalThis.ResizeObserver = mockFn().mockReturnValue({
+      disconnect: mockFn(),
+      observe: mockFn(),
+      unobserve: mockFn(),
+    });
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -111,7 +113,7 @@ describe("HeaderBar", () => {
     });
   });
 
-  describe("Basic Rendering", () => {
+  describe("basic Rendering", () => {
     it("should render the header bar with app name", () => {
       render(<HeaderBar LocationOptions={mockLocationOptions} />);
       expect(screen.getByText("Historical PET USA")).toBeInTheDocument();
@@ -141,7 +143,7 @@ describe("HeaderBar", () => {
     });
   });
 
-  describe("Location Options Handling", () => {
+  describe("location Options Handling", () => {
     it("should handle empty LocationOptions", () => {
       render(<HeaderBar LocationOptions={emptyLocationOptions} />);
       expect(screen.getByTestId("city-selector")).toBeInTheDocument();
@@ -173,7 +175,7 @@ describe("HeaderBar", () => {
     });
   });
 
-  describe("Edge Cases", () => {
+  describe("edge Cases", () => {
     it("should handle section with items set to undefined", () => {
       render(
         // @ts-expect-error - Testing invalid props
@@ -230,7 +232,7 @@ describe("HeaderBar", () => {
     });
   });
 
-  describe("City Selection and URL Building", () => {
+  describe("city Selection and URL Building", () => {
     it("should find current city when ID is provided", () => {
       render(<HeaderBar id={1} LocationOptions={mockLocationOptions} />);
       expect(screen.getByTestId("city-selector")).toBeInTheDocument();

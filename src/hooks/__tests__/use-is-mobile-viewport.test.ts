@@ -8,7 +8,7 @@ import type { Mock } from "vitest";
 
 describe("useIsMobileViewport", () => {
   let mockMatchMedia: Mock<(query: string) => MediaQueryList>;
-  let listeners: ((e: { matches: boolean }) => void)[] = [];
+  let listeners: ((e: { matches: boolean }) => void)[];
 
   beforeEach(() => {
     listeners = [];

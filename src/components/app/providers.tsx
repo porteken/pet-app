@@ -8,7 +8,7 @@ import * as React from "react";
 export const AppProviders = ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
-  const [queryClient] = React.useState(createQueryClient);
+  const queryClient = React.useMemo(createQueryClient, []);
 
   return (
     <ThemeProvider>

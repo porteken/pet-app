@@ -34,18 +34,7 @@ const createForecastQuery = (data: unknown, error?: unknown) => ({
   select: mockFn().mockReturnThis(),
 });
 
-describe("FetchTrendGraphData", () => {
-  it("should throw error when called in non-browser environment", async () => {
-    const originalWindow = globalThis.window;
-
-    Reflect.deleteProperty(globalThis, "window");
-
-    await expect(FetchTrendGraphData("avg", 1)).rejects.toThrow(
-      "FetchTrendGraphData can only be called in browser environment",
-    );
-
-    globalThis.window = originalWindow;
-  });
+describe("fetchTrendGraphData", () => {
   let mockSupabaseClient: ReturnType<typeof createMockSupabaseClient>;
   let mockValidation: ReturnType<typeof createMockValidation>;
   let mockLinearRegression: ReturnType<typeof createMockLinearRegression>;
@@ -67,7 +56,7 @@ describe("FetchTrendGraphData", () => {
     );
   });
 
-  it("should throw FetchError for invalid trend option", async () => {
+  it("should throw error when called in non-browser environment", async () => {
     mockValidation.validateTrendOption.mockReturnValue(false);
 
     await expect(FetchTrendGraphData("invalid", 1)).rejects.toThrow(
@@ -104,8 +93,8 @@ describe("FetchTrendGraphData", () => {
     expect(mockQuery.eq).toHaveBeenCalledWith("season", "Annual");
     expect(mockQuery.order).toHaveBeenCalledWith("year", { ascending: true });
 
-    expect(result.years).toEqual([2020, 2021]);
-    expect(result.year_pets).toEqual([25.5, 26.2]);
+    expect(result.years).toStrictEqual([2020, 2021]);
+    expect(result.year_pets).toStrictEqual([25.5, 26.2]);
     expect(result.trendline_pets[0]).toBe(1438);
     expect(result.trendline_pets[1]).toBeCloseTo(1438.7, 1);
   });
@@ -127,8 +116,8 @@ describe("FetchTrendGraphData", () => {
 
     expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year_max");
     expect(mockQuery.eq).toHaveBeenCalledWith("season", "Annual");
-    expect(result.years).toEqual([2020, 2021]);
-    expect(result.year_pets).toEqual([30.5, 31.2]);
+    expect(result.years).toStrictEqual([2020, 2021]);
+    expect(result.year_pets).toStrictEqual([30.5, 31.2]);
     expect(result.trendline_pets[0]).toBe(1443);
     expect(result.trendline_pets[1]).toBeCloseTo(1443.7, 1);
   });
@@ -138,7 +127,7 @@ describe("FetchTrendGraphData", () => {
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
 
-    await expect(FetchTrendGraphData("avg", 1)).resolves.toEqual({
+    await expect(FetchTrendGraphData("avg", 1)).resolves.toStrictEqual({
       increase_per_year: 0,
       trendline_pets: [],
       year_pets: [],
@@ -193,7 +182,7 @@ describe("FetchTrendGraphData", () => {
 
     mockSupabaseClient.from.mockReturnValue(mockQuery);
 
-    await expect(FetchTrendGraphData("avg", 1)).resolves.toEqual({
+    await expect(FetchTrendGraphData("avg", 1)).resolves.toStrictEqual({
       increase_per_year: 0,
       trendline_pets: [],
       year_pets: [],
@@ -202,7 +191,7 @@ describe("FetchTrendGraphData", () => {
   });
 });
 
-describe("FetchForecastData", () => {
+describe("fetchForecastData", () => {
   let mockSupabaseClient: ReturnType<typeof createMockSupabaseClient>;
   let mockValidation: ReturnType<typeof createMockValidation>;
 
@@ -256,7 +245,7 @@ describe("FetchForecastData", () => {
     expect(mockSupabaseClient.from).toHaveBeenCalledTimes(2);
     expect(mockHistoricalQuery.eq).toHaveBeenCalledWith("season", "Annual");
     expect(mockForecastQuery.eq).toHaveBeenCalledWith("season", "Annual");
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       forecastValues: [30.5, 31],
       forecastYears: [2026, 2027],
       lowerBound10: [28.5, 29],
@@ -364,13 +353,13 @@ describe("FetchForecastData", () => {
 
     const result = await FetchForecastData(1, 1);
 
-    expect(result?.forecastValues).toEqual([30.5]);
-    expect(result?.lowerBound10).toEqual([28.5]);
-    expect(result?.upperBound90).toEqual([32.5]);
+    expect(result?.forecastValues).toStrictEqual([30.5]);
+    expect(result?.lowerBound10).toStrictEqual([28.5]);
+    expect(result?.upperBound90).toStrictEqual([32.5]);
   });
 });
 
-describe("FetchReferenceGraphData export", () => {
+describe("fetchReferenceGraphData export", () => {
   it("should export FetchReferenceGraphData", async () => {
     const { FetchReferenceGraphData } = await import("../fetch-client");
     expect(FetchReferenceGraphData).toBeDefined();

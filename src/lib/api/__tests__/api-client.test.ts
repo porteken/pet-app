@@ -31,7 +31,7 @@ describe("api-client", () => {
 
       const result = await apiRequest(mockRequestFunction);
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         data: mockData,
         error: undefined,
       });
@@ -44,7 +44,7 @@ describe("api-client", () => {
 
       const result = await apiRequest(mockRequestFunction);
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         data: undefined,
         error: {
           code: "UNKNOWN_ERROR",
@@ -61,7 +61,7 @@ describe("api-client", () => {
 
       const result = await apiRequest(mockRequestFunction);
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         data: undefined,
         error: {
           code: "FETCH_ERROR",
@@ -78,7 +78,7 @@ describe("api-client", () => {
 
       const result = await apiRequest(mockRequestFunction);
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         data: undefined,
         error: {
           code: "UNKNOWN_ERROR",
@@ -151,7 +151,7 @@ describe("api-client", () => {
       );
 
       for (const { result, testCase } of results) {
-        expect(result).toEqual({
+        expect(result).toStrictEqual({
           data: testCase.data,
           error: undefined,
         });
@@ -169,8 +169,8 @@ describe("api-client", () => {
         apiRequest(mockRequestFunction2),
       ]);
 
-      expect(result1.data).toEqual(mockData1);
-      expect(result2.data).toEqual(mockData2);
+      expect(result1.data).toStrictEqual(mockData1);
+      expect(result2.data).toStrictEqual(mockData2);
       expect(result1.error).toBeUndefined();
       expect(result2.error).toBeUndefined();
     });
@@ -184,7 +184,7 @@ describe("api-client", () => {
 
       const result = await apiRequest(mockRequestFunction);
 
-      expect(result.data).toEqual(mockData);
+      expect(result.data).toStrictEqual(mockData);
       expect(result.error).toBeUndefined();
     });
   });

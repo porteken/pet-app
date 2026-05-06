@@ -76,7 +76,7 @@ const mockLocations = [
 const emptyLocations: typeof mockLocations = [];
 const noopMarkerClick = () => {};
 
-describe("MapComponent", () => {
+describe("mapComponent", () => {
   const renderWithQueryClient = (ui: React.ReactElement) => {
     const queryClient = new QueryClient({
       defaultOptions: {

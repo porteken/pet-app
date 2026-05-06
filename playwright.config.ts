@@ -35,7 +35,7 @@ const webServerTimeout =
     : DEVELOPMENT_WEB_SERVER_TIMEOUT;
 
 export default defineConfig({
-  forbidOnly: !!process.env.CI,
+  forbidOnly: Boolean(process.env.CI),
   fullyParallel: true,
   projects: [
     {

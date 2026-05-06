@@ -43,7 +43,7 @@ const MockMarkerComponent = mockFn(
 
 const mockPosition: [number, number] = [40.7128, -74.006];
 
-describe("OptimizedMarker", () => {
+describe("optimizedMarker", () => {
   const mockProperties: React.ComponentProps<typeof OptimizedMarker> = {
     icon: { iconUrl: "test-icon.png" } as unknown as Icon,
     latitude: mockPosition[0],

@@ -127,14 +127,19 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const forecastSupported = selectedGraphMeasure === "avg";
 
   React.useEffect(() => {
-    generatePetTrendGraph(
-      selectedGraphMeasure,
-      graphSeason,
-      forecastEnabled && forecastSupported,
-      forecastYearsAhead,
-    ).catch(() => {
-      // Error is handled by the graph component's own error state
-    });
+    const performGenerate = async () => {
+      try {
+        await generatePetTrendGraph(
+          selectedGraphMeasure,
+          graphSeason,
+          forecastEnabled && forecastSupported,
+          forecastYearsAhead,
+        );
+      } catch {
+        // Error is handled by the graph component's own error state
+      }
+    };
+    void performGenerate();
   }, [
     generatePetTrendGraph,
     selectedGraphMeasure,
@@ -146,17 +151,25 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   ]);
 
   const handleForecastToggle = React.useCallback(
-    (enabled: boolean) => {
+    async (enabled: boolean) => {
       setForecastEnabled(enabled);
-      setForecastPreferences(enabled, forecastYearsAhead).catch(() => {});
+      try {
+        await setForecastPreferences(enabled, forecastYearsAhead);
+      } catch {
+        // Ignore persistence failures
+      }
     },
     [forecastYearsAhead],
   );
 
   const handleForecastYearsChange = React.useCallback(
-    (yearsAhead: number) => {
+    async (yearsAhead: number) => {
       setForecastYearsAhead(yearsAhead);
-      setForecastPreferences(forecastEnabled, yearsAhead).catch(() => {});
+      try {
+        await setForecastPreferences(forecastEnabled, yearsAhead);
+      } catch {
+        // Ignore persistence failures
+      }
     },
     [forecastEnabled],
   );

@@ -55,12 +55,14 @@ const Main: FC<PageProperties> = ({
   }, []);
 
   const handleReferenceYearChange = React.useCallback(
-    (referenceYear: string) => {
+    async (referenceYear: string) => {
       setSelectedReferenceYear(referenceYear);
 
-      persistReferenceYearPreference(referenceYear).catch(() => {
+      try {
+        await persistReferenceYearPreference(referenceYear);
+      } catch {
         // Ignore persistence failures; the UI can continue with the selected value.
-      });
+      }
     },
     [],
   );

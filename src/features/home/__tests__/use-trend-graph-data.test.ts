@@ -93,7 +93,7 @@ describe("useTrendGraphData", () => {
       123,
       "Annual",
     );
-    expect(result.current.data).toEqual(mockData);
+    expect(result.current.data).toStrictEqual(mockData);
   });
 
   it("fetches data when enabled is not provided (defaults to true)", async () => {
@@ -113,7 +113,7 @@ describe("useTrendGraphData", () => {
       123,
       "Annual",
     );
-    expect(result.current.data).toEqual(mockData);
+    expect(result.current.data).toStrictEqual(mockData);
   });
 
   it("handles fetch errors correctly", async () => {
@@ -128,7 +128,7 @@ describe("useTrendGraphData", () => {
       expect(result.current.isError).toBe(true);
     });
 
-    expect(result.current.error).toEqual(mockError);
+    expect(result.current.error).toStrictEqual(mockError);
   });
 
   it("updates when locationId changes", async () => {
@@ -150,12 +150,12 @@ describe("useTrendGraphData", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(result.current.data).toEqual(mockData1);
+    expect(result.current.data).toStrictEqual(mockData1);
 
     rerender({ locationId: 456 });
 
     await waitFor(() => {
-      expect(result.current.data).toEqual(mockData2);
+      expect(result.current.data).toStrictEqual(mockData2);
     });
 
     expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(
@@ -191,12 +191,12 @@ describe("useTrendGraphData", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(result.current.data).toEqual(mockData1);
+    expect(result.current.data).toStrictEqual(mockData1);
 
     rerender({ option: "humidity" });
 
     await waitFor(() => {
-      expect(result.current.data).toEqual(mockData2);
+      expect(result.current.data).toStrictEqual(mockData2);
     });
 
     expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(
@@ -233,12 +233,12 @@ describe("useTrendGraphData", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(result.current.data).toEqual(mockData1);
+    expect(result.current.data).toStrictEqual(mockData1);
 
     rerender({ season: "Winter" as GraphSeason });
 
     await waitFor(() => {
-      expect(result.current.data).toEqual(mockData2);
+      expect(result.current.data).toStrictEqual(mockData2);
     });
 
     expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(
@@ -289,7 +289,7 @@ describe("useTrendGraphData", () => {
       123,
       "Annual",
     );
-    expect(result.current.data).toEqual(mockData);
+    expect(result.current.data).toStrictEqual(mockData);
   });
 
   it("handles locationId 0 correctly", async () => {
@@ -309,7 +309,7 @@ describe("useTrendGraphData", () => {
       0,
       "Annual",
     );
-    expect(result.current.data).toEqual(mockData);
+    expect(result.current.data).toStrictEqual(mockData);
   });
 
   it("uses correct query key format", () => {

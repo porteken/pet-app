@@ -15,7 +15,7 @@ import type {
   createMockValidation,
 } from "@/testing/mocks";
 
-type RankingViewRow = {
+interface RankingViewRow {
   avg_pet: number;
   change_from_2000: number | null;
   city: string;
@@ -27,14 +27,14 @@ type RankingViewRow = {
   p90: number;
   state: string;
   year: number;
-};
+}
 
 type MockSupabaseClient = ReturnType<typeof createMockSupabaseClient>;
 
-type QueryResponse<T> = {
+interface QueryResponse<T> {
   data: T | undefined;
   error: unknown;
-};
+}
 
 const createSuccessResponse = <T>(data: T): QueryResponse<T> => ({
   data,
@@ -112,7 +112,7 @@ describe("fetch-server", () => {
     mockValidation = setup.mockValidation;
   });
 
-  describe("FetchCityRankings", () => {
+  describe("fetchCityRankings", () => {
     it("should fetch and rank city data successfully", async () => {
       const rows = [
         createViewRow({
@@ -145,7 +145,7 @@ describe("fetch-server", () => {
       expect(mockQuery.eq).toHaveBeenNthCalledWith(2, "season", "Annual");
 
       expect(result).toHaveLength(2);
-      expect(result[0]).toEqual({
+      expect(result[0]).toStrictEqual({
         avg_pet: 35.5,
         changeFrom2000: 1.5,
         city: "Phoenix",
@@ -282,7 +282,7 @@ describe("fetch-server", () => {
     });
   });
 
-  describe("FetchLocations", () => {
+  describe("fetchLocations", () => {
     it("should fetch and format location data successfully", async () => {
       const mockLocations = [
         {
@@ -331,7 +331,7 @@ describe("fetch-server", () => {
         "city, lat, lng, id, state",
       );
 
-      expect(result.locations).toEqual([
+      expect(result.locations).toStrictEqual([
         {
           city: "Boston",
           lat: 42.3601,
@@ -361,7 +361,7 @@ describe("fetch-server", () => {
           state: "Texas",
         },
       ]);
-      expect(result.LocationOptions).toEqual([
+      expect(result.LocationOptions).toStrictEqual([
         {
           items: [
             { key: 1, title: "Boston" },
@@ -420,7 +420,7 @@ describe("fetch-server", () => {
       expect(fallbackQuery.select).toHaveBeenCalledWith(
         "city, lat, lng, location_id, state",
       );
-      expect(result.locations).toEqual(fallbackLocations);
+      expect(result.locations).toStrictEqual(fallbackLocations);
     });
 
     it("should ignore locations with non-positive ids", async () => {
@@ -459,7 +459,7 @@ describe("fetch-server", () => {
 
       const result = await FetchLocations();
 
-      expect(result.locations).toEqual([
+      expect(result.locations).toStrictEqual([
         {
           city: "Boston",
           lat: 42.3601,
@@ -475,7 +475,7 @@ describe("fetch-server", () => {
           state: "Texas",
         },
       ]);
-      expect(result.LocationOptions).toEqual([
+      expect(result.LocationOptions).toStrictEqual([
         {
           items: [{ key: 1, title: "Boston" }],
           title: "Massachusetts",
@@ -524,7 +524,7 @@ describe("fetch-server", () => {
     });
   });
 
-  describe("FetchReferenceGraphData", () => {
+  describe("fetchReferenceGraphData", () => {
     it("should throw error for invalid location ID", async () => {
       mockValidation.validateLocationId.mockReturnValue(false);
 
@@ -577,8 +577,8 @@ describe("fetch-server", () => {
       expect(mockQuery.eq).toHaveBeenCalledWith("location_id", 5);
       expect(mockQuery.order).toHaveBeenCalledWith("date", { ascending: true });
 
-      expect(result.pets).toEqual([25.5, 26.2]);
-      expect(result.dates).toEqual([
+      expect(result.pets).toStrictEqual([25.5, 26.2]);
+      expect(result.dates).toStrictEqual([
         new Date("2020-01-01"),
         new Date("2021-01-01"),
       ]);
@@ -606,7 +606,7 @@ describe("fetch-server", () => {
     });
   });
 
-  describe("FetchTrendGraphData", () => {
+  describe("fetchTrendGraphData", () => {
     it("should fetch trend data successfully", async () => {
       const mockData = [
         { location_id: 1, pet: 25.5, year: 2020 },
@@ -632,8 +632,8 @@ describe("fetch-server", () => {
       expect(mockQuery.eq).toHaveBeenCalledWith("season", "Annual");
       expect(mockQuery.order).toHaveBeenCalledWith("year", { ascending: true });
 
-      expect(result.years).toEqual([2020, 2021]);
-      expect(result.year_pets).toEqual([25.5, 26.2]);
+      expect(result.years).toStrictEqual([2020, 2021]);
+      expect(result.year_pets).toStrictEqual([25.5, 26.2]);
       expect(result.trendline_pets[0]).toBeCloseTo(1438, 0);
       expect(result.trendline_pets[1]).toBeCloseTo(1438.7, 0);
     });
@@ -675,7 +675,7 @@ describe("fetch-server", () => {
 
       const result = await FetchTrendGraphData("avg", 1);
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         increase_per_year: 0,
         trendline_pets: [],
         year_pets: [],

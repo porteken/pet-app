@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { SimpleLinearRegression } from "../simple-linear-regression";
 
-describe("SimpleLinearRegression", () => {
+describe("simpleLinearRegression", () => {
   describe("constructor", () => {
     it("should create instance with valid data", () => {
       const x = [1, 2, 3, 4, 5];

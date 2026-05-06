@@ -18,7 +18,7 @@ import {
 } from "@/lib/utils/trend-analysis";
 import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { GraphSection } from "./graph-section";
 import { MapComponent } from "./map-component";
@@ -77,9 +77,10 @@ const Home: FC<MapProperties> = ({
   const [forecastHeatStress, setForecastHeatStress] =
     useState<HeatStressDescription>();
 
-  const locationMap = useMemo(() => {
-    return new Map(locations.map((loc) => [loc.location_id, loc]));
-  }, [locations]);
+  const locationMap = useMemo(
+    () => new Map(locations.map((loc) => [loc.location_id, loc])),
+    [locations],
+  );
 
   const selectOptions = useMemo(
     () =>
@@ -160,15 +161,22 @@ const Home: FC<MapProperties> = ({
 
   const forecastSupported = selectedGraphMeasure === "avg";
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedLocationId !== undefined) {
-      generateGraph({
-        enableForecast: forecastEnabled && forecastSupported,
-        locationId: selectedLocationId,
-        option: selectedGraphMeasure,
-        season: selectedGraphSeason,
-        yearsAhead: forecastYearsAhead,
-      }).catch(() => {});
+      const performGenerate = async () => {
+        try {
+          await generateGraph({
+            enableForecast: forecastEnabled && forecastSupported,
+            locationId: selectedLocationId,
+            option: selectedGraphMeasure,
+            season: selectedGraphSeason,
+            yearsAhead: forecastYearsAhead,
+          });
+        } catch {
+          // Error is handled by generateGraph try/catch
+        }
+      };
+      void performGenerate();
     }
   }, [
     selectedLocationId,

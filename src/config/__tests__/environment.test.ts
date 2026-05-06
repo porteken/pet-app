@@ -23,7 +23,7 @@ describe("environment", () => {
 
       const { getPublicEnvironment } = await loadEnvironmentModule();
 
-      expect(getPublicEnvironment()).toEqual({
+      expect(getPublicEnvironment()).toStrictEqual({
         NEXT_PUBLIC_E2E_TEST: "false",
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "publishable-key",
         NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",

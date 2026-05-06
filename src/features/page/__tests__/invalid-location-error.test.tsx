@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { InvalidLocationError } from "../components/invalid-location-error";
 
-describe("InvalidLocationError", () => {
+describe("invalidLocationError", () => {
   it("renders the provided title and message", () => {
     render(
       <InvalidLocationError

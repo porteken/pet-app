@@ -82,7 +82,7 @@ describe("rankings page", () => {
       }),
     );
 
-    expect(metadata).toEqual({
+    expect(metadata).toStrictEqual({
       description: "City rankings by thermal stress (PET) values",
       title: "City Rankings - Thermal Stress Analysis",
     });

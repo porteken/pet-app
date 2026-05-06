@@ -27,9 +27,8 @@ import React, { useMemo, useState, useTransition } from "react";
 
 import type { LocationOptionSection } from "@/types/types";
 
-const getPetRange = (p10: number, p90: number): string => {
-  return `${p10.toFixed(1)}-${p90.toFixed(1)}`;
-};
+const getPetRange = (p10: number, p90: number): string =>
+  `${p10.toFixed(1)}-${p90.toFixed(1)}`;
 const colorMapping = (value: number) => {
   if (value > 0) {
     return "text-red-600";
@@ -82,20 +81,27 @@ function compareRankingItems(
   column: SortColumn,
 ): number {
   switch (column) {
-    case "avg_pet":
+    case "avg_pet": {
       return a.avg_pet - b.avg_pet;
-    case "change":
+    }
+    case "change": {
       return (a.changeFrom2000 ?? 0) - (b.changeFrom2000 ?? 0);
-    case "city":
+    }
+    case "city": {
       return a.city.localeCompare(b.city);
-    case "max_pet":
+    }
+    case "max_pet": {
       return (a.max_pet ?? 0) - (b.max_pet ?? 0);
-    case "rank":
+    }
+    case "rank": {
       return a.rank - b.rank;
-    case "state":
+    }
+    case "state": {
       return a.state.localeCompare(b.state);
-    default:
+    }
+    default: {
       return 0;
+    }
   }
 }
 

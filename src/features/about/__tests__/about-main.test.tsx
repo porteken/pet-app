@@ -38,7 +38,7 @@ const mockLocationOptions = [
 
 const emptyLocationOptions: typeof mockLocationOptions = [];
 
-describe("AboutMain", () => {
+describe("aboutMain", () => {
   it("should render the header bar with location options", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 

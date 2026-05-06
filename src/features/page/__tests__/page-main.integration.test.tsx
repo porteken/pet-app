@@ -14,12 +14,13 @@ class MockTrendAnalysis extends React.PureComponent<{
   initialGraphMeasure: string;
   onMeasureChange: (value: string) => void | Promise<void>;
 }> {
-  private readonly handleChange = (
+  private readonly handleChange = async (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    const result = this.props.onMeasureChange(event.currentTarget.value);
-    if (result instanceof Promise) {
-      result.catch(() => {});
+    try {
+      await this.props.onMeasureChange(event.currentTarget.value);
+    } catch {
+      // Ignore
     }
   };
 
@@ -48,12 +49,13 @@ class MockReferenceData extends React.PureComponent<{
   onReferenceYearChange: (value: string) => void | Promise<void>;
   referenceYear: string;
 }> {
-  private readonly handleChange = (
+  private readonly handleChange = async (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    const result = this.props.onReferenceYearChange(event.currentTarget.value);
-    if (result instanceof Promise) {
-      result.catch(() => {});
+    try {
+      await this.props.onReferenceYearChange(event.currentTarget.value);
+    } catch {
+      // Ignore
     }
   };
 
@@ -84,12 +86,12 @@ class MockReferenceData extends React.PureComponent<{
 }
 
 vi.mock("@/features/graph", () => ({
-  GenerateReferenceGraph: mockFn().mockImplementation(() => (
-    <div data-testid="reference-graph">Reference Graph</div>
-  )),
-  GenerateTrendGraph: mockFn().mockImplementation(() => (
-    <div data-testid="trend-graph">Trend Graph</div>
-  )),
+  GenerateReferenceGraph: mockFn().mockReturnValue(
+    <div data-testid="reference-graph">Reference Graph</div>,
+  ),
+  GenerateTrendGraph: mockFn().mockReturnValue(
+    <div data-testid="trend-graph">Trend Graph</div>,
+  ),
 }));
 
 vi.mock("@/features/header-bar", () => ({
@@ -134,7 +136,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-describe("PageMain Integration Tests", () => {
+describe("pageMain Integration Tests", () => {
   let defaultProps: PageProperties;
 
   beforeEach(() => {
@@ -172,7 +174,7 @@ describe("PageMain Integration Tests", () => {
     };
   });
 
-  describe("Component Integration", () => {
+  describe("component Integration", () => {
     it("should render with all main sections", async () => {
       render(<PageMain {...defaultProps} />);
 
@@ -194,7 +196,7 @@ describe("PageMain Integration Tests", () => {
       const optionsData = headerBar.dataset.options;
       const locationOptions = JSON.parse(String(optionsData));
       expect(optionsData).toBeDefined();
-      expect(locationOptions).toEqual(defaultProps.LocationOptions);
+      expect(locationOptions).toStrictEqual(defaultProps.LocationOptions);
     });
 
     it("should handle measure changes through preference persistence", async () => {
@@ -254,7 +256,7 @@ describe("PageMain Integration Tests", () => {
     });
   });
 
-  describe("Data Integration", () => {
+  describe("data Integration", () => {
     it("should pass correct data to trend analysis component", async () => {
       render(<PageMain {...defaultProps} />);
 
@@ -289,7 +291,7 @@ describe("PageMain Integration Tests", () => {
     });
   });
 
-  describe("User Interactions", () => {
+  describe("user Interactions", () => {
     it("should handle accessibility requirements", async () => {
       render(<PageMain {...defaultProps} />);
 
@@ -300,7 +302,7 @@ describe("PageMain Integration Tests", () => {
     });
   });
 
-  describe("Error Handling", () => {
+  describe("error Handling", () => {
     it("should keep the page mounted after changing graph measure", async () => {
       const user = userEvent.setup();
       render(<PageMain {...defaultProps} />);

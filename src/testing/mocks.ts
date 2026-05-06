@@ -1,3 +1,4 @@
+/* eslint-disable vitest/require-hook */
 import { drop, factory, primaryKey } from "@mswjs/data";
 
 let locationCounter = 1;
@@ -41,10 +42,10 @@ export const resetDatabase = () => {
 };
 
 export const createMockSupabaseClient = () => ({
-  from: mockFn().mockImplementation((_table: string) => {
-    return createMockSupabaseQuery();
-  }),
-  rpc: mockFn().mockImplementation(() => createMockSupabaseQuery()),
+  from: mockFn().mockImplementation((_table: string) =>
+    createMockSupabaseQuery(),
+  ),
+  rpc: mockFn().mockReturnValue(createMockSupabaseQuery()),
 });
 
 const createMockSupabaseQuery = () => ({

@@ -13,7 +13,7 @@ import { reloadPage } from "@/utils/reload";
 
 import { DatabaseError } from "../database-error";
 
-describe("DatabaseError", () => {
+describe("databaseError", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

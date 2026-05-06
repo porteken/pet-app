@@ -68,7 +68,7 @@ describe("loadLocationPageData", () => {
   });
 
   it("returns an invalid-location result for a non-numeric id", async () => {
-    await expect(loadLocationPageData("abc")).resolves.toEqual({
+    await expect(loadLocationPageData("abc")).resolves.toStrictEqual({
       payload: {
         message: "The provided location ID is not valid.",
         title: "Invalid location ID",
@@ -83,7 +83,7 @@ describe("loadLocationPageData", () => {
   it("returns a database error when locations cannot be loaded", async () => {
     mockFetchLocations.mockRejectedValue(new Error("offline"));
 
-    await expect(loadLocationPageData("7")).resolves.toEqual({
+    await expect(loadLocationPageData("7")).resolves.toStrictEqual({
       payload: {
         message: "Unable to connect to the database. Please try again later.",
         title: "Database Connection Error",
@@ -98,7 +98,7 @@ describe("loadLocationPageData", () => {
       locations: [],
     });
 
-    await expect(loadLocationPageData("7")).resolves.toEqual({
+    await expect(loadLocationPageData("7")).resolves.toStrictEqual({
       payload: {
         message:
           "Location data could not be loaded. The database may be temporarily unavailable.",
@@ -122,7 +122,7 @@ describe("loadLocationPageData", () => {
       ],
     });
 
-    await expect(loadLocationPageData("7")).resolves.toEqual({
+    await expect(loadLocationPageData("7")).resolves.toStrictEqual({
       payload: {
         message: "The requested location could not be found.",
         title: "Location not found",
@@ -146,7 +146,7 @@ describe("loadLocationPageData", () => {
     });
     mockFetchTrendGraphData.mockRejectedValue(new Error("graph failed"));
 
-    await expect(loadLocationPageData("7")).resolves.toEqual({
+    await expect(loadLocationPageData("7")).resolves.toStrictEqual({
       payload: {
         message: "Unable to connect to the database. Please try again later.",
         title: "Database Connection Error",
@@ -199,7 +199,7 @@ describe("loadLocationPageData", () => {
         pets: [25, 26],
       });
 
-    await expect(loadLocationPageData("7")).resolves.toEqual({
+    await expect(loadLocationPageData("7")).resolves.toStrictEqual({
       payload: {
         CurrentDates: currentDates,
         CurrentPets: [31, 32],
@@ -270,7 +270,7 @@ describe("loadLocationPageData", () => {
 
     const result = await loadLocationPageData("7");
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       payload: expect.objectContaining({
         initialForecastEnabled: DEFAULT_FORECAST_ENABLED,
         initialForecastYearsAhead: DEFAULT_FORECAST_YEARS_AHEAD,
@@ -324,7 +324,7 @@ describe("loadLocationPageData", () => {
 
     const result = await loadLocationPageData("7");
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       payload: expect.objectContaining({
         initialGraphMeasure: "avg",
         initialGraphSeason: "Winter",

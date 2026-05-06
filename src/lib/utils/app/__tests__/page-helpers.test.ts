@@ -161,7 +161,7 @@ describe("page-helpers", () => {
 
       const result = await getForecastPreferencesFromCookies();
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         enabled: false,
         yearsAhead: 10,
       });
@@ -185,7 +185,7 @@ describe("page-helpers", () => {
 
       const result = await getForecastPreferencesFromCookies();
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         enabled: true,
         yearsAhead: 25,
       });
@@ -207,7 +207,7 @@ describe("page-helpers", () => {
 
       const result = await getForecastPreferencesFromCookies();
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         enabled: true,
         yearsAhead: 10,
       });
@@ -229,7 +229,7 @@ describe("page-helpers", () => {
 
       const result = await getForecastPreferencesFromCookies();
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         enabled: false,
         yearsAhead: 15,
       });
@@ -271,7 +271,7 @@ describe("page-helpers", () => {
 
       const result = await getLocationData();
 
-      expect(result).toEqual(mockLocationData);
+      expect(result).toStrictEqual(mockLocationData);
       expect(mockFetchLocations).toHaveBeenCalled();
     });
 
@@ -415,7 +415,7 @@ describe("page-helpers", () => {
       );
 
       for (const { data, result } of results) {
-        expect(result).toEqual(data);
+        expect(result).toStrictEqual(data);
         expect(mockFetchLocations).toHaveBeenCalled();
       }
     });
@@ -444,7 +444,7 @@ describe("page-helpers", () => {
 
       const result = await getLocationData();
 
-      expect(result).toEqual(mockLocationData);
+      expect(result).toStrictEqual(mockLocationData);
       expect(mockFetchLocations).toHaveBeenCalled();
     });
 
@@ -482,12 +482,12 @@ describe("page-helpers", () => {
       mockFetchLocations.mockResolvedValue(mockLocationData);
 
       const result = await getLocationData();
-      expect(result).toEqual(mockLocationData);
+      expect(result).toStrictEqual(mockLocationData);
       expect(mockFetchLocations).toHaveBeenCalled();
     });
   });
 
-  describe("Integration scenarios", () => {
+  describe("integration scenarios", () => {
     it("both functions can be called independently", async () => {
       const mockCookieStore = {
         get: mockFn().mockReturnValue({ value: "pressure" }),
@@ -514,7 +514,7 @@ describe("page-helpers", () => {
       ]);
 
       expect(graphMeasure).toBe("pressure");
-      expect(locationData).toEqual(mockLocationData);
+      expect(locationData).toStrictEqual(mockLocationData);
       expect(mockCookies).toHaveBeenCalled();
       expect(mockFetchLocations).toHaveBeenCalled();
     });

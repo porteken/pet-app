@@ -122,11 +122,11 @@ const waitForInitialTrendAnalysisRender = async () => {
   });
 };
 
-describe("TrendAnalysis", () => {
+describe("trendAnalysis", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     Object.defineProperty(globalThis, "matchMedia", {
-      value: mockFn().mockImplementation(() => ({
+      value: mockFn().mockReturnValue({
         addEventListener: mockFn(),
         addListener: mockFn(),
         dispatchEvent: mockFn(),
@@ -135,12 +135,12 @@ describe("TrendAnalysis", () => {
         onchange: undefined,
         removeEventListener: mockFn(),
         removeListener: mockFn(),
-      })),
+      }),
       writable: true,
     });
   });
 
-  describe("Basic Rendering", () => {
+  describe("basic Rendering", () => {
     it("should render trend analysis heading", async () => {
       render(<TrendAnalysis {...defaultProps} />);
       await waitForInitialTrendAnalysisRender();
@@ -245,7 +245,7 @@ describe("TrendAnalysis", () => {
 
     it("should keep mobile graph legend collapsed by default and toggle open", async () => {
       Object.defineProperty(globalThis, "matchMedia", {
-        value: mockFn().mockImplementation(() => ({
+        value: mockFn().mockReturnValue({
           addEventListener: mockFn(),
           addListener: mockFn(),
           dispatchEvent: mockFn(),
@@ -254,7 +254,7 @@ describe("TrendAnalysis", () => {
           onchange: undefined,
           removeEventListener: mockFn(),
           removeListener: mockFn(),
-        })),
+        }),
         writable: true,
       });
 
@@ -293,7 +293,7 @@ describe("TrendAnalysis", () => {
     });
   });
 
-  describe("Thermal Stress Display", () => {
+  describe("thermal Stress Display", () => {
     it("should display current thermal stress description", async () => {
       render(<TrendAnalysis {...defaultProps} />);
 
@@ -364,7 +364,7 @@ describe("TrendAnalysis", () => {
     });
   });
 
-  describe("Graph Measure Change", () => {
+  describe("graph Measure Change", () => {
     it("should change measure when select value changes", async () => {
       const onMeasureChange = mockFn().mockResolvedValue(Promise.resolve());
       render(
@@ -431,7 +431,7 @@ describe("TrendAnalysis", () => {
     });
   });
 
-  describe("Forecast Controls", () => {
+  describe("forecast Controls", () => {
     it("should enable forecast when toggle is clicked", async () => {
       render(<TrendAnalysis {...defaultProps} />);
 
@@ -574,7 +574,7 @@ describe("TrendAnalysis", () => {
     });
   });
 
-  describe("Error Handling", () => {
+  describe("error Handling", () => {
     it("should handle API error gracefully", async () => {
       vi.mocked(FetchTrendGraphData).mockRejectedValueOnce(
         new Error("API Error"),
@@ -632,7 +632,7 @@ describe("TrendAnalysis", () => {
     });
   });
 
-  describe("Edge Cases", () => {
+  describe("edge Cases", () => {
     it("should handle empty forecast values", async () => {
       vi.mocked(FetchForecastData).mockResolvedValueOnce({
         forecastValues: [],

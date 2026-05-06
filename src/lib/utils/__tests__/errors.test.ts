@@ -18,11 +18,11 @@ vi.mock("@sentry/nextjs", () => ({
   captureException: mockFn(),
 }));
 
-describe("Error Classes", () => {
+describe("error Classes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
-  describe("AppError", () => {
+  describe("appError", () => {
     it("should create an AppError with basic properties", () => {
       const error = new AppError("Test message", "TEST_CODE");
 
@@ -56,7 +56,7 @@ describe("Error Classes", () => {
     });
   });
 
-  describe("DatabaseError", () => {
+  describe("databaseError", () => {
     it("should create a DatabaseError with basic properties", () => {
       const error = new DatabaseError("Database connection failed");
 
@@ -79,7 +79,7 @@ describe("Error Classes", () => {
     });
   });
 
-  describe("AuthenticationError", () => {
+  describe("authenticationError", () => {
     it("should create an AuthenticationError with default message", () => {
       const error = new AuthenticationError();
 
@@ -103,7 +103,7 @@ describe("Error Classes", () => {
     });
   });
 
-  describe("AuthorizationError", () => {
+  describe("authorizationError", () => {
     it("should create an AuthorizationError with default message", () => {
       const error = new AuthorizationError();
 
@@ -124,7 +124,7 @@ describe("Error Classes", () => {
     });
   });
 
-  describe("NetworkError", () => {
+  describe("networkError", () => {
     it("should create a NetworkError with basic properties", () => {
       const error = new NetworkError("Network failed", 503);
 
@@ -149,12 +149,12 @@ describe("Error Classes", () => {
       expect(error.message).toBe("Network error");
       expect(error.statusCode).toBe(504);
       expect(error.originalError).toBe(originalError);
-      expect(error.context).toEqual(context);
+      expect(error.context).toStrictEqual(context);
       expect(error.name).toBe("NetworkError");
     });
   });
 
-  describe("NotFoundError", () => {
+  describe("notFoundError", () => {
     it("should create a NotFoundError with basic properties", () => {
       const error = new NotFoundError("Resource not found");
 
@@ -163,7 +163,7 @@ describe("Error Classes", () => {
       expect(error.statusCode).toBe(404);
       expect(error.name).toBe("NotFoundError");
       expect(error.originalError).toBeUndefined();
-      expect(error.context).toEqual({ resource: undefined });
+      expect(error.context).toStrictEqual({ resource: undefined });
     });
 
     it("should create a NotFoundError with resource and original error", () => {
@@ -174,12 +174,12 @@ describe("Error Classes", () => {
       expect(error.code).toBe("NOT_FOUND_ERROR");
       expect(error.statusCode).toBe(404);
       expect(error.originalError).toBe(originalError);
-      expect(error.context).toEqual({ resource: "user" });
+      expect(error.context).toStrictEqual({ resource: "user" });
       expect(error.name).toBe("NotFoundError");
     });
   });
 
-  describe("ValidationError", () => {
+  describe("validationError", () => {
     it("should create a ValidationError with basic properties", () => {
       const error = new ValidationError("Validation failed");
 
@@ -188,7 +188,7 @@ describe("Error Classes", () => {
       expect(error.statusCode).toBe(400);
       expect(error.name).toBe("ValidationError");
       expect(error.originalError).toBeUndefined();
-      expect(error.context).toEqual({ field: undefined });
+      expect(error.context).toStrictEqual({ field: undefined });
     });
 
     it("should create a ValidationError with field and original error", () => {
@@ -203,12 +203,12 @@ describe("Error Classes", () => {
       expect(error.code).toBe("VALIDATION_ERROR");
       expect(error.statusCode).toBe(400);
       expect(error.originalError).toBe(originalError);
-      expect(error.context).toEqual({ field: "email" });
+      expect(error.context).toStrictEqual({ field: "email" });
       expect(error.name).toBe("ValidationError");
     });
   });
 
-  describe("AppError with context", () => {
+  describe("appError with context", () => {
     it("should create an AppError with context", () => {
       const context = { action: "delete", userId: 123 };
       const error = new AppError("Context test", "TEST_CODE", 500, {
@@ -217,7 +217,7 @@ describe("Error Classes", () => {
 
       expect(error.message).toBe("Context test");
       expect(error.code).toBe("TEST_CODE");
-      expect(error.context).toEqual(context);
+      expect(error.context).toStrictEqual(context);
     });
 
     it("should create a DatabaseError with context", () => {
@@ -231,11 +231,11 @@ describe("Error Classes", () => {
 
       expect(error.message).toBe("Database query failed");
       expect(error.originalError).toBe(originalError);
-      expect(error.context).toEqual(context);
+      expect(error.context).toStrictEqual(context);
     });
   });
 
-  describe("Error Factory", () => {
+  describe("error Factory", () => {
     beforeEach(() => {
       vi.clearAllMocks();
     });
@@ -256,7 +256,7 @@ describe("Error Classes", () => {
         });
 
         expect(error).toBeInstanceOf(ValidationError);
-        expect(error.context).toEqual({ field: "username" });
+        expect(error.context).toStrictEqual({ field: "username" });
       });
 
       it("should create an AuthenticationError for status code 401", () => {
@@ -292,7 +292,7 @@ describe("Error Classes", () => {
         });
 
         expect(error).toBeInstanceOf(NotFoundError);
-        expect(error.context).toEqual({ resource: "user" });
+        expect(error.context).toStrictEqual({ resource: "user" });
       });
 
       it("should create a DatabaseError for status code 500", () => {
@@ -335,12 +335,12 @@ describe("Error Classes", () => {
         const context = { test: "value" };
         const error = createError("Test", 400, undefined, context);
 
-        expect(error.context).toEqual({ field: undefined });
+        expect(error.context).toStrictEqual({ field: undefined });
       });
     });
   });
 
-  describe("Error Handler", () => {
+  describe("error Handler", () => {
     beforeEach(() => {
       vi.clearAllMocks();
     });
@@ -443,12 +443,12 @@ describe("Error Classes", () => {
         const error = new Error("Test error");
         const result = handleAsyncError(error, context);
 
-        expect(result.context).toEqual(context);
+        expect(result.context).toStrictEqual(context);
       });
     });
   });
 
-  describe("FetchError", () => {
+  describe("fetchError", () => {
     it("should create a FetchError with basic properties", () => {
       const error = new FetchError("Fetch failed");
 

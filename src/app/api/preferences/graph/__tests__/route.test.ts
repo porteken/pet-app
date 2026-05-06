@@ -14,7 +14,7 @@ vi.mock("next/headers", () => ({
   }),
 }));
 
-describe("POST /api/preferences/graph", () => {
+describe("pOST /api/preferences/graph", () => {
   let mockSet: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {

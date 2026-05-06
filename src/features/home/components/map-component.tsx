@@ -98,9 +98,9 @@ export const MapComponent = memo<MapComponentProperties>(
     selectedGraphMeasure,
     selectedGraphSeason = DEFAULT_GRAPH_SEASON,
   }) => {
-    const [MapContainer, setMapContainer] = useState<MapContainerType>();
-    const [TileLayer, setTileLayer] = useState<TileLayerType>();
-    const [Marker, setMarker] = useState<MarkerType>();
+    const [mapContainer, setMapContainer] = useState<MapContainerType>();
+    const [tileLayer, setTileLayer] = useState<TileLayerType>();
+    const [marker, setMarker] = useState<MarkerType>();
     const [isLoaded, setIsLoaded] = useState(false);
     const [customIcon, setCustomIcon] = useState<Icon>();
     const [isLegendOpen, setIsLegendOpen] = useState(false);
@@ -131,12 +131,19 @@ export const MapComponent = memo<MapComponentProperties>(
 
     useEffect(() => {
       if (typeof document !== "undefined") {
-        loadMap().catch(() => {});
+        const performLoadMap = async () => {
+          try {
+            await loadMap();
+          } catch {
+            // Error is handled inside loadMap or ignored here
+          }
+        };
+        void performLoadMap();
       }
     }, [loadMap]);
 
     const markers = useMemo(() => {
-      if (!locations || !customIcon || !Marker) {
+      if (!locations || !customIcon || !marker) {
         return undefined;
       }
 
@@ -147,7 +154,7 @@ export const MapComponent = memo<MapComponentProperties>(
           longitude={loc.lng}
           key={loc.location_id}
           locationId={loc.location_id}
-          MarkerComponent={Marker}
+          MarkerComponent={marker}
           onClick={onMarkerClick}
           selectedGraphMeasure={selectedGraphMeasure}
           selectedGraphSeason={selectedGraphSeason}
@@ -156,13 +163,13 @@ export const MapComponent = memo<MapComponentProperties>(
     }, [
       locations,
       customIcon,
-      Marker,
+      marker,
       onMarkerClick,
       selectedGraphMeasure,
       selectedGraphSeason,
     ]);
 
-    if (!isLoaded || !MapContainer || !TileLayer || !Marker || !customIcon) {
+    if (!isLoaded || !mapContainer || !tileLayer || !marker || !customIcon) {
       return <PageLoader />;
     }
 
@@ -208,8 +215,11 @@ export const MapComponent = memo<MapComponentProperties>(
       );
     }
 
+    const MapContainer = mapContainer;
+    const TileLayer = tileLayer;
+
     return (
-      <div className="relative h-full w-full">
+      <div className="relative size-full">
         <MapContainer
           center={MAP_CENTER}
           scrollWheelZoom
@@ -226,7 +236,7 @@ export const MapComponent = memo<MapComponentProperties>(
           <div className="pointer-events-auto flex flex-col items-start gap-2">
             <LegendToggleButton
               ariaControls="desktop-thermal-stress-legend"
-              className="glass-panel-muted text-foreground hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
+              className="text-foreground glass-panel-muted hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
               closedLabel="Show Thermal Stress Index"
               isLegendOpen={isLegendOpen}
               openLabel="Hide Thermal Stress Index"
@@ -251,7 +261,7 @@ export const MapComponent = memo<MapComponentProperties>(
             )}
             <LegendToggleButton
               ariaControls="mobile-thermal-stress-legend"
-              className="glass-panel-muted text-foreground hover:bg-accent rounded-l-2xl border-r-0 px-3 py-3 text-xs font-semibold transition"
+              className="text-foreground glass-panel-muted hover:bg-accent rounded-l-2xl border-r-0 p-3 text-xs font-semibold transition"
               closedLabel="Thermal Stress"
               isLegendOpen={isLegendOpen}
               openLabel="Close"

@@ -6,12 +6,12 @@ import { FetchReferenceGraphData } from "../reference-graph-data";
 vi.mock("../fetch-client");
 vi.mock("../reference-graph-data");
 
-describe("API Integration Tests", () => {
+describe("aPI Integration Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe("Client-Server Integration", () => {
+  describe("client-Server Integration", () => {
     it("should handle complete trend data flow", async () => {
       const mockTrendData = {
         increase_per_year: 1.2,
@@ -24,7 +24,7 @@ describe("API Integration Tests", () => {
 
       const result = await FetchTrendGraphData("avg", 1);
 
-      expect(result).toEqual(mockTrendData);
+      expect(result).toStrictEqual(mockTrendData);
       expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1);
     });
 
@@ -38,7 +38,7 @@ describe("API Integration Tests", () => {
 
       const result = await FetchReferenceGraphData("2022", 1);
 
-      expect(result).toEqual(mockReferenceData);
+      expect(result).toStrictEqual(mockReferenceData);
       expect(FetchReferenceGraphData).toHaveBeenCalledWith("2022", 1);
     });
 

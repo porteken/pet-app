@@ -59,7 +59,7 @@ vi.mock("next/dynamic", () => ({
 
 import Page from "../page";
 
-describe("Page Component", () => {
+describe("page Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -87,7 +87,7 @@ describe("Page Component", () => {
     render(await Page());
 
     expect(screen.getByTestId("home-component")).toBeInTheDocument();
-    expect(mockHome.mock.calls.at(-1)?.[0]).toEqual({
+    expect(mockHome.mock.calls.at(-1)?.[0]).toStrictEqual({
       initialForecastEnabled: false,
       initialForecastYearsAhead: 10,
       initialGraphMeasure: "temperature",
@@ -111,7 +111,9 @@ describe("Page Component", () => {
     render(await Page());
 
     expect(screen.getByTestId("error-handler")).toBeInTheDocument();
-    expect(mockLocationErrorHandler.mock.calls.at(-1)?.[0]).toEqual({ error });
+    expect(mockLocationErrorHandler.mock.calls.at(-1)?.[0]).toStrictEqual({
+      error,
+    });
     expect(mockHome).not.toHaveBeenCalled();
   });
 
@@ -132,7 +134,9 @@ describe("Page Component", () => {
     render(await Page());
 
     expect(screen.getByTestId("error-handler")).toBeInTheDocument();
-    expect(mockLocationErrorHandler.mock.calls.at(-1)?.[0]).toEqual({ error });
+    expect(mockLocationErrorHandler.mock.calls.at(-1)?.[0]).toStrictEqual({
+      error,
+    });
     expect(mockHome).not.toHaveBeenCalled();
   });
 
@@ -178,7 +182,7 @@ describe("Page Component", () => {
     render(await Page());
 
     expect(screen.getByTestId("home-component")).toBeInTheDocument();
-    expect(mockHome.mock.calls.at(-1)?.[0]).toEqual({
+    expect(mockHome.mock.calls.at(-1)?.[0]).toStrictEqual({
       initialForecastEnabled: false,
       initialForecastYearsAhead: 10,
       initialGraphMeasure: "temperature",

@@ -33,11 +33,11 @@ const defaultProps: React.ComponentProps<typeof ReferenceData> = {
   ReferencePets: [18, 20],
 };
 
-describe("ReferenceData", () => {
+describe("referenceData", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     Object.defineProperty(globalThis, "matchMedia", {
-      value: mockFn().mockImplementation(() => ({
+      value: mockFn().mockReturnValue({
         addEventListener: mockFn(),
         addListener: mockFn(),
         dispatchEvent: mockFn(),
@@ -46,7 +46,7 @@ describe("ReferenceData", () => {
         onchange: undefined,
         removeEventListener: mockFn(),
         removeListener: mockFn(),
-      })),
+      }),
       writable: true,
     });
   });
@@ -71,7 +71,7 @@ describe("ReferenceData", () => {
 
   it("should keep mobile graph legend collapsed by default and toggle open", async () => {
     Object.defineProperty(globalThis, "matchMedia", {
-      value: mockFn().mockImplementation(() => ({
+      value: mockFn().mockReturnValue({
         addEventListener: mockFn(),
         addListener: mockFn(),
         dispatchEvent: mockFn(),
@@ -80,7 +80,7 @@ describe("ReferenceData", () => {
         onchange: undefined,
         removeEventListener: mockFn(),
         removeListener: mockFn(),
-      })),
+      }),
       writable: true,
     });
 
@@ -91,7 +91,7 @@ describe("ReferenceData", () => {
 
     await waitFor(() => {
       const calls = vi.mocked(GenerateReferenceGraph).mock.calls;
-      expect(calls.at(-1)?.[0]).toEqual(
+      expect(calls.at(-1)?.[0]).toStrictEqual(
         expect.objectContaining({
           isMobileViewport: true,
           showLegend: false,
@@ -103,7 +103,7 @@ describe("ReferenceData", () => {
 
     await waitFor(() => {
       const calls = vi.mocked(GenerateReferenceGraph).mock.calls;
-      expect(calls.at(-1)?.[0]).toEqual(
+      expect(calls.at(-1)?.[0]).toStrictEqual(
         expect.objectContaining({
           isMobileViewport: true,
           showLegend: true,

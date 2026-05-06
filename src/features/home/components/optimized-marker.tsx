@@ -43,17 +43,17 @@ export const OptimizedMarker = memo<OptimizedMarkerProperties>(
       [latitude, longitude],
     );
 
-    const handleMouseEnter = useCallback(() => {
-      Promise.resolve()
-        .then(() =>
-          prefetchTrendGraphData(
-            queryClient,
-            locationId,
-            selectedGraphMeasure,
-            selectedGraphSeason,
-          ),
-        )
-        .catch(() => {});
+    const handleMouseEnter = useCallback(async () => {
+      try {
+        await prefetchTrendGraphData(
+          queryClient,
+          locationId,
+          selectedGraphMeasure,
+          selectedGraphSeason,
+        );
+      } catch {
+        // Ignore prefetch failures
+      }
     }, [locationId, queryClient, selectedGraphMeasure, selectedGraphSeason]);
 
     const handleClick = useCallback(() => {

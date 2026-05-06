@@ -4,12 +4,12 @@ import { server } from "@/testing/server";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
-describe("Supabase MSW integration", () => {
+describe("supabase MSW integration", () => {
   it("fetches trend graph data through MSW-backed Supabase responses", async () => {
     const result = await FetchTrendGraphData("avg", 1);
 
     expect(result.years.length).toBeGreaterThan(0);
-    expect(result.year_pets.length).toBe(result.years.length);
+    expect(result.year_pets).toHaveLength(result.years.length);
     expect(result.years[0]).toBe(2000);
   });
 
@@ -17,7 +17,7 @@ describe("Supabase MSW integration", () => {
     const result = await FetchReferenceGraphData("2025", 1);
 
     expect(result.dates.length).toBeGreaterThan(0);
-    expect(result.pets.length).toBe(result.dates.length);
+    expect(result.pets).toHaveLength(result.dates.length);
   });
 
   it("fails with a validation error when MSW returns malformed trend data", async () => {

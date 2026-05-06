@@ -55,12 +55,14 @@ const Main: FC<PageProperties> = ({
   }, []);
 
   const handleReferenceYearChange = React.useCallback(
-    (referenceYear: string) => {
+    async (referenceYear: string) => {
       setSelectedReferenceYear(referenceYear);
 
-      persistReferenceYearPreference(referenceYear).catch(() => {
+      try {
+        await persistReferenceYearPreference(referenceYear);
+      } catch {
         // Ignore persistence failures; the UI can continue with the selected value.
-      });
+      }
     },
     [],
   );
@@ -114,7 +116,7 @@ const Main: FC<PageProperties> = ({
             <button
               aria-controls="city-thermal-stress-legend"
               aria-expanded={isLegendOpen}
-              className="glass-panel-muted text-foreground hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
+              className="text-foreground glass-panel-muted hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
               onClick={handleToggleLegend}
               type="button"
             >

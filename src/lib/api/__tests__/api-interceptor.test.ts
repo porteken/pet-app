@@ -74,7 +74,7 @@ const createMockResponse = ({
   url,
 });
 
-describe("API Interceptor", () => {
+describe("aPI Interceptor", () => {
   beforeAll(() => {
     server.close();
   });
@@ -103,8 +103,8 @@ describe("API Interceptor", () => {
 
       const result = await handleApiResponse(mockResponse as any);
 
-      expect(result).toEqual(mockData);
-      expect(mockResponse.json).toHaveBeenCalledWith();
+      expect(result).toStrictEqual(mockData);
+      expect(mockResponse.json).toHaveBeenCalled();
     });
 
     it("throws error for failed responses", async () => {
@@ -487,7 +487,7 @@ describe("API Interceptor", () => {
 
       const result = await apiRequest("https://api.example.com/test");
 
-      expect(result).toEqual(mockData);
+      expect(result).toStrictEqual(mockData);
       expect(mockFetch).toHaveBeenCalledWith(
         "https://api.example.com/test",
         expect.objectContaining({
@@ -609,7 +609,7 @@ describe("API Interceptor", () => {
 
       const result = await apiRequestWithRetry("https://api.example.com/test");
 
-      expect(result).toEqual(mockData);
+      expect(result).toStrictEqual(mockData);
       expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
@@ -645,7 +645,7 @@ describe("API Interceptor", () => {
 
       const result = await promise;
 
-      expect(result).toEqual(mockData);
+      expect(result).toStrictEqual(mockData);
       expect(mockFetch).toHaveBeenCalledTimes(3);
     });
 
@@ -698,7 +698,7 @@ describe("API Interceptor", () => {
 
       const result = await promise;
 
-      expect(result).toEqual(mockData);
+      expect(result).toStrictEqual(mockData);
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });
   });

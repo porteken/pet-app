@@ -74,10 +74,10 @@ describe("app shell and error pages", () => {
     expect(layout.props.children.type).toBe("body");
     expect(layout.props.children.props.suppressHydrationWarning).toBe(true);
     expect(layout.props.children.props.children[1].type).toBe(mockAppProviders);
-    expect(layout.props.children.props.children[1].props.children).toEqual(
-      <span>Child content</span>,
-    );
-    expect(metadata).toEqual({
+    expect(
+      layout.props.children.props.children[1].props.children,
+    ).toStrictEqual(<span>Child content</span>);
+    expect(metadata).toStrictEqual({
       description: "Physiological Equivalent Temperature data for US cities",
       title: "Historical PET USA",
     });

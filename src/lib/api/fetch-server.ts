@@ -36,14 +36,14 @@ import type {
   TrendGraphDataProperties,
 } from "@/types/types";
 
-type LocationQueryRow = {
+interface LocationQueryRow {
   city: string;
   id?: unknown;
   lat: unknown;
   lng: unknown;
   location_id?: unknown;
   state: string;
-};
+}
 
 const CITY_RANKINGS_COLUMNS =
   "avg_pet, change_from_2000, city, future_lower, future_upper, location_id, max_pet, p10, p90, state, year";

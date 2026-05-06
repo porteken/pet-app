@@ -119,17 +119,19 @@ const HeaderBarComponent = ({
       .find((city) => city.key === id);
   }, [id, groupedCities]);
 
-  const selectData = useMemo(() => {
-    return groupedCities.map((group) => ({
-      group: group.group,
-      items: group.items.map((city) => ({
-        key: `city-${city.key}`,
-        label: city.title,
-        value: city.key.toString(),
+  const selectData = useMemo(
+    () =>
+      groupedCities.map((group) => ({
+        group: group.group,
+        items: group.items.map((city) => ({
+          key: `city-${city.key}`,
+          label: city.title,
+          value: city.key.toString(),
+        })),
+        key: `group-${group.group}`,
       })),
-      key: `group-${group.group}`,
-    }));
-  }, [groupedCities]);
+    [groupedCities],
+  );
 
   return (
     <header className="border-border/70 bg-background/80 sticky top-0 z-20 w-full border-b backdrop-blur-xl">

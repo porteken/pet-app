@@ -39,7 +39,7 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
         <label className="text-foreground flex items-center gap-3 text-sm font-medium">
           <input
             checked={enabled}
-            className="border-border bg-background text-primary focus-visible:ring-primary size-4 rounded border focus-visible:ring-2"
+            className="border-border bg-background text-primary focus-visible:ring-primary size-4 rounded-sm border focus-visible:ring-2"
             onChange={handleEnabledChange}
             type="checkbox"
           />

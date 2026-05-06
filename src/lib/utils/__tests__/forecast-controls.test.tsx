@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 
 import { ForecastControls } from "../forecast-controls";
 
-describe("ForecastControls", () => {
+describe("forecastControls", () => {
   it("renders the forecast toggle", () => {
     render(
       <ForecastControls

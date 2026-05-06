@@ -5,15 +5,13 @@ import * as React from "react";
 
 export const ThemeProvider = ({
   children,
-}: Readonly<{ children: React.ReactNode }>) => {
-  return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      disableTransitionOnChange
-      enableSystem
-    >
-      {children}
-    </NextThemesProvider>
-  );
-};
+}: Readonly<{ children: React.ReactNode }>) => (
+  <NextThemesProvider
+    attribute="class"
+    defaultTheme="system"
+    disableTransitionOnChange
+    enableSystem
+  >
+    {children}
+  </NextThemesProvider>
+);

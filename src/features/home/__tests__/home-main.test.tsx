@@ -133,9 +133,9 @@ class MockButton extends React.PureComponent<{
 }
 
 const mockQueryClient = {
-  fetchQuery: mockFn(async (options: { queryFn: () => unknown }) => {
-    return options.queryFn();
-  }),
+  fetchQuery: mockFn(async (options: { queryFn: () => unknown }) =>
+    options.queryFn(),
+  ),
 };
 
 vi.mock("@tanstack/react-query", async (importOriginal) => {
@@ -301,13 +301,13 @@ const defaultProps: React.ComponentProps<typeof Home> = {
   locations: mockLocations,
 };
 
-describe("Home", () => {
+describe("home", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPush.mockReset();
   });
 
-  describe("Basic Properties", () => {
+  describe("basic Properties", () => {
     it("should be importable", () => {
       expect(Home).toBeDefined();
     });
@@ -321,7 +321,7 @@ describe("Home", () => {
     });
   });
 
-  describe("Component Rendering", () => {
+  describe("component Rendering", () => {
     it("should render all main components", () => {
       render(<Home {...defaultProps} />);
 
@@ -350,7 +350,7 @@ describe("Home", () => {
     });
   });
 
-  describe("Interaction Handling", () => {
+  describe("interaction Handling", () => {
     it("should handle marker click and open modal", async () => {
       render(<Home {...defaultProps} />);
 
@@ -378,7 +378,7 @@ describe("Home", () => {
     });
 
     it("should show loading state during graph generation", async () => {
-      const slowFetch = mockFn().mockImplementation(() => createDelay(100));
+      const slowFetch = mockFn().mockReturnValue(createDelay(100));
       vi.mocked(FetchTrendGraphData).mockImplementation(slowFetch);
 
       render(<Home {...defaultProps} />);
@@ -427,7 +427,7 @@ describe("Home", () => {
     });
   });
 
-  describe("Navigation and View Details", () => {
+  describe("navigation and View Details", () => {
     it("should display 'View Full Details' button when location is selected", async () => {
       render(<Home {...defaultProps} />);
 
@@ -456,7 +456,7 @@ describe("Home", () => {
     });
   });
 
-  describe("Error Handling", () => {
+  describe("error Handling", () => {
     it("should handle API error gracefully", async () => {
       const errorMessage = "API Error";
       vi.mocked(FetchTrendGraphData).mockRejectedValue(new Error(errorMessage));
@@ -477,7 +477,7 @@ describe("Home", () => {
     });
   });
 
-  describe("Forecast Heat Stress", () => {
+  describe("forecast Heat Stress", () => {
     it("should fetch forecast data when forecast is enabled and marker clicked", async () => {
       vi.mocked(FetchForecastData).mockResolvedValue({
         forecastValues: [28, 30, 32],
@@ -598,7 +598,7 @@ describe("Home", () => {
     });
   });
 
-  describe("Initial State Handling", () => {
+  describe("initial State Handling", () => {
     it("should initialize with forecast enabled from props", async () => {
       render(<Home {...defaultProps} initialForecastEnabled={true} />);
 
@@ -636,7 +636,7 @@ describe("Home", () => {
     });
   });
 
-  describe("Empty Data Handling", () => {
+  describe("empty Data Handling", () => {
     it("should handle empty trend data years array", async () => {
       vi.mocked(FetchTrendGraphData).mockResolvedValue({
         increase_per_year: 0,

@@ -1,14 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 export type Primitive = number | string;
 
-type FilterOperation = {
+interface FilterOperation {
   column: string;
   type: "eq" | "gt" | "gte" | "lt" | "lte";
   value: Primitive;
-};
-type MockListResult = { data: MockRow[]; error: undefined };
+}
+interface MockListResult {
+  data: MockRow[];
+  error: undefined;
+}
 type MockRow = Record<string, Primitive>;
-type MockSingleResult = { data: MockRow | undefined; error: undefined };
+interface MockSingleResult {
+  data: MockRow | undefined;
+  error: undefined;
+}
 type MockSupabaseQuery = Promise<MockListResult> & {
   eq: (column: string, value: Primitive) => MockSupabaseQuery;
   gt: (column: string, value: Primitive) => MockSupabaseQuery;
@@ -24,7 +30,10 @@ type MockSupabaseQuery = Promise<MockListResult> & {
   select: (columns?: string) => MockSupabaseQuery;
   single: () => Promise<MockSingleResult>;
 };
-type OrderOperation = { ascending: boolean; column: string };
+interface OrderOperation {
+  ascending: boolean;
+  column: string;
+}
 
 const YEARS = Array.from({ length: 26 }, (_, index) => 2000 + index);
 const FORECAST_YEARS = Array.from({ length: 75 }, (_, index) => 2026 + index);
@@ -317,7 +326,7 @@ const applyFilters = (rows: MockRow[], filters: FilterOperation[]) =>
 
 const applyColumnSelection = (rows: MockRow[], columns?: string) => {
   if (!columns || columns.trim() === "*" || columns.trim() === "") {
-    return rows.map((row) => ({ ...row }));
+    return rows.map((row) => structuredClone(row));
   }
 
   const selectedColumns = columns
@@ -439,7 +448,7 @@ const createMockSupabaseQuery = (table: string): MockSupabaseQuery => {
 };
 
 export const getRuntimeMockTableRows = (table: string) =>
-  (MOCK_TABLES[table] ?? []).map((row) => ({ ...row }));
+  (MOCK_TABLES[table] ?? []).map((row) => structuredClone(row));
 
 export const createRuntimeMockSupabaseClient = () => ({
   from: createNoopFunction((table: string) => createMockSupabaseQuery(table)),

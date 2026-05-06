@@ -203,14 +203,13 @@ const buildReferenceChartData = (
   dates: Date[],
   currentPets: number[],
   referencePets: number[],
-): ReferenceChartPoint[] => {
-  return dates.map((date, index) => ({
+): ReferenceChartPoint[] =>
+  dates.map((date, index) => ({
     currentPet: currentPets[index],
     label: DATE_FORMATTER.format(date),
     referencePet: referencePets[index],
     tooltipLabel: DATE_FORMATTER.format(date),
   }));
-};
 
 const buildTrendChartData = (
   years: number[],
@@ -283,38 +282,32 @@ const buildTrendChartData = (
 const getChartMargin = ({
   isMobileViewport,
   showLegend,
-}: ChartMarginOptions) => {
-  return {
-    bottom: showLegend ? MARGIN_BOTTOM_WITH_LEGEND : 0,
-    left: isMobileViewport ? MARGIN_LEFT_MOBILE : MARGIN_LEFT_DESKTOP,
-    right: isMobileViewport ? MARGIN_RIGHT_MOBILE : MARGIN_RIGHT_DESKTOP,
-    top: MARGIN_TOP,
-  };
-};
+}: ChartMarginOptions) => ({
+  bottom: showLegend ? MARGIN_BOTTOM_WITH_LEGEND : 0,
+  left: isMobileViewport ? MARGIN_LEFT_MOBILE : MARGIN_LEFT_DESKTOP,
+  right: isMobileViewport ? MARGIN_RIGHT_MOBILE : MARGIN_RIGHT_DESKTOP,
+  top: MARGIN_TOP,
+});
 
 const hasTrendGraphData = (
   years: number[],
   yearPets: number[],
   trendlinePets: number[],
-): boolean => {
-  return years.length > 0 && yearPets.length > 0 && trendlinePets.length > 0;
-};
+): boolean =>
+  years.length > 0 && yearPets.length > 0 && trendlinePets.length > 0;
 
 const hasReferenceGraphData = (
   dates: Date[],
   currentPets: number[],
   referencePets: number[],
-): boolean => {
-  return dates.length > 0 && referencePets.length > 0 && currentPets.length > 0;
-};
+): boolean =>
+  dates.length > 0 && referencePets.length > 0 && currentPets.length > 0;
 
-const roundDownToStep = (value: number, step: number): number => {
-  return Math.floor(value / step) * step;
-};
+const roundDownToStep = (value: number, step: number): number =>
+  Math.floor(value / step) * step;
 
-const roundUpToStep = (value: number, step: number): number => {
-  return Math.ceil(value / step) * step;
-};
+const roundUpToStep = (value: number, step: number): number =>
+  Math.ceil(value / step) * step;
 
 const getYAxisDomain = (values: (number | undefined)[]): [number, number] => {
   const numericValues = values.filter(
@@ -341,15 +334,13 @@ const getYAxisDomain = (values: (number | undefined)[]): [number, number] => {
   return [lowerBound, upperBound];
 };
 
-const getTrendGraphType = (option: string): string => {
-  return option === GRAPH_CONFIG.TREND_OPTIONS.AVG ? "Average" : "Maximum";
-};
+const getTrendGraphType = (option: string): string =>
+  option === GRAPH_CONFIG.TREND_OPTIONS.AVG ? "Average" : "Maximum";
 
-const formatIncreasePerYearText = (increasePerYear: number): string => {
-  return increasePerYear >= 0
+const formatIncreasePerYearText = (increasePerYear: number): string =>
+  increasePerYear >= 0
     ? `+${increasePerYear.toFixed(2)}`
     : increasePerYear.toFixed(2);
-};
 
 const ChartShell = ({
   children,
@@ -357,32 +348,28 @@ const ChartShell = ({
   subtitle,
   title,
   useCompactDesktopHeight = false,
-}: ChartShellProperties): React.ReactElement => {
-  return (
-    <div
-      className={`${getGraphFillHeightClass(useCompactDesktopHeight)} w-full`}
-    >
-      <div className="graph-surface-panel flex h-full flex-col rounded-2xl p-3 sm:p-4">
-        <div className="border-border/60 mb-3 space-y-1 border-b pb-3">
-          <h3 className="text-foreground text-base font-semibold sm:text-lg">
-            {title}
-          </h3>
-          {subtitle && (
-            <p className="text-muted-foreground text-sm">{subtitle}</p>
-          )}
-        </div>
+}: ChartShellProperties): React.ReactElement => (
+  <div className={`${getGraphFillHeightClass(useCompactDesktopHeight)} w-full`}>
+    <div className="graph-surface-panel flex h-full flex-col rounded-2xl p-3 sm:p-4">
+      <div className="border-border/60 mb-3 space-y-1 border-b pb-3">
+        <h3 className="text-foreground text-base font-semibold sm:text-lg">
+          {title}
+        </h3>
+        {subtitle && (
+          <p className="text-muted-foreground text-sm">{subtitle}</p>
+        )}
+      </div>
 
-        <div className="min-h-0 flex-1">
-          {children ?? (
-            <div className="border-border/80 bg-background/20 text-muted-foreground flex h-full items-center justify-center rounded-xl border border-dashed px-4 text-center text-sm">
-              {emptyState}
-            </div>
-          )}
-        </div>
+      <div className="min-h-0 flex-1">
+        {children ?? (
+          <div className="border-border/80 bg-background/20 text-muted-foreground flex h-full items-center justify-center rounded-xl border border-dashed px-4 text-center text-sm">
+            {emptyState}
+          </div>
+        )}
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 const getTooltipColorStyle = (color?: string) => ({
   backgroundColor: color ?? GRAPH_COLORS.primary,
@@ -552,7 +539,7 @@ const TrendChartBody = ({
   return (
     <div
       aria-label={`${graphType} ${season} PET trend chart`}
-      className="h-full w-full"
+      className="size-full"
       data-testid="trend-chart"
       role="img"
     >
@@ -656,7 +643,7 @@ const ReferenceChartBody = ({
   return (
     <div
       aria-label={`${season} PET reference comparison chart`}
-      className="h-full w-full"
+      className="size-full"
       data-testid="reference-chart"
       role="img"
     >

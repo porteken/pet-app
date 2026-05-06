@@ -20,7 +20,7 @@ describe("reference-graph-data", () => {
     mockSupabaseClient = setup.mockSupabaseClient;
     mockValidation = setup.mockValidation;
   });
-  describe("FetchReferenceGraphData", () => {
+  describe("fetchReferenceGraphData", () => {
     it("should fetch and process reference data successfully", async () => {
       const mockData = [
         { date: "2023-01-01", location_id: 1, pet: 25.5, year: "2023" },
@@ -43,11 +43,11 @@ describe("reference-graph-data", () => {
       expect(mockQuery.eq).toHaveBeenNthCalledWith(2, "year", "2023");
       expect(mockQuery.order).toHaveBeenCalledWith("date", { ascending: true });
 
-      expect(result.dates).toEqual([
+      expect(result.dates).toStrictEqual([
         new Date("2023-01-01"),
         new Date("2023-01-02"),
       ]);
-      expect(result.pets).toEqual([25.5, 26.2]);
+      expect(result.pets).toStrictEqual([25.5, 26.2]);
 
       expect(mockValidation.validateDates).toHaveBeenCalledWith([
         new Date("2023-01-01"),
@@ -85,7 +85,7 @@ describe("reference-graph-data", () => {
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
-      await expect(FetchReferenceGraphData("2023", 1)).resolves.toEqual({
+      await expect(FetchReferenceGraphData("2023", 1)).resolves.toStrictEqual({
         dates: [],
         pets: [],
       });
@@ -124,7 +124,7 @@ describe("reference-graph-data", () => {
 
       mockSupabaseClient.from.mockReturnValue(mockQuery);
 
-      await expect(FetchReferenceGraphData("2023", 1)).resolves.toEqual({
+      await expect(FetchReferenceGraphData("2023", 1)).resolves.toStrictEqual({
         dates: [],
         pets: [],
       });

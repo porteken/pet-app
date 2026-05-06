@@ -24,7 +24,7 @@ vi.mock("next/navigation", () => ({
   usePathname: mockFn().mockReturnValue("/"),
 }));
 
-describe("NavButtons", () => {
+describe("navButtons", () => {
   beforeAll(() => {
     Object.defineProperty(globalThis, "matchMedia", {
       value: mockFn().mockImplementation((query: string) => ({
@@ -40,11 +40,11 @@ describe("NavButtons", () => {
       writable: true,
     });
 
-    globalThis.ResizeObserver = mockFn().mockImplementation(() => ({
+    globalThis.ResizeObserver = mockFn().mockReturnValue({
       disconnect: mockFn(),
       observe: mockFn(),
       unobserve: mockFn(),
-    }));
+    });
   });
 
   const mockBuildUrl = mockFn().mockImplementation((path: string) => path);

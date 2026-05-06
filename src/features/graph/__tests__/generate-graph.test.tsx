@@ -73,7 +73,7 @@ const mockYearPets4 = [18, 24, 28];
 const mockCurrentPets2 = [19, 31];
 const mockReferencePets2 = [18, 28];
 
-describe("Graph Components", () => {
+describe("graph Components", () => {
   beforeEach(() => {
     yAxisMock.mockClear();
   });
@@ -121,7 +121,7 @@ describe("Graph Components", () => {
     );
   });
 
-  describe("GenerateTrendGraph", () => {
+  describe("generateTrendGraph", () => {
     it("renders the chart shell and descriptive title", () => {
       render(
         <GenerateTrendGraph
@@ -178,7 +178,7 @@ describe("Graph Components", () => {
     });
   });
 
-  describe("GenerateReferenceGraph", () => {
+  describe("generateReferenceGraph", () => {
     it("sets a tighter y-axis domain around reference data", () => {
       render(
         <GenerateReferenceGraph

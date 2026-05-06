@@ -4,12 +4,12 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/features/graph", () => ({
-  GenerateReferenceGraph: mockFn().mockImplementation(() => (
-    <div data-testid="reference-graph" />
-  )),
-  GenerateTrendGraph: mockFn().mockImplementation(() => (
-    <div data-testid="trend-graph" />
-  )),
+  GenerateReferenceGraph: mockFn().mockReturnValue(
+    <div data-testid="reference-graph" />,
+  ),
+  GenerateTrendGraph: mockFn().mockReturnValue(
+    <div data-testid="trend-graph" />,
+  ),
 }));
 
 vi.mock("@/features/header-bar", () => ({
@@ -65,7 +65,7 @@ import { PageMain } from "../components/page-main";
 
 let fetchMock: ReturnType<typeof vi.fn>;
 
-describe("PageMain", () => {
+describe("pageMain", () => {
   const defaultProps: React.ComponentProps<typeof PageMain> = {
     CurrentDates: [new Date("2023-01-01"), new Date("2023-02-01")],
     CurrentPets: [15, 25],
@@ -100,7 +100,7 @@ describe("PageMain", () => {
     vi.stubGlobal("fetch", fetchMock);
   });
 
-  describe("Component Rendering", () => {
+  describe("component Rendering", () => {
     it("should render the page with title and location information", async () => {
       await act(async () => {
         render(<PageMain {...defaultProps} />);
@@ -167,7 +167,7 @@ describe("PageMain", () => {
     });
   });
 
-  describe("Graph Generation", () => {
+  describe("graph Generation", () => {
     it("should generate trend graph on initial render", async () => {
       await act(async () => {
         render(<PageMain {...defaultProps} />);
@@ -202,7 +202,7 @@ describe("PageMain", () => {
     });
   });
 
-  describe("User Interactions", () => {
+  describe("user Interactions", () => {
     it("should change graph measure and persist it through the preferences endpoint", async () => {
       const user = userEvent.setup();
       await act(async () => {

@@ -37,14 +37,12 @@ export const prefetchTrendGraphData = (
   locationId: number,
   option: string,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
-) => {
-  return queryClient.prefetchQuery({
+) =>
+  queryClient.prefetchQuery({
     ...getTrendGraphQueryOptions(locationId, option, season),
   });
-};
 
-export const invalidateTrendGraphData = (queryClient: QueryClient) => {
-  return queryClient.invalidateQueries({
+export const invalidateTrendGraphData = (queryClient: QueryClient) =>
+  queryClient.invalidateQueries({
     queryKey: ["trend-graph"],
   });
-};

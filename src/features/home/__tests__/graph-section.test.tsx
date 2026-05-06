@@ -190,13 +190,13 @@ const defaultProps: React.ComponentProps<typeof GraphSection> = {
   },
 };
 
-describe("GraphSection", () => {
+describe("graphSection", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPush.mockReset();
   });
 
-  describe("Basic Rendering", () => {
+  describe("basic Rendering", () => {
     it("should render measure select", () => {
       render(<GraphSection {...defaultProps} />);
 
@@ -246,7 +246,7 @@ describe("GraphSection", () => {
     });
   });
 
-  describe("Thermal Stress Display", () => {
+  describe("thermal Stress Display", () => {
     it("should display thermal stress description when provided", () => {
       render(
         <GraphSection
@@ -299,7 +299,7 @@ describe("GraphSection", () => {
     });
   });
 
-  describe("Loading State", () => {
+  describe("loading State", () => {
     it("should display loader when graphLoading is true", () => {
       render(<GraphSection {...defaultProps} graphLoading={true} />);
 
@@ -315,7 +315,7 @@ describe("GraphSection", () => {
     });
   });
 
-  describe("Interactions", () => {
+  describe("interactions", () => {
     it("should call onSelectChange when measure is changed", () => {
       const onSelectChange = mockFn();
       render(
@@ -427,7 +427,7 @@ describe("GraphSection", () => {
     });
   });
 
-  describe("Edge Cases", () => {
+  describe("edge Cases", () => {
     it("should render without pet graph", () => {
       render(<GraphSection {...defaultProps} trendGraphSnapshot={undefined} />);
 

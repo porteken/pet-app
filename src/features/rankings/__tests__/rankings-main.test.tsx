@@ -134,7 +134,11 @@ vi.mock("@/components/ui/pagination", () => ({
   ),
 }));
 
-import { setRankingsSeason, setRankingsYear } from "@/lib/actions/actions";
+import {
+  setRankingsHeatStress,
+  setRankingsSeason,
+  setRankingsYear,
+} from "@/lib/actions/actions";
 
 import { RankingsMain } from "../components/rankings-main";
 
@@ -396,13 +400,13 @@ const requireElement = <T extends Element>(element: null | T): T => {
   return element as T;
 };
 
-describe("RankingsMain", () => {
+describe("rankingsMain", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPush.mockReset();
   });
 
-  describe("Basic Rendering", () => {
+  describe("basic Rendering", () => {
     it("should render the component", () => {
       render(<RankingsMain {...defaultProps} />);
 
@@ -489,7 +493,7 @@ describe("RankingsMain", () => {
     });
   });
 
-  describe("Year Selection", () => {
+  describe("year Selection", () => {
     it("should initialize with the initial year", () => {
       render(<RankingsMain {...defaultProps} />);
 
@@ -534,7 +538,7 @@ describe("RankingsMain", () => {
     });
   });
 
-  describe("State Filtering", () => {
+  describe("state Filtering", () => {
     it("should show all states in the filter dropdown", () => {
       render(<RankingsMain {...defaultProps} />);
 
@@ -554,7 +558,7 @@ describe("RankingsMain", () => {
     });
   });
 
-  describe("Thermal Stress Filtering", () => {
+  describe("thermal Stress Filtering", () => {
     it("should filter rankings by thermal stress level", () => {
       render(<RankingsMain {...defaultProps} />);
 
@@ -569,7 +573,7 @@ describe("RankingsMain", () => {
     });
   });
 
-  describe("Sorting", () => {
+  describe("sorting", () => {
     it("should sort by rank by default", () => {
       render(<RankingsMain {...defaultProps} />);
 
@@ -641,7 +645,7 @@ describe("RankingsMain", () => {
     });
   });
 
-  describe("Pagination", () => {
+  describe("pagination", () => {
     it("should display pagination when there are multiple pages", () => {
       render(<RankingsMain {...defaultProps} rankings={mockRankings} />);
 
@@ -688,7 +692,7 @@ describe("RankingsMain", () => {
     });
   });
 
-  describe("Row Click Navigation", () => {
+  describe("row Click Navigation", () => {
     it("should navigate to location page when row is clicked", () => {
       render(<RankingsMain {...defaultProps} />);
 
@@ -699,7 +703,7 @@ describe("RankingsMain", () => {
     });
   });
 
-  describe("Data Display", () => {
+  describe("data Display", () => {
     it("should display change from 2000 with positive indicator", () => {
       render(<RankingsMain {...defaultProps} rankings={hotCityRankings} />);
 
@@ -742,7 +746,7 @@ describe("RankingsMain", () => {
     });
   });
 
-  describe("Empty State", () => {
+  describe("empty State", () => {
     it("should handle empty rankings array", () => {
       render(<RankingsMain {...defaultProps} rankings={emptyRankings} />);
 
@@ -759,7 +763,7 @@ describe("RankingsMain", () => {
     });
   });
 
-  describe("Helper Functions", () => {
+  describe("helper Functions", () => {
     it("should apply correct color for positive change values", () => {
       render(<RankingsMain {...defaultProps} rankings={hotCityRankings} />);
 
@@ -782,7 +786,7 @@ describe("RankingsMain", () => {
     });
   });
 
-  describe("Filter Combination", () => {
+  describe("filter Combination", () => {
     it("should apply state filter correctly", () => {
       render(<RankingsMain {...defaultProps} />);
 
@@ -794,7 +798,70 @@ describe("RankingsMain", () => {
     });
   });
 
-  describe("Filter Reset", () => {
+  describe("filter Reset", () => {
+    it("should clear the thermal stress filter when season changes", async () => {
+      render(
+        <RankingsMain
+          {...defaultProps}
+          initialHeatStress="No Thermal Stress"
+          initialState="TX"
+          rankings={mockRankings}
+        />,
+      );
+
+      const stateSelect = screen.getByTestId("state-select");
+      const seasonSelect = screen.getByTestId("season-select");
+
+      expect(
+        screen.getByText("No cities match the current filters."),
+      ).toBeInTheDocument();
+
+      fireEvent.change(seasonSelect, { target: { value: "Winter" } });
+
+      await waitFor(() => {
+        expect(setRankingsHeatStress).toHaveBeenCalledWith("");
+        expect(setRankingsSeason).toHaveBeenCalledWith("Winter");
+      });
+
+      expect(stateSelect).toHaveValue("TX");
+      expect(screen.getByText("Austin")).toBeInTheDocument();
+      expect(
+        screen.queryByText("No cities match the current filters."),
+      ).not.toBeInTheDocument();
+    });
+
+    it("should clear the thermal stress filter when year changes", async () => {
+      render(
+        <RankingsMain
+          {...defaultProps}
+          initialHeatStress="No Thermal Stress"
+          initialState="TX"
+          rankings={mockRankings}
+        />,
+      );
+
+      const stateSelect = screen.getByTestId("state-select");
+      const yearSelect = screen.getByTestId("year-select");
+
+      expect(
+        screen.getByText("No cities match the current filters."),
+      ).toBeInTheDocument();
+
+      fireEvent.change(yearSelect, { target: { value: "2025" } });
+
+      await waitFor(() => {
+        expect(setRankingsHeatStress).toHaveBeenCalledWith("");
+        expect(setRankingsYear).toHaveBeenCalledWith(2025);
+      });
+
+      expect(stateSelect).toHaveValue("TX");
+      expect(yearSelect).toHaveValue("2025");
+      expect(screen.getByText("Austin")).toBeInTheDocument();
+      expect(
+        screen.queryByText("No cities match the current filters."),
+      ).not.toBeInTheDocument();
+    });
+
     it("should reset page to 1 when sort column changes", () => {
       render(<RankingsMain {...defaultProps} rankings={mockRankings} />);
 

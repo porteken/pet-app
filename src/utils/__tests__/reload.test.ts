@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { reloadPage } from "../reload";
 
-describe("Reload Utility", () => {
+describe("reload Utility", () => {
   beforeEach(() => {
     Object.defineProperty(globalThis, "location", {
       value: {

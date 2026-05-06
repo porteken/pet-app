@@ -10,7 +10,7 @@ describe("mapTrendRowsToGraphData", () => {
       { pet: 4, year: 2002 },
     ]);
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       increase_per_year: 4,
       trendline_pets: [-4, 0, 4],
       year_pets: [-4, 0, 4],

@@ -28,19 +28,19 @@ describe("createQueryClient", () => {
 
 describe("queryKeys", () => {
   it("builds stable trend graph query keys", () => {
-    expect(queryKeys.trendGraph(123, "avg")).toEqual([
+    expect(queryKeys.trendGraph(123, "avg")).toStrictEqual([
       "trend-graph",
       123,
       "avg",
       "Annual",
     ]);
-    expect(queryKeys.trendGraph(123, "avg")).toEqual([
+    expect(queryKeys.trendGraph(123, "avg")).toStrictEqual([
       "trend-graph",
       123,
       "avg",
       "Annual",
     ]);
-    expect(queryKeys.trendGraph(999, "max")).toEqual([
+    expect(queryKeys.trendGraph(999, "max")).toStrictEqual([
       "trend-graph",
       999,
       "max",
@@ -57,7 +57,12 @@ describe("getTrendGraphQueryOptions", () => {
   it("returns a query function and query key", () => {
     const options = getTrendGraphQueryOptions(44, "avg");
 
-    expect(options.queryKey).toEqual(["trend-graph", 44, "avg", "Annual"]);
+    expect(options.queryKey).toStrictEqual([
+      "trend-graph",
+      44,
+      "avg",
+      "Annual",
+    ]);
     expect(options.queryFn).toBeTypeOf("function");
   });
 
@@ -75,7 +80,7 @@ describe("getTrendGraphQueryOptions", () => {
     const result = await options.queryFn();
 
     expect(mockFetchTrendGraphData).toHaveBeenCalledWith("max", 55, "Annual");
-    expect(result).toEqual(mockData);
+    expect(result).toStrictEqual(mockData);
   });
 });
 

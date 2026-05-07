@@ -32,6 +32,10 @@ const defaultProps: React.ComponentProps<typeof ReferenceData> = {
   ReferencePets: [18, 20],
 };
 
+const testCurrentDates = [new Date("2025-01-01T00:00:00.000Z")];
+const testCurrentPets = [22];
+const testReferencePets = [18];
+
 describe("referenceData", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -59,6 +63,10 @@ describe("referenceData", () => {
     await waitFor(() => {
       expect(screen.getByTestId("mock-reference-graph")).toBeInTheDocument();
     });
+
+    expect(
+      screen.getByTestId("reference-graph-scroll-region"),
+    ).toBeInTheDocument();
 
     expect(container.querySelector("#reference-data-graph")).toHaveClass(
       "flex-1",
@@ -135,6 +143,26 @@ describe("referenceData", () => {
 
     await waitFor(() => {
       expect(FetchReferenceGraphData).toHaveBeenCalledWith("2001", 1, "Annual");
+    });
+  });
+
+  it("should pass the current year using UTC-safe date handling", async () => {
+    render(
+      <ReferenceData
+        {...defaultProps}
+        CurrentDates={testCurrentDates}
+        CurrentPets={testCurrentPets}
+        ReferencePets={testReferencePets}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(GenerateReferenceGraph).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          currentYear: 2025,
+        }),
+        undefined,
+      );
     });
   });
 });

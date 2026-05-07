@@ -65,7 +65,7 @@ interface LocationPagePreferences {
 
 const parseLocationId = (id: string): number | undefined => {
   const locationId = Number(id);
-  if (!Number.isInteger(locationId) || locationId <= 0) {
+  if (!Number.isInteger(locationId) || locationId < 0) {
     return undefined;
   }
 
@@ -177,7 +177,7 @@ export const loadLocationPageData = async (
   rawLocationId: string,
 ): Promise<LocationPageLoadResult> => {
   const locationId = parseLocationId(rawLocationId);
-  if (!locationId) {
+  if (locationId === undefined) {
     return {
       payload: createInvalidLocationError(),
       status: "invalid-location",

@@ -1,12 +1,21 @@
+import Link from "next/link";
+
 export default function NotFound() {
   return (
-    <div className="mx-auto max-w-xl px-4 py-12">
-      <div className="flex flex-col items-center gap-4 text-center">
-        <h1 className="text-3xl font-bold text-gray-900">404 - Not Found</h1>
-        <p className="text-base text-gray-600">
-          The page you are looking for does not exist.
-        </p>
-      </div>
+    <div className="mx-auto flex min-h-[70vh] w-full max-w-4xl items-center px-4 py-12 sm:px-6 lg:px-8">
+      <section className="glass-panel w-full rounded-4xl p-8 text-center sm:p-10">
+        <h1 className="text-foreground text-3xl font-black tracking-tight sm:text-4xl">
+          Page not found
+        </h1>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link
+            className="bg-primary text-primary-foreground inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold shadow-sm transition hover:brightness-95"
+            href="/"
+          >
+            Back to home
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

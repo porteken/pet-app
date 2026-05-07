@@ -1,38 +1,30 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  mockDatabaseError,
-  mockInvalidLocationError,
-  mockLoadLocationPageData,
-  mockPage,
-} = vi.hoisted(() => ({
-  mockDatabaseError: mockFn(
-    ({ message, title }: { message: string; title: string }) => (
-      <div data-testid="database-error">
-        {title}:{message}
-      </div>
+const { mockDatabaseError, mockLoadLocationPageData, mockNotFound, mockPage } =
+  vi.hoisted(() => ({
+    mockDatabaseError: mockFn(
+      ({ message, title }: { message: string; title: string }) => (
+        <div data-testid="database-error">
+          {title}:{message}
+        </div>
+      ),
     ),
-  ),
-  mockInvalidLocationError: mockFn(
-    ({ message, title }: { message: string; title: string }) => (
-      <div data-testid="invalid-location-error">
-        {title}:{message}
-      </div>
-    ),
-  ),
-  mockLoadLocationPageData: mockFn(),
-  mockPage: mockFn((_properties?: unknown) => (
-    <div data-testid="location-page">Location Page</div>
-  )),
-}));
+    mockLoadLocationPageData: mockFn(),
+    mockNotFound: mockFn(() => {
+      throw new Error("NEXT_NOT_FOUND");
+    }),
+    mockPage: mockFn((_properties?: unknown) => (
+      <div data-testid="location-page">Location Page</div>
+    )),
+  }));
 
 vi.mock("@/components/app/database-error", () => ({
   DatabaseError: mockDatabaseError,
 }));
 
-vi.mock("@/features/page/components/invalid-location-error", () => ({
-  InvalidLocationError: mockInvalidLocationError,
+vi.mock("next/navigation", () => ({
+  notFound: mockNotFound,
 }));
 
 vi.mock("@/features/page/server/location-page-data", () => ({
@@ -116,11 +108,11 @@ describe("location route page", () => {
       status: "invalid-location",
     });
 
-    render(await LocationPage({ params: Promise.resolve({ id: "404" }) }));
+    await expect(
+      LocationPage({ params: Promise.resolve({ id: "404" }) }),
+    ).rejects.toThrow("NEXT_NOT_FOUND");
 
-    expect(screen.getByTestId("invalid-location-error")).toHaveTextContent(
-      "Location not found:Missing location",
-    );
+    expect(mockNotFound).toHaveBeenCalledTimes(1);
     expect(mockPage).not.toHaveBeenCalled();
   });
 });

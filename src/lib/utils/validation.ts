@@ -5,7 +5,7 @@ export function validateDates(dates: Date[]): void {
 }
 
 export function validateLocationId(locationId: number): boolean {
-  return Number.isInteger(locationId) && locationId > 0;
+  return Number.isInteger(locationId) && locationId >= 0;
 }
 
 export function validatePets(pets: number[]): void {

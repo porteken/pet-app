@@ -148,7 +148,7 @@ export const FetchLocations = cache(
 
     const locations = await fetchLocationRows(supabase);
 
-    const sanitizedLocations = filterRowsWithPositiveLocationId(locations);
+    const sanitizedLocations = filterRowsWithNonNegativeLocationId(locations);
     const validatedLocations = parseWithDatabaseError(
       "Locations",
       parseLocationRows,
@@ -341,14 +341,14 @@ export async function FetchTrendGraphData(
   return mapTrendRowsToGraphData(validatedRows);
 }
 
-function filterRowsWithPositiveLocationId<
+function filterRowsWithNonNegativeLocationId<
   T extends {
     location_id?: unknown;
   },
 >(rows: T[]): T[] {
   return rows.filter((row) => {
     const locationId = Number(row.location_id);
-    return Number.isInteger(locationId) && locationId > 0;
+    return Number.isInteger(locationId) && locationId >= 0;
   });
 }
 

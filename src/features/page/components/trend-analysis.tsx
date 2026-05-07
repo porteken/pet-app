@@ -53,6 +53,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     React.useState<TrendGraphSnapshot>();
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
+  const latestTrendRequestRef = React.useRef(0);
 
   const showTrendLegend = !isMobileViewport || isMobileLegendOpen;
 
@@ -63,6 +64,8 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       enableForecast: boolean,
       yearsAhead: number,
     ) => {
+      const requestId = ++latestTrendRequestRef.current;
+
       try {
         const {
           forecastHeatStress: newForecastHeatStress,
@@ -76,10 +79,18 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           season,
         });
 
+        if (requestId !== latestTrendRequestRef.current) {
+          return;
+        }
+
         setCurrentHeatStress(newHeatStressDescription);
         setForecastHeatStress(newForecastHeatStress);
         setTrendGraphSnapshot(snapshot);
       } catch {
+        if (requestId !== latestTrendRequestRef.current) {
+          return;
+        }
+
         setTrendGraphSnapshot({
           forecastData: undefined,
           increase_per_year: 0,
@@ -181,16 +192,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   return (
     <div className="h-full min-h-0">
       <div className="fade-in-up glass-panel flex h-full min-h-0 flex-col rounded-3xl p-4 sm:px-5 sm:py-6">
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-primary mb-1 text-xs font-semibold tracking-[0.24em] uppercase">
-              Historical trend
-            </p>
-            <h2 className="text-foreground text-lg font-semibold sm:text-xl">
-              Trend Analysis
-            </h2>
-          </div>
-        </div>
+        <h2 className="sr-only">Trend Analysis</h2>
         <div className="mb-5 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>

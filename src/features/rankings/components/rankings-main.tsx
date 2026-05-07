@@ -542,7 +542,7 @@ export function RankingsMain({
       >
         <section className="fade-in-up glass-panel mb-8 overflow-hidden rounded-4xl">
           <div className="bg-primary px-6 py-5 sm:px-8 sm:py-6">
-            <h1 className="text-primary-foreground text-3xl font-black tracking-tight sm:text-4xl">
+            <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
               Cities ranked by Average PET
             </h1>
           </div>

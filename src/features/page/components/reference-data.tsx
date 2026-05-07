@@ -23,6 +23,12 @@ interface ReferenceGraphSnapshot {
   year: string;
 }
 
+const REFERENCE_SCROLL_HINT_THRESHOLD = 90;
+const REFERENCE_MIN_CHART_WIDTH_MOBILE = 840;
+const REFERENCE_MIN_CHART_WIDTH_DESKTOP = 1120;
+const REFERENCE_POINT_WIDTH_MOBILE = 3.5;
+const REFERENCE_POINT_WIDTH_DESKTOP = 4.5;
+
 const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   CurrentDates,
   CurrentPets,
@@ -37,17 +43,46 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
     React.useState<ReferenceGraphSnapshot>();
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
+  const latestReferenceRequestRef = React.useRef(0);
 
   const showReferenceLegend = !isMobileViewport || isMobileLegendOpen;
+  const referencePointCount = referenceGraphSnapshot?.dates.length ?? 0;
+  const needsHorizontalScroll =
+    referencePointCount >= REFERENCE_SCROLL_HINT_THRESHOLD;
+  const referenceChartMinWidth = React.useMemo(() => {
+    if (!needsHorizontalScroll) {
+      return 0;
+    }
+
+    const minimumWidth = isMobileViewport
+      ? REFERENCE_MIN_CHART_WIDTH_MOBILE
+      : REFERENCE_MIN_CHART_WIDTH_DESKTOP;
+    const pointWidth = isMobileViewport
+      ? REFERENCE_POINT_WIDTH_MOBILE
+      : REFERENCE_POINT_WIDTH_DESKTOP;
+
+    return Math.max(minimumWidth, Math.round(referencePointCount * pointWidth));
+  }, [isMobileViewport, needsHorizontalScroll, referencePointCount]);
+
+  const containerStyle = React.useMemo(
+    () => ({ minWidth: `${referenceChartMinWidth}px` }),
+    [referenceChartMinWidth],
+  );
 
   const generatePetReferenceGraph = React.useCallback(
     async (year: string) => {
+      const requestId = ++latestReferenceRequestRef.current;
       const referenceData =
         year === initialReferenceYear
           ? { dates: CurrentDates, pets: ReferencePets }
           : await FetchReferenceGraphData(year, id, DEFAULT_GRAPH_SEASON);
 
       const { dates, pets } = referenceData;
+
+      if (requestId !== latestReferenceRequestRef.current) {
+        return;
+      }
+
       setReferenceGraphSnapshot({ dates, pets, year });
     },
     [CurrentDates, ReferencePets, id, initialReferenceYear],
@@ -80,16 +115,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   return (
     <div className="h-full min-h-0">
       <div className="fade-in-up glass-panel flex h-full min-h-0 flex-col rounded-3xl p-4 sm:px-5 sm:py-6">
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-primary mb-1 text-xs font-semibold tracking-[0.24em] uppercase">
-              Historical comparison
-            </p>
-            <h2 className="text-foreground text-lg font-semibold sm:text-xl">
-              Reference Data
-            </h2>
-          </div>
-        </div>
+        <h2 className="sr-only">Reference Data</h2>
         <div className="mb-5 space-y-4">
           <label
             className="text-foreground mb-2 block text-sm font-medium"
@@ -122,23 +148,31 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
           </button>
         </div>
         <div
-          className="min-h-[clamp(220px,42vh,520px)] flex-1 overflow-hidden sm:min-h-[clamp(450px,70vh,850px)]"
+          className="flex min-h-[clamp(220px,42vh,520px)] flex-1 flex-col overflow-hidden sm:min-h-[clamp(450px,70vh,850px)]"
           id="reference-data-graph"
         >
           {referenceGraphSnapshot ? (
-            <GenerateReferenceGraph
-              currentPets={CurrentPets}
-              currentYear={
-                CurrentDates.at(-1)?.getFullYear() ??
-                GRAPH_CONFIG.YEAR_RANGE.END
-              }
-              dates={referenceGraphSnapshot.dates}
-              isMobileViewport={isMobileViewport}
-              referencePets={referenceGraphSnapshot.pets}
-              referenceYear={referenceGraphSnapshot.year}
-              season={DEFAULT_GRAPH_SEASON}
-              showLegend={showReferenceLegend}
-            />
+            <div
+              aria-label="Scrollable reference graph"
+              className="-mx-4 min-h-0 flex-1 touch-pan-x overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:px-0"
+              data-testid="reference-graph-scroll-region"
+            >
+              <div className="h-full min-w-full" style={containerStyle}>
+                <GenerateReferenceGraph
+                  currentPets={CurrentPets}
+                  currentYear={
+                    CurrentDates.at(-1)?.getUTCFullYear() ??
+                    GRAPH_CONFIG.YEAR_RANGE.END
+                  }
+                  dates={referenceGraphSnapshot.dates}
+                  isMobileViewport={isMobileViewport}
+                  referencePets={referenceGraphSnapshot.pets}
+                  referenceYear={referenceGraphSnapshot.year}
+                  season={DEFAULT_GRAPH_SEASON}
+                  showLegend={showReferenceLegend}
+                />
+              </div>
+            </div>
           ) : (
             <div className="text-muted-foreground graph-surface-panel flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm">
               Loading chart…

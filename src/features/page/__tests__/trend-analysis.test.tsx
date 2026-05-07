@@ -428,6 +428,91 @@ describe("trendAnalysis", () => {
         ).not.toBeInTheDocument();
       });
     });
+
+    it("should ignore stale graph responses when measure changes quickly", async () => {
+      let resolveMaxRequest:
+        | ((value: {
+            increase_per_year: number;
+            trendline_pets: number[];
+            year_pets: number[];
+            years: number[];
+          }) => void)
+        | undefined;
+      let resolveAvgRequest:
+        | ((value: {
+            increase_per_year: number;
+            trendline_pets: number[];
+            year_pets: number[];
+            years: number[];
+          }) => void)
+        | undefined;
+
+      vi.mocked(FetchTrendGraphData)
+        .mockResolvedValueOnce({
+          increase_per_year: 0.5,
+          trendline_pets: [20, 22, 24, 26],
+          year_pets: [20, 22, 24, 26],
+          years: [2020, 2021, 2022, 2023],
+        })
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveMaxRequest = resolve;
+            }),
+        )
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveAvgRequest = resolve;
+            }),
+        );
+
+      render(<TrendAnalysis {...defaultProps} />);
+
+      await waitForInitialTrendAnalysisRender();
+
+      const select = screen.getByLabelText("Graph Measure");
+      fireEvent.change(select, { target: { value: "max" } });
+      fireEvent.change(select, { target: { value: "avg" } });
+
+      resolveAvgRequest?.({
+        increase_per_year: 0.2,
+        trendline_pets: [11, 12, 13, 14],
+        year_pets: [10, 11, 12, 13],
+        years: [2020, 2021, 2022, 2023],
+      });
+
+      await waitFor(() => {
+        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            increasePerYear: 0.2,
+            option: "avg",
+            trendlinePets: [11, 12, 13, 14],
+            yearPets: [10, 11, 12, 13],
+          }),
+          undefined,
+        );
+      });
+
+      resolveMaxRequest?.({
+        increase_per_year: 1.1,
+        trendline_pets: [50, 51, 52, 53],
+        year_pets: [49, 50, 51, 52],
+        years: [2020, 2021, 2022, 2023],
+      });
+
+      await waitFor(() => {
+        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            increasePerYear: 0.2,
+            option: "avg",
+            trendlinePets: [11, 12, 13, 14],
+            yearPets: [10, 11, 12, 13],
+          }),
+          undefined,
+        );
+      });
+    });
   });
 
   describe("forecast Controls", () => {

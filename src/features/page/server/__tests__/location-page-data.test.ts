@@ -234,6 +234,63 @@ describe("loadLocationPageData", () => {
     );
   });
 
+  it("returns the assembled page data for location id zero when present", async () => {
+    const locationOptions = [
+      {
+        items: [{ key: 0, title: "New York" }],
+        title: "New York",
+      },
+    ];
+    const location = {
+      city: "New York",
+      lat: 40.7128,
+      lng: -74.006,
+      location_id: 0,
+      state: "New York",
+    };
+
+    mockFetchLocations.mockResolvedValue({
+      LocationOptions: locationOptions,
+      locations: [location],
+    });
+    mockFetchTrendGraphData.mockResolvedValue({
+      trendline_pets: [28, 29],
+      year_pets: [27, 28],
+      years: [2023, 2024],
+    });
+    mockFetchReferenceGraphData
+      .mockResolvedValueOnce({
+        dates: [new Date("2024-01-01")],
+        pets: [31],
+      })
+      .mockResolvedValueOnce({
+        dates: [new Date("2024-01-01")],
+        pets: [25],
+      });
+
+    await expect(loadLocationPageData("0")).resolves.toStrictEqual({
+      payload: expect.objectContaining({
+        CurrentPets: [31],
+        LocationOptions: locationOptions,
+        ReferencePets: [25],
+        TrendlinePets: [28, 29],
+        YearPets: [27, 28],
+        Years: [2023, 2024],
+        id: 0,
+        location,
+      }),
+      status: "success",
+    });
+
+    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("avg", 0, "Annual");
+    expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
+      1,
+      "2025",
+      0,
+      "Annual",
+    );
+  });
+
   it("falls back to default preferences and reference year when cookies are invalid", async () => {
     mockCookies.mockResolvedValue(
       createCookieStore({

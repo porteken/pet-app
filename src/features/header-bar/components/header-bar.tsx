@@ -112,7 +112,7 @@ const HeaderBarComponent = ({
   }, [LocationOptions]);
 
   const currentCity = useMemo(() => {
-    if (!id) {
+    if (id === undefined) {
       return undefined;
     }
     return groupedCities

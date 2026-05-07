@@ -435,11 +435,18 @@ describe("fetch-server", () => {
       expect(result.locations).toStrictEqual(fallbackLocations);
     });
 
-    it("should ignore locations with non-positive ids", async () => {
+    it("should ignore locations with negative ids while keeping location zero", async () => {
       const mockLocations = [
         {
-          city: "Invalid City",
+          city: "New York",
           id: 0,
+          lat: 40.7128,
+          lng: -74.006,
+          state: "New York",
+        },
+        {
+          city: "Invalid City",
+          id: -1,
           lat: 0,
           lng: 0,
           state: "Nowhere",
@@ -473,6 +480,13 @@ describe("fetch-server", () => {
 
       expect(result.locations).toStrictEqual([
         {
+          city: "New York",
+          lat: 40.7128,
+          lng: -74.006,
+          location_id: 0,
+          state: "New York",
+        },
+        {
           city: "Boston",
           lat: 42.3601,
           lng: -71.0589,
@@ -491,6 +505,10 @@ describe("fetch-server", () => {
         {
           items: [{ key: 1, title: "Boston" }],
           title: "Massachusetts",
+        },
+        {
+          items: [{ key: 0, title: "New York" }],
+          title: "New York",
         },
         {
           items: [{ key: 3, title: "Austin" }],
@@ -539,10 +557,6 @@ describe("fetch-server", () => {
   describe("fetchReferenceGraphData", () => {
     it("should throw error for invalid location ID", async () => {
       mockValidation.validateLocationId.mockReturnValue(false);
-
-      await expect(FetchReferenceGraphData("2023", 0)).rejects.toThrow(
-        new DatabaseError("Invalid locationId: 0"),
-      );
 
       await expect(FetchReferenceGraphData("2023", -1)).rejects.toThrow(
         new DatabaseError("Invalid locationId: -1"),
@@ -653,9 +667,6 @@ describe("fetch-server", () => {
     it("should throw error for invalid location ID", async () => {
       mockValidation.validateLocationId.mockReturnValue(false);
 
-      await expect(FetchTrendGraphData("avg", 0)).rejects.toThrow(
-        new DatabaseError("Invalid locationId: 0"),
-      );
       await expect(FetchTrendGraphData("avg", -1)).rejects.toThrow(
         new DatabaseError("Invalid locationId: -1"),
       );

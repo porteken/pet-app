@@ -75,12 +75,12 @@ const Main: FC<PageProperties> = ({
     <div className="min-h-screen">
       <HeaderBar id={id} LocationOptions={LocationOptions} />
       <main
-        className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
+        className="mx-auto w-full max-w-[1700px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10"
         id="main-content"
       >
         <PageHeader location={location} />
 
-        <div className="grid items-stretch gap-8 lg:grid-cols-2">
+        <div className="grid items-stretch gap-8 lg:grid-cols-2 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.25fr)] 2xl:grid-cols-[minmax(0,0.88fr)_minmax(0,1.35fr)]">
           <TrendAnalysis
             graphSeason={selectedGraphSeason}
             id={id}

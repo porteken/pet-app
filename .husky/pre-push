@@ -1,0 +1,7 @@
+echo "Running pre-push checks..."
+
+pnpm run test:unit
+
+pnpm run test:integration
+
+echo "Pre-push checks passed!"

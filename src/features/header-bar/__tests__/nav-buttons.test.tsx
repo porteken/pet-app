@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom";
 
 import { render, screen } from "@testing-library/react";
@@ -54,9 +53,6 @@ describe("navButtons", () => {
 
     expect(screen.getByText("Map")).toBeInTheDocument();
     expect(screen.getByText("About")).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("View source code on GitHub"),
-    ).toBeInTheDocument();
   });
 
   it("should render buttons with correct links", () => {
@@ -69,10 +65,6 @@ describe("navButtons", () => {
     expect(screen.getByLabelText("Navigate to about page")).toHaveAttribute(
       "href",
       "/about",
-    );
-    expect(screen.getByLabelText("View source code on GitHub")).toHaveAttribute(
-      "href",
-      "https://github.com/porteken/pet-app",
     );
   });
 

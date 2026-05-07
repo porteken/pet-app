@@ -158,7 +158,11 @@ describe("fetch-server", () => {
         rank: 1,
         state: "Arizona",
       });
-      expect(result[1].rank).toBe(2);
+      const secondResult = result[1];
+      if (!secondResult) {
+        throw new Error("Expected at least two results");
+      }
+      expect(secondResult.rank).toBe(2);
     });
 
     it("should throw error for invalid year", async () => {
@@ -208,8 +212,12 @@ describe("fetch-server", () => {
 
       const result = await FetchCityRankings(2024);
 
-      expect(result[0].FutureValueLower).toBeUndefined();
-      expect(result[0].FutureValueUpper).toBeUndefined();
+      const firstResult = result[0];
+      if (!firstResult) {
+        throw new Error("Expected at least one result");
+      }
+      expect(firstResult.FutureValueLower).toBeUndefined();
+      expect(firstResult.FutureValueUpper).toBeUndefined();
     });
 
     it("should handle rows with null change values", async () => {
@@ -221,7 +229,11 @@ describe("fetch-server", () => {
 
       const result = await FetchCityRankings(2024);
 
-      expect(result[0].changeFrom2000).toBeUndefined();
+      const firstResult = result[0];
+      if (!firstResult) {
+        throw new Error("Expected at least one result");
+      }
+      expect(firstResult.changeFrom2000).toBeUndefined();
     });
 
     it("should sort by avg_pet descending and assign ranks", async () => {
@@ -423,11 +435,18 @@ describe("fetch-server", () => {
       expect(result.locations).toStrictEqual(fallbackLocations);
     });
 
-    it("should ignore locations with non-positive ids", async () => {
+    it("should ignore locations with negative ids while keeping location zero", async () => {
       const mockLocations = [
         {
-          city: "Invalid City",
+          city: "New York",
           id: 0,
+          lat: 40.7128,
+          lng: -74.006,
+          state: "New York",
+        },
+        {
+          city: "Invalid City",
+          id: -1,
           lat: 0,
           lng: 0,
           state: "Nowhere",
@@ -461,6 +480,13 @@ describe("fetch-server", () => {
 
       expect(result.locations).toStrictEqual([
         {
+          city: "New York",
+          lat: 40.7128,
+          lng: -74.006,
+          location_id: 0,
+          state: "New York",
+        },
+        {
           city: "Boston",
           lat: 42.3601,
           lng: -71.0589,
@@ -479,6 +505,10 @@ describe("fetch-server", () => {
         {
           items: [{ key: 1, title: "Boston" }],
           title: "Massachusetts",
+        },
+        {
+          items: [{ key: 0, title: "New York" }],
+          title: "New York",
         },
         {
           items: [{ key: 3, title: "Austin" }],
@@ -528,10 +558,6 @@ describe("fetch-server", () => {
     it("should throw error for invalid location ID", async () => {
       mockValidation.validateLocationId.mockReturnValue(false);
 
-      await expect(FetchReferenceGraphData("2023", 0)).rejects.toThrow(
-        new DatabaseError("Invalid locationId: 0"),
-      );
-
       await expect(FetchReferenceGraphData("2023", -1)).rejects.toThrow(
         new DatabaseError("Invalid locationId: -1"),
       );
@@ -564,6 +590,8 @@ describe("fetch-server", () => {
 
       const mockQuery = {
         eq: mockFn().mockReturnThis(),
+        gte: mockFn().mockReturnThis(),
+        lt: mockFn().mockReturnThis(),
         order: mockFn().mockResolvedValue({ data: mockData, error: undefined }),
         select: mockFn().mockReturnThis(),
       };
@@ -572,9 +600,11 @@ describe("fetch-server", () => {
 
       const result = await FetchReferenceGraphData("2023", 5);
 
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year");
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet");
       expect(mockQuery.select).toHaveBeenCalled();
       expect(mockQuery.eq).toHaveBeenCalledWith("location_id", 5);
+      expect(mockQuery.gte).toHaveBeenCalledWith("date", "2023-01-01");
+      expect(mockQuery.lt).toHaveBeenCalledWith("date", "2024-01-01");
       expect(mockQuery.order).toHaveBeenCalledWith("date", { ascending: true });
 
       expect(result.pets).toStrictEqual([25.5, 26.2]);
@@ -588,6 +618,8 @@ describe("fetch-server", () => {
       const mockError = new Error("Database connection failed");
       const mockQuery = {
         eq: mockFn().mockReturnThis(),
+        gte: mockFn().mockReturnThis(),
+        lt: mockFn().mockReturnThis(),
         order: mockFn().mockResolvedValue({
           data: undefined,
           error: mockError,
@@ -626,7 +658,7 @@ describe("fetch-server", () => {
 
       const result = await FetchTrendGraphData("avg", 1);
 
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year_avg");
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year_stats");
       expect(mockQuery.select).toHaveBeenCalled();
       expect(mockQuery.eq).toHaveBeenCalledWith("location_id", 1);
       expect(mockQuery.eq).toHaveBeenCalledWith("season", "Annual");
@@ -641,9 +673,6 @@ describe("fetch-server", () => {
     it("should throw error for invalid location ID", async () => {
       mockValidation.validateLocationId.mockReturnValue(false);
 
-      await expect(FetchTrendGraphData("avg", 0)).rejects.toThrow(
-        new DatabaseError("Invalid locationId: 0"),
-      );
       await expect(FetchTrendGraphData("avg", -1)).rejects.toThrow(
         new DatabaseError("Invalid locationId: -1"),
       );
@@ -704,6 +733,49 @@ describe("fetch-server", () => {
       );
     });
 
+    it("should fall back to legacy trend data when the season column is unavailable", async () => {
+      const seasonColumnError = {
+        code: "PGRST204",
+        details: null,
+        hint: null,
+        message:
+          "Could not find the 'season' column of 'pet_year_stats' in the schema cache",
+      };
+      const primaryQuery = {
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({
+          data: undefined,
+          error: seasonColumnError,
+        }),
+        select: mockFn().mockReturnThis(),
+      };
+      const fallbackQuery = {
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({
+          data: [{ location_id: 1, pet: 25.5, year: 2020 }],
+          error: undefined,
+        }),
+        select: mockFn().mockReturnThis(),
+      };
+
+      mockSupabaseClient.from
+        .mockReturnValueOnce(primaryQuery)
+        .mockReturnValueOnce(fallbackQuery);
+      mockLinearRegression.predict.mockReturnValue(1438);
+
+      const result = await FetchTrendGraphData("avg", 1, "Winter");
+
+      expect(primaryQuery.eq).toHaveBeenNthCalledWith(1, "location_id", 1);
+      expect(primaryQuery.eq).toHaveBeenNthCalledWith(2, "season", "Winter");
+      expect(fallbackQuery.eq).toHaveBeenCalledWith("location_id", 1);
+      expect(fallbackQuery.eq).not.toHaveBeenCalledWith("season", "Winter");
+      expect(result).toMatchObject({
+        trendline_pets: [1438],
+        year_pets: [25.5],
+        years: [2020],
+      });
+    });
+
     it("should handle both avg and max options", async () => {
       const mockData = [{ location_id: 1, pet: 25.5, year: 2020 }];
       const mockQuery = {
@@ -718,13 +790,13 @@ describe("fetch-server", () => {
       await FetchTrendGraphData("avg", 1);
       expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(
         1,
-        "pet_year_avg",
+        "pet_year_stats",
       );
 
       await FetchTrendGraphData("max", 1);
       expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(
         2,
-        "pet_year_max",
+        "pet_year_stats",
       );
     });
   });

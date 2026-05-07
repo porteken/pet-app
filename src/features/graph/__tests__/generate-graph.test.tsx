@@ -1,14 +1,19 @@
-// eslint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom";
 
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { yAxisMock } = vi.hoisted(() => ({
-  yAxisMock: vi.fn<
-    ({ children }: { children?: React.ReactNode }) => React.ReactNode
-  >(({ children }) => <div data-testid="recharts-y-axis">{children}</div>),
+const { areaMock, lineMock, yAxisMock } = vi.hoisted(() => ({
+  areaMock: vi.fn<(props: Record<string, any>) => React.ReactNode>(
+    ({ children }) => <div data-testid="recharts-area">{children}</div>,
+  ),
+  lineMock: vi.fn<(props: Record<string, any>) => React.ReactNode>(
+    ({ children }) => <div data-testid="recharts-line">{children}</div>,
+  ),
+  yAxisMock: vi.fn<(props: Record<string, any>) => React.ReactNode>(
+    ({ children }) => <div data-testid="recharts-y-axis">{children}</div>,
+  ),
 }));
 
 vi.mock("recharts", async () => {
@@ -19,11 +24,11 @@ vi.mock("recharts", async () => {
     );
 
   return {
-    Area: createStub("recharts-area"),
+    Area: areaMock,
     CartesianGrid: createStub("recharts-grid"),
     ComposedChart: createStub("recharts-chart"),
     Legend: createStub("recharts-legend"),
-    Line: createStub("recharts-line"),
+    Line: lineMock,
     ResponsiveContainer: createStub("recharts-responsive-container"),
     Tooltip: createStub("recharts-tooltip"),
     XAxis: createStub("recharts-x-axis"),
@@ -75,6 +80,8 @@ const mockReferencePets2 = [18, 28];
 
 describe("graph Components", () => {
   beforeEach(() => {
+    areaMock.mockClear();
+    lineMock.mockClear();
     yAxisMock.mockClear();
   });
 
@@ -176,6 +183,42 @@ describe("graph Components", () => {
       expect(screen.getByText("Maximum Summer PET")).toBeInTheDocument();
       expect(screen.getAllByTestId("recharts-area")).toHaveLength(2);
     });
+
+    it("only animates the trend series on the initial mount", () => {
+      const { rerender } = render(
+        <GenerateTrendGraph
+          increasePerYear={0.5}
+          option="avg"
+          season="Annual"
+          trendlinePets={mockTrendlinePets1}
+          yearPets={mockYearPets1}
+          years={mockYears1}
+        />,
+      );
+
+      expect(
+        lineMock.mock.calls
+          .slice(-2)
+          .every(([props]) => props.isAnimationActive),
+      ).toBe(true);
+
+      rerender(
+        <GenerateTrendGraph
+          increasePerYear={0.75}
+          option="max"
+          season="Summer"
+          trendlinePets={mockTrendlinePets2}
+          yearPets={mockYearPets2}
+          years={mockYears1}
+        />,
+      );
+
+      expect(
+        lineMock.mock.calls
+          .slice(-2)
+          .every(([props]) => !props.isAnimationActive),
+      ).toBe(true);
+    });
   });
 
   describe("generateReferenceGraph", () => {
@@ -216,6 +259,30 @@ describe("graph Components", () => {
         screen.getByText("Annual PET in 2025 vs 2000"),
       ).toBeInTheDocument();
       expect(screen.getByTestId("reference-chart")).toBeInTheDocument();
+    });
+
+    it("uses clearer labels for the current and reference year series", () => {
+      render(
+        <GenerateReferenceGraph
+          currentPets={mockCurrentPets}
+          currentYear={2025}
+          dates={mockDates}
+          referencePets={mockReferencePets}
+          referenceYear="2000"
+          season="Annual"
+        />,
+      );
+
+      expect(
+        lineMock.mock.calls.some(
+          ([props]) => props.name === "Current year (2025)",
+        ),
+      ).toBe(true);
+      expect(
+        lineMock.mock.calls.some(
+          ([props]) => props.name === "Reference year (2000)",
+        ),
+      ).toBe(true);
     });
 
     it("renders the empty state when reference data is unavailable", () => {

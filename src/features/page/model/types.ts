@@ -4,6 +4,7 @@ import type { LocationOptionSection, LocationProperties } from "@/types/types";
 export interface PageProperties {
   CurrentDates: Date[];
   CurrentPets: number[];
+  IncreasePerYear: number;
   id: number;
   initialForecastEnabled: boolean;
   initialForecastYearsAhead: number;

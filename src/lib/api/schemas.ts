@@ -5,11 +5,11 @@ import { z, ZodError } from "zod";
 const finiteNumberSchema = z.coerce
   .number()
   .refine(Number.isFinite, "Expected a finite number");
-const positiveIntegerSchema = z.coerce.number().int().positive();
+const nonNegativeIntegerSchema = z.coerce.number().int().nonnegative();
 const yearSchema = z.coerce.number().int().min(MIN_YEAR).max(MAX_YEAR);
 
 const trendGraphRowSchema = z.object({
-  location_id: positiveIntegerSchema,
+  location_id: nonNegativeIntegerSchema,
   pet: finiteNumberSchema,
   year: yearSchema,
 });
@@ -19,13 +19,13 @@ const referenceGraphRowSchema = z.object({
     .string()
     .min(1)
     .refine((value) => !Number.isNaN(Date.parse(value)), "Invalid date format"),
-  location_id: positiveIntegerSchema,
+  location_id: nonNegativeIntegerSchema,
   pet: finiteNumberSchema,
   year: z.coerce.string().optional(),
 });
 
 const forecastRowSchema = z.object({
-  location_id: positiveIntegerSchema.optional(),
+  location_id: nonNegativeIntegerSchema.optional(),
   lower: finiteNumberSchema,
   pet: finiteNumberSchema,
   upper: finiteNumberSchema,
@@ -40,7 +40,7 @@ const locationRowSchema = z.object({
   city: z.string().min(1),
   lat: finiteNumberSchema,
   lng: finiteNumberSchema,
-  location_id: positiveIntegerSchema,
+  location_id: nonNegativeIntegerSchema,
   state: z.string().min(1),
 });
 
@@ -50,7 +50,7 @@ const rankingViewRowSchema = z.object({
   city: z.string().min(1),
   future_lower: finiteNumberSchema.nullable(),
   future_upper: finiteNumberSchema.nullable(),
-  location_id: positiveIntegerSchema,
+  location_id: nonNegativeIntegerSchema,
   max_pet: finiteNumberSchema.nullable(),
   p10: finiteNumberSchema.nullable(),
   p90: finiteNumberSchema.nullable(),

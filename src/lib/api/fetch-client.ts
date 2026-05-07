@@ -23,6 +23,116 @@ import { apiRequest, hasError } from "./api-client";
 import type { TrendGraphDataProperties } from "@/types/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+interface ForecastQueryWindow {
+  lastHistoricalYear: number;
+  targetYear: number;
+}
+
+function isMissingSeasonColumnError(
+  error: unknown,
+  relationName: string,
+): boolean {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const code = "code" in error ? error.code : undefined;
+  const message = "message" in error ? error.message : undefined;
+
+  if (typeof message !== "string") {
+    return false;
+  }
+
+  return (
+    (code === "42703" &&
+      message.includes(`column ${relationName}.season does not exist`)) ||
+    (code === "PGRST204" &&
+      message.includes("'season'") &&
+      message.includes(`'${relationName}'`))
+  );
+}
+
+async function fetchHistoricalYear(
+  supabase: SupabaseClient,
+  locationId: number,
+  season: GraphSeason,
+) {
+  const primaryQuery = await supabase
+    .from("pet_year_stats")
+    .select("year")
+    .eq("location_id", locationId)
+    .eq("season", season)
+    .order("year", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!isMissingSeasonColumnError(primaryQuery.error, "pet_year_stats")) {
+    return primaryQuery;
+  }
+
+  return supabase
+    .from("pet_year_stats")
+    .select("year")
+    .eq("location_id", locationId)
+    .order("year", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+}
+
+async function fetchForecastRows(
+  supabase: SupabaseClient,
+  locationId: number,
+  season: GraphSeason,
+  queryWindow: ForecastQueryWindow,
+) {
+  const primaryQuery = await supabase
+    .from("pet_forecast")
+    .select("year, pet, lower, upper")
+    .eq("location_id", locationId)
+    .eq("season", season)
+    .gt("year", queryWindow.lastHistoricalYear)
+    .lte("year", queryWindow.targetYear)
+    .order("year", { ascending: true });
+
+  if (!isMissingSeasonColumnError(primaryQuery.error, "pet_forecast")) {
+    return primaryQuery;
+  }
+
+  return supabase
+    .from("pet_forecast")
+    .select("year, pet, lower, upper")
+    .eq("location_id", locationId)
+    .gt("year", queryWindow.lastHistoricalYear)
+    .lte("year", queryWindow.targetYear)
+    .order("year", { ascending: true });
+}
+
+async function fetchTrendRows(
+  supabase: SupabaseClient,
+  locationId: number,
+  season: GraphSeason,
+  option: string,
+) {
+  const columns = `year, pet:${option}_pet, location_id`;
+
+  const primaryQuery = await supabase
+    .from("pet_year_stats")
+    .select(columns)
+    .eq("location_id", locationId)
+    .eq("season", season)
+    .order("year", { ascending: true });
+
+  if (!isMissingSeasonColumnError(primaryQuery.error, "pet_year_stats")) {
+    return primaryQuery;
+  }
+
+  return supabase
+    .from("pet_year_stats")
+    .select(columns)
+    .eq("location_id", locationId)
+    .order("year", { ascending: true });
+}
+
 export async function FetchForecastData(
   locationId: number,
   yearsAhead: number,
@@ -51,14 +161,8 @@ export async function FetchForecastData(
   const response = await apiRequest(async () => {
     const supabase = createClient();
 
-    const { data: historicalData, error: historicalError } = await supabase
-      .from("pet_year_avg")
-      .select("year")
-      .eq("location_id", locationId)
-      .eq("season", resolvedSeason)
-      .order("year", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { data: historicalData, error: historicalError } =
+      await fetchHistoricalYear(supabase, locationId, resolvedSeason);
 
     if (historicalError) {
       throw new FetchError(
@@ -81,17 +185,19 @@ export async function FetchForecastData(
       return undefined;
     }
 
-    const lastHistoricalYear = validatedHistoricalData[0].year;
+    const firstHistorical = validatedHistoricalData[0];
+    if (!firstHistorical) {
+      return undefined;
+    }
+    const lastHistoricalYear = firstHistorical.year;
     const targetYear = lastHistoricalYear + yearsAhead;
 
-    const { data, error } = await supabase
-      .from("pet_forecast")
-      .select("year, pet, lower, upper")
-      .eq("location_id", locationId)
-      .eq("season", resolvedSeason)
-      .gt("year", lastHistoricalYear)
-      .lte("year", targetYear)
-      .order("year", { ascending: true });
+    const { data, error } = await fetchForecastRows(
+      supabase,
+      locationId,
+      resolvedSeason,
+      { lastHistoricalYear, targetYear },
+    );
 
     if (error) {
       throw new FetchError("Database error fetching forecast data", error);
@@ -151,13 +257,11 @@ export async function FetchTrendGraphData(
 
   const response = await apiRequest(async () => {
     const supabase = createClient();
-    const tableName = option === "avg" ? "pet_year_avg" : "pet_year_max";
-
     const data = await fetchTrendData(
       supabase,
-      tableName,
       locationId,
       resolvedSeason,
+      option,
     );
     return mapTrendRowsToGraphData(data);
   });
@@ -179,9 +283,9 @@ export { FetchReferenceGraphData } from "./reference-graph-data";
 
 async function fetchTrendData(
   supabase: SupabaseClient,
-  tableName: string,
   locationId: number,
   season: GraphSeason,
+  option: string,
 ): Promise<
   Array<{
     location_id: number;
@@ -189,12 +293,12 @@ async function fetchTrendData(
     year: number;
   }>
 > {
-  const { data, error } = await supabase
-    .from(tableName)
-    .select("year, pet, location_id")
-    .eq("location_id", locationId)
-    .eq("season", season)
-    .order("year", { ascending: true });
+  const { data, error } = await fetchTrendRows(
+    supabase,
+    locationId,
+    season,
+    option,
+  );
 
   if (error) {
     throw new FetchError("Database error fetching trend data", error);

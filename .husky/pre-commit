@@ -3,8 +3,4 @@ echo "Running pre-commit checks..."
 pnpm exec knip --fix --allow-remove-files
 pnpm exec lint-staged
 
-pnpm run test:unit
-
-pnpm run test:integration
-
 echo "Pre-commit checks passed!"

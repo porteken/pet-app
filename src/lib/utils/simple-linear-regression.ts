@@ -5,7 +5,7 @@ const T_VALUE_MAP: Record<number, number> = {
   0.99: 2.576,
 };
 const DEFAULT_CONFIDENCE_LEVEL = 0.8;
-const DEFAULT_T_VALUE = T_VALUE_MAP[DEFAULT_CONFIDENCE_LEVEL];
+const DEFAULT_T_VALUE = T_VALUE_MAP[DEFAULT_CONFIDENCE_LEVEL] ?? 1.282;
 
 export class SimpleLinearRegression {
   public readonly slope: number;
@@ -57,7 +57,7 @@ export class SimpleLinearRegression {
 
     const tValue = T_VALUE_MAP[confidenceLevel] ?? DEFAULT_T_VALUE;
 
-    const margin = tValue * predictionError;
+    const margin = (tValue ?? DEFAULT_T_VALUE) * predictionError;
 
     return {
       lowerBound: prediction - margin,
@@ -74,10 +74,14 @@ export class SimpleLinearRegression {
     let xY = 0;
 
     for (let index = 0; index < n; index++) {
-      xSum += x[index];
-      ySum += y[index];
-      xSquared += x[index] * x[index];
-      xY += x[index] * y[index];
+      const xv = x[index];
+      const yv = y[index];
+      if (xv !== undefined && yv !== undefined) {
+        xSum += xv;
+        ySum += yv;
+        xSquared += xv * xv;
+        xY += xv * yv;
+      }
     }
 
     const numerator = n * xY - xSum * ySum;
@@ -97,9 +101,13 @@ export class SimpleLinearRegression {
 
     let sumSquaredResiduals = 0;
     for (let index = 0; index < n; index++) {
-      const predicted = this.slope * x[index] + this.intercept;
-      const residual = y[index] - predicted;
-      sumSquaredResiduals += residual * residual;
+      const xv = x[index];
+      const yv = y[index];
+      if (xv !== undefined && yv !== undefined) {
+        const predicted = this.slope * xv + this.intercept;
+        const residual = yv - predicted;
+        sumSquaredResiduals += residual * residual;
+      }
     }
 
     return Math.sqrt(sumSquaredResiduals / (n - 2));

@@ -128,6 +128,7 @@ interface ReferenceChartBodyProperties {
 const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
   month: "short",
+  timeZone: "UTC",
 });
 
 const PET_FORMATTER = new Intl.NumberFormat("en-US", {
@@ -171,7 +172,7 @@ const getActiveDotStyle = (color: string) => ({
 
 const TREND_ACTIVE_DOT = getActiveDotStyle(GRAPH_COLORS.primary);
 const REF_CURRENT_ACTIVE_DOT = getActiveDotStyle(GRAPH_COLORS.primary);
-const REF_REFERENCE_ACTIVE_DOT = getActiveDotStyle(GRAPH_COLORS.reference);
+const REF_REFERENCE_ACTIVE_DOT = getActiveDotStyle(GRAPH_COLORS.secondary);
 
 const formatYAxisTick = (value: number) => `${value.toFixed(0)}°`;
 const formatLegendLabel = (value: string) => (
@@ -197,6 +198,17 @@ const shouldAnimateCharts = (): boolean => {
   }
 
   return !globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+};
+
+const useInitialChartAnimation = (): boolean => {
+  const animationsAllowed = React.useMemo(() => shouldAnimateCharts(), []);
+  const hasRenderedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    hasRenderedRef.current = true;
+  }, []);
+
+  return animationsAllowed && !hasRenderedRef.current;
 };
 
 const buildReferenceChartData = (
@@ -384,7 +396,7 @@ const ChartTooltip = ({
     return null;
   }
 
-  const point = payload[0]?.payload as Partial<
+  const point = (payload[0]?.payload ?? {}) as Partial<
     ReferenceChartPoint & TrendChartPoint
   >;
   const visiblePayload = payload.filter(
@@ -543,7 +555,12 @@ const TrendChartBody = ({
       data-testid="trend-chart"
       role="img"
     >
-      <ResponsiveContainer height="100%" width="100%">
+      <ResponsiveContainer
+        height="100%"
+        minHeight={0}
+        minWidth={0}
+        width="100%"
+      >
         <ComposedChart data={chartData} margin={chartMargin}>
           <CartesianGrid
             stroke={GRAPH_COLORS.grid}
@@ -647,7 +664,12 @@ const ReferenceChartBody = ({
       data-testid="reference-chart"
       role="img"
     >
-      <ResponsiveContainer height="100%" width="100%">
+      <ResponsiveContainer
+        height="100%"
+        minHeight={0}
+        minWidth={0}
+        width="100%"
+      >
         <ComposedChart data={chartData} margin={chartMargin}>
           <CartesianGrid
             stroke={GRAPH_COLORS.grid}
@@ -684,21 +706,21 @@ const ReferenceChartBody = ({
             dataKey="currentPet"
             dot={false}
             isAnimationActive={shouldAnimate}
-            name={`${currentYear} PET`}
+            name={`Current year (${currentYear})`}
             stroke={GRAPH_COLORS.primary}
-            strokeWidth={2.5}
-            type="monotone"
+            strokeWidth={3}
+            type="linear"
           />
           <Line
             activeDot={REF_REFERENCE_ACTIVE_DOT}
             dataKey="referencePet"
             dot={false}
             isAnimationActive={shouldAnimate}
-            name={`${referenceYear} PET`}
-            stroke={GRAPH_COLORS.reference}
-            strokeDasharray="8 5"
+            name={`Reference year (${referenceYear})`}
+            stroke={GRAPH_COLORS.secondary}
+            strokeDasharray="12 7"
             strokeWidth={2.5}
-            type="monotone"
+            type="linear"
           />
         </ComposedChart>
       </ResponsiveContainer>
@@ -718,6 +740,8 @@ export const GenerateTrendGraph = ({
   yearPets,
   years,
 }: GenerateTrendGraphOptions): React.ReactElement => {
+  const shouldAnimate = useInitialChartAnimation();
+
   if (!hasTrendGraphData(years, yearPets, trendlinePets)) {
     return (
       <ChartShell
@@ -740,7 +764,6 @@ export const GenerateTrendGraph = ({
   const startYear = years.at(0) ?? GRAPH_CONFIG.YEAR_RANGE.START;
   const endYear = years.at(-1) ?? GRAPH_CONFIG.YEAR_RANGE.END;
   const increaseText = formatIncreasePerYearText(increasePerYear);
-  const shouldAnimate = shouldAnimateCharts();
 
   return (
     <ChartShell
@@ -772,6 +795,8 @@ export const GenerateReferenceGraph = ({
   season = DEFAULT_GRAPH_SEASON,
   showLegend = true,
 }: GenerateReferenceGraphOptions): React.ReactElement => {
+  const shouldAnimate = useInitialChartAnimation();
+
   if (!hasReferenceGraphData(dates, currentPets, referencePets)) {
     return (
       <ChartShell
@@ -783,12 +808,10 @@ export const GenerateReferenceGraph = ({
   }
 
   const chartData = buildReferenceChartData(dates, currentPets, referencePets);
-  const shouldAnimate = shouldAnimateCharts();
 
   return (
     <ChartShell
       emptyState="No data available for the selected parameters."
-      subtitle="Daily physiological equivalent temperature comparison."
       title={`${season} PET in ${currentYear} vs ${referenceYear}`}
     >
       <ReferenceChartBody

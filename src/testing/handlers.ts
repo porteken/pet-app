@@ -2,7 +2,6 @@ import {
   getRuntimeMockTableRows,
   type Primitive,
 } from "@/testing/runtime-mocks";
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { http, HttpResponse } from "msw";
 
 type FilterOperator = "eq" | "gt" | "gte" | "lt" | "lte";
@@ -41,7 +40,16 @@ const matchesFilter = (
   const numericRowValue = toNumber(rowValue);
   const numericFilterValue = toNumber(filterValue);
   if (numericRowValue === undefined || numericFilterValue === undefined) {
-    return false;
+    if (operator === "gt") {
+      return String(rowValue) > filterValue;
+    }
+    if (operator === "gte") {
+      return String(rowValue) >= filterValue;
+    }
+    if (operator === "lt") {
+      return String(rowValue) < filterValue;
+    }
+    return String(rowValue) <= filterValue;
   }
 
   if (operator === "gt") {
@@ -143,7 +151,15 @@ const applyColumnSelection = (rows: MockRow[], requestUrl: URL) => {
     .filter(Boolean);
 
   return rows.map((row) =>
-    Object.fromEntries(columns.map((column) => [column, row[column]])),
+    Object.fromEntries(
+      columns.map((column) => {
+        const parts = column.split(":");
+        if (parts.length === 2 && parts[0] && parts[1]) {
+          return [parts[0], row[parts[1]]];
+        }
+        return [column, row[column]];
+      }),
+    ),
   );
 };
 

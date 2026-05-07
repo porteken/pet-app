@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { server } from "@/testing/server";
 import {
   afterAll,

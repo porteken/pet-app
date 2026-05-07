@@ -131,7 +131,7 @@ describe("loadLocationPageData", () => {
     });
   });
 
-  it("returns a database error when graph data fetching fails", async () => {
+  it("returns the page with empty trend data when trend graph fetching fails", async () => {
     mockFetchLocations.mockResolvedValue({
       LocationOptions: [],
       locations: [
@@ -144,14 +144,93 @@ describe("loadLocationPageData", () => {
         },
       ],
     });
+    mockFetchReferenceGraphData
+      .mockResolvedValueOnce({
+        dates: [new Date("2024-01-01")],
+        pets: [31],
+      })
+      .mockResolvedValueOnce({
+        dates: [new Date("2024-01-01")],
+        pets: [25],
+      });
     mockFetchTrendGraphData.mockRejectedValue(new Error("graph failed"));
 
     await expect(loadLocationPageData("7")).resolves.toStrictEqual({
       payload: {
-        message: "Unable to connect to the database. Please try again later.",
-        title: "Database Connection Error",
+        CurrentDates: [new Date("2024-01-01")],
+        CurrentPets: [31],
+        IncreasePerYear: 0,
+        ReferencePets: [25],
+        TrendlinePets: [],
+        YearPets: [],
+        Years: [],
+        id: 7,
+        initialForecastEnabled: DEFAULT_FORECAST_ENABLED,
+        initialForecastYearsAhead: DEFAULT_FORECAST_YEARS_AHEAD,
+        initialGraphMeasure: DEFAULT_GRAPH_MEASURE,
+        initialGraphSeason: DEFAULT_GRAPH_SEASON,
+        initialReferenceYear: DEFAULT_REFERENCE_YEAR,
+        location: {
+          city: "Boston",
+          lat: 42.3601,
+          lng: -71.0589,
+          location_id: 7,
+          state: "Massachusetts",
+        },
+        LocationOptions: [],
       },
-      status: "database-error",
+      status: "success",
+    });
+  });
+
+  it("returns the page with empty reference data when reference graph fetching fails", async () => {
+    mockFetchLocations.mockResolvedValue({
+      LocationOptions: [],
+      locations: [
+        {
+          city: "Boston",
+          lat: 42.3601,
+          lng: -71.0589,
+          location_id: 7,
+          state: "Massachusetts",
+        },
+      ],
+    });
+    mockFetchTrendGraphData.mockResolvedValue({
+      increase_per_year: 0.5,
+      trendline_pets: [28, 29],
+      year_pets: [27, 28],
+      years: [2023, 2024],
+    });
+    mockFetchReferenceGraphData.mockRejectedValue(
+      new Error("reference failed"),
+    );
+
+    await expect(loadLocationPageData("7")).resolves.toStrictEqual({
+      payload: {
+        CurrentDates: [],
+        CurrentPets: [],
+        IncreasePerYear: 0.5,
+        ReferencePets: [],
+        TrendlinePets: [28, 29],
+        YearPets: [27, 28],
+        Years: [2023, 2024],
+        id: 7,
+        initialForecastEnabled: DEFAULT_FORECAST_ENABLED,
+        initialForecastYearsAhead: DEFAULT_FORECAST_YEARS_AHEAD,
+        initialGraphMeasure: DEFAULT_GRAPH_MEASURE,
+        initialGraphSeason: DEFAULT_GRAPH_SEASON,
+        initialReferenceYear: DEFAULT_REFERENCE_YEAR,
+        location: {
+          city: "Boston",
+          lat: 42.3601,
+          lng: -71.0589,
+          location_id: 7,
+          state: "Massachusetts",
+        },
+        LocationOptions: [],
+      },
+      status: "success",
     });
   });
 
@@ -185,6 +264,7 @@ describe("loadLocationPageData", () => {
       locations: [location],
     });
     mockFetchTrendGraphData.mockResolvedValue({
+      increase_per_year: 0.5,
       trendline_pets: [28, 29],
       year_pets: [27, 28],
       years: [2023, 2024],
@@ -203,6 +283,7 @@ describe("loadLocationPageData", () => {
       payload: {
         CurrentDates: currentDates,
         CurrentPets: [31, 32],
+        IncreasePerYear: 0.5,
         id: 7,
         initialForecastEnabled: true,
         initialForecastYearsAhead: 25,
@@ -219,7 +300,7 @@ describe("loadLocationPageData", () => {
       status: "success",
     });
 
-    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("avg", 7, "Winter");
+    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("max", 7, "Winter");
     expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
       1,
       "2025",
@@ -230,6 +311,65 @@ describe("loadLocationPageData", () => {
       2,
       "2010",
       7,
+      "Annual",
+    );
+  });
+
+  it("returns the assembled page data for location id zero when present", async () => {
+    const locationOptions = [
+      {
+        items: [{ key: 0, title: "New York" }],
+        title: "New York",
+      },
+    ];
+    const location = {
+      city: "New York",
+      lat: 40.7128,
+      lng: -74.006,
+      location_id: 0,
+      state: "New York",
+    };
+
+    mockFetchLocations.mockResolvedValue({
+      LocationOptions: locationOptions,
+      locations: [location],
+    });
+    mockFetchTrendGraphData.mockResolvedValue({
+      increase_per_year: 0.5,
+      trendline_pets: [28, 29],
+      year_pets: [27, 28],
+      years: [2023, 2024],
+    });
+    mockFetchReferenceGraphData
+      .mockResolvedValueOnce({
+        dates: [new Date("2024-01-01")],
+        pets: [31],
+      })
+      .mockResolvedValueOnce({
+        dates: [new Date("2024-01-01")],
+        pets: [25],
+      });
+
+    await expect(loadLocationPageData("0")).resolves.toStrictEqual({
+      payload: expect.objectContaining({
+        CurrentPets: [31],
+        IncreasePerYear: 0.5,
+        LocationOptions: locationOptions,
+        ReferencePets: [25],
+        TrendlinePets: [28, 29],
+        YearPets: [27, 28],
+        Years: [2023, 2024],
+        id: 0,
+        location,
+      }),
+      status: "success",
+    });
+
+    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("avg", 0, "Annual");
+    expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
+      1,
+      "2025",
+      0,
       "Annual",
     );
   });
@@ -272,6 +412,7 @@ describe("loadLocationPageData", () => {
 
     expect(result).toStrictEqual({
       payload: expect.objectContaining({
+        IncreasePerYear: 0,
         initialForecastEnabled: DEFAULT_FORECAST_ENABLED,
         initialForecastYearsAhead: DEFAULT_FORECAST_YEARS_AHEAD,
         initialGraphMeasure: DEFAULT_GRAPH_MEASURE,

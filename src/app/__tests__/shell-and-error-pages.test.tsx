@@ -58,10 +58,11 @@ describe("app shell and error pages", () => {
   it("renders the not found page", () => {
     render(<NotFound />);
 
-    expect(screen.getByText("404 - Not Found")).toBeInTheDocument();
-    expect(
-      screen.getByText("The page you are looking for does not exist."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Page not found")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Back to home" })).toHaveAttribute(
+      "href",
+      "/",
+    );
   });
 
   it("renders the root layout metadata and children", () => {

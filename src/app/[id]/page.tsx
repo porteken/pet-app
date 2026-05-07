@@ -1,7 +1,7 @@
 import { DatabaseError } from "@/components/app/database-error";
 import Page from "@/features/page";
-import { InvalidLocationError } from "@/features/page/components/invalid-location-error";
 import { loadLocationPageData } from "@/features/page/server/location-page-data";
+import { notFound } from "next/navigation";
 
 export default async function LocationPage({
   params,
@@ -21,12 +21,7 @@ export default async function LocationPage({
   }
 
   if (result.status === "invalid-location") {
-    return (
-      <InvalidLocationError
-        message={result.payload.message}
-        title={result.payload.title}
-      />
-    );
+    notFound();
   }
 
   return <Page {...result.payload} />;

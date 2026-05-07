@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 "use client";
 
 import { HeaderBar } from "@/features/header-bar";
@@ -94,7 +93,7 @@ const Home: FC<MapProperties> = ({
     () =>
       SeasonOptions.map((option) => ({
         label: option.label,
-        value: option.key as GraphSeason,
+        value: normalizeGraphSeason(option.key),
       })),
     [],
   );

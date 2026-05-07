@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { LocationErrorHandler } from "@/components/app/error-handlers";
 import Home from "@/features/home";
 import {
@@ -33,7 +32,9 @@ const HomePage = async () => {
       />
     );
   } catch (error) {
-    return <LocationErrorHandler error={error as Error} />;
+    const errorObject =
+      error instanceof Error ? error : new Error(String(error));
+    return <LocationErrorHandler error={errorObject} />;
   }
 };
 

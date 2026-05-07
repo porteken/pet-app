@@ -56,8 +56,7 @@ describe("aPI Integration Tests", () => {
 
       vi.mocked(FetchTrendGraphData).mockImplementation(
         (_option, locationId) => {
-          // eslint-disable-next-line vitest/no-conditional-in-test
-          if (locationId <= 0) {
+          if (locationId < 0) {
             return Promise.reject(new Error("Invalid location ID"));
           }
           return Promise.resolve({

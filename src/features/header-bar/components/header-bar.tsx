@@ -95,10 +95,9 @@ const HeaderBarComponent = ({
 
     const grouped: Record<string, LocationItem[]> = {};
     for (const city of allCities) {
-      if (!grouped[city.state]) {
-        grouped[city.state] = [];
-      }
-      grouped[city.state].push(city);
+      const group = grouped[city.state] ?? [];
+      group.push(city);
+      grouped[city.state] = group;
     }
 
     const sortedStates = Object.keys(grouped).toSorted((a, b) =>
@@ -106,12 +105,14 @@ const HeaderBarComponent = ({
     );
     return sortedStates.map((state) => ({
       group: state,
-      items: grouped[state].toSorted((a, b) => a.title.localeCompare(b.title)),
+      items: (grouped[state] ?? []).toSorted((a, b) =>
+        a.title.localeCompare(b.title),
+      ),
     }));
   }, [LocationOptions]);
 
   const currentCity = useMemo(() => {
-    if (!id) {
+    if (id === undefined) {
       return undefined;
     }
     return groupedCities

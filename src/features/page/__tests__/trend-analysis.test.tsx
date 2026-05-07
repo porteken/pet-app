@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom";
 
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -111,10 +110,13 @@ const defaultProps: React.ComponentProps<typeof TrendAnalysis> = {
   initialForecastEnabled: false,
   initialForecastYearsAhead: 10,
   initialGraphMeasure: "avg",
+  initialGraphSeason: "Annual",
   onMeasureChange: mockFn().mockResolvedValue(Promise.resolve()),
   onSeasonChange: mockFn().mockResolvedValue(Promise.resolve()),
-  referenceYear: "2000",
 };
+const initialTrendlinePets = [20, 22, 24, 26];
+const initialYearPets = [20, 22, 24, 26];
+const initialYears = [2020, 2021, 2022, 2023];
 
 const waitForInitialTrendAnalysisRender = async () => {
   await waitFor(() => {
@@ -194,12 +196,39 @@ describe("trendAnalysis", () => {
       );
     });
 
-    it("should call FetchTrendGraphData on mount", async () => {
+    it("should call FetchTrendGraphData on mount when no initial trend snapshot is provided", async () => {
       render(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1, "Annual");
       });
+    });
+
+    it("should use the initial trend snapshot without refetching on mount", async () => {
+      render(
+        <TrendAnalysis
+          {...defaultProps}
+          initialIncreasePerYear={0.5}
+          initialTrendlinePets={initialTrendlinePets}
+          initialYearPets={initialYearPets}
+          initialYears={initialYears}
+        />,
+      );
+
+      await waitFor(() => {
+        expect(GenerateTrendGraph).toHaveBeenCalledWith(
+          expect.objectContaining({
+            increasePerYear: 0.5,
+            option: "avg",
+            trendlinePets: [20, 22, 24, 26],
+            yearPets: [20, 22, 24, 26],
+            years: [2020, 2021, 2022, 2023],
+          }),
+          undefined,
+        );
+      });
+
+      expect(FetchTrendGraphData).not.toHaveBeenCalled();
     });
 
     it("should call GenerateTrendGraph with fetched data", async () => {
@@ -220,27 +249,6 @@ describe("trendAnalysis", () => {
           undefined,
         );
       });
-    });
-
-    it("should refresh trend graph data when reference year changes", async () => {
-      const { rerender } = render(<TrendAnalysis {...defaultProps} />);
-
-      await waitForInitialTrendAnalysisRender();
-
-      rerender(<TrendAnalysis {...defaultProps} referenceYear="2022" />);
-
-      await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
-          expect.objectContaining({
-            trendlinePets: [20, 22, 24, 26],
-            yearPets: [20, 22, 24, 26],
-            years: [2020, 2021, 2022, 2023],
-          }),
-          undefined,
-        );
-      });
-
-      expect(FetchTrendGraphData).toHaveBeenCalledTimes(2);
     });
 
     it("should keep mobile graph legend collapsed by default and toggle open", async () => {
@@ -427,6 +435,91 @@ describe("trendAnalysis", () => {
         expect(
           screen.queryByTestId("forecast-controls"),
         ).not.toBeInTheDocument();
+      });
+    });
+
+    it("should ignore stale graph responses when measure changes quickly", async () => {
+      let resolveMaxRequest:
+        | ((value: {
+            increase_per_year: number;
+            trendline_pets: number[];
+            year_pets: number[];
+            years: number[];
+          }) => void)
+        | undefined;
+      let resolveAvgRequest:
+        | ((value: {
+            increase_per_year: number;
+            trendline_pets: number[];
+            year_pets: number[];
+            years: number[];
+          }) => void)
+        | undefined;
+
+      vi.mocked(FetchTrendGraphData)
+        .mockResolvedValueOnce({
+          increase_per_year: 0.5,
+          trendline_pets: [20, 22, 24, 26],
+          year_pets: [20, 22, 24, 26],
+          years: [2020, 2021, 2022, 2023],
+        })
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveMaxRequest = resolve;
+            }),
+        )
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveAvgRequest = resolve;
+            }),
+        );
+
+      render(<TrendAnalysis {...defaultProps} />);
+
+      await waitForInitialTrendAnalysisRender();
+
+      const select = screen.getByLabelText("Graph Measure");
+      fireEvent.change(select, { target: { value: "max" } });
+      fireEvent.change(select, { target: { value: "avg" } });
+
+      resolveAvgRequest?.({
+        increase_per_year: 0.2,
+        trendline_pets: [11, 12, 13, 14],
+        year_pets: [10, 11, 12, 13],
+        years: [2020, 2021, 2022, 2023],
+      });
+
+      await waitFor(() => {
+        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            increasePerYear: 0.2,
+            option: "avg",
+            trendlinePets: [11, 12, 13, 14],
+            yearPets: [10, 11, 12, 13],
+          }),
+          undefined,
+        );
+      });
+
+      resolveMaxRequest?.({
+        increase_per_year: 1.1,
+        trendline_pets: [50, 51, 52, 53],
+        year_pets: [49, 50, 51, 52],
+        years: [2020, 2021, 2022, 2023],
+      });
+
+      await waitFor(() => {
+        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            increasePerYear: 0.2,
+            option: "avg",
+            trendlinePets: [11, 12, 13, 14],
+            yearPets: [10, 11, 12, 13],
+          }),
+          undefined,
+        );
       });
     });
   });

@@ -3,6 +3,7 @@
 import { PageLoader } from "@/components/app/page-loader";
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
+import { useTheme } from "next-themes";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import { OptimizedMarker } from "./optimized-marker";
@@ -11,12 +12,19 @@ import type { Icon } from "leaflet";
 import type { ComponentType, CSSProperties, ReactNode } from "react";
 const MAP_CENTER_LAT = 39.5;
 const MAP_CENTER_LNG = -98.35;
-const ICON_SIZE_WIDTH = 36;
-const ICON_SIZE_HEIGHT = 52;
-const ICON_ANCHOR_X = 18;
-const ICON_ANCHOR_Y = 52;
+const ICON_SIZE_WIDTH = 30;
+const ICON_SIZE_HEIGHT = 42;
+const ICON_ANCHOR_X = 15;
+const ICON_ANCHOR_Y = 42;
 const POPUP_ANCHOR_X = 0;
-const POPUP_ANCHOR_Y = -46;
+const POPUP_ANCHOR_Y = -36;
+const LIGHT_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+const LIGHT_TILE_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+const DARK_TILE_URL =
+  "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+const DARK_TILE_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
 interface Location {
   city: string;
@@ -98,6 +106,7 @@ export const MapComponent = memo<MapComponentProperties>(
     selectedGraphMeasure,
     selectedGraphSeason = DEFAULT_GRAPH_SEASON,
   }) => {
+    const { resolvedTheme } = useTheme();
     const [mapContainer, setMapContainer] = useState<MapContainerType>();
     const [tileLayer, setTileLayer] = useState<TileLayerType>();
     const [marker, setMarker] = useState<MarkerType>();
@@ -109,7 +118,7 @@ export const MapComponent = memo<MapComponentProperties>(
       const reactLeaflet = await import("react-leaflet");
 
       const L = await import("leaflet");
-      const markerSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="52" viewBox="0 0 28 40" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 11.2 14 26 14 26s14-14.8 14-26C28 6.268 21.732 0 14 0z" fill="#2563EB"/><circle cx="14" cy="14" r="5" fill="white"/></svg>`;
+      const markerSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${ICON_SIZE_WIDTH}" height="${ICON_SIZE_HEIGHT}" viewBox="0 0 28 40" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 11.2 14 26 14 26s14-14.8 14-26C28 6.268 21.732 0 14 0z" fill="#2563EB"/><circle cx="14" cy="14" r="5" fill="white"/></svg>`;
       const markerUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(markerSvg)}`;
 
       const createdCustomIcon = L.icon({
@@ -217,6 +226,11 @@ export const MapComponent = memo<MapComponentProperties>(
 
     const MapContainer = mapContainer;
     const TileLayer = tileLayer;
+    const isDarkTheme = resolvedTheme === "dark";
+    const tileUrl = isDarkTheme ? DARK_TILE_URL : LIGHT_TILE_URL;
+    const tileAttribution = isDarkTheme
+      ? DARK_TILE_ATTRIBUTION
+      : LIGHT_TILE_ATTRIBUTION;
 
     return (
       <div className="relative size-full">
@@ -227,8 +241,9 @@ export const MapComponent = memo<MapComponentProperties>(
           zoom={5}
         >
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution={tileAttribution}
+            key={tileUrl}
+            url={tileUrl}
           />
           {markers}
         </MapContainer>

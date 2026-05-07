@@ -20,14 +20,19 @@ export class AppError extends Error {
   public readonly originalError?: unknown;
   public readonly context?: ErrorContext;
 
+  public readonly code: string;
+  public readonly statusCode: number;
+
   constructor(
     message: string,
-    public readonly code: string,
-    public readonly statusCode = HTTP_INTERNAL_ERROR,
+    code: string,
+    statusCode = HTTP_INTERNAL_ERROR,
     options?: AppErrorOptions,
   ) {
     super(message);
     this.name = "AppError";
+    this.code = code;
+    this.statusCode = statusCode;
     this.originalError = options?.originalError;
     this.context = options?.context;
 

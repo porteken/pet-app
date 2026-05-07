@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
-// eslint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom";
 
 import { fireEvent, render, screen } from "@testing-library/react";
@@ -16,8 +14,8 @@ const mockToString = mockFn().mockReturnValue("");
 const mockLocationOptions = [
   {
     items: [
-      { key: 1, title: "New York" },
-      { key: 2, title: "Los Angeles" },
+      { key: 0, title: "New York" },
+      { key: 1, title: "Los Angeles" },
     ],
     title: "Test States",
   },
@@ -199,7 +197,7 @@ describe("headerBar", () => {
       fireEvent.focus(selector);
       fireEvent.click(screen.getByText("New York"));
 
-      expect(mockPush).toHaveBeenCalledWith("/1");
+      expect(mockPush).toHaveBeenCalledWith("/0");
     });
 
     it("should allow searching by state in the city autocomplete", () => {
@@ -229,6 +227,15 @@ describe("headerBar", () => {
 
       render(<HeaderBar id={-1} LocationOptions={mockLocationOptions} />);
       expect(screen.getAllByTestId("city-selector")).toHaveLength(2);
+    });
+
+    it("should treat location id zero as a selected city", () => {
+      render(<HeaderBar id={0} LocationOptions={mockLocationOptions} />);
+
+      expect(screen.getByTestId("city-selector")).toHaveAttribute(
+        "data-placeholder",
+        "Change City",
+      );
     });
   });
 

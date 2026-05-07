@@ -1,9 +1,17 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MapComponent } from "../components/map-component";
+
+const { mockUseTheme } = vi.hoisted(() => ({
+  mockUseTheme: mockFn(() => ({ resolvedTheme: "light" })),
+}));
+
+vi.mock("next-themes", () => ({
+  useTheme: () => mockUseTheme(),
+}));
 
 vi.mock("react-leaflet", () => {
   interface MockComponentProperties {
@@ -35,7 +43,13 @@ vi.mock("react-leaflet", () => {
         {children}
       </button>
     ),
-    TileLayer: () => <div data-testid="tile-layer" />,
+    TileLayer: ({ attribution, url }: { attribution: string; url: string }) => (
+      <div
+        data-attribution={attribution}
+        data-testid="tile-layer"
+        data-url={url}
+      />
+    ),
   };
 });
 
@@ -91,6 +105,11 @@ describe("mapComponent", () => {
     );
   };
 
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseTheme.mockReturnValue({ resolvedTheme: "light" });
+  });
+
   it("should display a loading message on initial render", () => {
     renderWithQueryClient(
       <MapComponent
@@ -134,6 +153,24 @@ describe("mapComponent", () => {
     expect(screen.queryByText("Loading map...")).not.toBeInTheDocument();
   });
 
+  it("should use a dark basemap when dark mode is active", async () => {
+    mockUseTheme.mockReturnValue({ resolvedTheme: "dark" });
+
+    renderWithQueryClient(
+      <MapComponent
+        locations={mockLocations}
+        onMarkerClick={noopMarkerClick}
+        selectedGraphMeasure="avg"
+      />,
+    );
+
+    const tileLayer = await screen.findByTestId("tile-layer");
+    expect(tileLayer).toHaveAttribute(
+      "data-url",
+      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    );
+  });
+
   it("should call onMarkerClick with the correct location_id when a marker is clicked", async () => {
     const onMarkerClick = mockFn();
     renderWithQueryClient(
@@ -146,10 +183,18 @@ describe("mapComponent", () => {
 
     const markers = await screen.findAllByTestId("marker");
 
-    fireEvent.click(markers[0]);
+    const firstMarker = markers[0];
+    if (!firstMarker) {
+      throw new Error("No marker found");
+    }
+    fireEvent.click(firstMarker);
 
     expect(onMarkerClick).toHaveBeenCalledTimes(1);
-    expect(onMarkerClick).toHaveBeenCalledWith(mockLocations[0].location_id);
+    const firstLocation = mockLocations[0];
+    if (!firstLocation) {
+      throw new Error("No location found");
+    }
+    expect(onMarkerClick).toHaveBeenCalledWith(firstLocation.location_id);
   });
 
   it("should keep the thermal stress legend collapsed by default and toggle open", async () => {

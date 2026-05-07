@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 export type Primitive = number | string;
 
 interface FilterOperation {
@@ -231,31 +230,21 @@ const MOCK_TABLES: Record<string, MockRow[]> = {
       };
     }),
   ),
-  pet_year: petYearRows,
-  pet_year_avg: LOCATIONS.flatMap((location) =>
+  pet: petYearRows,
+  pet_year_stats: LOCATIONS.flatMap((location) =>
     YEARS.flatMap((year) =>
-      GRAPH_SEASONS.map((season) => ({
-        location_id: location.location_id,
-        pet: round(
-          getAveragePet(location.location_id, year) +
-            SEASONAL_AVG_OFFSETS[season],
-        ),
-        season,
-        year,
-      })),
-    ),
-  ),
-  pet_year_max: LOCATIONS.flatMap((location) =>
-    YEARS.flatMap((year) =>
-      GRAPH_SEASONS.map((season) => ({
-        location_id: location.location_id,
-        pet: round(
-          getAveragePet(location.location_id, year) +
-            SEASONAL_MAX_OFFSETS[season],
-        ),
-        season,
-        year,
-      })),
+      GRAPH_SEASONS.map((season) => {
+        const avg = getAveragePet(location.location_id, year);
+        return {
+          avg_pet: round(avg + SEASONAL_AVG_OFFSETS[season]),
+          location_id: location.location_id,
+          max_pet: round(avg + SEASONAL_MAX_OFFSETS[season]),
+          p10: round(avg - 2.5),
+          p90: round(avg + 2.5),
+          season,
+          year,
+        };
+      }),
     ),
   ),
 };
@@ -270,7 +259,8 @@ const compareEq = (left: Primitive | undefined, right: Primitive) =>
 const compareNumeric = (
   left: Primitive | undefined,
   right: Primitive,
-  comparator: (rowValue: number, filterValue: number) => boolean,
+  stringComparator: (rowValue: string, filterValue: string) => boolean,
+  numericComparator: (rowValue: number, filterValue: number) => boolean,
 ) => {
   if (left === undefined) {
     return false;
@@ -279,19 +269,19 @@ const compareNumeric = (
   const rowValue = Number(left);
   const filterValue = Number(right);
   if (Number.isNaN(rowValue) || Number.isNaN(filterValue)) {
-    return false;
+    return stringComparator(String(left), String(right));
   }
 
-  return comparator(rowValue, filterValue);
+  return numericComparator(rowValue, filterValue);
 };
 
-const compareGreaterThan = (rowValue: number, filterValue: number) =>
+const compareGreaterThan = <T>(rowValue: T, filterValue: T) =>
   rowValue > filterValue;
-const compareGreaterThanOrEqual = (rowValue: number, filterValue: number) =>
+const compareGreaterThanOrEqual = <T>(rowValue: T, filterValue: T) =>
   rowValue >= filterValue;
-const compareLessThan = (rowValue: number, filterValue: number) =>
+const compareLessThan = <T>(rowValue: T, filterValue: T) =>
   rowValue < filterValue;
-const compareLessThanOrEqual = (rowValue: number, filterValue: number) =>
+const compareLessThanOrEqual = <T>(rowValue: T, filterValue: T) =>
   rowValue <= filterValue;
 
 const matchesFilterOperation = (row: MockRow, filter: FilterOperation) => {
@@ -302,16 +292,36 @@ const matchesFilterOperation = (row: MockRow, filter: FilterOperation) => {
       return compareEq(cell, filter.value);
     }
     case "gt": {
-      return compareNumeric(cell, filter.value, compareGreaterThan);
+      return compareNumeric(
+        cell,
+        filter.value,
+        compareGreaterThan,
+        compareGreaterThan,
+      );
     }
     case "gte": {
-      return compareNumeric(cell, filter.value, compareGreaterThanOrEqual);
+      return compareNumeric(
+        cell,
+        filter.value,
+        compareGreaterThanOrEqual,
+        compareGreaterThanOrEqual,
+      );
     }
     case "lt": {
-      return compareNumeric(cell, filter.value, compareLessThan);
+      return compareNumeric(
+        cell,
+        filter.value,
+        compareLessThan,
+        compareLessThan,
+      );
     }
     case "lte": {
-      return compareNumeric(cell, filter.value, compareLessThanOrEqual);
+      return compareNumeric(
+        cell,
+        filter.value,
+        compareLessThanOrEqual,
+        compareLessThanOrEqual,
+      );
     }
     default: {
       return true;
@@ -335,7 +345,15 @@ const applyColumnSelection = (rows: MockRow[], columns?: string) => {
     .filter(Boolean);
 
   return rows.map((row) =>
-    Object.fromEntries(selectedColumns.map((column) => [column, row[column]])),
+    Object.fromEntries(
+      selectedColumns.map((column) => {
+        const parts = column.split(":");
+        if (parts.length === 2 && parts[0] && parts[1]) {
+          return [parts[0], row[parts[1]]];
+        }
+        return [column, row[column]];
+      }),
+    ),
   );
 };
 
@@ -384,7 +402,7 @@ const createMockSupabaseQuery = (table: string): MockSupabaseQuery => {
       rows = rows.slice(0, Math.max(0, limitValue));
     }
 
-    return applyColumnSelection(rows, selectedColumns);
+    return applyColumnSelection(rows, selectedColumns) as any;
   };
 
   const asResult = (): MockListResult => ({

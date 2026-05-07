@@ -22,7 +22,7 @@ describe("supabase MSW integration", () => {
 
   it("fails with a validation error when MSW returns malformed trend data", async () => {
     server.use(
-      http.get("*/rest/v1/pet_year_avg", () =>
+      http.get("*/rest/v1/pet_year_stats", () =>
         HttpResponse.json([
           { location_id: 1, pet: "not-a-number", year: 2025 },
         ]),

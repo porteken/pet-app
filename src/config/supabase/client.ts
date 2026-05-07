@@ -1,6 +1,5 @@
 import { getPublicEnvironment, isE2ETestRun } from "@/config/environment";
 import { createRuntimeMockSupabaseClient } from "@/testing/runtime-mocks";
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { createBrowserClient } from "@supabase/ssr";
 
 import type { SupabaseClient } from "@supabase/supabase-js";

@@ -148,7 +148,7 @@ export const FetchLocations = cache(
 
     const locations = await fetchLocationRows(supabase);
 
-    const sanitizedLocations = filterRowsWithPositiveLocationId(locations);
+    const sanitizedLocations = filterRowsWithNonNegativeLocationId(locations);
     const validatedLocations = parseWithDatabaseError(
       "Locations",
       parseLocationRows,
@@ -233,6 +233,17 @@ function isMissingLocationColumnError(error: unknown): boolean {
 }
 
 function isMissingCityRankingsSeasonColumnError(error: unknown): boolean {
+  return isMissingSeasonColumnError(error, "city_rankings_view");
+}
+
+function isMissingPetYearStatsSeasonColumnError(error: unknown): boolean {
+  return isMissingSeasonColumnError(error, "pet_year_stats");
+}
+
+function isMissingSeasonColumnError(
+  error: unknown,
+  relationName: string,
+): boolean {
   if (!error || typeof error !== "object") {
     return false;
   }
@@ -246,11 +257,37 @@ function isMissingCityRankingsSeasonColumnError(error: unknown): boolean {
 
   return (
     (code === "42703" &&
-      message.includes("column city_rankings_view.season does not exist")) ||
+      message.includes(`column ${relationName}.season does not exist`)) ||
     (code === "PGRST204" &&
       message.includes("'season'") &&
-      message.includes("'city_rankings_view'"))
+      message.includes(`'${relationName}'`))
   );
+}
+
+async function fetchTrendGraphRows(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  option: string,
+  locationId: number,
+  season: GraphSeason,
+) {
+  const columns = `location_id, pet:${option}_pet, year`;
+
+  const primaryQuery = await supabase
+    .from("pet_year_stats")
+    .select(columns)
+    .eq("location_id", locationId)
+    .eq("season", season)
+    .order("year", { ascending: true });
+
+  if (!isMissingPetYearStatsSeasonColumnError(primaryQuery.error)) {
+    return primaryQuery;
+  }
+
+  return supabase
+    .from("pet_year_stats")
+    .select(columns)
+    .eq("location_id", locationId)
+    .order("year", { ascending: true });
 }
 
 export async function FetchReferenceGraphData(
@@ -274,10 +311,11 @@ export async function FetchReferenceGraphData(
   const supabase = await createClient(cookieStore);
 
   const { data, error } = await supabase
-    .from("pet_year")
-    .select("date, location_id, pet, year")
+    .from("pet")
+    .select("date, location_id, pet")
     .eq("location_id", locationId)
-    .eq("year", year)
+    .gte("date", `${year}-01-01`)
+    .lt("date", `${Number(year) + 1}-01-01`)
     .order("date", { ascending: true });
 
   if (error || !data) {
@@ -318,12 +356,12 @@ export async function FetchTrendGraphData(
   const cookieStore = await cookies();
   const supabase = await createClient(cookieStore);
 
-  const { data, error } = await supabase
-    .from(`pet_year_${option}`)
-    .select("location_id, pet, year")
-    .eq("location_id", locationId)
-    .eq("season", resolvedSeason)
-    .order("year", { ascending: true });
+  const { data, error } = await fetchTrendGraphRows(
+    supabase,
+    option,
+    locationId,
+    resolvedSeason,
+  );
 
   if (error || !data) {
     throw new DatabaseError(
@@ -341,14 +379,14 @@ export async function FetchTrendGraphData(
   return mapTrendRowsToGraphData(validatedRows);
 }
 
-function filterRowsWithPositiveLocationId<
+function filterRowsWithNonNegativeLocationId<
   T extends {
     location_id?: unknown;
   },
 >(rows: T[]): T[] {
   return rows.filter((row) => {
     const locationId = Number(row.location_id);
-    return Number.isInteger(locationId) && locationId > 0;
+    return Number.isInteger(locationId) && locationId >= 0;
   });
 }
 

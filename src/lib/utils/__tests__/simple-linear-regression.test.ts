@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { describe, expect, it } from "vitest";
 
 import { SimpleLinearRegression } from "../simple-linear-regression";

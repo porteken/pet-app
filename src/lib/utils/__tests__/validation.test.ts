@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion */
 import { describe, expect, it } from "vitest";
 
 import {
@@ -49,14 +48,11 @@ describe("validation utilities", () => {
   });
 
   describe("validateLocationId", () => {
-    it("should return true for valid positive integers", () => {
+    it("should return true for valid non-negative integers", () => {
+      expect(validateLocationId(0)).toBe(true);
       expect(validateLocationId(1)).toBe(true);
       expect(validateLocationId(100)).toBe(true);
       expect(validateLocationId(999)).toBe(true);
-    });
-
-    it("should return false for zero", () => {
-      expect(validateLocationId(0)).toBe(false);
     });
 
     it("should return false for negative numbers", () => {

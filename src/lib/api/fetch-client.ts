@@ -52,7 +52,7 @@ export async function FetchForecastData(
     const supabase = createClient();
 
     const { data: historicalData, error: historicalError } = await supabase
-      .from("pet_year_avg")
+      .from("pet_year_stats")
       .select("year")
       .eq("location_id", locationId)
       .eq("season", resolvedSeason)
@@ -155,13 +155,11 @@ export async function FetchTrendGraphData(
 
   const response = await apiRequest(async () => {
     const supabase = createClient();
-    const tableName = option === "avg" ? "pet_year_avg" : "pet_year_max";
-
     const data = await fetchTrendData(
       supabase,
-      tableName,
       locationId,
       resolvedSeason,
+      option,
     );
     return mapTrendRowsToGraphData(data);
   });
@@ -183,9 +181,9 @@ export { FetchReferenceGraphData } from "./reference-graph-data";
 
 async function fetchTrendData(
   supabase: SupabaseClient,
-  tableName: string,
   locationId: number,
   season: GraphSeason,
+  option: string,
 ): Promise<
   Array<{
     location_id: number;
@@ -194,8 +192,8 @@ async function fetchTrendData(
   }>
 > {
   const { data, error } = await supabase
-    .from(tableName)
-    .select("year, pet, location_id")
+    .from("pet_year_stats")
+    .select(`year, pet:${option}_pet, location_id`)
     .eq("location_id", locationId)
     .eq("season", season)
     .order("year", { ascending: true });

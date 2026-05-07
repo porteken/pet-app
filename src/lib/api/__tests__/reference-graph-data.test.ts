@@ -29,6 +29,8 @@ describe("reference-graph-data", () => {
 
       const mockQuery = {
         eq: mockFn().mockReturnThis(),
+        gte: mockFn().mockReturnThis(),
+        lt: mockFn().mockReturnThis(),
         order: mockFn().mockResolvedValue({ data: mockData, error: undefined }),
         select: mockFn().mockReturnThis(),
       };
@@ -37,10 +39,11 @@ describe("reference-graph-data", () => {
 
       const result = await FetchReferenceGraphData("2023", 1);
 
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year");
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet");
       expect(mockQuery.select).toHaveBeenCalled();
       expect(mockQuery.eq).toHaveBeenNthCalledWith(1, "location_id", 1);
-      expect(mockQuery.eq).toHaveBeenNthCalledWith(2, "year", "2023");
+      expect(mockQuery.gte).toHaveBeenCalledWith("date", "2023-01-01");
+      expect(mockQuery.lt).toHaveBeenCalledWith("date", "2024-01-01");
       expect(mockQuery.order).toHaveBeenCalledWith("date", { ascending: true });
 
       expect(result.dates).toStrictEqual([
@@ -79,6 +82,8 @@ describe("reference-graph-data", () => {
     it("should return empty arrays when no data is found", async () => {
       const mockQuery = {
         eq: mockFn().mockReturnThis(),
+        gte: mockFn().mockReturnThis(),
+        lt: mockFn().mockReturnThis(),
         order: mockFn().mockResolvedValue({ data: [], error: undefined }),
         select: mockFn().mockReturnThis(),
       };
@@ -95,6 +100,8 @@ describe("reference-graph-data", () => {
       const mockError = { message: "Database connection failed" };
       const mockQuery = {
         eq: mockFn().mockReturnThis(),
+        gte: mockFn().mockReturnThis(),
+        lt: mockFn().mockReturnThis(),
         order: mockFn().mockResolvedValue({
           data: undefined,
           error: mockError,
@@ -115,6 +122,8 @@ describe("reference-graph-data", () => {
     it("should handle null data response", async () => {
       const mockQuery = {
         eq: mockFn().mockReturnThis(),
+        gte: mockFn().mockReturnThis(),
+        lt: mockFn().mockReturnThis(),
         order: mockFn().mockResolvedValue({
           data: undefined,
           error: undefined,
@@ -133,6 +142,8 @@ describe("reference-graph-data", () => {
     it("should handle unexpected errors during data fetching", async () => {
       const mockQuery = {
         eq: mockFn().mockReturnThis(),
+        gte: mockFn().mockReturnThis(),
+        lt: mockFn().mockReturnThis(),
         order: mockFn().mockRejectedValue(new Error("Network error")),
         select: mockFn().mockReturnThis(),
       };
@@ -151,6 +162,8 @@ describe("reference-graph-data", () => {
 
       const mockQuery = {
         eq: mockFn().mockReturnThis(),
+        gte: mockFn().mockReturnThis(),
+        lt: mockFn().mockReturnThis(),
         order: mockFn().mockResolvedValue({ data: mockData, error: undefined }),
         select: mockFn().mockReturnThis(),
       };
@@ -168,6 +181,8 @@ describe("reference-graph-data", () => {
     it("should rethrow FetchErrors from data fetching", async () => {
       const mockQuery = {
         eq: mockFn().mockReturnThis(),
+        gte: mockFn().mockReturnThis(),
+        lt: mockFn().mockReturnThis(),
         order: mockFn().mockRejectedValue(new FetchError("Custom fetch error")),
         select: mockFn().mockReturnThis(),
       };

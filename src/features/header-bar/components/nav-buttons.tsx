@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utilities";
-import { Code2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
@@ -39,7 +38,7 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
             isActivePath("/rankings") &&
               "bg-accent font-semibold text-foreground",
           )}
-          href="/rankings"
+          href={buildUrl("/rankings")}
         >
           Rankings
         </Link>
@@ -52,25 +51,9 @@ export const NavButtons: React.FC<NavButtonsProperties> = ({ buildUrl }) => {
             "rounded-full px-3 py-2",
             isActivePath("/about") && "bg-accent font-semibold text-foreground",
           )}
-          href="/about"
+          href={buildUrl("/about")}
         >
           About
-        </Link>
-      </Button>
-
-      <Button
-        aria-label="View source code on GitHub"
-        asChild
-        className="rounded-full"
-        size="icon"
-        variant="ghost"
-      >
-        <Link
-          href="https://github.com/porteken/pet-app"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <Code2 className="size-4" />
         </Link>
       </Button>
     </>

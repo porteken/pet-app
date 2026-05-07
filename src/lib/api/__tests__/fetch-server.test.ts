@@ -590,6 +590,8 @@ describe("fetch-server", () => {
 
       const mockQuery = {
         eq: mockFn().mockReturnThis(),
+        gte: mockFn().mockReturnThis(),
+        lt: mockFn().mockReturnThis(),
         order: mockFn().mockResolvedValue({ data: mockData, error: undefined }),
         select: mockFn().mockReturnThis(),
       };
@@ -598,9 +600,11 @@ describe("fetch-server", () => {
 
       const result = await FetchReferenceGraphData("2023", 5);
 
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year");
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet");
       expect(mockQuery.select).toHaveBeenCalled();
       expect(mockQuery.eq).toHaveBeenCalledWith("location_id", 5);
+      expect(mockQuery.gte).toHaveBeenCalledWith("date", "2023-01-01");
+      expect(mockQuery.lt).toHaveBeenCalledWith("date", "2024-01-01");
       expect(mockQuery.order).toHaveBeenCalledWith("date", { ascending: true });
 
       expect(result.pets).toStrictEqual([25.5, 26.2]);
@@ -614,6 +618,8 @@ describe("fetch-server", () => {
       const mockError = new Error("Database connection failed");
       const mockQuery = {
         eq: mockFn().mockReturnThis(),
+        gte: mockFn().mockReturnThis(),
+        lt: mockFn().mockReturnThis(),
         order: mockFn().mockResolvedValue({
           data: undefined,
           error: mockError,
@@ -652,7 +658,7 @@ describe("fetch-server", () => {
 
       const result = await FetchTrendGraphData("avg", 1);
 
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year_avg");
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith("pet_year_stats");
       expect(mockQuery.select).toHaveBeenCalled();
       expect(mockQuery.eq).toHaveBeenCalledWith("location_id", 1);
       expect(mockQuery.eq).toHaveBeenCalledWith("season", "Annual");
@@ -741,13 +747,13 @@ describe("fetch-server", () => {
       await FetchTrendGraphData("avg", 1);
       expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(
         1,
-        "pet_year_avg",
+        "pet_year_stats",
       );
 
       await FetchTrendGraphData("max", 1);
       expect(mockSupabaseClient.from).toHaveBeenNthCalledWith(
         2,
-        "pet_year_max",
+        "pet_year_stats",
       );
     });
   });

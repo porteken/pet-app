@@ -54,10 +54,11 @@ async function fetchData(
   }>
 > {
   const { data, error } = await supabase
-    .from("pet_year")
-    .select("date, location_id, pet, year")
+    .from("pet")
+    .select("date, location_id, pet")
     .eq("location_id", locationId)
-    .eq("year", year)
+    .gte("date", `${year}-01-01`)
+    .lt("date", `${Number(year) + 1}-01-01`)
     .order("date", { ascending: true });
 
   if (error) {

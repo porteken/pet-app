@@ -28,6 +28,7 @@ const handleMeasureChange = async (measure: string): Promise<void> => {
 const Main: FC<PageProperties> = ({
   CurrentDates,
   CurrentPets,
+  IncreasePerYear,
   id,
   initialForecastEnabled,
   initialForecastYearsAhead,
@@ -37,6 +38,9 @@ const Main: FC<PageProperties> = ({
   location,
   LocationOptions,
   ReferencePets,
+  TrendlinePets,
+  YearPets,
+  Years,
 }) => {
   const [selectedGraphSeason, setSelectedGraphSeason] =
     React.useState<GraphSeason>(initialGraphSeason);
@@ -87,9 +91,13 @@ const Main: FC<PageProperties> = ({
             initialForecastEnabled={initialForecastEnabled}
             initialForecastYearsAhead={initialForecastYearsAhead}
             initialGraphMeasure={initialGraphMeasure}
+            initialGraphSeason={initialGraphSeason}
+            initialIncreasePerYear={IncreasePerYear}
+            initialTrendlinePets={TrendlinePets}
+            initialYearPets={YearPets}
+            initialYears={Years}
             onMeasureChange={handleMeasureChange}
             onSeasonChange={handleSeasonChange}
-            referenceYear={selectedReferenceYear}
           />
 
           <ReferenceData

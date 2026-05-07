@@ -154,6 +154,7 @@ describe("pageMain Integration Tests", () => {
     defaultProps = {
       CurrentDates: [new Date("2023-01-01"), new Date("2023-02-01")],
       CurrentPets: [15, 25],
+      IncreasePerYear: 0.5,
       id: location.location_id,
       initialForecastEnabled: false,
       initialForecastYearsAhead: 10,
@@ -278,6 +279,7 @@ describe("pageMain Integration Tests", () => {
         ...defaultProps,
         CurrentDates: [],
         CurrentPets: [],
+        IncreasePerYear: 0,
         ReferencePets: [],
         TrendlinePets: [],
         YearPets: [],

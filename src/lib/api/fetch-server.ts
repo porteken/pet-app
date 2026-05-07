@@ -233,6 +233,17 @@ function isMissingLocationColumnError(error: unknown): boolean {
 }
 
 function isMissingCityRankingsSeasonColumnError(error: unknown): boolean {
+  return isMissingSeasonColumnError(error, "city_rankings_view");
+}
+
+function isMissingPetYearStatsSeasonColumnError(error: unknown): boolean {
+  return isMissingSeasonColumnError(error, "pet_year_stats");
+}
+
+function isMissingSeasonColumnError(
+  error: unknown,
+  relationName: string,
+): boolean {
   if (!error || typeof error !== "object") {
     return false;
   }
@@ -246,11 +257,37 @@ function isMissingCityRankingsSeasonColumnError(error: unknown): boolean {
 
   return (
     (code === "42703" &&
-      message.includes("column city_rankings_view.season does not exist")) ||
+      message.includes(`column ${relationName}.season does not exist`)) ||
     (code === "PGRST204" &&
       message.includes("'season'") &&
-      message.includes("'city_rankings_view'"))
+      message.includes(`'${relationName}'`))
   );
+}
+
+async function fetchTrendGraphRows(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  option: string,
+  locationId: number,
+  season: GraphSeason,
+) {
+  const columns = `location_id, pet:${option}_pet, year`;
+
+  const primaryQuery = await supabase
+    .from("pet_year_stats")
+    .select(columns)
+    .eq("location_id", locationId)
+    .eq("season", season)
+    .order("year", { ascending: true });
+
+  if (!isMissingPetYearStatsSeasonColumnError(primaryQuery.error)) {
+    return primaryQuery;
+  }
+
+  return supabase
+    .from("pet_year_stats")
+    .select(columns)
+    .eq("location_id", locationId)
+    .order("year", { ascending: true });
 }
 
 export async function FetchReferenceGraphData(
@@ -319,12 +356,12 @@ export async function FetchTrendGraphData(
   const cookieStore = await cookies();
   const supabase = await createClient(cookieStore);
 
-  const { data, error } = await supabase
-    .from("pet_year_stats")
-    .select(`location_id, pet:${option}_pet, year`)
-    .eq("location_id", locationId)
-    .eq("season", resolvedSeason)
-    .order("year", { ascending: true });
+  const { data, error } = await fetchTrendGraphRows(
+    supabase,
+    option,
+    locationId,
+    resolvedSeason,
+  );
 
   if (error || !data) {
     throw new DatabaseError(

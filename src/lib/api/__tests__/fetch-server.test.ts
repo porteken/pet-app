@@ -733,6 +733,49 @@ describe("fetch-server", () => {
       );
     });
 
+    it("should fall back to legacy trend data when the season column is unavailable", async () => {
+      const seasonColumnError = {
+        code: "PGRST204",
+        details: null,
+        hint: null,
+        message:
+          "Could not find the 'season' column of 'pet_year_stats' in the schema cache",
+      };
+      const primaryQuery = {
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({
+          data: undefined,
+          error: seasonColumnError,
+        }),
+        select: mockFn().mockReturnThis(),
+      };
+      const fallbackQuery = {
+        eq: mockFn().mockReturnThis(),
+        order: mockFn().mockResolvedValue({
+          data: [{ location_id: 1, pet: 25.5, year: 2020 }],
+          error: undefined,
+        }),
+        select: mockFn().mockReturnThis(),
+      };
+
+      mockSupabaseClient.from
+        .mockReturnValueOnce(primaryQuery)
+        .mockReturnValueOnce(fallbackQuery);
+      mockLinearRegression.predict.mockReturnValue(1438);
+
+      const result = await FetchTrendGraphData("avg", 1, "Winter");
+
+      expect(primaryQuery.eq).toHaveBeenNthCalledWith(1, "location_id", 1);
+      expect(primaryQuery.eq).toHaveBeenNthCalledWith(2, "season", "Winter");
+      expect(fallbackQuery.eq).toHaveBeenCalledWith("location_id", 1);
+      expect(fallbackQuery.eq).not.toHaveBeenCalledWith("season", "Winter");
+      expect(result).toMatchObject({
+        trendline_pets: [1438],
+        year_pets: [25.5],
+        years: [2020],
+      });
+    });
+
     it("should handle both avg and max options", async () => {
       const mockData = [{ location_id: 1, pet: 25.5, year: 2020 }];
       const mockQuery = {

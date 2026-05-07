@@ -17,10 +17,10 @@ const createTrendQuery = (data: unknown, error?: unknown) => ({
   select: mockFn().mockReturnThis(),
 });
 
-const createHistoricalQuery = (data: unknown) => ({
+const createHistoricalQuery = (data: unknown, error?: unknown) => ({
   eq: mockFn().mockReturnThis(),
   limit: mockFn().mockReturnThis(),
-  maybeSingle: mockFn().mockResolvedValue({ data }),
+  maybeSingle: mockFn().mockResolvedValue({ data, error }),
   order: mockFn().mockReturnThis(),
   select: mockFn().mockReturnThis(),
 });
@@ -190,6 +190,37 @@ describe("fetchTrendGraphData", () => {
       years: [],
     });
   });
+
+  it("should fall back to legacy trend data when the season column is unavailable", async () => {
+    const seasonColumnError = {
+      code: "PGRST204",
+      details: null,
+      hint: null,
+      message:
+        "Could not find the 'season' column of 'pet_year_stats' in the schema cache",
+    };
+    const primaryQuery = createTrendQuery(undefined, seasonColumnError);
+    const fallbackQuery = createTrendQuery([
+      { location_id: 1, pet: 25.5, year: 2020 },
+    ]);
+
+    mockSupabaseClient.from
+      .mockReturnValueOnce(primaryQuery)
+      .mockReturnValueOnce(fallbackQuery);
+    mockLinearRegression.predict.mockReturnValue(1438);
+
+    const result = await FetchTrendGraphData("avg", 1, "Winter");
+
+    expect(primaryQuery.eq).toHaveBeenNthCalledWith(1, "location_id", 1);
+    expect(primaryQuery.eq).toHaveBeenNthCalledWith(2, "season", "Winter");
+    expect(fallbackQuery.eq).toHaveBeenCalledWith("location_id", 1);
+    expect(fallbackQuery.eq).not.toHaveBeenCalledWith("season", "Winter");
+    expect(result).toMatchObject({
+      trendline_pets: [1438],
+      year_pets: [25.5],
+      years: [2020],
+    });
+  });
 });
 
 describe("fetchForecastData", () => {
@@ -318,6 +349,80 @@ describe("fetchForecastData", () => {
     await expect(FetchForecastData(1, 10)).rejects.toThrow(
       "Database error fetching forecast data",
     );
+  });
+
+  it("should fall back to legacy forecast data when season columns are unavailable", async () => {
+    const seasonColumnError = {
+      code: "PGRST204",
+      details: null,
+      hint: null,
+      message:
+        "Could not find the 'season' column of 'pet_year_stats' in the schema cache",
+    };
+    const forecastSeasonColumnError = {
+      code: "PGRST204",
+      details: null,
+      hint: null,
+      message:
+        "Could not find the 'season' column of 'pet_forecast' in the schema cache",
+    };
+    const primaryHistoricalQuery = createHistoricalQuery(
+      undefined,
+      seasonColumnError,
+    );
+    const fallbackHistoricalQuery = createHistoricalQuery({ year: 2025 });
+    const primaryForecastQuery = createForecastQuery(
+      undefined,
+      forecastSeasonColumnError,
+    );
+    const fallbackForecastQuery = createForecastQuery([
+      { lower: 28.5, pet: 30.5, upper: 32.5, year: 2026 },
+    ]);
+
+    mockSupabaseClient.from
+      .mockReturnValueOnce(primaryHistoricalQuery)
+      .mockReturnValueOnce(fallbackHistoricalQuery)
+      .mockReturnValueOnce(primaryForecastQuery)
+      .mockReturnValueOnce(fallbackForecastQuery);
+
+    const result = await FetchForecastData(1, 10, "Winter");
+
+    expect(primaryHistoricalQuery.eq).toHaveBeenNthCalledWith(
+      1,
+      "location_id",
+      1,
+    );
+    expect(primaryHistoricalQuery.eq).toHaveBeenNthCalledWith(
+      2,
+      "season",
+      "Winter",
+    );
+    expect(fallbackHistoricalQuery.eq).toHaveBeenCalledWith("location_id", 1);
+    expect(fallbackHistoricalQuery.eq).not.toHaveBeenCalledWith(
+      "season",
+      "Winter",
+    );
+    expect(primaryForecastQuery.eq).toHaveBeenNthCalledWith(
+      1,
+      "location_id",
+      1,
+    );
+    expect(primaryForecastQuery.eq).toHaveBeenNthCalledWith(
+      2,
+      "season",
+      "Winter",
+    );
+    expect(fallbackForecastQuery.eq).toHaveBeenCalledWith("location_id", 1);
+    expect(fallbackForecastQuery.eq).not.toHaveBeenCalledWith(
+      "season",
+      "Winter",
+    );
+    expect(result).toStrictEqual({
+      forecastValues: [30.5],
+      forecastYears: [2026],
+      lowerBound10: [28.5],
+      upperBound90: [32.5],
+    });
   });
 
   it("should calculate correct target year based on yearsAhead", async () => {

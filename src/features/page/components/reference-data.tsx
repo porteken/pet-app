@@ -72,8 +72,12 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   const generatePetReferenceGraph = React.useCallback(
     async (year: string) => {
       const requestId = ++latestReferenceRequestRef.current;
+      const hasInitialReferenceSnapshot =
+        CurrentDates.length > 0 &&
+        CurrentPets.length === CurrentDates.length &&
+        ReferencePets.length === CurrentDates.length;
       const referenceData =
-        year === initialReferenceYear
+        year === initialReferenceYear && hasInitialReferenceSnapshot
           ? { dates: CurrentDates, pets: ReferencePets }
           : await FetchReferenceGraphData(year, id, DEFAULT_GRAPH_SEASON);
 
@@ -85,7 +89,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
 
       setReferenceGraphSnapshot({ dates, pets, year });
     },
-    [CurrentDates, ReferencePets, id, initialReferenceYear],
+    [CurrentDates, CurrentPets.length, ReferencePets, id, initialReferenceYear],
   );
 
   const handleReferenceYearChange = React.useCallback(

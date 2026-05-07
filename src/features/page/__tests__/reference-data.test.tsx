@@ -35,6 +35,8 @@ const defaultProps: React.ComponentProps<typeof ReferenceData> = {
 const testCurrentDates = [new Date("2025-01-01T00:00:00.000Z")];
 const testCurrentPets = [22];
 const testReferencePets = [18];
+const emptyDates: Date[] = [];
+const emptyPets: number[] = [];
 
 describe("referenceData", () => {
   beforeEach(() => {
@@ -163,6 +165,21 @@ describe("referenceData", () => {
         }),
         undefined,
       );
+    });
+  });
+
+  it("should refetch the initial reference year when the server snapshot is empty", async () => {
+    render(
+      <ReferenceData
+        {...defaultProps}
+        CurrentDates={emptyDates}
+        CurrentPets={emptyPets}
+        ReferencePets={emptyPets}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(FetchReferenceGraphData).toHaveBeenCalledWith("2000", 1, "Annual");
     });
   });
 });

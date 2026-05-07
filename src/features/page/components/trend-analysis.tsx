@@ -13,6 +13,7 @@ import {
 import React from "react";
 
 import type { HeatStressDescription } from "@/lib/utils/thermal-stress";
+import type { TrendGraphDataProperties } from "@/types/types";
 
 interface TrendAnalysisProperties {
   graphSeason: GraphSeason;
@@ -20,9 +21,13 @@ interface TrendAnalysisProperties {
   initialForecastEnabled: boolean;
   initialForecastYearsAhead: number;
   initialGraphMeasure: string;
+  initialGraphSeason: GraphSeason;
+  initialIncreasePerYear?: number;
+  initialTrendlinePets?: number[];
+  initialYearPets?: number[];
+  initialYears?: number[];
   onMeasureChange: (measure: string) => Promise<void>;
   onSeasonChange: (season: GraphSeason) => Promise<void>;
-  referenceYear: string;
 }
 
 const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
@@ -31,10 +36,52 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   initialForecastEnabled,
   initialForecastYearsAhead,
   initialGraphMeasure,
+  initialGraphSeason,
+  initialIncreasePerYear = 0,
+  initialTrendlinePets = [],
+  initialYearPets = [],
+  initialYears = [],
   onMeasureChange,
   onSeasonChange,
-  referenceYear,
 }) => {
+  const initialTrendData = React.useMemo<
+    TrendGraphDataProperties | undefined
+  >(() => {
+    if (
+      initialYears.length === 0 ||
+      initialYearPets.length !== initialYears.length ||
+      initialTrendlinePets.length !== initialYears.length
+    ) {
+      return undefined;
+    }
+
+    return {
+      increase_per_year: initialIncreasePerYear,
+      trendline_pets: initialTrendlinePets,
+      year_pets: initialYearPets,
+      years: initialYears,
+    };
+  }, [
+    initialIncreasePerYear,
+    initialTrendlinePets,
+    initialYearPets,
+    initialYears,
+  ]);
+  const initialTrendSnapshot = React.useMemo<TrendGraphSnapshot | undefined>(
+    () =>
+      initialTrendData
+        ? {
+            forecastData: undefined,
+            increase_per_year: initialTrendData.increase_per_year,
+            option: initialGraphMeasure,
+            season: initialGraphSeason,
+            trendline_pets: initialTrendData.trendline_pets,
+            year_pets: initialTrendData.year_pets,
+            years: initialTrendData.years,
+          }
+        : undefined,
+    [initialGraphMeasure, initialGraphSeason, initialTrendData],
+  );
   const [selectedGraphMeasure, setSelectedGraphMeasure] =
     React.useState(initialGraphMeasure);
   const [forecastEnabled, setForecastEnabled] = React.useState(
@@ -49,13 +96,20 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const [forecastHeatStress, setForecastHeatStress] = React.useState<
     HeatStressDescription | undefined
   >();
-  const [trendGraphSnapshot, setTrendGraphSnapshot] =
-    React.useState<TrendGraphSnapshot>();
+  const [trendGraphSnapshot, setTrendGraphSnapshot] = React.useState<
+    TrendGraphSnapshot | undefined
+  >(initialTrendSnapshot);
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
   const latestTrendRequestRef = React.useRef(0);
 
   const showTrendLegend = !isMobileViewport || isMobileLegendOpen;
+
+  React.useEffect(() => {
+    setTrendGraphSnapshot(initialTrendSnapshot);
+    setCurrentHeatStress(undefined);
+    setForecastHeatStress(undefined);
+  }, [initialTrendSnapshot]);
 
   const generatePetTrendGraph = React.useCallback(
     async (
@@ -74,7 +128,17 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
         } = await buildTrendAnalysisResult({
           enableForecast,
           fetchForecastData: () => FetchForecastData(id, yearsAhead, season),
-          fetchTrendGraphData: () => FetchTrendGraphData(option, id, season),
+          fetchTrendGraphData: () => {
+            if (
+              initialTrendData &&
+              option === initialGraphMeasure &&
+              season === initialGraphSeason
+            ) {
+              return Promise.resolve(initialTrendData);
+            }
+
+            return FetchTrendGraphData(option, id, season);
+          },
           option,
           season,
         });
@@ -104,7 +168,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
         setForecastHeatStress(undefined);
       }
     },
-    [id],
+    [id, initialGraphMeasure, initialGraphSeason, initialTrendData],
   );
 
   const handleGraphMeasureChange = React.useCallback(
@@ -158,7 +222,6 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     forecastEnabled,
     forecastSupported,
     forecastYearsAhead,
-    referenceYear,
   ]);
 
   const handleForecastToggle = React.useCallback(

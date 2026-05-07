@@ -59,7 +59,10 @@ vi.mock("@/lib/api/fetch-client", () => ({
 }));
 
 import { GenerateReferenceGraph, GenerateTrendGraph } from "@/features/graph";
-import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
+import {
+  FetchReferenceGraphData,
+  FetchTrendGraphData,
+} from "@/lib/api/fetch-client";
 
 import { PageMain } from "../components/page-main";
 
@@ -69,6 +72,7 @@ describe("pageMain", () => {
   const defaultProps: React.ComponentProps<typeof PageMain> = {
     CurrentDates: [new Date("2023-01-01"), new Date("2023-02-01")],
     CurrentPets: [15, 25],
+    IncreasePerYear: 0.5,
     id: 1,
     initialForecastEnabled: false,
     initialForecastYearsAhead: 10,
@@ -252,34 +256,33 @@ describe("pageMain", () => {
       );
     });
 
-    it("should refresh the trend graph when reference year changes", async () => {
+    it("should not refetch the trend graph when reference year changes", async () => {
       const user = userEvent.setup();
 
       await act(async () => {
         render(<PageMain {...defaultProps} />);
       });
 
+      await waitFor(() => {
+        expect(GenerateTrendGraph).toHaveBeenCalled();
+      });
+
+      expect(FetchTrendGraphData).not.toHaveBeenCalled();
+
       const selectElement = screen.getByLabelText("Reference Year");
       await user.selectOptions(selectElement, "2021");
 
       await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+        expect(fetchMock).toHaveBeenCalledWith(
+          "/api/preferences/graph",
           expect.objectContaining({
-            trendlinePets: [5, 10, 15],
-            yearPets: [7, 12, 17],
-            years: [2020, 2021, 2022],
+            body: JSON.stringify({ referenceYear: "2021" }),
+            method: "POST",
           }),
-          undefined,
         );
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(
-        "/api/preferences/graph",
-        expect.objectContaining({
-          body: JSON.stringify({ referenceYear: "2021" }),
-          method: "POST",
-        }),
-      );
+      expect(FetchTrendGraphData).not.toHaveBeenCalled();
     });
 
     it("should not refetch reference graph data when graph season changes", async () => {

@@ -25,10 +25,16 @@ import { validateYear } from "@/lib/utils/validation";
 import { cookies } from "next/headers";
 
 import type { PageProperties } from "../model/types";
-import type { LocationOptionSection, LocationProperties } from "@/types/types";
+import type {
+  LocationOptionSection,
+  LocationProperties,
+  ReferenceGraphDataProperties,
+  TrendGraphDataProperties,
+} from "@/types/types";
 
 interface GraphData {
   dates: Date[];
+  increase_per_year: number;
   pets: number[];
   reference_pets: number[];
   trendline_pets: number[];
@@ -62,6 +68,50 @@ interface LocationPagePreferences {
   initialGraphSeason: GraphSeason;
   initialReferenceYear: string;
 }
+
+const createEmptyGraphData = (): GraphData => ({
+  dates: [],
+  increase_per_year: 0,
+  pets: [],
+  reference_pets: [],
+  trendline_pets: [],
+  year_pets: [],
+  years: [],
+});
+
+const getFulfilledValue = <T>(result: PromiseSettledResult<T>): T | undefined =>
+  result.status === "fulfilled" ? result.value : undefined;
+
+const resolveReferenceGraphData = (
+  currentData: ReferenceGraphDataProperties | undefined,
+  referenceData: ReferenceGraphDataProperties | undefined,
+  emptyGraphData: GraphData,
+) => {
+  if (!currentData || !referenceData) {
+    return {
+      dates: emptyGraphData.dates,
+      pets: emptyGraphData.pets,
+      reference_pets: emptyGraphData.reference_pets,
+    };
+  }
+
+  return {
+    dates: currentData.dates,
+    pets: currentData.pets,
+    reference_pets: referenceData.pets,
+  };
+};
+
+const resolveTrendGraphData = (
+  trendData: TrendGraphDataProperties | undefined,
+  emptyGraphData: GraphData,
+) => ({
+  increase_per_year:
+    trendData?.increase_per_year ?? emptyGraphData.increase_per_year,
+  trendline_pets: trendData?.trendline_pets ?? emptyGraphData.trendline_pets,
+  year_pets: trendData?.year_pets ?? emptyGraphData.year_pets,
+  years: trendData?.years ?? emptyGraphData.years,
+});
 
 const parseLocationId = (id: string): number | undefined => {
   const locationId = Number(id);
@@ -116,26 +166,35 @@ const getPreferencesFromCookies =
 
 const fetchGraphData = async (
   locationId: number,
+  measure: string,
   season: GraphSeason,
   referenceYear: string,
 ): Promise<GraphData> => {
-  const [trendData, currentData, referenceData] = await Promise.all([
-    FetchTrendGraphData("avg", locationId, season),
-    FetchReferenceGraphData(
-      String(GRAPH_CONFIG.YEAR_RANGE.END),
-      locationId,
-      DEFAULT_GRAPH_SEASON,
-    ),
-    FetchReferenceGraphData(referenceYear, locationId, DEFAULT_GRAPH_SEASON),
-  ]);
+  const [trendResult, currentResult, referenceResult] =
+    await Promise.allSettled([
+      FetchTrendGraphData(measure, locationId, season),
+      FetchReferenceGraphData(
+        String(GRAPH_CONFIG.YEAR_RANGE.END),
+        locationId,
+        DEFAULT_GRAPH_SEASON,
+      ),
+      FetchReferenceGraphData(referenceYear, locationId, DEFAULT_GRAPH_SEASON),
+    ]);
+
+  const emptyGraphData = createEmptyGraphData();
+  const trendData = getFulfilledValue(trendResult);
+  const currentData = getFulfilledValue(currentResult);
+  const referenceData = getFulfilledValue(referenceResult);
+  const referenceGraphData = resolveReferenceGraphData(
+    currentData,
+    referenceData,
+    emptyGraphData,
+  );
+  const trendGraphData = resolveTrendGraphData(trendData, emptyGraphData);
 
   return {
-    dates: currentData.dates,
-    pets: currentData.pets,
-    reference_pets: referenceData.pets,
-    trendline_pets: trendData.trendline_pets,
-    year_pets: trendData.year_pets,
-    years: trendData.years,
+    ...referenceGraphData,
+    ...trendGraphData,
   };
 };
 
@@ -220,36 +279,31 @@ export const loadLocationPageData = async (
     };
   }
 
-  try {
-    const graphData = await fetchGraphData(
-      locationId,
-      preferences.initialGraphSeason,
-      preferences.initialReferenceYear,
-    );
+  const graphData = await fetchGraphData(
+    locationId,
+    preferences.initialGraphMeasure,
+    preferences.initialGraphSeason,
+    preferences.initialReferenceYear,
+  );
 
-    return {
-      payload: {
-        CurrentDates: graphData.dates,
-        CurrentPets: graphData.pets,
-        id: locationId,
-        initialForecastEnabled: preferences.initialForecastEnabled,
-        initialForecastYearsAhead: preferences.initialForecastYearsAhead,
-        initialGraphMeasure: preferences.initialGraphMeasure,
-        initialGraphSeason: preferences.initialGraphSeason,
-        initialReferenceYear: preferences.initialReferenceYear,
-        location: selectedLocation,
-        LocationOptions,
-        ReferencePets: graphData.reference_pets,
-        TrendlinePets: graphData.trendline_pets,
-        YearPets: graphData.year_pets,
-        Years: graphData.years,
-      },
-      status: "success",
-    };
-  } catch {
-    return {
-      payload: createDatabaseError(),
-      status: "database-error",
-    };
-  }
+  return {
+    payload: {
+      CurrentDates: graphData.dates,
+      CurrentPets: graphData.pets,
+      IncreasePerYear: graphData.increase_per_year,
+      id: locationId,
+      initialForecastEnabled: preferences.initialForecastEnabled,
+      initialForecastYearsAhead: preferences.initialForecastYearsAhead,
+      initialGraphMeasure: preferences.initialGraphMeasure,
+      initialGraphSeason: preferences.initialGraphSeason,
+      initialReferenceYear: preferences.initialReferenceYear,
+      location: selectedLocation,
+      LocationOptions,
+      ReferencePets: graphData.reference_pets,
+      TrendlinePets: graphData.trendline_pets,
+      YearPets: graphData.year_pets,
+      Years: graphData.years,
+    },
+    status: "success",
+  };
 };

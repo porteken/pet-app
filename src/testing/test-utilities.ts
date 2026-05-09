@@ -5,36 +5,26 @@ import { vi } from "vitest";
 import {
   createMockCookieStore,
   createMockLinearRegression,
-  createMockSupabaseClient,
   createMockValidation,
   setupSuccessfulValidations,
 } from "./mocks";
 
-import type { createClient as createBrowserClient } from "@/config/supabase/client";
-import type { createClient as createServerClient } from "@/config/supabase/server";
 import type { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
 import type { cookies as cookiesFunction } from "next/headers";
 
 export const setupApiClientTest = async () => {
-  const mockSupabaseClient = createMockSupabaseClient();
   const mockValidation = createMockValidation();
-
-  const { createClient } = await import("@/config/supabase/client");
-  vi.mocked(createClient).mockReturnValue(
-    mockSupabaseClient as ReturnType<typeof createBrowserClient>,
-  );
 
   const validation = await import("@/lib/utils/validation");
   Object.assign(validation, mockValidation);
 
   setupSuccessfulValidations(mockValidation);
 
-  return { mockSupabaseClient, mockValidation };
+  return { mockValidation };
 };
 
 export const setupApiServerTest = async () => {
   const mockCookieStore = createMockCookieStore();
-  const mockSupabaseClient = createMockSupabaseClient();
   const mockLinearRegression = createMockLinearRegression();
   const mockValidation = createMockValidation();
 
@@ -43,10 +33,7 @@ export const setupApiServerTest = async () => {
     mockCookieStore as unknown as Awaited<ReturnType<typeof cookiesFunction>>,
   );
 
-  const { createClient } = await import("@/config/supabase/server");
-  vi.mocked(createClient).mockResolvedValue(
-    mockSupabaseClient as Awaited<ReturnType<typeof createServerClient>>,
-  );
+  const dbQueries = await import("@/lib/db/queries");
 
   const { SimpleLinearRegression } =
     await import("@/lib/utils/simple-linear-regression");
@@ -62,8 +49,15 @@ export const setupApiServerTest = async () => {
 
   return {
     mockCookieStore,
+    mockDbQueries: {
+      fetchCityRankingsRows: vi.mocked(dbQueries.fetchCityRankingsRows),
+      fetchForecastRows: vi.mocked(dbQueries.fetchForecastRows),
+      fetchHistoricalYearRow: vi.mocked(dbQueries.fetchHistoricalYearRow),
+      fetchLocationRows: vi.mocked(dbQueries.fetchLocationRows),
+      fetchReferenceGraphRows: vi.mocked(dbQueries.fetchReferenceGraphRows),
+      fetchTrendGraphRows: vi.mocked(dbQueries.fetchTrendGraphRows),
+    },
     mockLinearRegression,
-    mockSupabaseClient,
     mockValidation,
   };
 };

@@ -29,6 +29,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/*": ["./registry/**/*"],
   },
+  serverExternalPackages: ["pg"],
   turbopack: {
     resolveAlias: {
       underscore: "lodash",

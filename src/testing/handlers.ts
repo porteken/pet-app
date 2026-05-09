@@ -1,113 +1,20 @@
 import {
-  getRuntimeMockTableRows,
-  type Primitive,
-} from "@/testing/runtime-mocks";
+  filterReferenceRowsBySeason,
+  mapReferenceRowsToGraphData,
+  mapTrendRowsToGraphData,
+} from "@/lib/api/graph-data";
+import { DEFAULT_GRAPH_SEASON, normalizeGraphSeason } from "@/lib/constants";
+import { getRuntimeMockTableRows } from "@/testing/runtime-mocks";
 import { http, HttpResponse } from "msw";
 
-type FilterOperator = "eq" | "gt" | "gte" | "lt" | "lte";
-type MockRow = Record<string, Primitive | undefined>;
+type RuntimeTrendOption = "avg" | "max";
 
-const RESERVED_QUERY_PARAMS = new Set(["limit", "offset", "order", "select"]);
-
-const filterOperatorSet = new Set<FilterOperator>([
-  "eq",
-  "gt",
-  "gte",
-  "lt",
-  "lte",
-]);
-
-const toNumber = (value: Primitive | string) => {
-  const numberValue = Number(value);
-  return Number.isNaN(numberValue) ? undefined : numberValue;
-};
-
-const matchesFilter = (
-  row: MockRow,
-  column: string,
-  operator: FilterOperator,
-  filterValue: string,
-) => {
-  const rowValue = row[column];
-  if (rowValue === undefined) {
-    return false;
-  }
-
-  if (operator === "eq") {
-    return String(rowValue) === filterValue;
-  }
-
-  const numericRowValue = toNumber(rowValue);
-  const numericFilterValue = toNumber(filterValue);
-  if (numericRowValue === undefined || numericFilterValue === undefined) {
-    if (operator === "gt") {
-      return String(rowValue) > filterValue;
-    }
-    if (operator === "gte") {
-      return String(rowValue) >= filterValue;
-    }
-    if (operator === "lt") {
-      return String(rowValue) < filterValue;
-    }
-    return String(rowValue) <= filterValue;
-  }
-
-  if (operator === "gt") {
-    return numericRowValue > numericFilterValue;
-  }
-
-  if (operator === "gte") {
-    return numericRowValue >= numericFilterValue;
-  }
-
-  if (operator === "lt") {
-    return numericRowValue < numericFilterValue;
-  }
-
-  return numericRowValue <= numericFilterValue;
-};
-
-const applyFilters = (rows: MockRow[], requestUrl: URL) => {
-  let filteredRows = rows;
-
-  for (const [column, rawFilterValue] of requestUrl.searchParams.entries()) {
-    if (RESERVED_QUERY_PARAMS.has(column)) {
-      continue;
-    }
-
-    const [operator, ...rest] = rawFilterValue.split(".");
-    if (
-      !filterOperatorSet.has(operator as FilterOperator) ||
-      rest.length === 0
-    ) {
-      continue;
-    }
-
-    const typedOperator = operator as FilterOperator;
-    const filterValue = rest.join(".");
-
-    filteredRows = filteredRows.filter((row) =>
-      matchesFilter(row, column, typedOperator, filterValue),
-    );
-  }
-
-  return filteredRows;
-};
-
-const applyOrdering = (rows: MockRow[], requestUrl: URL) => {
-  const order = requestUrl.searchParams.get("order");
-  if (!order) {
-    return rows;
-  }
-
-  const [column, direction] = order.split(".");
-  if (!column) {
-    return rows;
-  }
-
-  const isAscending = direction !== "desc";
-
-  return rows.toSorted((left, right) => {
+const sortBy = <TRow extends Record<string, unknown>>(
+  rows: TRow[],
+  column: keyof TRow,
+  ascending = true,
+) =>
+  rows.toSorted((left, right) => {
     const leftValue = left[column];
     const rightValue = right[column];
 
@@ -116,71 +23,147 @@ const applyOrdering = (rows: MockRow[], requestUrl: URL) => {
     }
 
     if (typeof leftValue === "number" && typeof rightValue === "number") {
-      return isAscending ? leftValue - rightValue : rightValue - leftValue;
+      return ascending ? leftValue - rightValue : rightValue - leftValue;
     }
 
-    return isAscending
+    return ascending
       ? String(leftValue).localeCompare(String(rightValue))
       : String(rightValue).localeCompare(String(leftValue));
   });
+
+const getTrendMetricColumn = (option: RuntimeTrendOption) =>
+  option === "max" ? "max_pet" : "avg_pet";
+
+const getRuntimeTrendRows = (
+  locationId: number,
+  option: RuntimeTrendOption,
+  season: string,
+) => {
+  const rows = getRuntimeMockTableRows("pet_year_stats");
+  const metricColumn = getTrendMetricColumn(option);
+
+  return sortBy(
+    rows
+      .filter((row) => row.location_id === locationId && row.season === season)
+      .map((row) => ({
+        location_id: row.location_id,
+        pet: Number(row[metricColumn]),
+        year: row.year,
+      })),
+    "year",
+  );
 };
 
-const applyLimit = (rows: MockRow[], requestUrl: URL) => {
-  const limit = requestUrl.searchParams.get("limit");
-  if (!limit) {
-    return rows;
-  }
+const getRuntimeReferenceRows = (locationId: number, year: string) => {
+  const start = `${year}-01-01`;
+  const end = `${Number(year) + 1}-01-01`;
+  const rows = getRuntimeMockTableRows("pet");
 
-  const parsedLimit = Number.parseInt(limit, 10);
-  if (Number.isNaN(parsedLimit)) {
-    return rows;
-  }
-
-  return rows.slice(0, Math.max(0, parsedLimit));
+  return sortBy(
+    rows
+      .filter(
+        (row) =>
+          row.location_id === locationId && row.date >= start && row.date < end,
+      )
+      .map((row) => ({
+        date: row.date,
+        pet: row.pet,
+      })),
+    "date",
+  );
 };
 
-const applyColumnSelection = (rows: MockRow[], requestUrl: URL) => {
-  const select = requestUrl.searchParams.get("select");
-  if (!select || select === "*") {
-    return rows;
-  }
+const getRuntimeHistoricalYear = (locationId: number, season: string) => {
+  const rows = getRuntimeMockTableRows("pet_year_stats");
 
-  const columns = select
-    .split(",")
-    .map((column) => column.trim())
-    .filter(Boolean);
-
-  return rows.map((row) =>
-    Object.fromEntries(
-      columns.map((column) => {
-        const parts = column.split(":");
-        if (parts.length === 2 && parts[0] && parts[1]) {
-          return [parts[0], row[parts[1]]];
-        }
-        return [column, row[column]];
-      }),
+  return sortBy(
+    rows.filter(
+      (row) => row.location_id === locationId && row.season === season,
     ),
+    "year",
+    false,
+  )[0];
+};
+
+const getRuntimeForecastRows = (
+  locationId: number,
+  season: string,
+  lastHistoricalYear: number,
+  targetYear: number,
+) => {
+  const rows = getRuntimeMockTableRows("pet_forecast");
+
+  return sortBy(
+    rows.filter(
+      (row) =>
+        row.location_id === locationId &&
+        row.season === season &&
+        row.year > lastHistoricalYear &&
+        row.year <= targetYear,
+    ),
+    "year",
   );
 };
 
 export const handlers = [
-  http.get("*/rest/v1/:table", ({ params, request }) => {
-    const tableName = params.table;
-    if (typeof tableName !== "string") {
-      return HttpResponse.json(
-        { message: "Missing table name" },
-        { status: 400 },
-      );
+  http.get("*/api/data/trend", ({ request }) => {
+    const url = new URL(request.url);
+    const locationId = Number(url.searchParams.get("locationId"));
+    const option = (url.searchParams.get("option") ??
+      "avg") as RuntimeTrendOption;
+    const season = normalizeGraphSeason(
+      url.searchParams.get("season") ?? DEFAULT_GRAPH_SEASON,
+    );
+
+    const rows = getRuntimeTrendRows(locationId, option, season);
+
+    return HttpResponse.json(mapTrendRowsToGraphData(rows), { status: 200 });
+  }),
+  http.get("*/api/data/reference", ({ request }) => {
+    const url = new URL(request.url);
+    const locationId = Number(url.searchParams.get("locationId"));
+    const year = url.searchParams.get("year") ?? "2000";
+    const season = normalizeGraphSeason(
+      url.searchParams.get("season") ?? DEFAULT_GRAPH_SEASON,
+    );
+
+    const rows = getRuntimeReferenceRows(locationId, year);
+    const data = mapReferenceRowsToGraphData(
+      filterReferenceRowsBySeason(rows, season),
+    );
+
+    return HttpResponse.json(data, { status: 200 });
+  }),
+  http.get("*/api/data/forecast", ({ request }) => {
+    const url = new URL(request.url);
+    const locationId = Number(url.searchParams.get("locationId"));
+    const season = normalizeGraphSeason(
+      url.searchParams.get("season") ?? DEFAULT_GRAPH_SEASON,
+    );
+    const yearsAhead = Number(url.searchParams.get("yearsAhead") ?? "0");
+
+    const historicalRow = getRuntimeHistoricalYear(locationId, season);
+    if (!historicalRow) {
+      return HttpResponse.json(null, { status: 200 });
     }
 
-    const url = new URL(request.url);
-    const sourceRows = getRuntimeMockTableRows(tableName);
+    const forecastRows = getRuntimeForecastRows(
+      locationId,
+      season,
+      historicalRow.year,
+      historicalRow.year + yearsAhead,
+    );
 
-    const filteredRows = applyFilters(sourceRows, url);
-    const orderedRows = applyOrdering(filteredRows, url);
-    const limitedRows = applyLimit(orderedRows, url);
-    const selectedRows = applyColumnSelection(limitedRows, url);
-
-    return HttpResponse.json(selectedRows, { status: 200 });
+    return HttpResponse.json(
+      forecastRows.length === 0
+        ? null
+        : {
+            forecastValues: forecastRows.map(({ pet }) => Number(pet)),
+            forecastYears: forecastRows.map(({ year }) => year),
+            lowerBound10: forecastRows.map(({ lower }) => Number(lower)),
+            upperBound90: forecastRows.map(({ upper }) => Number(upper)),
+          },
+      { status: 200 },
+    );
   }),
 ];

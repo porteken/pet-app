@@ -1,37 +1,48 @@
-export type Primitive = number | string;
+import type {
+  CityRankingsViewTable,
+  PetForecastTable,
+  PetYearStatsTable,
+} from "@/lib/db/types";
 
-interface FilterOperation {
-  column: string;
-  type: "eq" | "gt" | "gte" | "lt" | "lte";
-  value: Primitive;
-}
-interface MockListResult {
-  data: MockRow[];
-  error: undefined;
-}
+type Primitive = number | string;
 type MockRow = Record<string, Primitive>;
-interface MockSingleResult {
-  data: MockRow | undefined;
-  error: undefined;
+
+interface RuntimeLocationRow extends MockRow {
+  city: string;
+  id: number;
+  lat: number;
+  lng: number;
+  location_id: number;
+  state: string;
 }
-type MockSupabaseQuery = Promise<MockListResult> & {
-  eq: (column: string, value: Primitive) => MockSupabaseQuery;
-  gt: (column: string, value: Primitive) => MockSupabaseQuery;
-  gte: (column: string, value: Primitive) => MockSupabaseQuery;
-  limit: (count: number) => MockSupabaseQuery;
-  lt: (column: string, value: Primitive) => MockSupabaseQuery;
-  lte: (column: string, value: Primitive) => MockSupabaseQuery;
-  maybeSingle: () => Promise<MockSingleResult>;
-  order: (
-    column: string,
-    options?: { ascending?: boolean },
-  ) => MockSupabaseQuery;
-  select: (columns?: string) => MockSupabaseQuery;
-  single: () => Promise<MockSingleResult>;
-};
-interface OrderOperation {
-  ascending: boolean;
-  column: string;
+
+interface RuntimePetChangeRow extends MockRow {
+  change: number;
+  location_id: number;
+}
+
+interface RuntimePetPercentilesRow extends MockRow {
+  location_id: number;
+  p10: number;
+  p90: number;
+  year: number;
+}
+
+interface RuntimePetRow extends MockRow {
+  date: string;
+  location_id: number;
+  pet: number;
+  year: number;
+}
+
+interface RuntimeMockTables {
+  city_rankings_view: Array<CityRankingsViewTable & MockRow>;
+  locations: RuntimeLocationRow[];
+  pet: RuntimePetRow[];
+  pet_change: RuntimePetChangeRow[];
+  pet_forecast: Array<PetForecastTable & MockRow>;
+  pet_percentiles: RuntimePetPercentilesRow[];
+  pet_year_stats: Array<PetYearStatsTable & MockRow>;
 }
 
 const YEARS = Array.from({ length: 26 }, (_, index) => 2000 + index);
@@ -120,8 +131,8 @@ const getAveragePet = (locationId: number, year: number) => {
   return round(location.year2000Avg + delta * location.trendPerYear);
 };
 
-const buildPetYearRows = () => {
-  const rows: MockRow[] = [];
+const buildPetYearRows = (): RuntimePetRow[] => {
+  const rows: RuntimePetRow[] = [];
 
   for (const location of LOCATIONS) {
     for (const year of YEARS) {
@@ -148,7 +159,7 @@ const buildPetYearRows = () => {
 
 const petYearRows = buildPetYearRows();
 
-const MOCK_TABLES: Record<string, MockRow[]> = {
+const MOCK_TABLES: RuntimeMockTables = {
   city_rankings_view: LOCATIONS.flatMap((location) =>
     YEARS.flatMap((year) =>
       GRAPH_SEASONS.map((season) => {
@@ -249,228 +260,21 @@ const MOCK_TABLES: Record<string, MockRow[]> = {
   ),
 };
 
-const createNoopFunction = <TArguments extends unknown[], TReturn>(
-  implementation: (...arguments_: TArguments) => TReturn,
-) => implementation;
+const hasTable = (table: string): table is keyof RuntimeMockTables =>
+  Object.hasOwn(MOCK_TABLES, table);
 
-const compareEq = (left: Primitive | undefined, right: Primitive) =>
-  left !== undefined && String(left) === String(right);
-
-const compareNumeric = (
-  left: Primitive | undefined,
-  right: Primitive,
-  stringComparator: (rowValue: string, filterValue: string) => boolean,
-  numericComparator: (rowValue: number, filterValue: number) => boolean,
-) => {
-  if (left === undefined) {
-    return false;
+const getTableRows = (table: string): MockRow[] => {
+  if (!hasTable(table)) {
+    return [];
   }
 
-  const rowValue = Number(left);
-  const filterValue = Number(right);
-  if (Number.isNaN(rowValue) || Number.isNaN(filterValue)) {
-    return stringComparator(String(left), String(right));
-  }
-
-  return numericComparator(rowValue, filterValue);
+  return MOCK_TABLES[table];
 };
 
-const compareGreaterThan = <T>(rowValue: T, filterValue: T) =>
-  rowValue > filterValue;
-const compareGreaterThanOrEqual = <T>(rowValue: T, filterValue: T) =>
-  rowValue >= filterValue;
-const compareLessThan = <T>(rowValue: T, filterValue: T) =>
-  rowValue < filterValue;
-const compareLessThanOrEqual = <T>(rowValue: T, filterValue: T) =>
-  rowValue <= filterValue;
-
-const matchesFilterOperation = (row: MockRow, filter: FilterOperation) => {
-  const cell = row[filter.column];
-
-  switch (filter.type) {
-    case "eq": {
-      return compareEq(cell, filter.value);
-    }
-    case "gt": {
-      return compareNumeric(
-        cell,
-        filter.value,
-        compareGreaterThan,
-        compareGreaterThan,
-      );
-    }
-    case "gte": {
-      return compareNumeric(
-        cell,
-        filter.value,
-        compareGreaterThanOrEqual,
-        compareGreaterThanOrEqual,
-      );
-    }
-    case "lt": {
-      return compareNumeric(
-        cell,
-        filter.value,
-        compareLessThan,
-        compareLessThan,
-      );
-    }
-    case "lte": {
-      return compareNumeric(
-        cell,
-        filter.value,
-        compareLessThanOrEqual,
-        compareLessThanOrEqual,
-      );
-    }
-    default: {
-      return true;
-    }
-  }
-};
-
-const applyFilters = (rows: MockRow[], filters: FilterOperation[]) =>
-  rows.filter((row) =>
-    filters.every((filter) => matchesFilterOperation(row, filter)),
-  );
-
-const applyColumnSelection = (rows: MockRow[], columns?: string) => {
-  if (!columns || columns.trim() === "*" || columns.trim() === "") {
-    return rows.map((row) => structuredClone(row));
-  }
-
-  const selectedColumns = columns
-    .split(",")
-    .map((column) => column.trim())
-    .filter(Boolean);
-
-  return rows.map((row) =>
-    Object.fromEntries(
-      selectedColumns.map((column) => {
-        const parts = column.split(":");
-        if (parts.length === 2 && parts[0] && parts[1]) {
-          return [parts[0], row[parts[1]]];
-        }
-        return [column, row[column]];
-      }),
-    ),
-  );
-};
-
-const applyOrdering = (rows: MockRow[], orderOperation?: OrderOperation) => {
-  if (!orderOperation) {
-    return [...rows];
-  }
-
-  const { ascending, column } = orderOperation;
-
-  return rows.toSorted((left, right) => {
-    const a = left[column];
-    const b = right[column];
-
-    if (a === b) {
-      return 0;
-    }
-
-    if (typeof a === "number" && typeof b === "number") {
-      return ascending ? a - b : b - a;
-    }
-
-    return ascending
-      ? String(a).localeCompare(String(b))
-      : String(b).localeCompare(String(a));
-  });
-};
-
-const createMockSupabaseQuery = (table: string): MockSupabaseQuery => {
-  let selectedColumns: string | undefined;
-  const filters: FilterOperation[] = [];
-  let orderOperation: OrderOperation | undefined;
-  let limitValue: number | undefined;
-
-  const computeRows = (): MockRow[] => {
-    const sourceRows = MOCK_TABLES[table];
-
-    if (!sourceRows) {
-      return [];
-    }
-
-    let rows = applyFilters(sourceRows, filters);
-    rows = applyOrdering(rows, orderOperation);
-
-    if (typeof limitValue === "number") {
-      rows = rows.slice(0, Math.max(0, limitValue));
-    }
-
-    return applyColumnSelection(rows, selectedColumns) as any;
-  };
-
-  const asResult = (): MockListResult => ({
-    data: computeRows(),
-    error: undefined,
-  });
-
-  const query = new Promise<MockListResult>((resolve) => {
-    queueMicrotask(() => {
-      resolve(asResult());
-    });
-  }) as MockSupabaseQuery;
-
-  query.select = createNoopFunction((columns?: string) => {
-    selectedColumns = columns;
-    return query;
-  });
-  query.eq = createNoopFunction((column: string, value: Primitive) => {
-    filters.push({ column, type: "eq", value });
-    return query;
-  });
-  query.gt = createNoopFunction((column: string, value: Primitive) => {
-    filters.push({ column, type: "gt", value });
-    return query;
-  });
-  query.gte = createNoopFunction((column: string, value: Primitive) => {
-    filters.push({ column, type: "gte", value });
-    return query;
-  });
-  query.lt = createNoopFunction((column: string, value: Primitive) => {
-    filters.push({ column, type: "lt", value });
-    return query;
-  });
-  query.lte = createNoopFunction((column: string, value: Primitive) => {
-    filters.push({ column, type: "lte", value });
-    return query;
-  });
-  query.order = createNoopFunction(
-    (column: string, options?: { ascending?: boolean }) => {
-      orderOperation = {
-        ascending: options?.ascending ?? true,
-        column,
-      };
-      return query;
-    },
-  );
-  query.limit = createNoopFunction((count: number) => {
-    limitValue = count;
-    return query;
-  });
-  query.single = createNoopFunction(async () => {
-    const rows = computeRows();
-    return { data: rows[0], error: undefined };
-  });
-  query.maybeSingle = createNoopFunction(async () => {
-    const rows = computeRows();
-    return { data: rows[0], error: undefined };
-  });
-
-  return query;
-};
-
-export const getRuntimeMockTableRows = (table: string) =>
-  (MOCK_TABLES[table] ?? []).map((row) => structuredClone(row));
-
-export const createRuntimeMockSupabaseClient = () => ({
-  from: createNoopFunction((table: string) => createMockSupabaseQuery(table)),
-  rpc: createNoopFunction((_name: string) =>
-    createMockSupabaseQuery("__rpc__"),
-  ),
-});
+export function getRuntimeMockTableRows<TTable extends keyof RuntimeMockTables>(
+  table: TTable,
+): RuntimeMockTables[TTable];
+export function getRuntimeMockTableRows(table: string): MockRow[];
+export function getRuntimeMockTableRows(table: string) {
+  return getTableRows(table).map((row) => structuredClone(row));
+}

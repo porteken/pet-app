@@ -83,14 +83,11 @@ const HeaderBarComponent = ({
     const options = Array.isArray(LocationOptions) ? LocationOptions : [];
 
     const allCities = options.flatMap((section) =>
-      [...(section.items || [])].map(
-        (item) =>
-          ({
-            key: item.key,
-            state: section.title,
-            title: item.title,
-          }) as LocationItem,
-      ),
+      [...(section.items || [])].map((item) => ({
+        key: item.key,
+        state: section.title,
+        title: item.title,
+      })),
     );
 
     const grouped: Record<string, LocationItem[]> = {};

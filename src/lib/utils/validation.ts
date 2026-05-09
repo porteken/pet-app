@@ -14,7 +14,7 @@ export function validatePets(pets: number[]): void {
   }
 }
 
-export function validateTrendOption(option: string): boolean {
+export function validateTrendOption(option: string): option is "avg" | "max" {
   return option === "avg" || option === "max";
 }
 

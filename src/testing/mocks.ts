@@ -40,26 +40,6 @@ export const resetDatabase = () => {
   drop(database);
 };
 
-export const createMockSupabaseClient = () => ({
-  from: mockFn().mockImplementation((_table: string) =>
-    createMockSupabaseQuery(),
-  ),
-  rpc: mockFn().mockReturnValue(createMockSupabaseQuery()),
-});
-
-const createMockSupabaseQuery = () => ({
-  eq: mockFn().mockReturnThis(),
-  gt: mockFn().mockReturnThis(),
-  gte: mockFn().mockReturnThis(),
-  limit: mockFn().mockReturnThis(),
-  lt: mockFn().mockReturnThis(),
-  lte: mockFn().mockReturnThis(),
-  maybeSingle: mockFn(),
-  order: mockFn().mockReturnThis(),
-  select: mockFn().mockReturnThis(),
-  single: mockFn(),
-});
-
 export const createMockCookieStore = () => ({
   get: mockFn(),
   set: mockFn(),

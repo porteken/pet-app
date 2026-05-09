@@ -7,8 +7,8 @@ export default function LocationNotFound() {
         <h1 className="text-foreground text-3xl font-black tracking-tight sm:text-4xl">
           Location not found
         </h1>
-        <p className="text-muted-foreground mt-4 text-sm sm:text-base">
-          The requested location could not be found.
+        <p className="text-muted-foreground mt-3 text-sm sm:text-base">
+          We couldn&apos;t find a location matching that URL.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link

@@ -17,6 +17,9 @@ export type ApiResponse<T> =
 
 type ErrorHandler = (error: Error) => void;
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
 export async function apiRequest<T>(
   requestFunction: () => Promise<T>,
   errorHandler?: ErrorHandler,
@@ -51,6 +54,35 @@ export function hasError<T>(response: ApiResponse<T>): response is {
   };
 } {
   return response.error !== undefined;
+}
+
+export async function fetchApiJson(path: string): Promise<unknown> {
+  const response = await fetch(path, {
+    headers: {
+      accept: "application/json",
+    },
+  });
+
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch {
+    payload = undefined;
+  }
+
+  if (!response.ok) {
+    const message =
+      (isRecord(payload) && typeof payload.error === "string"
+        ? payload.error
+        : undefined) ?? `Request failed with status ${response.status}`;
+
+    throw new FetchError(message, {
+      payload,
+      statusCode: response.status,
+    });
+  }
+
+  return payload;
 }
 
 function handleApiError(error: unknown) {

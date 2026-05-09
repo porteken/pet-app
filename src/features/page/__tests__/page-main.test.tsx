@@ -24,10 +24,6 @@ vi.mock("@/features/header-bar", () => ({
   ),
 }));
 
-vi.mock("@/config/supabase/client", () => ({
-  default: {},
-}));
-
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     back: mockFn(),

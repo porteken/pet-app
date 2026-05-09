@@ -1,13 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import type { ReactNode } from "react";
+
 vi.mock("next/link", () => ({
   default: ({
     children,
     href,
     ...properties
   }: {
-    children: React.ReactNode;
+    children: ReactNode;
     href: string;
   }) => (
     <a href={href} {...properties}>
@@ -18,13 +20,13 @@ vi.mock("next/link", () => ({
 
 import LocationNotFound from "../not-found";
 
-describe("location not found page", () => {
-  it("renders the invalid location message and recovery link", () => {
+describe("location not-found page", () => {
+  it("renders the missing location message and return link", () => {
     render(<LocationNotFound />);
 
     expect(screen.getByText("Location not found")).toBeInTheDocument();
     expect(
-      screen.getByText("The requested location could not be found."),
+      screen.getByText("We couldn't find a location matching that URL."),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Back to home" })).toHaveAttribute(
       "href",

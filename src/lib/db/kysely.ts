@@ -56,4 +56,3 @@ export const getDb = (): Kysely<Database> => {
 
   return globalThis.petAppDbSingleton;
 };
-

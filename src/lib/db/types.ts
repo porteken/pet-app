@@ -15,7 +15,7 @@ export interface CityRankingsViewTable {
   year: number;
 }
 
-export interface LocationsTable {
+interface LocationsTable {
   city: string;
   id?: number | null;
   lat: NumericLike;
@@ -33,7 +33,7 @@ export interface PetForecastTable {
   year: number;
 }
 
-export interface PetTable {
+interface PetTable {
   date: Date | string;
   location_id: number;
   pet: NumericLike;

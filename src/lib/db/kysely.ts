@@ -57,9 +57,3 @@ export const getDb = (): Kysely<Database> => {
   return globalThis.petAppDbSingleton;
 };
 
-export const destroyDb = async () => {
-  await globalThis.petAppDbSingleton?.destroy();
-  await globalThis.petAppPgPoolSingleton?.end();
-  globalThis.petAppDbSingleton = undefined;
-  globalThis.petAppPgPoolSingleton = undefined;
-};

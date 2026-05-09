@@ -1,12 +1,7 @@
-import { createClient } from "@/config/supabase/client";
-import {
-  filterReferenceRowsBySeason,
-  mapReferenceRowsToGraphData,
-} from "@/lib/api/graph-data";
 import {
   formatSchemaValidationError,
   isSchemaValidationError,
-  parseReferenceGraphRows,
+  parseReferenceGraphDataResponse,
 } from "@/lib/api/schemas";
 import {
   DEFAULT_GRAPH_SEASON,
@@ -16,15 +11,20 @@ import {
 import { FetchError } from "@/lib/utils/errors";
 import { validateLocationId, validateYear } from "@/lib/utils/validation";
 
+import { apiRequest, fetchApiJson, hasError } from "./api-client";
+
 import type { ReferenceGraphDataProperties } from "@/types/types";
-import type { SupabaseClient } from "@supabase/supabase-js";
+
+const buildQueryString = (params: Record<string, number | string>) =>
+  new URLSearchParams(
+    Object.entries(params).map(([key, value]) => [key, String(value)]),
+  ).toString();
 
 export async function FetchReferenceGraphData(
   year: string,
   locationId: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
 ): Promise<ReferenceGraphDataProperties> {
-  const supabase = createClient();
   const resolvedSeason = normalizeGraphSeason(season);
 
   if (!validateYear(year)) {
@@ -35,49 +35,47 @@ export async function FetchReferenceGraphData(
     throw new FetchError(`Invalid location ID: ${locationId}`);
   }
 
-  const data = await fetchData(supabase, locationId, year);
-  return mapReferenceRowsToGraphData(
-    filterReferenceRowsBySeason(data, resolvedSeason),
-  );
-}
+  const response = await apiRequest(async () => {
+    const payload = await fetchApiJson(
+      `/api/data/reference?${buildQueryString({
+        locationId,
+        season: resolvedSeason,
+        year,
+      })}`,
+    );
 
-async function fetchData(
-  supabase: SupabaseClient,
-  locationId: number,
-  year: string,
-): Promise<
-  Array<{
-    date: string;
-    location_id: number;
-    pet: number;
-    year?: string;
-  }>
-> {
-  const { data, error } = await supabase
-    .from("pet")
-    .select("date, location_id, pet")
-    .eq("location_id", locationId)
-    .gte("date", `${year}-01-01`)
-    .lt("date", `${Number(year) + 1}-01-01`)
-    .order("date", { ascending: true });
+    return parseWithFetchError(
+      "Reference graph",
+      parseReferenceGraphDataResponse,
+      payload,
+    );
+  });
 
-  if (error) {
+  if (hasError(response)) {
     throw new FetchError(
-      `Database error fetching reference data for location ${locationId}, year ${year}: ${error.message}`,
-      error,
+      `Failed to fetch reference data for location ${locationId}, year ${year}: ${response.error.message}`,
+      {
+        code: response.error.code,
+        context: { locationId, statusCode: response.error.status, year },
+      },
     );
   }
 
+  return response.data;
+}
+
+const parseWithFetchError = <T>(
+  resource: string,
+  parser: (payload: unknown) => T,
+  payload: unknown,
+): T => {
   try {
-    return parseReferenceGraphRows(data ?? []);
-  } catch (validationError) {
-    if (isSchemaValidationError(validationError)) {
-      throw new FetchError(
-        formatSchemaValidationError("Reference graph", validationError),
-        validationError,
-      );
+    return parser(payload);
+  } catch (error) {
+    if (isSchemaValidationError(error)) {
+      throw new FetchError(formatSchemaValidationError(resource, error), error);
     }
 
-    throw validationError;
+    throw error;
   }
-}
+};

@@ -2,13 +2,26 @@ import { z } from "zod";
 
 const publicEnvironmentSchema = z.object({
   NEXT_PUBLIC_E2E_TEST: z.enum(["false", "true"]).default("false"),
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
-  NEXT_PUBLIC_SUPABASE_URL: z.url(),
+});
+
+const serverDatabaseEnvironmentSchema = z.object({
+  PGDATABASE: z.string().min(1),
+  PGHOST: z.string().min(1),
+  PGPASSWORD: z.string().min(1),
+  PGPORT: z.coerce.number().int().positive(),
+  PGSSLMODE: z
+    .enum(["allow", "disable", "prefer", "require", "verify-ca", "verify-full"])
+    .default("require"),
+  PGUSER: z.string().min(1),
 });
 
 type PublicEnvironment = z.infer<typeof publicEnvironmentSchema>;
+export type ServerDatabaseEnvironment = z.infer<
+  typeof serverDatabaseEnvironmentSchema
+>;
 
 let cachedPublicEnvironment: PublicEnvironment | undefined;
+let cachedServerDatabaseEnvironment: ServerDatabaseEnvironment | undefined;
 
 const formatEnvironmentIssues = (
   issues: Array<{ message: string; path: PropertyKey[] }>,
@@ -27,9 +40,6 @@ export const getPublicEnvironment = (): PublicEnvironment => {
 
   const parsed = publicEnvironmentSchema.safeParse({
     NEXT_PUBLIC_E2E_TEST: process.env.NEXT_PUBLIC_E2E_TEST,
-    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   });
   if (!parsed.success) {
     throw new Error(
@@ -39,6 +49,30 @@ export const getPublicEnvironment = (): PublicEnvironment => {
 
   cachedPublicEnvironment = parsed.data;
   return cachedPublicEnvironment;
+};
+
+export const getServerDatabaseEnvironment = (): ServerDatabaseEnvironment => {
+  if (cachedServerDatabaseEnvironment) {
+    return cachedServerDatabaseEnvironment;
+  }
+
+  const parsed = serverDatabaseEnvironmentSchema.safeParse({
+    PGDATABASE: process.env.PGDATABASE,
+    PGHOST: process.env.PGHOST,
+    PGPASSWORD: process.env.PGPASSWORD,
+    PGPORT: process.env.PGPORT,
+    PGSSLMODE: process.env.PGSSLMODE,
+    PGUSER: process.env.PGUSER,
+  });
+
+  if (!parsed.success) {
+    throw new Error(
+      `Invalid server environment variables: ${formatEnvironmentIssues(parsed.error.issues)}`,
+    );
+  }
+
+  cachedServerDatabaseEnvironment = parsed.data;
+  return cachedServerDatabaseEnvironment;
 };
 
 export const isE2ETestRun = () =>

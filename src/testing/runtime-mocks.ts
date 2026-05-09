@@ -1,3 +1,9 @@
+import type {
+  CityRankingsViewTable,
+  PetForecastTable,
+  PetYearStatsTable,
+} from "@/lib/db/types";
+
 export type Primitive = number | string;
 
 interface FilterOperation {
@@ -10,6 +16,44 @@ interface MockListResult {
   error: undefined;
 }
 type MockRow = Record<string, Primitive>;
+
+interface RuntimeLocationRow extends MockRow {
+  city: string;
+  id: number;
+  lat: number;
+  lng: number;
+  location_id: number;
+  state: string;
+}
+
+interface RuntimePetChangeRow extends MockRow {
+  change: number;
+  location_id: number;
+}
+
+interface RuntimePetPercentilesRow extends MockRow {
+  location_id: number;
+  p10: number;
+  p90: number;
+  year: number;
+}
+
+interface RuntimePetRow extends MockRow {
+  date: string;
+  location_id: number;
+  pet: number;
+  year: number;
+}
+
+interface RuntimeMockTables {
+  city_rankings_view: Array<CityRankingsViewTable & MockRow>;
+  locations: RuntimeLocationRow[];
+  pet: RuntimePetRow[];
+  pet_change: RuntimePetChangeRow[];
+  pet_forecast: Array<PetForecastTable & MockRow>;
+  pet_percentiles: RuntimePetPercentilesRow[];
+  pet_year_stats: Array<PetYearStatsTable & MockRow>;
+}
 interface MockSingleResult {
   data: MockRow | undefined;
   error: undefined;
@@ -120,8 +164,8 @@ const getAveragePet = (locationId: number, year: number) => {
   return round(location.year2000Avg + delta * location.trendPerYear);
 };
 
-const buildPetYearRows = () => {
-  const rows: MockRow[] = [];
+const buildPetYearRows = (): RuntimePetRow[] => {
+  const rows: RuntimePetRow[] = [];
 
   for (const location of LOCATIONS) {
     for (const year of YEARS) {
@@ -148,7 +192,7 @@ const buildPetYearRows = () => {
 
 const petYearRows = buildPetYearRows();
 
-const MOCK_TABLES: Record<string, MockRow[]> = {
+const MOCK_TABLES: RuntimeMockTables = {
   city_rankings_view: LOCATIONS.flatMap((location) =>
     YEARS.flatMap((year) =>
       GRAPH_SEASONS.map((season) => {
@@ -252,6 +296,17 @@ const MOCK_TABLES: Record<string, MockRow[]> = {
 const createNoopFunction = <TArguments extends unknown[], TReturn>(
   implementation: (...arguments_: TArguments) => TReturn,
 ) => implementation;
+
+const hasTable = (table: string): table is keyof RuntimeMockTables =>
+  Object.hasOwn(MOCK_TABLES, table);
+
+const getTableRows = (table: string): MockRow[] => {
+  if (!hasTable(table)) {
+    return [];
+  }
+
+  return MOCK_TABLES[table];
+};
 
 const compareEq = (left: Primitive | undefined, right: Primitive) =>
   left !== undefined && String(left) === String(right);
@@ -389,11 +444,7 @@ const createMockSupabaseQuery = (table: string): MockSupabaseQuery => {
   let limitValue: number | undefined;
 
   const computeRows = (): MockRow[] => {
-    const sourceRows = MOCK_TABLES[table];
-
-    if (!sourceRows) {
-      return [];
-    }
+    const sourceRows = getTableRows(table);
 
     let rows = applyFilters(sourceRows, filters);
     rows = applyOrdering(rows, orderOperation);
@@ -465,8 +516,13 @@ const createMockSupabaseQuery = (table: string): MockSupabaseQuery => {
   return query;
 };
 
-export const getRuntimeMockTableRows = (table: string) =>
-  (MOCK_TABLES[table] ?? []).map((row) => structuredClone(row));
+export function getRuntimeMockTableRows<TTable extends keyof RuntimeMockTables>(
+  table: TTable,
+): RuntimeMockTables[TTable];
+export function getRuntimeMockTableRows(table: string): MockRow[];
+export function getRuntimeMockTableRows(table: string) {
+  return getTableRows(table).map((row) => structuredClone(row));
+}
 
 export const createRuntimeMockSupabaseClient = () => ({
   from: createNoopFunction((table: string) => createMockSupabaseQuery(table)),

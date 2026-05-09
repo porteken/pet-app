@@ -49,7 +49,9 @@ export default defineConfig({
 
     {
       name: "webkit",
-      use: { ...devices["Desktop Safari"] },
+      use: {
+        ...devices["Desktop Safari"],
+      },
     },
 
     {
@@ -58,7 +60,9 @@ export default defineConfig({
     },
     {
       name: "Mobile Safari",
-      use: { ...devices["iPhone 12"] },
+      use: {
+        ...devices["iPhone 12"],
+      },
     },
   ],
   reporter: process.env.CI ? "html" : "line",

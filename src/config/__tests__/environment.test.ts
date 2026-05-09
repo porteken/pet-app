@@ -6,8 +6,12 @@ const loadEnvironmentModule = async () => import("../environment");
 
 const setBaseEnvironment = () => {
   process.env.NEXT_PUBLIC_E2E_TEST = "false";
-  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
-  delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  process.env.PGDATABASE = "pet";
+  process.env.PGHOST = "localhost";
+  process.env.PGPASSWORD = "password";
+  process.env.PGPORT = "5432";
+  process.env.PGSSLMODE = "require";
+  process.env.PGUSER = "postgres";
 };
 
 describe("environment", () => {
@@ -17,27 +21,51 @@ describe("environment", () => {
   });
 
   describe("getPublicEnvironment", () => {
-    it("returns the configured publishable key when present", async () => {
+    it("returns the configured public environment", async () => {
       setBaseEnvironment();
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "publishable-key";
 
       const { getPublicEnvironment } = await loadEnvironmentModule();
 
       expect(getPublicEnvironment()).toStrictEqual({
         NEXT_PUBLIC_E2E_TEST: "false",
-        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "publishable-key",
-        NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
       });
     });
 
-    it("throws when Supabase key is absent", async () => {
+    it("defaults the E2E flag when absent", async () => {
       setBaseEnvironment();
+      delete process.env.NEXT_PUBLIC_E2E_TEST;
 
       const { getPublicEnvironment } = await loadEnvironmentModule();
 
-      expect(() => getPublicEnvironment()).toThrow(
-        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-      );
+      expect(getPublicEnvironment()).toStrictEqual({
+        NEXT_PUBLIC_E2E_TEST: "false",
+      });
+    });
+  });
+
+  describe("getServerDatabaseEnvironment", () => {
+    it("returns the configured PostgreSQL environment", async () => {
+      setBaseEnvironment();
+
+      const { getServerDatabaseEnvironment } = await loadEnvironmentModule();
+
+      expect(getServerDatabaseEnvironment()).toStrictEqual({
+        PGDATABASE: "pet",
+        PGHOST: "localhost",
+        PGPASSWORD: "password",
+        PGPORT: 5432,
+        PGSSLMODE: "require",
+        PGUSER: "postgres",
+      });
+    });
+
+    it("throws when a required PostgreSQL variable is absent", async () => {
+      setBaseEnvironment();
+      delete process.env.PGHOST;
+
+      const { getServerDatabaseEnvironment } = await loadEnvironmentModule();
+
+      expect(() => getServerDatabaseEnvironment()).toThrow("PGHOST");
     });
   });
 });

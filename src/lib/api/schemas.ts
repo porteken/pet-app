@@ -58,6 +58,33 @@ const rankingViewRowSchema = z.object({
   year: yearSchema,
 });
 
+const trendGraphDataResponseSchema = z.object({
+  increase_per_year: finiteNumberSchema,
+  trendline_pets: z.array(finiteNumberSchema),
+  year_pets: z.array(finiteNumberSchema),
+  years: z.array(yearSchema),
+});
+
+const referenceGraphDataResponseSchema = z.object({
+  dates: z.array(
+    z
+      .string()
+      .min(1)
+      .refine(
+        (value) => !Number.isNaN(Date.parse(value)),
+        "Invalid date format",
+      ),
+  ),
+  pets: z.array(finiteNumberSchema),
+});
+
+const forecastGraphDataResponseSchema = z.object({
+  forecastValues: z.array(finiteNumberSchema),
+  forecastYears: z.array(yearSchema),
+  lowerBound10: z.array(finiteNumberSchema),
+  upperBound90: z.array(finiteNumberSchema),
+});
+
 const formatIssuePath = (issuePath: PropertyKey[]) =>
   issuePath.length === 0 ? "response" : issuePath.join(".");
 
@@ -93,6 +120,24 @@ export const parseLocationRows = (rows: unknown) =>
 
 export const parseRankingViewRows = (rows: unknown) =>
   z.array(rankingViewRowSchema).parse(rows);
+
+export const parseTrendGraphDataResponse = (payload: unknown) =>
+  trendGraphDataResponseSchema.parse(payload);
+
+export const parseReferenceGraphDataResponse = (payload: unknown) => {
+  const parsed = referenceGraphDataResponseSchema.parse(payload);
+
+  return {
+    dates: parsed.dates.map((date) => new Date(date)),
+    pets: parsed.pets,
+  };
+};
+
+export const parseForecastDataResponse = (payload: unknown) =>
+  forecastGraphDataResponseSchema
+    .nullable()
+    .transform((value) => value ?? undefined)
+    .parse(payload);
 
 export const isSchemaValidationError = (error: unknown): error is ZodError =>
   error instanceof ZodError;

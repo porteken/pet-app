@@ -1,5 +1,5 @@
 "use server";
-import { createClient } from "@/config/supabase/server";
+
 import {
   filterReferenceRowsBySeason,
   mapReferenceRowsToGraphData,
@@ -8,6 +8,8 @@ import {
 import {
   formatSchemaValidationError,
   isSchemaValidationError,
+  parseForecastRows,
+  parseHistoricalYearRows,
   parseLocationRows,
   parseRankingViewRows,
   parseReferenceGraphRows,
@@ -18,17 +20,22 @@ import {
   type GraphSeason,
   normalizeGraphSeason,
 } from "@/lib/constants";
+import {
+  fetchCityRankingsRows,
+  fetchForecastRows,
+  fetchHistoricalYearRow,
+  fetchLocationRows,
+  fetchReferenceGraphRows,
+  fetchTrendGraphRows,
+} from "@/lib/db/queries";
 import { DatabaseError } from "@/lib/utils/errors";
 import {
   validateLocationId,
   validateTrendOption,
   validateYear,
 } from "@/lib/utils/validation";
-import { cookies } from "next/headers";
 import { cache } from "react";
 
-const MIN_YEAR = 2000;
-const MAX_YEAR = 2100;
 import type {
   FetchLocationProperties,
   LocationOptionSection,
@@ -36,26 +43,16 @@ import type {
   TrendGraphDataProperties,
 } from "@/types/types";
 
+const MIN_YEAR = 2000;
+const MAX_YEAR = 2100;
+
 interface LocationQueryRow {
-  city: string;
+  city: unknown;
   id?: unknown;
   lat: unknown;
   lng: unknown;
   location_id?: unknown;
-  state: string;
-}
-
-const CITY_RANKINGS_COLUMNS =
-  "avg_pet, change_from_2000, city, future_lower, future_upper, location_id, max_pet, p10, p90, state, year";
-
-function assertQueryData<T>(
-  label: string,
-  data: T | null,
-  error: unknown,
-): asserts data is T {
-  if (error || !data) {
-    throw new DatabaseError(`Failed to fetch ${label} from database`, error);
-  }
+  state: unknown;
 }
 
 export async function FetchCityRankings(
@@ -84,24 +81,23 @@ export async function FetchCityRankings(
     );
   }
 
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore);
-
-  const { data, error } = await fetchCityRankingsRows(
-    supabase,
-    year,
-    resolvedSeason,
-  );
-
-  assertQueryData("city rankings", data, error);
+  let rows;
+  try {
+    rows = await fetchCityRankingsRows(year, resolvedSeason);
+  } catch (error) {
+    throw new DatabaseError(
+      "Failed to fetch city rankings from database",
+      error,
+    );
+  }
 
   const validatedRows = parseWithDatabaseError(
     "City rankings view",
     parseRankingViewRows,
-    data,
+    rows,
   );
 
-  const rankings = validatedRows
+  return validatedRows
     .toSorted((a, b) => b.avg_pet - a.avg_pet)
     .map((row, index) => ({
       avg_pet: row.avg_pet,
@@ -116,39 +112,23 @@ export async function FetchCityRankings(
       rank: index + 1,
       state: row.state,
     }));
-
-  return rankings;
-}
-
-async function fetchCityRankingsRows(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  year: number,
-  season: GraphSeason,
-) {
-  const primaryQuery = await supabase
-    .from("city_rankings_view")
-    .select(CITY_RANKINGS_COLUMNS)
-    .eq("year", year)
-    .eq("season", season);
-
-  if (!isMissingCityRankingsSeasonColumnError(primaryQuery.error)) {
-    return primaryQuery;
-  }
-
-  return supabase
-    .from("city_rankings_view")
-    .select(CITY_RANKINGS_COLUMNS)
-    .eq("year", year);
 }
 
 export const FetchLocations = cache(
   async (): Promise<FetchLocationProperties> => {
-    const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    let locations;
+    try {
+      locations = await fetchLocationRows("id");
+    } catch (error) {
+      throw new DatabaseError(
+        "Failed to fetch location data from database",
+        error,
+      );
+    }
 
-    const locations = await fetchLocationRows(supabase);
-
-    const sanitizedLocations = filterRowsWithNonNegativeLocationId(locations);
+    const normalizedLocations = locations.map(normalizeLocationRow);
+    const sanitizedLocations =
+      filterRowsWithNonNegativeLocationId(normalizedLocations);
     const validatedLocations = parseWithDatabaseError(
       "Locations",
       parseLocationRows,
@@ -183,111 +163,84 @@ export const FetchLocations = cache(
   },
 );
 
-async function fetchLocationRows(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-) {
-  const primaryQuery = await supabase
-    .from("locations")
-    .select("city, lat, lng, id, state");
+export async function FetchForecastData(
+  locationId: number,
+  yearsAhead: number,
+  season: GraphSeason = DEFAULT_GRAPH_SEASON,
+): Promise<
+  | undefined
+  | {
+      forecastValues: number[];
+      forecastYears: number[];
+      lowerBound10: number[];
+      upperBound90: number[];
+    }
+> {
+  if (!validateLocationId(locationId)) {
+    throw new DatabaseError(`Invalid locationId: ${locationId}`);
+  }
 
-  const fallbackQuery = isMissingLocationColumnError(primaryQuery.error)
-    ? await supabase
-        .from("locations")
-        .select("city, lat, lng, location_id, state")
-    : primaryQuery;
+  const resolvedSeason = normalizeGraphSeason(season);
 
-  if (fallbackQuery.error || !fallbackQuery.data) {
+  let historicalData;
+  try {
+    historicalData = await fetchHistoricalYearRow(locationId, resolvedSeason);
+  } catch (error) {
     throw new DatabaseError(
-      "Failed to fetch location data from database",
-      fallbackQuery.error,
+      "Failed to fetch forecast data from database",
+      error,
     );
   }
 
-  return fallbackQuery.data.map(normalizeLocationRow);
-}
+  if (!historicalData) {
+    return undefined;
+  }
 
-function normalizeLocationRow({
-  id,
-  location_id,
-  ...location
-}: LocationQueryRow) {
-  return {
-    ...location,
-    location_id: id ?? location_id,
+  const validatedHistoricalData = parseWithDatabaseError(
+    "Historical year",
+    parseHistoricalYearRows,
+    [historicalData],
+  );
+  const firstHistorical = validatedHistoricalData[0];
+  if (!firstHistorical) {
+    return undefined;
+  }
+
+  const queryWindow = {
+    lastHistoricalYear: firstHistorical.year,
+    targetYear: firstHistorical.year + yearsAhead,
   };
-}
 
-function isMissingLocationColumnError(error: unknown): boolean {
-  if (!error || typeof error !== "object") {
-    return false;
+  let forecastRows;
+  try {
+    forecastRows = await fetchForecastRows(
+      locationId,
+      queryWindow,
+      resolvedSeason,
+    );
+  } catch (error) {
+    throw new DatabaseError(
+      "Failed to fetch forecast data from database",
+      error,
+    );
   }
 
-  const code = "code" in error ? error.code : undefined;
-  const message = "message" in error ? error.message : undefined;
-
-  return (
-    code === "42703" &&
-    typeof message === "string" &&
-    message.includes("column locations.id does not exist")
+  const validatedForecastRows = parseWithDatabaseError(
+    "Forecast",
+    parseForecastRows,
+    forecastRows,
   );
-}
 
-function isMissingCityRankingsSeasonColumnError(error: unknown): boolean {
-  return isMissingSeasonColumnError(error, "city_rankings_view");
-}
-
-function isMissingPetYearStatsSeasonColumnError(error: unknown): boolean {
-  return isMissingSeasonColumnError(error, "pet_year_stats");
-}
-
-function isMissingSeasonColumnError(
-  error: unknown,
-  relationName: string,
-): boolean {
-  if (!error || typeof error !== "object") {
-    return false;
+  if (validatedForecastRows.length === 0) {
+    return undefined;
   }
 
-  const code = "code" in error ? error.code : undefined;
-  const message = "message" in error ? error.message : undefined;
-
-  if (typeof message !== "string") {
-    return false;
-  }
-
-  return (
-    (code === "42703" &&
-      message.includes(`column ${relationName}.season does not exist`)) ||
-    (code === "PGRST204" &&
-      message.includes("'season'") &&
-      message.includes(`'${relationName}'`))
-  );
-}
-
-async function fetchTrendGraphRows(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  option: string,
-  locationId: number,
-  season: GraphSeason,
-) {
-  const columns = `location_id, pet:${option}_pet, year`;
-
-  const primaryQuery = await supabase
-    .from("pet_year_stats")
-    .select(columns)
-    .eq("location_id", locationId)
-    .eq("season", season)
-    .order("year", { ascending: true });
-
-  if (!isMissingPetYearStatsSeasonColumnError(primaryQuery.error)) {
-    return primaryQuery;
-  }
-
-  return supabase
-    .from("pet_year_stats")
-    .select(columns)
-    .eq("location_id", locationId)
-    .order("year", { ascending: true });
+  return {
+    forecastValues: validatedForecastRows.map(({ pet }) => pet),
+    forecastYears: validatedForecastRows.map(({ year }) => year),
+    lowerBound10: validatedForecastRows.map(({ lower }) => lower),
+    upperBound90: validatedForecastRows.map(({ upper }) => upper),
+  };
 }
 
 export async function FetchReferenceGraphData(
@@ -307,18 +260,10 @@ export async function FetchReferenceGraphData(
     );
   }
 
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore);
-
-  const { data, error } = await supabase
-    .from("pet")
-    .select("date, location_id, pet")
-    .eq("location_id", locationId)
-    .gte("date", `${year}-01-01`)
-    .lt("date", `${Number(year) + 1}-01-01`)
-    .order("date", { ascending: true });
-
-  if (error || !data) {
+  let rows;
+  try {
+    rows = await fetchReferenceGraphRows(locationId, year);
+  } catch (error) {
     throw new DatabaseError(
       "Failed to fetch reference graph data from database",
       error,
@@ -328,7 +273,7 @@ export async function FetchReferenceGraphData(
   const validatedRows = parseWithDatabaseError(
     "Reference graph",
     parseReferenceGraphRows,
-    data,
+    rows,
   );
 
   return mapReferenceRowsToGraphData(
@@ -353,17 +298,10 @@ export async function FetchTrendGraphData(
     );
   }
 
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore);
-
-  const { data, error } = await fetchTrendGraphRows(
-    supabase,
-    option,
-    locationId,
-    resolvedSeason,
-  );
-
-  if (error || !data) {
+  let rows;
+  try {
+    rows = await fetchTrendGraphRows(locationId, option, resolvedSeason);
+  } catch (error) {
     throw new DatabaseError(
       "Failed to fetch trend graph data from database",
       error,
@@ -373,10 +311,21 @@ export async function FetchTrendGraphData(
   const validatedRows = parseWithDatabaseError(
     "Trend graph",
     parseTrendGraphRows,
-    data,
+    rows,
   );
 
   return mapTrendRowsToGraphData(validatedRows);
+}
+
+function normalizeLocationRow({
+  id,
+  location_id,
+  ...location
+}: LocationQueryRow) {
+  return {
+    ...location,
+    location_id: id ?? location_id,
+  };
 }
 
 function filterRowsWithNonNegativeLocationId<

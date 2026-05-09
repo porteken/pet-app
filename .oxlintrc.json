@@ -395,12 +395,6 @@
   },
   "overrides": [
     {
-      "files": ["src/config/supabase/**/*.{ts,tsx}"],
-      "rules": {
-        "typescript/no-unsafe-type-assertion": "off"
-      }
-    },
-    {
       "files": [
         "**/__tests__/**/*.{ts,tsx}",
         "**/*.test.{ts,tsx}",

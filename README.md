@@ -35,7 +35,7 @@ Based on [this study](https://bjsm.bmj.com/content/55/15/825), PET may provide b
 - **UI**: shadcn/ui
 - **Map**: Leaflet, React Leaflet, OpenStreetMap
 - **Charts**: Recharts
-- **Data**: Supabase
+- **Data**: Postgres, Kysely
 - **Monitoring**: Sentry
 - **Testing**: Vitest, Playwright
 - **Deployment**: Vercel

@@ -16,7 +16,6 @@ export default defineConfig({
         ".next/**",
         "tests/**",
         "src/utils/__tests__/test-utilities.ts",
-        "src/config/supabase/**",
         "src/proxy.ts",
         "**/*types.ts",
         "**/constants.ts",

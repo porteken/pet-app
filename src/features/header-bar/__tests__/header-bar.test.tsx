@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom";
 
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -94,11 +95,11 @@ describe("headerBar", () => {
       writable: true,
     });
 
-    globalThis.ResizeObserver = mockFn().mockReturnValue({
-      disconnect: mockFn(),
-      observe: mockFn(),
-      unobserve: mockFn(),
-    });
+    globalThis.ResizeObserver = class ResizeObserver {
+      disconnect = mockFn();
+      observe = mockFn();
+      unobserve = mockFn();
+    } as unknown as typeof globalThis.ResizeObserver;
   });
 
   beforeEach(() => {
@@ -187,25 +188,31 @@ describe("headerBar", () => {
       render(<HeaderBar LocationOptions={mockLocationOptions} />);
 
       const selector = screen.getByTestId("city-selector");
-      expect(selector).toHaveAttribute("data-placeholder", "Select City");
+      expect(selector).toHaveTextContent("Select City");
     });
 
-    it("should handle the onChange event for city selector", () => {
+    it("should handle the onChange event for city selector", async () => {
+      const user = userEvent.setup();
       render(<HeaderBar LocationOptions={mockLocationOptions} />);
 
       const selector = screen.getByTestId("city-selector");
-      fireEvent.focus(selector);
-      fireEvent.click(screen.getByText("New York"));
+      await user.click(selector);
+
+      const option = await screen.findByRole("option", { name: "New York" });
+      await user.click(option);
 
       expect(mockPush).toHaveBeenCalledWith("/0");
     });
 
-    it("should allow searching by state in the city autocomplete", () => {
+    it("should allow searching by state in the city autocomplete", async () => {
+      const user = userEvent.setup();
       render(<HeaderBar LocationOptions={mockLocationOptions} />);
 
       const selector = screen.getByTestId("city-selector");
-      fireEvent.focus(selector);
-      fireEvent.change(selector, { target: { value: "test states" } });
+      await user.click(selector);
+
+      const searchInput = await screen.findByPlaceholderText("Search...");
+      await user.type(searchInput, "test states");
 
       expect(screen.getByText("New York")).toBeInTheDocument();
       expect(screen.getByText("Los Angeles")).toBeInTheDocument();
@@ -214,28 +221,29 @@ describe("headerBar", () => {
     it("should clear city selection when clear button is clicked", () => {
       render(<HeaderBar id={1} LocationOptions={mockLocationOptions} />);
 
-      fireEvent.click(screen.getByRole("button", { name: "Clear selection" }));
+      fireEvent.click(screen.getByRole("button", { name: "Clear" }));
       expect(mockPush).toHaveBeenCalledWith("/");
     });
 
     it("should have proper placeholder text based on ID", () => {
-      render(<HeaderBar id={1} LocationOptions={mockLocationOptions} />);
-      expect(screen.getByTestId("city-selector")).toHaveAttribute(
-        "data-placeholder",
+      const { unmount } = render(
+        <HeaderBar id={999} LocationOptions={mockLocationOptions} />,
+      );
+      expect(screen.getByTestId("city-selector")).toHaveTextContent(
         "Change City",
       );
+      unmount();
 
       render(<HeaderBar id={-1} LocationOptions={mockLocationOptions} />);
-      expect(screen.getAllByTestId("city-selector")).toHaveLength(2);
+      expect(screen.getByTestId("city-selector")).toHaveTextContent(
+        "Select City",
+      );
     });
 
     it("should treat location id zero as a selected city", () => {
       render(<HeaderBar id={0} LocationOptions={mockLocationOptions} />);
 
-      expect(screen.getByTestId("city-selector")).toHaveAttribute(
-        "data-placeholder",
-        "Change City",
-      );
+      expect(screen.getByTestId("city-selector")).toHaveTextContent("New York");
     });
   });
 

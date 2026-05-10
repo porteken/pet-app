@@ -60,3 +60,22 @@ afterEach(() => {
 afterAll(() => {
   server.close();
 });
+
+if (typeof globalThis !== "undefined") {
+  vi.spyOn(
+    globalThis.HTMLElement.prototype,
+    "hasPointerCapture",
+  ).mockImplementation(vi.fn<() => boolean>());
+  vi.spyOn(
+    globalThis.HTMLElement.prototype,
+    "releasePointerCapture",
+  ).mockImplementation(vi.fn<() => void>());
+  vi.spyOn(
+    globalThis.HTMLElement.prototype,
+    "setPointerCapture",
+  ).mockImplementation(vi.fn<() => void>());
+  vi.spyOn(
+    globalThis.HTMLElement.prototype,
+    "scrollIntoView",
+  ).mockImplementation(vi.fn<() => void>());
+}

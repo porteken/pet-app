@@ -234,8 +234,9 @@ const Select = ({
     return data
       .map((item) => {
         if ("group" in item) {
-          const filteredItems = item.items.filter((i) =>
-            i.label.toLowerCase().includes(lowerSearch),
+          const groupMatch = item.group.toLowerCase().includes(lowerSearch);
+          const filteredItems = item.items.filter(
+            (i) => groupMatch || i.label.toLowerCase().includes(lowerSearch),
           );
           if (filteredItems.length > 0) {
             return { ...item, items: filteredItems };

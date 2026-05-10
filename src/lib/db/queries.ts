@@ -372,10 +372,7 @@ export async function fetchForecastRows(
   try {
     return await buildQuery(season).execute();
   } catch (error) {
-    if (
-      season !== undefined &&
-      isMissingColumnError(error, table, "season")
-    ) {
+    if (season !== undefined && isMissingColumnError(error, table, "season")) {
       return buildQuery().execute();
     }
 

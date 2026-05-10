@@ -175,9 +175,7 @@ describe("trendAnalysis", () => {
       render(<TrendAnalysis {...defaultProps} initialGraphMeasure="max" />);
 
       await waitFor(() => {
-        expect(
-          screen.getByTestId("forecast-controls"),
-        ).toBeInTheDocument();
+        expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
       });
     });
 
@@ -420,8 +418,6 @@ describe("trendAnalysis", () => {
 
       expect(select).toHaveValue("max");
     });
-
-
 
     it("should ignore stale graph responses when measure changes quickly", async () => {
       let resolveMaxRequest:
@@ -755,8 +751,6 @@ describe("trendAnalysis", () => {
         );
       });
     });
-
-
 
     it("should have correct select options", async () => {
       render(<TrendAnalysis {...defaultProps} />);

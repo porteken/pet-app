@@ -127,7 +127,8 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           snapshot,
         } = await buildTrendAnalysisResult({
           enableForecast,
-          fetchForecastData: () => FetchForecastData(id, yearsAhead, season, option),
+          fetchForecastData: () =>
+            FetchForecastData(id, yearsAhead, season, option),
           fetchTrendGraphData: () => {
             if (
               initialTrendData &&
@@ -198,8 +199,6 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     },
     [onSeasonChange],
   );
-
-
 
   React.useEffect(() => {
     const performGenerate = async () => {

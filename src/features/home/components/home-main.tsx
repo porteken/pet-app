@@ -158,8 +158,6 @@ const Home: FC<MapProperties> = ({
     await setGraphSeason(nextSeason);
   }, []);
 
-
-
   useEffect(() => {
     if (selectedLocationId !== undefined) {
       const performGenerate = async () => {

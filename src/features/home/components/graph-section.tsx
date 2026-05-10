@@ -229,7 +229,6 @@ class GraphControlsPanel extends React.PureComponent<GraphControlsPanelPropertie
       selectOptions,
     } = this.props;
 
-
     const showMobileLegendToggle =
       isMobileViewport && onToggleMobileGraphLegend !== undefined;
 

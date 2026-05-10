@@ -29,7 +29,12 @@ export async function GET(request: Request) {
   }
 
   try {
-    const data = await FetchForecastData(locationId, yearsAhead, season, option);
+    const data = await FetchForecastData(
+      locationId,
+      yearsAhead,
+      season,
+      option,
+    );
     return NextResponse.json(data ?? null);
   } catch (error) {
     return createDataRouteErrorResponse(error, "Failed to fetch forecast data");

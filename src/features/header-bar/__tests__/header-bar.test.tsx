@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -216,6 +216,29 @@ describe("headerBar", () => {
 
       expect(screen.getByText("New York")).toBeInTheDocument();
       expect(screen.getByText("Los Angeles")).toBeInTheDocument();
+    });
+
+    it("should focus the search input so typing works immediately after opening", async () => {
+      const user = userEvent.setup();
+      render(<HeaderBar LocationOptions={mockLocationOptions} />);
+
+      const selector = screen.getByTestId("city-selector");
+      await user.click(selector);
+
+      const searchInput = await screen.findByPlaceholderText("Search...");
+      await waitFor(() => {
+        expect(searchInput).toHaveFocus();
+      });
+
+      await user.keyboard("los");
+
+      expect(searchInput).toHaveValue("los");
+      expect(
+        screen.getByRole("option", { name: "Los Angeles" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("option", { name: "New York" }),
+      ).not.toBeInTheDocument();
     });
 
     it("should clear city selection when clear button is clicked", () => {

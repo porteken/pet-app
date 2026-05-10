@@ -37,8 +37,8 @@ jobs:
       - run: pnpm run tsc
       - run: pnpm run knip
 
-  vitest-unit:
-    name: Vitest Unit (shard ${{ matrix.shard_index }}/5)
+  vitest:
+    name: Vitest (shard ${{ matrix.shard_index }}/5)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -57,19 +57,19 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
 
-      - run: pnpm run test:unit --reporter=blob --outputFile=./vitest-unit-blob-${{ matrix.shard_index }}-of-5.json --shard=${{ matrix.shard_index }}/5
+      - run: pnpm exec vitest run --reporter=blob --outputFile=./vitest-blob-${{ matrix.shard_index }}-of-5.json --shard=${{ matrix.shard_index }}/5
 
-      - name: Upload Vitest unit blob report
+      - name: Upload Vitest blob report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: vitest-unit-blob-${{ matrix.shard_index }}
-          path: vitest-unit-blob-${{ matrix.shard_index }}-of-5.json
+          name: vitest-blob-${{ matrix.shard_index }}
+          path: vitest-blob-${{ matrix.shard_index }}-of-5.json
           retention-days: 1
 
-  merge-vitest-unit:
-    name: Merge Vitest Unit Reports
-    needs: vitest-unit
+  merge-vitest:
+    name: Merge Vitest Reports
+    needs: vitest
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
@@ -85,110 +85,33 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
 
-      - name: Download Vitest unit blob reports
+      - name: Download Vitest blob reports
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
-          path: all-vitest-unit-blob-reports
-          pattern: vitest-unit-blob-*
+          path: all-vitest-blob-reports
+          pattern: vitest-blob-*
           merge-multiple: true
 
-      - name: Check for downloaded Vitest unit blob reports
-        id: unit_blob_reports
+      - name: Check for downloaded Vitest blob reports
+        id: vitest_blob_reports
         run: |
-          mkdir -p ./all-vitest-unit-blob-reports
+          mkdir -p ./all-vitest-blob-reports
 
-          if find ./all-vitest-unit-blob-reports -maxdepth 1 -type f -name '*.json' | grep -q .; then
+          if find ./all-vitest-blob-reports -maxdepth 1 -type f -name '*.json' | grep -q .; then
             echo "found=true" >> "$GITHUB_OUTPUT"
           else
             echo "found=false" >> "$GITHUB_OUTPUT"
-            echo "No Vitest unit blob reports were downloaded; skipping merge."
+            echo "No Vitest blob reports were downloaded; skipping merge."
           fi
 
-      - name: Merge Vitest unit reports
-        if: steps.unit_blob_reports.outputs.found == 'true'
-        run: pnpm exec vitest run --merge-reports=./all-vitest-unit-blob-reports --reporter=junit
+      - name: Merge Vitest reports
+        if: steps.vitest_blob_reports.outputs.found == 'true'
+        run: pnpm exec vitest run --merge-reports=./all-vitest-blob-reports --reporter=junit
 
-      - name: Fail when unit blob reports are unexpectedly missing
-        if: steps.unit_blob_reports.outputs.found != 'true' && needs.vitest-unit.result == 'success'
+      - name: Fail when Vitest blob reports are unexpectedly missing
+        if: steps.vitest_blob_reports.outputs.found != 'true' && needs.vitest.result == 'success'
         run: |
-          echo "Expected Vitest unit blob reports, but none were downloaded."
-          exit 1
-
-  vitest-integration:
-    name: Vitest Integration (shard ${{ matrix.shard_index }}/2)
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard_index: [1, 2]
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
-        with:
-          run_install: false
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
-
-      - run: pnpm run test:integration --reporter=blob --outputFile=./vitest-integration-blob-${{ matrix.shard_index }}-of-2.json --shard=${{ matrix.shard_index }}/2
-
-      - name: Upload Vitest integration blob report
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: vitest-integration-blob-${{ matrix.shard_index }}
-          path: vitest-integration-blob-${{ matrix.shard_index }}-of-2.json
-          retention-days: 1
-
-  merge-vitest-integration:
-    name: Merge Vitest Integration Reports
-    needs: vitest-integration
-    if: ${{ !cancelled() }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
-        with:
-          run_install: false
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
-
-      - name: Download Vitest integration blob reports
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
-        with:
-          path: all-vitest-integration-blob-reports
-          pattern: vitest-integration-blob-*
-          merge-multiple: true
-
-      - name: Check for downloaded Vitest integration blob reports
-        id: integration_blob_reports
-        run: |
-          mkdir -p ./all-vitest-integration-blob-reports
-
-          if find ./all-vitest-integration-blob-reports -maxdepth 1 -type f -name '*.json' | grep -q .; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-            echo "No Vitest integration blob reports were downloaded; skipping merge."
-          fi
-
-      - name: Merge Vitest integration reports
-        if: steps.integration_blob_reports.outputs.found == 'true'
-        run: pnpm exec vitest run --merge-reports=./all-vitest-integration-blob-reports --reporter=junit
-
-      - name: Fail when integration blob reports are unexpectedly missing
-        if: steps.integration_blob_reports.outputs.found != 'true' && needs.vitest-integration.result == 'success'
-        run: |
-          echo "Expected Vitest integration blob reports, but none were downloaded."
+          echo "Expected Vitest blob reports, but none were downloaded."
           exit 1
 
   playwright-e2e:
@@ -236,14 +159,14 @@ jobs:
 
       - name: Get Playwright Version
         id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_ENV"
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
 
       - name: Cache Playwright Browsers
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         id: cache-playwright
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
 
       - name: Install Playwright Browsers & OS Deps
         if: steps.cache-playwright.outputs.cache-hit != 'true'
@@ -370,14 +293,7 @@ jobs:
   deploy:
     name: Deploy to Vercel
     if: github.event_name == 'push' && (github.ref_name == 'dev' || github.ref_name == 'prd')
-    needs:
-      [
-        quality-checks,
-        vitest-unit,
-        vitest-integration,
-        playwright-e2e,
-        sonarqube,
-      ]
+    needs: [quality-checks, vitest, playwright-e2e, sonarqube]
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Vercel Deploy Hook

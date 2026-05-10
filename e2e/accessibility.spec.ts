@@ -171,11 +171,22 @@ test.describe("Accessibility", () => {
 
     await page.goto("/1");
 
-    const selectElements = page.locator("select");
-    const firstSelect = selectElements.first();
-    const box = await firstSelect.boundingBox();
-    expect(box).not.toBeNull();
-    expect(box?.height).toBeGreaterThanOrEqual(40);
+    const touchTargets = [
+      page.locator("select#graph-season"),
+      page.locator("select#graph-measure"),
+      page.locator("select#reference-year"),
+    ];
+
+    for (const touchTarget of touchTargets) {
+      await expect(touchTarget).toBeVisible({ timeout: 10_000 });
+      const box = await touchTarget.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box?.height).toBeGreaterThanOrEqual(40);
+    }
+
+    await expect(page.getByTestId("city-selector")).toBeVisible({
+      timeout: 10_000,
+    });
 
     await expect(
       page.getByRole("heading", TREND_ANALYSIS_HEADING),

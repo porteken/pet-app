@@ -99,7 +99,7 @@ describe("headerBar", () => {
       disconnect = mockFn();
       observe = mockFn();
       unobserve = mockFn();
-    } as unknown as typeof globalThis.ResizeObserver;
+    };
   });
 
   beforeEach(() => {

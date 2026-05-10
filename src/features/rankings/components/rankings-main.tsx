@@ -250,6 +250,7 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
           <Select
             className="w-full"
             data={YEAR_OPTIONS}
+            data-testid="rankings-year-filter"
             disabled={isPending}
             label="Year"
             onChange={this.handleYearChange}
@@ -258,6 +259,7 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
           <Select
             className="w-full"
             data={SEASON_OPTIONS}
+            data-testid="rankings-season-filter"
             disabled={isPending}
             label="Season"
             onChange={this.handleSeasonChange}
@@ -267,6 +269,7 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
             className="w-full"
             clearable
             data={stateOptions}
+            data-testid="rankings-state-filter"
             disabled={isPending}
             label="State"
             onChange={this.handleStateChange}
@@ -278,6 +281,7 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
             className="w-full"
             clearable
             data={heatStressOptions}
+            data-testid="rankings-heat-stress-filter"
             disabled={isPending}
             label="Avg Thermal Stress Level"
             onChange={this.handleHeatStressChange}

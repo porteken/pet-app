@@ -494,7 +494,7 @@ describe("home", () => {
       });
 
       await waitFor(() =>
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual"),
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual", "avg"),
       );
     });
 
@@ -514,7 +514,7 @@ describe("home", () => {
       });
 
       await waitFor(() =>
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Winter"),
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Winter", "avg"),
       );
     });
 
@@ -604,7 +604,7 @@ describe("home", () => {
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual", "avg");
       });
     });
 
@@ -630,7 +630,7 @@ describe("home", () => {
       fireEvent.click(screen.getByTestId("marker-click"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 20, "Annual");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 20, "Annual", "avg");
       });
     });
   });

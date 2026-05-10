@@ -90,8 +90,10 @@ const getRuntimeForecastRows = (
   season: string,
   lastHistoricalYear: number,
   targetYear: number,
+  option: string = "avg",
 ) => {
-  const rows = getRuntimeMockTableRows("pet_forecast");
+  const table = option === "max" ? "pet_forecast_max" : "pet_forecast";
+  const rows = getRuntimeMockTableRows(table);
 
   return sortBy(
     rows.filter(
@@ -140,6 +142,7 @@ export const handlers = [
     const season = normalizeGraphSeason(
       url.searchParams.get("season") ?? DEFAULT_GRAPH_SEASON,
     );
+    const option = url.searchParams.get("option") ?? "avg";
     const yearsAhead = Number(url.searchParams.get("yearsAhead") ?? "0");
 
     const historicalRow = getRuntimeHistoricalYear(locationId, season);
@@ -152,6 +155,7 @@ export const handlers = [
       season,
       historicalRow.year,
       historicalRow.year + yearsAhead,
+      option,
     );
 
     return HttpResponse.json(

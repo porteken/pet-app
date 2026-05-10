@@ -14,6 +14,7 @@ export async function GET(request: Request) {
   const season = normalizeGraphSeason(
     url.searchParams.get("season") ?? DEFAULT_GRAPH_SEASON,
   );
+  const option = url.searchParams.get("option") ?? "avg";
   const yearsAhead = Number(url.searchParams.get("yearsAhead"));
 
   if (!validateLocationId(locationId)) {
@@ -28,7 +29,12 @@ export async function GET(request: Request) {
   }
 
   try {
-    const data = await FetchForecastData(locationId, yearsAhead, season);
+    const data = await FetchForecastData(
+      locationId,
+      yearsAhead,
+      season,
+      option,
+    );
     return NextResponse.json(data ?? null);
   } catch (error) {
     return createDataRouteErrorResponse(error, "Failed to fetch forecast data");

@@ -28,6 +28,7 @@ export async function FetchForecastData(
   locationId: number,
   yearsAhead: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
+  option: string = "avg",
 ): Promise<
   | undefined
   | {
@@ -39,6 +40,10 @@ export async function FetchForecastData(
 > {
   if (!validateLocationId(locationId)) {
     throw new FetchError(`Invalid location ID: ${locationId}`);
+  }
+
+  if (!validateTrendOption(option)) {
+    throw new FetchError(`Invalid trend option: ${option}`);
   }
 
   if (globalThis.window == undefined) {
@@ -53,6 +58,7 @@ export async function FetchForecastData(
     const payload = await fetchApiJson(
       `/api/data/forecast?${buildQueryString({
         locationId,
+        option,
         season: resolvedSeason,
         yearsAhead,
       })}`,

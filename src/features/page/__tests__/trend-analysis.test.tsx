@@ -171,13 +171,11 @@ describe("trendAnalysis", () => {
       expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
     });
 
-    it("should not render forecast controls when measure is max", async () => {
+    it("should render forecast controls when measure is max", async () => {
       render(<TrendAnalysis {...defaultProps} initialGraphMeasure="max" />);
 
       await waitFor(() => {
-        expect(
-          screen.queryByTestId("forecast-controls"),
-        ).not.toBeInTheDocument();
+        expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
       });
     });
 
@@ -345,7 +343,7 @@ describe("trendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual", "avg");
       });
 
       await waitFor(() => {
@@ -419,23 +417,6 @@ describe("trendAnalysis", () => {
       });
 
       expect(select).toHaveValue("max");
-    });
-
-    it("should hide forecast controls when changing to max measure", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
-      });
-
-      const select = screen.getByLabelText("Graph Measure");
-      fireEvent.change(select, { target: { value: "max" } });
-
-      await waitFor(() => {
-        expect(
-          screen.queryByTestId("forecast-controls"),
-        ).not.toBeInTheDocument();
-      });
     });
 
     it("should ignore stale graph responses when measure changes quickly", async () => {
@@ -535,7 +516,7 @@ describe("trendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual", "avg");
       });
 
       expect(setForecastPreferences).toHaveBeenCalledWith(true, 10);
@@ -554,7 +535,7 @@ describe("trendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 15, "Annual");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 15, "Annual", "avg");
       });
 
       expect(setForecastPreferences).toHaveBeenCalledWith(false, 15);
@@ -570,7 +551,7 @@ describe("trendAnalysis", () => {
       );
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 20, "Annual");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 20, "Annual", "avg");
       });
     });
 
@@ -584,7 +565,7 @@ describe("trendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Winter");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Winter", "avg");
       });
     });
 
@@ -769,16 +750,6 @@ describe("trendAnalysis", () => {
           "Annual",
         );
       });
-    });
-
-    it("should not fetch forecast when measure is not avg even if enabled", async () => {
-      render(<TrendAnalysis {...defaultProps} initialGraphMeasure="max" />);
-
-      await waitFor(() => {
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1, "Annual");
-      });
-
-      expect(FetchForecastData).not.toHaveBeenCalled();
     });
 
     it("should have correct select options", async () => {

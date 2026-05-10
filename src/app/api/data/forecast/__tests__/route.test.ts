@@ -14,6 +14,7 @@ const { mockFetchForecastData, mockValidateLocationId } = vi.hoisted(() => ({
         locationId: number,
         yearsAhead: number,
         season: string,
+        option: string,
       ) => Promise<ForecastData | undefined>
     >(),
   mockValidateLocationId: vi.fn<(locationId: number) => boolean>(),
@@ -86,7 +87,7 @@ describe("get /api/data/forecast", () => {
       upperBound90: [31.9],
     });
     expect(response.status).toBe(200);
-    expect(mockFetchForecastData).toHaveBeenCalledWith(7, 12, "Summer");
+    expect(mockFetchForecastData).toHaveBeenCalledWith(7, 12, "Summer", "avg");
   });
 
   it("normalizes invalid seasons to the default season", async () => {
@@ -100,7 +101,7 @@ describe("get /api/data/forecast", () => {
 
     await expect(response.json()).resolves.toBeNull();
     expect(response.status).toBe(200);
-    expect(mockFetchForecastData).toHaveBeenCalledWith(7, 5, "Annual");
+    expect(mockFetchForecastData).toHaveBeenCalledWith(7, 5, "Annual", "avg");
   });
 
   it("converts thrown errors into data route responses", async () => {

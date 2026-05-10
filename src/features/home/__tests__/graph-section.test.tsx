@@ -238,10 +238,10 @@ describe("graphSection", () => {
       expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
     });
 
-    it("should not render forecast controls when measure is not avg", () => {
+    it("should render forecast controls when measure is max", () => {
       render(<GraphSection {...defaultProps} selectedGraphMeasure="max" />);
 
-      expect(screen.queryByTestId("forecast-controls")).not.toBeInTheDocument();
+      expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
     });
   });
 

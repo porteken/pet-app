@@ -184,7 +184,7 @@ describe("fetchForecastData", () => {
     const result = await FetchForecastData(1, 10);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/data/forecast?locationId=1&season=Annual&yearsAhead=10",
+      "/api/data/forecast?locationId=1&option=avg&season=Annual&yearsAhead=10",
       expect.any(Object),
     );
     expect(result).toStrictEqual({
@@ -208,7 +208,7 @@ describe("fetchForecastData", () => {
     await FetchForecastData(1, 10, "Winter");
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/data/forecast?locationId=1&season=Winter&yearsAhead=10",
+      "/api/data/forecast?locationId=1&option=avg&season=Winter&yearsAhead=10",
       expect.any(Object),
     );
   });

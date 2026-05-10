@@ -25,7 +25,7 @@ export default function GlobalError({
                 Try again
               </Button>
 
-              <Alert variant="info">
+              <Alert variant="default">
                 <AlertTitle>Need help?</AlertTitle>
                 <AlertDescription>
                   Contact Kenneth Porter at{" "}

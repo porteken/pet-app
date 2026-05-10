@@ -1,8 +1,15 @@
 "use client";
 
-import { cn } from "@/lib/utilities";
+import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
-import React, { memo, useEffect, useId, useRef, type ReactNode } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  type ReactNode,
+} from "react";
 
 interface ModalProperties {
   children: ReactNode;
@@ -27,17 +34,25 @@ const Modal = memo<ModalProperties>(
     const titleId = useId();
     const dialogReference = useRef<HTMLDialogElement>(null);
 
+    const handleCancel = useCallback(
+      (event: React.SyntheticEvent<HTMLDialogElement>) => {
+        event.preventDefault();
+        onClose();
+      },
+      [onClose],
+    );
+
     useEffect(() => {
-      if (!open || !dialogReference.current) {
-        return;
+      const dialog = dialogReference.current;
+      if (!open || !dialog) {
+        return () => {};
       }
 
-      const dialog = dialogReference.current;
       const focusableSelector =
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-      const focusableElements = Array.from(
-        dialog.querySelectorAll<HTMLElement>(focusableSelector),
-      ).filter((element) => !element.hasAttribute("disabled"));
+      const focusableElements = [
+        ...dialog.querySelectorAll<HTMLElement>(focusableSelector),
+      ].filter((element) => !element.hasAttribute("disabled"));
 
       focusableElements[0]?.focus();
 
@@ -114,10 +129,7 @@ const Modal = memo<ModalProperties>(
             dialogPositionClass,
             dialogClassName,
           )}
-          onCancel={(event) => {
-            event.preventDefault();
-            onClose();
-          }}
+          onCancel={handleCancel}
           open
           ref={dialogReference}
         >

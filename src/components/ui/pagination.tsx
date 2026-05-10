@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 
-function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
+function PaginationRoot({ className, ...props }: React.ComponentProps<"nav">) {
   return (
     <nav
       role="navigation"
@@ -119,6 +119,85 @@ function PaginationEllipsis({
     </span>
   );
 }
+
+interface PaginationProps {
+  className?: string;
+  onChange: (page: number) => void;
+  total: number;
+  value: number;
+}
+
+const Pagination = ({ className, onChange, total, value }: PaginationProps) => {
+  const pages = React.useMemo(() => {
+    const items: (number | string)[] = [];
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      for (let i = 1; i <= total; i++) items.push(i);
+    } else {
+      items.push(1);
+      if (value > 3) items.push("ellipsis-1");
+
+      const start = Math.max(2, value - 1);
+      const end = Math.min(total - 1, value + 1);
+
+      for (let i = start; i <= end; i++) {
+        if (!items.includes(i)) items.push(i);
+      }
+
+      if (value < total - 2) items.push("ellipsis-2");
+      if (!items.includes(total)) items.push(total);
+    }
+    return items;
+  }, [total, value]);
+
+  return (
+    <PaginationRoot className={className}>
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              if (value > 1) onChange(value - 1);
+            }}
+          />
+        </PaginationItem>
+
+        {pages.map((page, index) => (
+          <PaginationItem
+            key={typeof page === "string" ? page : `page-${page}`}
+          >
+            {typeof page === "number" ? (
+              <PaginationLink
+                href="#"
+                isActive={page === value}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onChange(page);
+                }}
+              >
+                {page}
+              </PaginationLink>
+            ) : (
+              <PaginationEllipsis />
+            )}
+          </PaginationItem>
+        ))}
+
+        <PaginationItem>
+          <PaginationNext
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              if (value < total) onChange(value + 1);
+            }}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </PaginationRoot>
+  );
+};
 
 export {
   Pagination,

@@ -17,6 +17,8 @@ export default defineConfig({
         "tests/**",
         "src/utils/__tests__/test-utilities.ts",
         "src/proxy.ts",
+        "src/lib/utils.ts",
+        "src/components/ui/**",
         "**/*types.ts",
         "**/constants.ts",
       ],

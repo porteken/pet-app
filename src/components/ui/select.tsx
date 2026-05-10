@@ -1,11 +1,17 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  SearchIcon,
+  XIcon,
+} from "lucide-react";
 import { Select as SelectPrimitive } from "radix-ui";
 import * as React from "react";
 
-function Select({
+function SelectRoot({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />;
@@ -59,15 +65,14 @@ function SelectTrigger({
 function SelectContent({
   className,
   children,
-  position = "item-aligned",
-  align = "center",
+  position = "popper",
+  align = "start",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
         data-slot="select-content"
-        data-align-trigger={position === "item-aligned"}
         className={cn(
           "relative z-50 max-h-(--radix-select-content-available-height) min-w-36 origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           position === "popper" &&
@@ -82,8 +87,7 @@ function SelectContent({
         <SelectPrimitive.Viewport
           data-position={position}
           className={cn(
-            "data-[position=popper]:h-(--radix-select-trigger-height) data-[position=popper]:w-full data-[position=popper]:min-w-(--radix-select-trigger-width)",
-            position === "popper" && "",
+            "p-1 data-[position=popper]:h-(--radix-select-trigger-height) data-[position=popper]:w-full data-[position=popper]:min-w-(--radix-select-trigger-width)",
           )}
         >
           {children}
@@ -179,6 +183,164 @@ function SelectScrollDownButton({
     </SelectPrimitive.ScrollDownButton>
   );
 }
+
+interface SelectOption {
+  key?: string;
+  label: string;
+  value?: string;
+}
+
+interface SelectGroupOption {
+  group: string;
+  items: SelectOption[];
+  key?: string;
+}
+
+interface SelectProps {
+  className?: string;
+  clearable?: boolean;
+  data: (SelectOption | SelectGroupOption)[];
+  disabled?: boolean;
+  label?: string;
+  onChange?: (value: any) => void;
+  onClear?: () => void;
+  placeholder?: string;
+  searchable?: boolean;
+  value?: string;
+  size?: "sm" | "default";
+  "data-testid"?: string;
+}
+
+const Select = ({
+  className,
+  clearable,
+  data,
+  disabled,
+  label,
+  onChange,
+  onClear,
+  placeholder,
+  searchable,
+  value,
+  size,
+  "data-testid": testId,
+}: SelectProps) => {
+  const [searchTerm, setSearchTerm] = React.useState("");
+
+  const filteredData = React.useMemo(() => {
+    if (!searchTerm) return data;
+    const lowerSearch = searchTerm.toLowerCase();
+
+    return data
+      .map((item) => {
+        if ("group" in item) {
+          const filteredItems = item.items.filter((i) =>
+            i.label.toLowerCase().includes(lowerSearch),
+          );
+          if (filteredItems.length > 0) {
+            return { ...item, items: filteredItems };
+          }
+          return null;
+        }
+        if (item.label.toLowerCase().includes(lowerSearch)) {
+          return item;
+        }
+        return null;
+      })
+      .filter(Boolean) as (SelectOption | SelectGroupOption)[];
+  }, [data, searchTerm]);
+
+  const handleValueChange = (newValue: string) => {
+    if (onChange) {
+      onChange(newValue);
+    }
+  };
+
+  const hasValue = value !== undefined && value !== null && value !== "";
+
+  return (
+    <div className={cn("flex flex-col gap-1.5", className)}>
+      {label && (
+        <label className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {label}
+        </label>
+      )}
+      <div className="relative flex items-center gap-2">
+        <SelectRoot
+          disabled={disabled}
+          onValueChange={handleValueChange}
+          value={value ?? ""}
+        >
+          <SelectTrigger className="w-full" data-testid={testId} size={size}>
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            {searchable && (
+              <div className="flex items-center border-b px-3 py-2">
+                <SearchIcon className="mr-2 size-4 shrink-0 opacity-50" />
+                <input
+                  className="placeholder:text-muted-foreground flex h-8 w-full rounded-md bg-transparent py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  placeholder="Search..."
+                  value={searchTerm}
+                />
+              </div>
+            )}
+            {filteredData.map((item, index) => {
+              if ("group" in item) {
+                return (
+                  <SelectGroup key={item.key ?? `group-${index}`}>
+                    <SelectLabel data-testid="searchable-select-group-label">
+                      {item.group}
+                    </SelectLabel>
+                    {item.items.map((subItem, subIndex) => (
+                      <SelectItem
+                        data-testid="searchable-select-option"
+                        key={subItem.key ?? subItem.value ?? `item-${subIndex}`}
+                        value={subItem.value ?? subItem.key ?? ""}
+                      >
+                        {subItem.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                );
+              }
+              return (
+                <SelectItem
+                  data-testid="searchable-select-option"
+                  key={item.key ?? item.value ?? `item-${index}`}
+                  value={item.value ?? item.key ?? ""}
+                >
+                  {item.label}
+                </SelectItem>
+              );
+            })}
+            {filteredData.length === 0 && (
+              <div className="text-muted-foreground py-6 text-center text-sm">
+                No results found.
+              </div>
+            )}
+          </SelectContent>
+        </SelectRoot>
+        {clearable && hasValue && (
+          <button
+            className="text-muted-foreground hover:text-foreground focus:ring-ring absolute right-8 flex size-4 items-center justify-center rounded-sm transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none"
+            onClick={(e) => {
+              e.preventDefault();
+              onClear?.();
+            }}
+            type="button"
+          >
+            <XIcon className="size-3" />
+            <span className="sr-only">Clear</span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export {
   Select,

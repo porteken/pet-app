@@ -229,7 +229,7 @@ class GraphControlsPanel extends React.PureComponent<GraphControlsPanelPropertie
       selectOptions,
     } = this.props;
 
-    const showForecastControls = selectedGraphMeasure === "avg";
+
     const showMobileLegendToggle =
       isMobileViewport && onToggleMobileGraphLegend !== undefined;
 
@@ -251,14 +251,12 @@ class GraphControlsPanel extends React.PureComponent<GraphControlsPanelPropertie
           size="sm"
           value={selectedGraphMeasure}
         />
-        {showForecastControls && (
-          <ForecastControls
-            enabled={forecastEnabled}
-            onToggle={onForecastToggle}
-            onYearsChange={onForecastYearsChange}
-            yearsAhead={forecastYearsAhead}
-          />
-        )}
+        <ForecastControls
+          enabled={forecastEnabled}
+          onToggle={onForecastToggle}
+          onYearsChange={onForecastYearsChange}
+          yearsAhead={forecastYearsAhead}
+        />
         <GraphHeatStressSummary
           forecastEnabled={forecastEnabled}
           forecastHeatStress={forecastHeatStress}

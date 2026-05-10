@@ -54,5 +54,6 @@ export interface Database {
   locations: LocationsTable;
   pet: PetTable;
   pet_forecast: PetForecastTable;
+  pet_forecast_max: PetForecastTable;
   pet_year_stats: PetYearStatsTable;
 }

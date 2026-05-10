@@ -398,6 +398,7 @@ describe("fetch-server", () => {
         1,
         { lastHistoricalYear: 2025, targetYear: 2035 },
         "Annual",
+        "avg",
       );
       expect(result).toStrictEqual({
         forecastValues: [30.5, 31],
@@ -423,6 +424,7 @@ describe("fetch-server", () => {
         1,
         { lastHistoricalYear: 2025, targetYear: 2035 },
         "Winter",
+        "avg",
       );
     });
 

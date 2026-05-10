@@ -45,9 +45,6 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
           />
           <span>Show Forecast</span>
         </label>
-        <span className="rounded-full bg-(--pill-surface) px-2.5 py-1 text-xs font-semibold text-(--pill-foreground)">
-          Avg only
-        </span>
       </div>
 
       {enabled && (

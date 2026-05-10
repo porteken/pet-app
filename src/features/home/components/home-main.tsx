@@ -116,7 +116,7 @@ const Home: FC<MapProperties> = ({
         } = await buildTrendAnalysisResult({
           enableForecast,
           fetchForecastData: () =>
-            FetchForecastData(locationId, yearsAhead, season),
+            FetchForecastData(locationId, yearsAhead, season, option),
           fetchTrendGraphData: () =>
             queryClient.fetchQuery(
               getTrendGraphQueryOptions(locationId, option, season),
@@ -158,14 +158,14 @@ const Home: FC<MapProperties> = ({
     await setGraphSeason(nextSeason);
   }, []);
 
-  const forecastSupported = selectedGraphMeasure === "avg";
+
 
   useEffect(() => {
     if (selectedLocationId !== undefined) {
       const performGenerate = async () => {
         try {
           await generateGraph({
-            enableForecast: forecastEnabled && forecastSupported,
+            enableForecast: forecastEnabled,
             locationId: selectedLocationId,
             option: selectedGraphMeasure,
             season: selectedGraphSeason,
@@ -183,7 +183,6 @@ const Home: FC<MapProperties> = ({
     selectedGraphSeason,
     forecastEnabled,
     forecastYearsAhead,
-    forecastSupported,
     generateGraph,
   ]);
 

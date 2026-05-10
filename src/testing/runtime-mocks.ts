@@ -41,6 +41,7 @@ interface RuntimeMockTables {
   pet: RuntimePetRow[];
   pet_change: RuntimePetChangeRow[];
   pet_forecast: Array<PetForecastTable & MockRow>;
+  pet_forecast_max: Array<PetForecastTable & MockRow>;
   pet_percentiles: RuntimePetPercentilesRow[];
   pet_year_stats: Array<PetYearStatsTable & MockRow>;
 }
@@ -217,6 +218,32 @@ const MOCK_TABLES: RuntimeMockTables = {
         const yearsAhead = year - lastHistoricalYear;
         const forecastPet = round(
           lastHistoricalAvg + yearsAhead * location.trendPerYear,
+        );
+
+        return {
+          location_id: location.location_id,
+          lower: round(forecastPet - 2.2),
+          pet: forecastPet,
+          season,
+          upper: round(forecastPet + 2.2),
+          year,
+        };
+      });
+    });
+  }),
+  pet_forecast_max: LOCATIONS.flatMap((location) => {
+    const lastHistoricalYear = 2025;
+
+    return GRAPH_SEASONS.flatMap((season) => {
+      const lastHistoricalMax = round(
+        getAveragePet(location.location_id, lastHistoricalYear) +
+          SEASONAL_MAX_OFFSETS[season],
+      );
+
+      return FORECAST_YEARS.map((year) => {
+        const yearsAhead = year - lastHistoricalYear;
+        const forecastPet = round(
+          lastHistoricalMax + yearsAhead * location.trendPerYear,
         );
 
         return {

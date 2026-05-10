@@ -167,6 +167,7 @@ export async function FetchForecastData(
   locationId: number,
   yearsAhead: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
+  option: string = "avg",
 ): Promise<
   | undefined
   | {
@@ -178,6 +179,10 @@ export async function FetchForecastData(
 > {
   if (!validateLocationId(locationId)) {
     throw new DatabaseError(`Invalid locationId: ${locationId}`);
+  }
+
+  if (!validateTrendOption(option)) {
+    throw new DatabaseError(`Invalid trend option: ${option}`);
   }
 
   const resolvedSeason = normalizeGraphSeason(season);
@@ -217,6 +222,7 @@ export async function FetchForecastData(
       locationId,
       queryWindow,
       resolvedSeason,
+      option,
     );
   } catch (error) {
     throw new DatabaseError(

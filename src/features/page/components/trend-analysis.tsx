@@ -127,7 +127,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           snapshot,
         } = await buildTrendAnalysisResult({
           enableForecast,
-          fetchForecastData: () => FetchForecastData(id, yearsAhead, season),
+          fetchForecastData: () => FetchForecastData(id, yearsAhead, season, option),
           fetchTrendGraphData: () => {
             if (
               initialTrendData &&
@@ -199,7 +199,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     [onSeasonChange],
   );
 
-  const forecastSupported = selectedGraphMeasure === "avg";
+
 
   React.useEffect(() => {
     const performGenerate = async () => {
@@ -207,7 +207,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
         await generatePetTrendGraph(
           selectedGraphMeasure,
           graphSeason,
-          forecastEnabled && forecastSupported,
+          forecastEnabled,
           forecastYearsAhead,
         );
       } catch {
@@ -220,7 +220,6 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     selectedGraphMeasure,
     graphSeason,
     forecastEnabled,
-    forecastSupported,
     forecastYearsAhead,
   ]);
 
@@ -300,14 +299,12 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
               </select>
             </div>
           </div>
-          {forecastSupported && (
-            <ForecastControls
-              enabled={forecastEnabled}
-              onToggle={handleForecastToggle}
-              onYearsChange={handleForecastYearsChange}
-              yearsAhead={forecastYearsAhead}
-            />
-          )}
+          <ForecastControls
+            enabled={forecastEnabled}
+            onToggle={handleForecastToggle}
+            onYearsChange={handleForecastYearsChange}
+            yearsAhead={forecastYearsAhead}
+          />
         </div>
         {currentHeatStress && (
           <div className="glass-panel-muted mb-5 rounded-2xl p-4">

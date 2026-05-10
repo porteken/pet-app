@@ -7,7 +7,7 @@ import { getDb } from "./kysely";
 import type { NumericLike } from "./types";
 import type { GraphSeason } from "@/lib/constants";
 
-type TrendMetricOption = "avg" | "max";
+export type TrendMetricOption = "avg" | "max";
 type LocationIdentifierColumn = "id" | "location_id";
 
 export interface ForecastQueryWindow {
@@ -159,8 +159,10 @@ const getRuntimeForecastRows = (
   locationId: number,
   queryWindow: ForecastQueryWindow,
   season?: GraphSeason,
+  option: TrendMetricOption = "avg",
 ) => {
-  const rows = getRuntimeMockTableRows("pet_forecast");
+  const table = option === "max" ? "pet_forecast_max" : "pet_forecast";
+  const rows = getRuntimeMockTableRows(table);
 
   return sortBy(
     rows.filter(
@@ -344,14 +346,17 @@ export async function fetchForecastRows(
   locationId: number,
   queryWindow: ForecastQueryWindow,
   season?: GraphSeason,
+  option: TrendMetricOption = "avg",
 ) {
   if (isE2ETestRun()) {
-    return getRuntimeForecastRows(locationId, queryWindow, season);
+    return getRuntimeForecastRows(locationId, queryWindow, season, option);
   }
+
+  const table = option === "max" ? "pet_forecast_max" : "pet_forecast";
 
   const buildQuery = (selectedSeason?: GraphSeason) => {
     let query = getDb()
-      .selectFrom("pet_forecast")
+      .selectFrom(table)
       .select(["year", "pet", "lower", "upper"])
       .where("location_id", "=", locationId)
       .where("year", ">", queryWindow.lastHistoricalYear)
@@ -369,7 +374,7 @@ export async function fetchForecastRows(
   } catch (error) {
     if (
       season !== undefined &&
-      isMissingColumnError(error, "pet_forecast", "season")
+      isMissingColumnError(error, table, "season")
     ) {
       return buildQuery().execute();
     }

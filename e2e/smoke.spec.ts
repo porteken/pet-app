@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { searchAndSelectCustomOption } from "./utils/custom-select";
 import { MARKER_SELECTOR } from "./utils/map-marker";
 import {
   gotoAndWaitForMapPage,
@@ -30,13 +31,12 @@ test.describe("Smoke Tests", () => {
     await modal.getByRole("button", { name: "Close" }).click();
     await expect(modal).toBeHidden({ timeout: 10_000 });
 
-    await page.locator("input[data-testid='city-selector']").click();
-    const phoenixOption = page
-      .getByTestId("searchable-select-option")
-      .filter({ hasText: "Phoenix" })
-      .first();
-    await expect(phoenixOption).toBeVisible({ timeout: 5000 });
-    await phoenixOption.click();
+    await searchAndSelectCustomOption(
+      page,
+      page.getByTestId("city-selector"),
+      "Phoenix",
+      /^Phoenix$/,
+    );
     await waitForLocationDetailsPage(page);
 
     const graphMeasure = page.locator("select#graph-measure");
@@ -95,13 +95,12 @@ test.describe("Smoke Tests", () => {
     await page.setViewportSize({ height: 667, width: 375 });
     await modal.getByRole("button", { name: "Close" }).click();
     await expect(modal).toBeHidden({ timeout: 10_000 });
-    await page.locator("input[data-testid='city-selector']").click();
-    const phoenixOption = page
-      .getByTestId("searchable-select-option")
-      .filter({ hasText: "Phoenix" })
-      .first();
-    await expect(phoenixOption).toBeVisible({ timeout: 5000 });
-    await phoenixOption.click();
+    await searchAndSelectCustomOption(
+      page,
+      page.getByTestId("city-selector"),
+      "Phoenix",
+      /^Phoenix$/,
+    );
     await waitForLocationDetailsPage(page);
   });
 

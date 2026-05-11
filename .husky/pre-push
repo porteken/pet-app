@@ -1,7 +1,7 @@
+#!/usr/bin/env sh
+
 echo "Running pre-push checks..."
 
-pnpm run test:unit
-
-pnpm run test:integration
+pnpm test
 
 echo "Pre-push checks passed!"

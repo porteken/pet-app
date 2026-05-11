@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
 
+import {
+  getOpenCustomSelectOptions,
+  openCustomSelect,
+  selectCustomOption,
+} from "./utils/custom-select";
+import { waitForLocationDetailsPage } from "./utils/map-page";
+
 test.describe("Rankings Page", () => {
   test("should display rankings table with data", async ({ page }) => {
     await page.goto("/rankings");
@@ -28,9 +35,9 @@ test.describe("Rankings Page", () => {
       timeout: 10_000,
     });
 
-    await expect(page.getByLabel("Year")).toBeVisible();
-    await expect(page.getByLabel("State")).toBeVisible();
-    await expect(page.getByLabel("Avg Thermal Stress Level")).toBeVisible();
+    await expect(page.getByTestId("rankings-year-filter")).toBeVisible();
+    await expect(page.getByTestId("rankings-state-filter")).toBeVisible();
+    await expect(page.getByTestId("rankings-heat-stress-filter")).toBeVisible();
   });
 
   test("should display thermal stress legend", async ({ page }) => {
@@ -60,10 +67,13 @@ test.describe("Rankings Page", () => {
       timeout: 10_000,
     });
 
-    const yearSelect = page.getByLabel("Year");
-    await expect(yearSelect).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("rankings-year-filter")).toBeVisible({
+      timeout: 10_000,
+    });
 
-    await yearSelect.selectOption({ label: "2010" });
+    const yearSelect = page.getByTestId("rankings-year-filter");
+    await selectCustomOption(page, yearSelect, /^2010$/);
+    await expect(yearSelect).toContainText("2010");
 
     await expect(page.locator("table tbody tr").first()).toBeVisible({
       timeout: 10_000,
@@ -95,15 +105,14 @@ test.describe("Rankings Page", () => {
 
     const firstRow = page.locator("table tbody tr").first();
     await expect(firstRow).toBeVisible({ timeout: 10_000 });
+    await firstRow.scrollIntoViewIfNeeded();
 
-    await firstRow.click();
+    await Promise.all([
+      page.waitForURL(/\/\d+(?:\?.*)?$/, { timeout: 15_000 }),
+      firstRow.locator("td").nth(1).click(),
+    ]);
 
-    await expect(page).toHaveURL(/\/\d+$/);
-    await expect(
-      page.getByRole("heading", { name: "Trend Analysis" }),
-    ).toBeVisible({
-      timeout: 15_000,
-    });
+    await waitForLocationDetailsPage(page);
   });
 
   test("should filter by state", async ({ page }) => {
@@ -115,16 +124,26 @@ test.describe("Rankings Page", () => {
       timeout: 15_000,
     });
 
-    const stateSelect = page.getByLabel("State");
-    await expect(stateSelect).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("rankings-state-filter")).toBeVisible({
+      timeout: 10_000,
+    });
 
-    const firstStateOption = stateSelect.locator("option").nth(1);
-    const stateValue = await firstStateOption.getAttribute("value");
-    await stateSelect.selectOption(stateValue);
+    const stateSelect = page.getByTestId("rankings-state-filter");
+    await openCustomSelect(page, stateSelect);
+    const firstStateOption = getOpenCustomSelectOptions(page).first();
+    const firstStateOptionText = await firstStateOption.textContent();
+    const stateLabel = firstStateOptionText?.trim();
+    expect(stateLabel).toBeTruthy();
+    await firstStateOption.click();
+
+    await expect(stateSelect).toContainText(stateLabel ?? "");
 
     await expect(page.locator("table tbody tr").first()).toBeVisible({
       timeout: 10_000,
     });
+    await expect(
+      page.locator("table tbody tr").first().locator("td").nth(2),
+    ).toContainText(stateLabel ?? "");
   });
 
   test("should filter by thermal stress level", async ({ page }) => {
@@ -136,12 +155,19 @@ test.describe("Rankings Page", () => {
       timeout: 15_000,
     });
 
-    const heatStressSelect = page.getByLabel("Avg Thermal Stress Level");
-    await expect(heatStressSelect).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("rankings-heat-stress-filter")).toBeVisible({
+      timeout: 10_000,
+    });
 
-    const firstOption = heatStressSelect.locator("option").nth(1);
-    const optionValue = await firstOption.getAttribute("value");
-    await heatStressSelect.selectOption(optionValue);
+    const heatStressSelect = page.getByTestId("rankings-heat-stress-filter");
+    await openCustomSelect(page, heatStressSelect);
+    const firstOption = getOpenCustomSelectOptions(page).first();
+    const firstOptionText = await firstOption.textContent();
+    const optionLabel = firstOptionText?.trim();
+    expect(optionLabel).toBeTruthy();
+    await firstOption.click();
+
+    await expect(heatStressSelect).toContainText(optionLabel ?? "");
 
     await expect(page.locator("table tbody tr").first()).toBeVisible({
       timeout: 15_000,

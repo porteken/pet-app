@@ -27,7 +27,7 @@ import type { HeatStressDescription } from "@/lib/utils/thermal-stress";
 import type { LocationProperties } from "@/types/types";
 import type { FC } from "react";
 
-const Modal = dynamic(() => import("@/components/ui/modal"), {
+const Modal = dynamic(() => import("@/components/modal"), {
   ssr: false,
 });
 

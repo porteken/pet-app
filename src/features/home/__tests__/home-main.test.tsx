@@ -191,7 +191,7 @@ vi.mock("@/features/header-bar", () => ({
   )),
 }));
 
-vi.mock("@/components/ui/modal", () => ({
+vi.mock("@/components/modal", () => ({
   default: mockFn(
     ({
       children,

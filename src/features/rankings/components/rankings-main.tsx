@@ -54,6 +54,15 @@ const ALL_THERMAL_STRESS_LEVELS = THERMAL_STRESS_LEGEND_ITEMS.map((item) => ({
   value: item.level,
 }));
 
+const LAST_RANKINGS_HEAT_STRESS_LEVEL = "Strong Heat Stress";
+
+const RANKINGS_HEAT_STRESS_LEVELS = ALL_THERMAL_STRESS_LEVELS.slice(
+  0,
+  ALL_THERMAL_STRESS_LEVELS.findIndex(
+    (item) => item.value === LAST_RANKINGS_HEAT_STRESS_LEVEL,
+  ) + 1,
+);
+
 const SEASON_OPTIONS = GRAPH_SEASONS.map((season) => ({
   label: season,
   value: season,
@@ -250,6 +259,7 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
           <Select
             className="w-full"
             data={YEAR_OPTIONS}
+            data-testid="rankings-year-filter"
             disabled={isPending}
             label="Year"
             onChange={this.handleYearChange}
@@ -258,6 +268,7 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
           <Select
             className="w-full"
             data={SEASON_OPTIONS}
+            data-testid="rankings-season-filter"
             disabled={isPending}
             label="Season"
             onChange={this.handleSeasonChange}
@@ -267,6 +278,7 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
             className="w-full"
             clearable
             data={stateOptions}
+            data-testid="rankings-state-filter"
             disabled={isPending}
             label="State"
             onChange={this.handleStateChange}
@@ -278,6 +290,7 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
             className="w-full"
             clearable
             data={heatStressOptions}
+            data-testid="rankings-heat-stress-filter"
             disabled={isPending}
             label="Avg Thermal Stress Level"
             onChange={this.handleHeatStressChange}
@@ -489,7 +502,7 @@ export function RankingsMain({
       filteredByState.map((r) => getHeatStressInfo(r.avg_pet).level),
     );
 
-    return ALL_THERMAL_STRESS_LEVELS.filter((option) =>
+    return RANKINGS_HEAT_STRESS_LEVELS.filter((option) =>
       availableLevels.has(option.value),
     );
   }, [rankings, stateFilter]);
@@ -540,14 +553,6 @@ export function RankingsMain({
         className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
         id="main-content"
       >
-        <section className="fade-in-up glass-panel mb-8 overflow-hidden rounded-4xl">
-          <div className="bg-primary px-6 py-5 sm:px-8 sm:py-6">
-            <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
-              Cities ranked by Average PET
-            </h1>
-          </div>
-        </section>
-
         <RankingsFilters
           heatStressFilter={heatStressFilter}
           heatStressOptions={heatStressOptions}
@@ -562,6 +567,14 @@ export function RankingsMain({
           stateFilter={stateFilter}
           stateOptions={stateOptions}
         />
+
+        <section className="fade-in-up glass-panel mb-8 overflow-hidden rounded-4xl">
+          <div className="bg-primary px-6 py-5 sm:px-8 sm:py-6">
+            <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+              Cities ranked by Average PET
+            </h1>
+          </div>
+        </section>
 
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-muted-foreground text-sm">

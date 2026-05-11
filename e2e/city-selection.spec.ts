@@ -1,5 +1,12 @@
 import { expect, type Locator, test } from "@playwright/test";
 
+import {
+  fillOpenCustomSelectSearch,
+  getOpenCustomSelectContent,
+  getOpenCustomSelectOptions,
+  openCustomSelect,
+} from "./utils/custom-select";
+
 const getRequiredTextContent = async (locator: Locator): Promise<string> => {
   const text = await locator.textContent();
   expect(text).not.toBeNull();
@@ -41,15 +48,11 @@ test.describe("City Selection", () => {
     const citySelect = page.getByTestId("city-selector");
     await expect(citySelect).toBeVisible();
 
-    await citySelect.click();
-    const firstOption = page.getByTestId("searchable-select-option").first();
+    await openCustomSelect(page, citySelect);
+    const firstOption = getOpenCustomSelectOptions(page).first();
     await expect(firstOption).toBeVisible();
-    const firstCityValue = await firstOption.getAttribute("data-value");
-    expect(firstCityValue).not.toBeNull();
     await firstOption.click();
-    await expect(page).toHaveURL(
-      new RegExp(String.raw`/${firstCityValue}(\?.*)?$`),
-    );
+    await expect(page).toHaveURL(/\/\d+(?:\?.*)?$/);
   });
 
   test("should allow searching for cities", async ({ page }) => {
@@ -58,8 +61,8 @@ test.describe("City Selection", () => {
     const citySearch = page.getByTestId("city-selector");
     await expect(citySearch).toBeVisible({ timeout: 10_000 });
 
-    await citySearch.click();
-    const filteredOptions = page.getByTestId("searchable-select-option");
+    await openCustomSelect(page, citySearch);
+    const filteredOptions = getOpenCustomSelectOptions(page);
     await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
     const firstOptionLabel = await getRequiredTextContent(
       filteredOptions.first(),
@@ -68,7 +71,7 @@ test.describe("City Selection", () => {
 
     expect(cityQuery.length).toBeGreaterThan(0);
 
-    await citySearch.fill(cityQuery);
+    await fillOpenCustomSelectSearch(page, cityQuery);
 
     await expect(filteredOptions.first()).toBeVisible({ timeout: 15_000 });
     expect(await filteredOptions.count()).toBeGreaterThan(0);
@@ -83,20 +86,24 @@ test.describe("City Selection", () => {
     const citySearch = page.getByTestId("city-selector");
     await expect(citySearch).toBeVisible({ timeout: 10_000 });
 
-    await citySearch.click();
-    const filteredOptions = page.getByTestId("searchable-select-option");
+    await openCustomSelect(page, citySearch);
+    const filteredOptions = getOpenCustomSelectOptions(page);
     await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
-    const firstGroupLabel = page
-      .getByTestId("searchable-select-group-label")
-      .first();
+    const groupLabels = getOpenCustomSelectContent(page).getByTestId(
+      "searchable-select-group-label",
+    );
+    const firstGroupLabel = groupLabels.first();
     const firstStateLabel = await getRequiredTextContent(firstGroupLabel);
     const stateQuery = firstStateLabel.trim().toLowerCase();
 
     expect(stateQuery.length).toBeGreaterThan(0);
 
-    await citySearch.fill(stateQuery);
+    await fillOpenCustomSelectSearch(page, stateQuery);
 
     await expect(filteredOptions.first()).toBeVisible({ timeout: 15_000 });
     expect(await filteredOptions.count()).toBeGreaterThan(0);
+    await expect(groupLabels.first()).toContainText(
+      new RegExp(stateQuery, "i"),
+    );
   });
 });

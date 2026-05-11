@@ -60,3 +60,35 @@ afterEach(() => {
 afterAll(() => {
   server.close();
 });
+
+if (typeof globalThis !== "undefined" && globalThis.HTMLElement) {
+  if (!globalThis.HTMLElement.prototype.hasPointerCapture) {
+    globalThis.HTMLElement.prototype.hasPointerCapture = () => false;
+  }
+  if (!globalThis.HTMLElement.prototype.releasePointerCapture) {
+    globalThis.HTMLElement.prototype.releasePointerCapture = () => {};
+  }
+  if (!globalThis.HTMLElement.prototype.setPointerCapture) {
+    globalThis.HTMLElement.prototype.setPointerCapture = () => {};
+  }
+  if (!globalThis.HTMLElement.prototype.scrollIntoView) {
+    globalThis.HTMLElement.prototype.scrollIntoView = () => {};
+  }
+
+  vi.spyOn(
+    globalThis.HTMLElement.prototype,
+    "hasPointerCapture",
+  ).mockReturnValue(false);
+  vi.spyOn(
+    globalThis.HTMLElement.prototype,
+    "releasePointerCapture",
+  ).mockImplementation(() => {});
+  vi.spyOn(
+    globalThis.HTMLElement.prototype,
+    "setPointerCapture",
+  ).mockImplementation(() => {});
+  vi.spyOn(
+    globalThis.HTMLElement.prototype,
+    "scrollIntoView",
+  ).mockImplementation(() => {});
+}

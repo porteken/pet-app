@@ -274,7 +274,10 @@ export function CitySelector({
       </div>
 
       {open && (
-        <div className="bg-popover text-popover-foreground ring-foreground/10 absolute inset-x-0 top-full z-12000 mt-2 overflow-hidden rounded-lg shadow-md ring-1">
+        <div
+          className="bg-popover text-popover-foreground ring-foreground/10 absolute inset-x-0 top-full z-12000 mt-2 overflow-hidden rounded-lg shadow-md ring-1"
+          data-slot="select-content"
+        >
           <div className="bg-popover flex items-center border-b px-3 py-2">
             <SearchIcon className="mr-2 size-4 shrink-0 opacity-50" />
             <input
@@ -298,7 +301,10 @@ export function CitySelector({
                   className="scroll-my-1 p-1"
                   key={group.key ?? `group-${groupIndex}`}
                 >
-                  <div className="text-muted-foreground px-1.5 py-1 text-xs">
+                  <div
+                    className="text-muted-foreground px-1.5 py-1 text-xs"
+                    data-testid="searchable-select-group-label"
+                  >
                     {group.group}
                   </div>
 
@@ -312,6 +318,7 @@ export function CitySelector({
                           "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
                           selected && "bg-accent/60",
                         )}
+                        data-testid="searchable-select-option"
                         data-value={item.value}
                         key={
                           item.key ?? `${group.key ?? group.group}-${itemIndex}`

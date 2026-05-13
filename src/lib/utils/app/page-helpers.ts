@@ -19,7 +19,7 @@ import { cookies } from "next/headers";
 export const getGraphMeasureFromCookies = async (): Promise<string> => {
   const cookieStore = await cookies();
   return (
-    getLatestCookieValue(cookieStore, GRAPH_MEASURE_COOKIE_NAME) ||
+    getLatestCookieValue(cookieStore, GRAPH_MEASURE_COOKIE_NAME) ??
     DEFAULT_GRAPH_MEASURE
   );
 };
@@ -28,7 +28,7 @@ export const getGraphSeasonFromCookies = async () => {
   const cookieStore = await cookies();
 
   return normalizeGraphSeason(
-    getLatestCookieValue(cookieStore, GRAPH_SEASON_COOKIE_NAME) ||
+    getLatestCookieValue(cookieStore, GRAPH_SEASON_COOKIE_NAME) ??
       DEFAULT_GRAPH_SEASON,
   );
 };

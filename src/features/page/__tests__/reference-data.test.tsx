@@ -163,7 +163,6 @@ describe("referenceData", () => {
         expect.objectContaining({
           currentYear: 2025,
         }),
-        undefined,
       );
     });
   });

@@ -47,7 +47,7 @@ async function getCandidateMarkerIndices(page: Page): Promise<number[]> {
         const visibleHeight = bottom - top;
 
         if (visibleWidth <= 0 || visibleHeight <= 0) {
-          return undefined;
+          return null;
         }
 
         const centerX = left + visibleWidth / 2;
@@ -62,7 +62,7 @@ async function getCandidateMarkerIndices(page: Page): Promise<number[]> {
             element.contains(topElement)
           )
         ) {
-          return undefined;
+          return null;
         }
 
         return {
@@ -72,7 +72,7 @@ async function getCandidateMarkerIndices(page: Page): Promise<number[]> {
       })
       .filter(
         (value): value is { index: number; visibleArea: number } =>
-          value !== undefined,
+          value !== null,
       )
       .toSorted((a, b) => b.visibleArea - a.visibleArea);
 

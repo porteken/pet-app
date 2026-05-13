@@ -23,5 +23,5 @@ export const onRequestError: typeof Sentry.captureRequestError = (
     return;
   }
 
-  return Sentry.captureRequestError(...arguments_);
+  Sentry.captureRequestError(...arguments_);
 };

@@ -37,11 +37,11 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/lib/actions/actions", () => ({
-  setForecastPreferences: mockFn().mockResolvedValue(undefined),
+  setForecastPreferences: mockFn().mockResolvedValue(),
 }));
 
 vi.mock("@/lib/api/fetch-client", () => ({
-  FetchForecastData: mockFn().mockResolvedValue(undefined),
+  FetchForecastData: mockFn().mockResolvedValue(),
   FetchReferenceGraphData: mockFn().mockResolvedValue({
     dates: [new Date("2023-01-01"), new Date("2023-02-01")],
     pets: [10, 20],

@@ -130,7 +130,7 @@ describe("mapComponent", () => {
       />,
     );
 
-    const noDataMessage = await screen.findByText(/no map data available/i);
+    const noDataMessage = await screen.findByText(/no map data available/iu);
     expect(noDataMessage).toBeInTheDocument();
 
     expect(screen.queryByText("Loading map...")).not.toBeInTheDocument();

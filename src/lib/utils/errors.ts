@@ -130,26 +130,27 @@ export const createError = (
   originalError?: unknown,
   context?: ErrorContext,
 ): AppError => {
-  switch (true) {
-    case statusCode === HTTP_BAD_REQUEST: {
-      return new ValidationError(message, context?.field, originalError);
-    }
-    case statusCode === HTTP_UNAUTHORIZED: {
-      return new AuthenticationError(message, originalError);
-    }
-    case statusCode === HTTP_FORBIDDEN: {
-      return new AuthorizationError(message, originalError);
-    }
-    case statusCode === HTTP_NOT_FOUND: {
-      return new NotFoundError(message, context?.resource, originalError);
-    }
-    case statusCode >= HTTP_INTERNAL_ERROR: {
-      return new DatabaseError(message, originalError, context);
-    }
-    default: {
-      return new NetworkError(message, statusCode, originalError, context);
-    }
+  if (statusCode === HTTP_BAD_REQUEST) {
+    return new ValidationError(message, context?.field, originalError);
   }
+
+  if (statusCode === HTTP_UNAUTHORIZED) {
+    return new AuthenticationError(message, originalError);
+  }
+
+  if (statusCode === HTTP_FORBIDDEN) {
+    return new AuthorizationError(message, originalError);
+  }
+
+  if (statusCode === HTTP_NOT_FOUND) {
+    return new NotFoundError(message, context?.resource, originalError);
+  }
+
+  if (statusCode >= HTTP_INTERNAL_ERROR) {
+    return new DatabaseError(message, originalError, context);
+  }
+
+  return new NetworkError(message, statusCode, originalError, context);
 };
 
 export const handleAsyncError = (

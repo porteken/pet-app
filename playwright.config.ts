@@ -1,8 +1,5 @@
 import "dotenv/config";
 
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { defineConfig, devices } from "@playwright/test";
 
 const PRODUCTION_TIMEOUT_SECONDS = 240;
@@ -17,7 +14,7 @@ const NAVIGATION_TIMEOUT = 30_000;
 const CI_WORKERS = 1;
 const LOCAL_WORKERS = 4;
 
-const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = import.meta.dirname;
 const playwrightPort =
   process.env.PLAYWRIGHT_PORT ?? process.env.PORT ?? "3000";
 const playwrightBaseURL =

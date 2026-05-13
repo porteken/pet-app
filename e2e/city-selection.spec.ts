@@ -10,7 +10,7 @@ import {
 const getRequiredTextContent = async (locator: Locator): Promise<string> => {
   const text = await locator.textContent();
   expect(text).not.toBeNull();
-  return text || "";
+  return text ?? "";
 };
 
 test.describe("City Selection", () => {
@@ -52,7 +52,7 @@ test.describe("City Selection", () => {
     const firstOption = getOpenCustomSelectOptions(page).first();
     await expect(firstOption).toBeVisible();
     await firstOption.click();
-    await expect(page).toHaveURL(/\/\d+(?:\?.*)?$/);
+    await expect(page).toHaveURL(/\/\d+(?:\?.*)?$/u);
   });
 
   test("should allow searching for cities", async ({ page }) => {
@@ -76,7 +76,7 @@ test.describe("City Selection", () => {
     await expect(filteredOptions.first()).toBeVisible({ timeout: 15_000 });
     expect(await filteredOptions.count()).toBeGreaterThan(0);
     await expect(filteredOptions.first()).toContainText(
-      new RegExp(cityQuery, "i"),
+      new RegExp(cityQuery, "iu"),
     );
   });
 
@@ -103,7 +103,7 @@ test.describe("City Selection", () => {
     await expect(filteredOptions.first()).toBeVisible({ timeout: 15_000 });
     expect(await filteredOptions.count()).toBeGreaterThan(0);
     await expect(groupLabels.first()).toContainText(
-      new RegExp(stateQuery, "i"),
+      new RegExp(stateQuery, "iu"),
     );
   });
 });

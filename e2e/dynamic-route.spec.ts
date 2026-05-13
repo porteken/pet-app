@@ -6,7 +6,7 @@ test.describe("Location Page", () => {
 
   test("should display location content and graphs", async ({ page }) => {
     await page.goto("/1");
-    await expect(page.getByRole("heading", { name: /, / })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /, /u })).toBeVisible();
     await expect(page.locator("select#graph-measure")).toBeVisible();
     await expect(page.locator("select#reference-year")).toBeVisible();
     await expect(page.locator(locationCharts)).toHaveCount(2, {

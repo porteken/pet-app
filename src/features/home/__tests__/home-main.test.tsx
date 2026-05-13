@@ -7,7 +7,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type * as TanstackReactQuery from "@tanstack/react-query";
 
 const createDelay = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 const mockPush = mockFn();
 
 class MockMapComponent extends React.PureComponent<{
@@ -186,7 +188,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/features/header-bar", () => ({
   HeaderBar: mockFn(({ LocationOptions }: { LocationOptions?: unknown[] }) => (
     <div data-testid="header-bar">
-      HeaderBar with {LocationOptions?.length || 0} locations
+      HeaderBar with {LocationOptions?.length ?? 0} locations
     </div>
   )),
 }));
@@ -468,9 +470,11 @@ describe("home", () => {
         expect(
           screen.getByText("Unable to load graph data"),
         ).toBeInTheDocument();
-        expect(screen.getByText(/contact kenneth porter/i)).toBeInTheDocument();
         expect(
-          screen.getByRole("link", { name: /porteken@gmail.com/i }),
+          screen.getByText(/contact kenneth porter/iu),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: /porteken@gmail.com/iu }),
         ).toBeInTheDocument();
       });
     });
@@ -493,9 +497,9 @@ describe("home", () => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
       });
 
-      await waitFor(() =>
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual", "avg"),
-      );
+      await waitFor(() => {
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual", "avg");
+      });
     });
 
     it("should fetch seasonal forecast data when seasonal forecast is enabled", async () => {
@@ -513,9 +517,9 @@ describe("home", () => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
       });
 
-      await waitFor(() =>
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Winter", "avg"),
-      );
+      await waitFor(() => {
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Winter", "avg");
+      });
     });
 
     it("should fetch forecast when toggling forecast on", async () => {
@@ -536,7 +540,9 @@ describe("home", () => {
 
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
-      await waitFor(() => expect(FetchForecastData).toHaveBeenCalled());
+      await waitFor(() => {
+        expect(FetchForecastData).toHaveBeenCalled();
+      });
     });
 
     it("should handle forecast data with NaN bounds", async () => {
@@ -555,7 +561,9 @@ describe("home", () => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
       });
 
-      await waitFor(() => expect(FetchForecastData).toHaveBeenCalled());
+      await waitFor(() => {
+        expect(FetchForecastData).toHaveBeenCalled();
+      });
     });
 
     it("should handle forecast data with empty arrays", async () => {
@@ -574,7 +582,9 @@ describe("home", () => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
       });
 
-      await waitFor(() => expect(FetchForecastData).toHaveBeenCalled());
+      await waitFor(() => {
+        expect(FetchForecastData).toHaveBeenCalled();
+      });
     });
 
     it("should handle forecast with undefined final values", async () => {
@@ -593,7 +603,9 @@ describe("home", () => {
         expect(screen.getByTestId("modal")).toBeInTheDocument();
       });
 
-      await waitFor(() => expect(FetchForecastData).toHaveBeenCalled());
+      await waitFor(() => {
+        expect(FetchForecastData).toHaveBeenCalled();
+      });
     });
   });
 

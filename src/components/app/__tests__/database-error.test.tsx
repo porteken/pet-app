@@ -26,8 +26,8 @@ describe("databaseError", () => {
         "Unable to connect to the database. Please try again later.",
       ),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Need help\?/)).toBeInTheDocument();
-    expect(screen.getByText(/Contact Kenneth Porter/)).toBeInTheDocument();
+    expect(screen.getByText(/Need help\?/u)).toBeInTheDocument();
+    expect(screen.getByText(/Contact Kenneth Porter/u)).toBeInTheDocument();
   });
 
   it("renders with custom message", () => {
@@ -47,17 +47,17 @@ describe("databaseError", () => {
   it("hides contact info when showContactInfo is false", () => {
     render(<DatabaseError showContactInfo={false} />);
 
-    expect(screen.queryByText(/Need help\?/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Need help\?/u)).not.toBeInTheDocument();
     expect(
-      screen.queryByText(/Contact Kenneth Porter/),
+      screen.queryByText(/Contact Kenneth Porter/u),
     ).not.toBeInTheDocument();
   });
 
   it("shows contact info when showContactInfo is true", () => {
     render(<DatabaseError showContactInfo />);
 
-    expect(screen.getByText(/Need help\?/)).toBeInTheDocument();
-    expect(screen.getByText(/Contact Kenneth Porter/)).toBeInTheDocument();
+    expect(screen.getByText(/Need help\?/u)).toBeInTheDocument();
+    expect(screen.getByText(/Contact Kenneth Porter/u)).toBeInTheDocument();
     expect(screen.getByText("porteken@gmail.com")).toBeInTheDocument();
   });
 

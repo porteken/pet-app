@@ -30,6 +30,14 @@ interface TrendAnalysisProperties {
   onSeasonChange: (season: GraphSeason) => Promise<void>;
 }
 
+const ignorePersistenceError = async (promise: Promise<void>) => {
+  try {
+    await promise;
+  } catch {
+    // The local UI state remains valid even if persistence fails.
+  }
+};
+
 const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   graphSeason,
   id,
@@ -44,29 +52,28 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   onMeasureChange,
   onSeasonChange,
 }) => {
-  const initialTrendData = React.useMemo<
-    TrendGraphDataProperties | undefined
-  >(() => {
-    if (
-      initialYears.length === 0 ||
-      initialYearPets.length !== initialYears.length ||
-      initialTrendlinePets.length !== initialYears.length
-    ) {
-      return undefined;
-    }
+  const initialTrendData =
+    React.useMemo<TrendGraphDataProperties | null>(() => {
+      if (
+        initialYears.length === 0 ||
+        initialYearPets.length !== initialYears.length ||
+        initialTrendlinePets.length !== initialYears.length
+      ) {
+        return null;
+      }
 
-    return {
-      increase_per_year: initialIncreasePerYear,
-      trendline_pets: initialTrendlinePets,
-      year_pets: initialYearPets,
-      years: initialYears,
-    };
-  }, [
-    initialIncreasePerYear,
-    initialTrendlinePets,
-    initialYearPets,
-    initialYears,
-  ]);
+      return {
+        increase_per_year: initialIncreasePerYear,
+        trendline_pets: initialTrendlinePets,
+        year_pets: initialYearPets,
+        years: initialYears,
+      };
+    }, [
+      initialIncreasePerYear,
+      initialTrendlinePets,
+      initialYearPets,
+      initialYears,
+    ]);
   const initialTrendSnapshot = React.useMemo<TrendGraphSnapshot | undefined>(
     () =>
       initialTrendData
@@ -173,29 +180,21 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   );
 
   const handleGraphMeasureChange = React.useCallback(
-    async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
       const option = event.target.value;
       setIsMobileLegendOpen(false);
       setSelectedGraphMeasure(option);
-      try {
-        await onMeasureChange(option);
-      } catch {
-        // Ignore persistence failures and keep the local selection.
-      }
+      void ignorePersistenceError(onMeasureChange(option));
     },
     [onMeasureChange],
   );
 
   const handleSeasonChange = React.useCallback(
-    async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
       const season = normalizeGraphSeason(event.target.value);
       setIsMobileLegendOpen(false);
 
-      try {
-        await onSeasonChange(season);
-      } catch {
-        // Ignore persistence failures and keep the local selection.
-      }
+      void ignorePersistenceError(onSeasonChange(season));
     },
     [onSeasonChange],
   );
@@ -223,25 +222,21 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   ]);
 
   const handleForecastToggle = React.useCallback(
-    async (enabled: boolean) => {
+    (enabled: boolean) => {
       setForecastEnabled(enabled);
-      try {
-        await setForecastPreferences(enabled, forecastYearsAhead);
-      } catch {
-        // Ignore persistence failures
-      }
+      void ignorePersistenceError(
+        setForecastPreferences(enabled, forecastYearsAhead),
+      );
     },
     [forecastYearsAhead],
   );
 
   const handleForecastYearsChange = React.useCallback(
-    async (yearsAhead: number) => {
+    (yearsAhead: number) => {
       setForecastYearsAhead(yearsAhead);
-      try {
-        await setForecastPreferences(forecastEnabled, yearsAhead);
-      } catch {
-        // Ignore persistence failures
-      }
+      void ignorePersistenceError(
+        setForecastPreferences(forecastEnabled, yearsAhead),
+      );
     },
     [forecastEnabled],
   );

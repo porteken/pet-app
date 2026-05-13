@@ -429,7 +429,7 @@ describe("fetch-server", () => {
     });
 
     it("returns undefined when there is no historical data", async () => {
-      mockDbQueries.fetchHistoricalYearRow.mockResolvedValue(undefined);
+      mockDbQueries.fetchHistoricalYearRow.mockResolvedValue(null as any);
 
       await expect(
         fetchServer.FetchForecastData(1, 10),

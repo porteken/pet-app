@@ -19,7 +19,7 @@ export function validateTrendOption(option: string): option is "avg" | "max" {
 }
 
 export function validateYear(year: string): boolean {
-  return /^\d{4}$/.test(year);
+  return /^\d{4}$/u.test(year);
 }
 
 export function validateYearPets(yearPets: number[]): void {

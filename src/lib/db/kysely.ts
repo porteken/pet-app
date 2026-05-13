@@ -13,18 +13,13 @@ declare global {
 const resolveSslConfiguration = (
   sslMode: ServerDatabaseEnvironment["PGSSLMODE"],
 ) => {
-  switch (sslMode) {
-    case "disable": {
-      return false;
-    }
-    case "verify-ca":
-    case "verify-full": {
-      return { rejectUnauthorized: true };
-    }
-    default: {
-      return { rejectUnauthorized: false };
-    }
+  if (sslMode === "disable") {
+    return false;
   }
+
+  return {
+    rejectUnauthorized: sslMode === "verify-ca" || sslMode === "verify-full",
+  };
 };
 
 const createPool = () => {

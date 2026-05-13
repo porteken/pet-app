@@ -1,8 +1,5 @@
 "use client";
 
-/* eslint-disable jsx-a11y/prefer-tag-over-role */
-/* oxlint-disable jsx-a11y/prefer-tag-over-role */
-
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon, SearchIcon, XIcon } from "lucide-react";
 import * as React from "react";
@@ -98,7 +95,7 @@ export function CitySelector({
 
   React.useEffect(() => {
     if (!open) {
-      return undefined;
+      return () => {};
     }
 
     const animationFrame = requestAnimationFrame(() => {
@@ -114,20 +111,21 @@ export function CitySelector({
       searchInput.setSelectionRange(caretPosition, caretPosition);
     });
 
-    return () => cancelAnimationFrame(animationFrame);
+    return () => {
+      cancelAnimationFrame(animationFrame);
+    };
   }, [open, searchTerm]);
 
   React.useEffect(() => {
     if (!open) {
-      return undefined;
+      return () => {};
     }
 
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
-      if (!(event.target instanceof Node)) {
-        return;
-      }
-
-      if (!wrapperReference.current?.contains(event.target)) {
+      if (
+        event.target instanceof Node &&
+        !wrapperReference.current?.contains(event.target)
+      ) {
         closeMenu();
       }
     };

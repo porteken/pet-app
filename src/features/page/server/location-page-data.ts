@@ -126,10 +126,10 @@ const getPreferencesFromCookies =
   async (): Promise<LocationPagePreferences> => {
     const cookieStore = await cookies();
     const initialGraphMeasure =
-      getLatestCookieValue(cookieStore, GRAPH_MEASURE_COOKIE_NAME) ||
+      getLatestCookieValue(cookieStore, GRAPH_MEASURE_COOKIE_NAME) ??
       DEFAULT_GRAPH_MEASURE;
     const initialGraphSeason = normalizeGraphSeason(
-      getLatestCookieValue(cookieStore, GRAPH_SEASON_COOKIE_NAME) ||
+      getLatestCookieValue(cookieStore, GRAPH_SEASON_COOKIE_NAME) ??
         DEFAULT_GRAPH_SEASON,
     );
     const rawReferenceYear = getLatestCookieValue(

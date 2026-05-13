@@ -113,7 +113,7 @@ export const apiRequest = async <T>(
 
     return await handleApiResponse<T>(response, {
       ...context,
-      method: options.method || "GET",
+      method: options.method ?? "GET",
     });
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
@@ -151,9 +151,11 @@ export const apiRequestWithRetry = async <T>(
         RETRY_DELAY_BASE * 2 ** (attempt - 1),
         RETRY_DELAY_MAX,
       );
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      await new Promise((resolve) => {
+        setTimeout(resolve, delay);
+      });
     }
   }
 
-  throw lastError;
+  throw lastError ?? new NetworkError("Request failed after retries", 0);
 };

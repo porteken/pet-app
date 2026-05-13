@@ -281,7 +281,6 @@ describe("trendAnalysis", () => {
             isMobileViewport: true,
             showLegend: false,
           }),
-          undefined,
         );
       });
 
@@ -293,7 +292,6 @@ describe("trendAnalysis", () => {
             isMobileViewport: true,
             showLegend: true,
           }),
-          undefined,
         );
       });
     });
@@ -365,7 +363,7 @@ describe("trendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
-        expect(screen.getByText(/range:/)).toBeInTheDocument();
+        expect(screen.getByText(/range:/u)).toBeInTheDocument();
       });
     });
   });
@@ -480,7 +478,6 @@ describe("trendAnalysis", () => {
             trendlinePets: [11, 12, 13, 14],
             yearPets: [10, 11, 12, 13],
           }),
-          undefined,
         );
       });
 
@@ -499,7 +496,6 @@ describe("trendAnalysis", () => {
             trendlinePets: [11, 12, 13, 14],
             yearPets: [10, 11, 12, 13],
           }),
-          undefined,
         );
       });
     });

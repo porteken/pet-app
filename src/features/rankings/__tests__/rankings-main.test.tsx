@@ -28,7 +28,7 @@ class MockSelectControl extends React.PureComponent<{
 
   public render(): React.ReactNode {
     const { data, disabled, label, placeholder, value } = this.props;
-    const testId = `${label?.toLowerCase().replaceAll(/\s/g, "-") ?? "select"}-select`;
+    const testId = `${label?.toLowerCase().replaceAll(/\s/gu, "-") ?? "select"}-select`;
 
     return (
       <div>
@@ -113,7 +113,7 @@ vi.mock("@/lib/actions/actions", () => ({
 vi.mock("@/features/header-bar", () => ({
   HeaderBar: mockFn(({ LocationOptions }: { LocationOptions?: unknown[] }) => (
     <div data-testid="header-bar">
-      HeaderBar with {LocationOptions?.length || 0} locations
+      HeaderBar with {LocationOptions?.length ?? 0} locations
     </div>
   )),
 }));
@@ -669,8 +669,8 @@ describe("rankingsMain", () => {
     it("should display showing text with correct counts", () => {
       render(<RankingsMain {...defaultProps} rankings={mockRankings} />);
 
-      expect(screen.getByText(/Showing/)).toBeInTheDocument();
-      expect(screen.getByText(/of 22 cities/)).toBeInTheDocument();
+      expect(screen.getByText(/Showing/u)).toBeInTheDocument();
+      expect(screen.getByText(/of 22 cities/u)).toBeInTheDocument();
     });
 
     it("should reset to page 1 when filters change", () => {
@@ -686,7 +686,7 @@ describe("rankingsMain", () => {
         target: { value: "Extreme Heat Stress" },
       });
 
-      expect(screen.getByText(/Showing/)).toBeInTheDocument();
+      expect(screen.getByText(/Showing/u)).toBeInTheDocument();
     });
   });
 
@@ -751,13 +751,13 @@ describe("rankingsMain", () => {
       expect(
         screen.getByText("Cities ranked by Average PET"),
       ).toBeInTheDocument();
-      expect(screen.getByText(/Showing 0/)).toBeInTheDocument();
+      expect(screen.getByText(/Showing 0/u)).toBeInTheDocument();
     });
 
     it("should show no results message when filter excludes all", () => {
       render(<RankingsMain {...defaultProps} rankings={topFiveRankings} />);
 
-      expect(screen.getByText(/Showing 1-5 of 5 cities/)).toBeInTheDocument();
+      expect(screen.getByText(/Showing 1-5 of 5 cities/u)).toBeInTheDocument();
     });
   });
 

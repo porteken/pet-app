@@ -17,7 +17,9 @@ vi.mock("@/lib/utils/errors", () => ({
 }));
 
 const createDelay = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 describe("api-client", () => {
   beforeEach(() => {

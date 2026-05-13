@@ -296,11 +296,8 @@ export function CitySelector({
                 No results found.
               </div>
             ) : (
-              filteredData.map((group, groupIndex) => (
-                <div
-                  className="scroll-my-1 p-1"
-                  key={group.key ?? `group-${groupIndex}`}
-                >
+              filteredData.map((group) => (
+                <div className="scroll-my-1 p-1" key={group.key ?? group.group}>
                   <div
                     className="text-muted-foreground px-1.5 py-1 text-xs"
                     data-testid="searchable-select-group-label"
@@ -308,7 +305,7 @@ export function CitySelector({
                     {group.group}
                   </div>
 
-                  {group.items.map((item, itemIndex) => {
+                  {group.items.map((item) => {
                     const selected = item.value === value;
 
                     return (
@@ -321,7 +318,8 @@ export function CitySelector({
                         data-testid="searchable-select-option"
                         data-value={item.value}
                         key={
-                          item.key ?? `${group.key ?? group.group}-${itemIndex}`
+                          item.key ??
+                          `${group.key ?? group.group}-${item.value}`
                         }
                         onClick={handleOptionClick}
                         role="option"

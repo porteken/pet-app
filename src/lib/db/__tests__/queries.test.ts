@@ -48,6 +48,19 @@ const createRef = (column: string) => ({
   column,
 });
 
+const toError = (error: unknown) => {
+  if (error instanceof Error) {
+    return error;
+  }
+  if (typeof error === "string") {
+    return new Error(error);
+  }
+  const err = new Error(JSON.stringify(error));
+  return typeof error === "object" && error !== null
+    ? Object.assign(err, error)
+    : err;
+};
+
 const resolveSelection = (selection: unknown) => {
   if (typeof selection !== "function") {
     return selection;
@@ -80,14 +93,14 @@ const createDbMock = (plans: QueryPlan[]) => {
       const builder: QueryBuilder = {
         execute: async () => {
           if (plan.executeError !== undefined) {
-            throw plan.executeError;
+            throw toError(plan.executeError);
           }
 
           return plan.executeResult ?? [];
         },
         executeTakeFirst: async () => {
           if (plan.executeTakeFirstError !== undefined) {
-            throw plan.executeTakeFirstError;
+            throw toError(plan.executeTakeFirstError);
           }
 
           return plan.executeTakeFirstResult;
@@ -297,9 +310,9 @@ describe("db queries", () => {
         ],
       });
 
-      await expect(queries.fetchCityRankingsRows(2024, "Summer")).rejects.toBe(
-        thrownError,
-      );
+      await expect(
+        queries.fetchCityRankingsRows(2024, "Summer"),
+      ).rejects.toThrow(thrownError);
     });
 
     it("falls back from id to location_id when the legacy id column is missing", async () => {

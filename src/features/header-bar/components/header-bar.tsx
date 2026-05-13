@@ -110,7 +110,7 @@ const HeaderBarComponent = ({
 
   const currentCity = useMemo(() => {
     if (id === undefined) {
-      return undefined;
+      return null;
     }
     return groupedCities
       .flatMap((group) => group.items)

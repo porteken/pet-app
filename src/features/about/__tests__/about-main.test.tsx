@@ -58,7 +58,9 @@ describe("aboutMain", () => {
   it("should display the purpose section label", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    expect(screen.getByText(/purpose of the application/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/purpose of the application/iu),
+    ).toBeInTheDocument();
   });
 
   it("should keep the page heading accessible", () => {
@@ -72,7 +74,9 @@ describe("aboutMain", () => {
   it("should display the 'What is PET?' section with correct heading", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    const petHeading = screen.getByRole("heading", { name: /what is pet\?/i });
+    const petHeading = screen.getByRole("heading", {
+      name: /what is pet\?/iu,
+    });
     expect(petHeading).toBeInTheDocument();
     expect(petHeading).toHaveClass(
       "text-primary",
@@ -86,7 +90,7 @@ describe("aboutMain", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
     const petDefinition = screen.getByText(
-      /pet \(physiological equivalent temperature\) is a method to measure/i,
+      /pet \(physiological equivalent temperature\) is a method to measure/iu,
     );
     expect(petDefinition).toBeInTheDocument();
     expect(petDefinition).toHaveTextContent(
@@ -100,7 +104,7 @@ describe("aboutMain", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
     const factorsText = screen.getByText(
-      /temperature, humidity, wind speed, solar radiation, and clothing/i,
+      /temperature, humidity, wind speed, solar radiation, and clothing/iu,
     );
     expect(factorsText).toBeInTheDocument();
   });
@@ -108,7 +112,7 @@ describe("aboutMain", () => {
   it("should render a link to the research study", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
-    const studyLink = screen.getByRole("link", { name: /this study/i });
+    const studyLink = screen.getByRole("link", { name: /this study/iu });
     expect(studyLink).toBeInTheDocument();
     expect(studyLink).toHaveAttribute(
       "href",
@@ -121,7 +125,7 @@ describe("aboutMain", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
     const studyText = screen.getByText(
-      /there is evidence to suggest that the pet may do a better job/i,
+      /there is evidence to suggest that the pet may do a better job/iu,
     );
     expect(studyText).toBeInTheDocument();
     expect(studyText).toHaveTextContent("WBGT and UTCI");

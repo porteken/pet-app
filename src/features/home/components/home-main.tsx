@@ -39,6 +39,14 @@ interface GenerateGraphOptions {
   yearsAhead: number;
 }
 
+const ignorePersistenceError = async (promise: Promise<void>) => {
+  try {
+    await promise;
+  } catch {
+    // The local UI state remains valid even if persistence fails.
+  }
+};
+
 const Home: FC<MapProperties> = ({
   initialForecastEnabled,
   initialForecastYearsAhead,
@@ -141,21 +149,21 @@ const Home: FC<MapProperties> = ({
   );
 
   const handleSelectChange = useCallback(
-    async (option: string) => {
+    (option: string) => {
       if (selectedLocationId !== undefined) {
         setIsMobileGraphLegendOpen(false);
         setSelectedGraphMeasure(option);
-        await setGraphMeasure(option);
+        void ignorePersistenceError(setGraphMeasure(option));
       }
     },
     [selectedLocationId],
   );
 
-  const handleSeasonChange = useCallback(async (season: GraphSeason) => {
+  const handleSeasonChange = useCallback((season: GraphSeason) => {
     const nextSeason = normalizeGraphSeason(season);
     setIsMobileGraphLegendOpen(false);
     setSelectedGraphSeason(nextSeason);
-    await setGraphSeason(nextSeason);
+    void ignorePersistenceError(setGraphSeason(nextSeason));
   }, []);
 
   useEffect(() => {

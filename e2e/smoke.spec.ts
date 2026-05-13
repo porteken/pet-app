@@ -35,7 +35,7 @@ test.describe("Smoke Tests", () => {
       page,
       page.getByTestId("city-selector"),
       "Phoenix",
-      /^Phoenix$/,
+      /^Phoenix$/u,
     );
     await waitForLocationDetailsPage(page);
 
@@ -55,7 +55,7 @@ test.describe("Smoke Tests", () => {
     page,
   }) => {
     await page.goto("/1");
-    await waitForLocationDetailsPage(page, /\/1(?:\?.*)?$/);
+    await waitForLocationDetailsPage(page, /\/1(?:\?.*)?$/u);
 
     const graphMeasure = page.locator("select#graph-measure");
     const referenceYear = page.locator("select#reference-year");
@@ -99,7 +99,7 @@ test.describe("Smoke Tests", () => {
       page,
       page.getByTestId("city-selector"),
       "Phoenix",
-      /^Phoenix$/,
+      /^Phoenix$/u,
     );
     await waitForLocationDetailsPage(page);
   });

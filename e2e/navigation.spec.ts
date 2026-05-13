@@ -50,7 +50,7 @@ test.describe("Navigation", () => {
   }) => {
     await page.goto("/");
 
-    const githubLink = page.getByRole("link", { name: /github/i }).first();
+    const githubLink = page.getByRole("link", { name: /github/iu }).first();
     await expect(githubLink).toBeVisible({ timeout: 10_000 });
 
     await expect(githubLink).toHaveAttribute("target", "_blank");

@@ -25,6 +25,14 @@ const handleMeasureChange = async (measure: string): Promise<void> => {
   }
 };
 
+const ignorePersistenceError = async (promise: Promise<void>) => {
+  try {
+    await promise;
+  } catch {
+    // The local UI state remains valid even if persistence fails.
+  }
+};
+
 const Main: FC<PageProperties> = ({
   CurrentDates,
   CurrentPets,
@@ -59,14 +67,12 @@ const Main: FC<PageProperties> = ({
   }, []);
 
   const handleReferenceYearChange = React.useCallback(
-    async (referenceYear: string) => {
+    (referenceYear: string) => {
       setSelectedReferenceYear(referenceYear);
 
-      try {
-        await persistReferenceYearPreference(referenceYear);
-      } catch {
-        // Ignore persistence failures; the UI can continue with the selected value.
-      }
+      void ignorePersistenceError(
+        persistReferenceYearPreference(referenceYear),
+      );
     },
     [],
   );

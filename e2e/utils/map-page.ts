@@ -54,7 +54,7 @@ export async function waitForMapPage(page: Page): Promise<void> {
 
 export async function waitForLocationDetailsPage(
   page: Page,
-  urlPattern = /\/\d+(?:\?.*)?$/,
+  urlPattern = /\/\d+(?:\?.*)?$/u,
 ): Promise<void> {
   await expect(page).toHaveURL(urlPattern, {
     timeout: LOCATION_DETAILS_TIMEOUT,

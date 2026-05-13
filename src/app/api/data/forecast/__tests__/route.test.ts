@@ -91,7 +91,7 @@ describe("get /api/data/forecast", () => {
   });
 
   it("normalizes invalid seasons to the default season", async () => {
-    mockFetchForecastData.mockResolvedValue(undefined);
+    mockFetchForecastData.mockResolvedValue(null as any);
 
     const response = await GET(
       new Request(

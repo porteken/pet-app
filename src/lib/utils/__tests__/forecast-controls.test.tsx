@@ -33,7 +33,7 @@ describe("forecastControls", () => {
     );
 
     expect(
-      screen.queryByLabelText(/forecast .* year/i),
+      screen.queryByLabelText(/forecast .* year/iu),
     ).not.toBeInTheDocument();
     expect(screen.queryByRole("slider")).not.toBeInTheDocument();
   });

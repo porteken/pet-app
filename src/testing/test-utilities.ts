@@ -38,8 +38,12 @@ export const setupApiServerTest = async () => {
   const { SimpleLinearRegression } =
     await import("@/lib/utils/simple-linear-regression");
   vi.mocked(SimpleLinearRegression).mockImplementation(
-    function MockSimpleLinearRegression() {
-      return mockLinearRegression as unknown as SimpleLinearRegression;
+    function MockSimpleLinearRegression(
+      this: SimpleLinearRegression,
+      _x: number[],
+      _y: number[],
+    ) {
+      Object.assign(this, mockLinearRegression);
     },
   );
 

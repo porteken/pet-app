@@ -12,16 +12,12 @@ let fetchMock: ReturnType<typeof vi.fn>;
 
 class MockTrendAnalysis extends React.PureComponent<{
   initialGraphMeasure: string;
-  onMeasureChange: (value: string) => void | Promise<void>;
+  onMeasureChange: (value: string) => void;
 }> {
-  private readonly handleChange = async (
+  private readonly handleChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    try {
-      await this.props.onMeasureChange(event.currentTarget.value);
-    } catch {
-      // Ignore
-    }
+    this.props.onMeasureChange(event.currentTarget.value);
   };
 
   public render(): React.ReactNode {
@@ -46,17 +42,13 @@ class MockTrendAnalysis extends React.PureComponent<{
 }
 
 class MockReferenceData extends React.PureComponent<{
-  onReferenceYearChange: (value: string) => void | Promise<void>;
+  onReferenceYearChange: (value: string) => void;
   referenceYear: string;
 }> {
-  private readonly handleChange = async (
+  private readonly handleChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    try {
-      await this.props.onReferenceYearChange(event.currentTarget.value);
-    } catch {
-      // Ignore
-    }
+    this.props.onReferenceYearChange(event.currentTarget.value);
   };
 
   public render(): React.ReactNode {

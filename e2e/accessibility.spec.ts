@@ -17,7 +17,7 @@ test.describe("Accessibility", () => {
     await page.keyboard.press("Tab");
 
     await page.goto("/1");
-    await waitForLocationDetailsPage(page, /\/1(?:\?.*)?$/);
+    await waitForLocationDetailsPage(page, /\/1(?:\?.*)?$/u);
 
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");

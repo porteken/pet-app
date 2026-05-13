@@ -276,24 +276,24 @@ describe("trendAnalysis", () => {
       expect(toggle).toHaveAttribute("aria-expanded", "false");
 
       await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+        const calls = vi.mocked(GenerateTrendGraph).mock.calls;
+        expect(calls.at(-1)?.[0]).toStrictEqual(
           expect.objectContaining({
             isMobileViewport: true,
             showLegend: false,
           }),
-          undefined,
         );
       });
 
       fireEvent.click(toggle);
 
       await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+        const calls = vi.mocked(GenerateTrendGraph).mock.calls;
+        expect(calls.at(-1)?.[0]).toStrictEqual(
           expect.objectContaining({
             isMobileViewport: true,
             showLegend: true,
           }),
-          undefined,
         );
       });
     });
@@ -365,7 +365,7 @@ describe("trendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
-        expect(screen.getByText(/range:/)).toBeInTheDocument();
+        expect(screen.getByText(/range:/u)).toBeInTheDocument();
       });
     });
   });
@@ -473,14 +473,14 @@ describe("trendAnalysis", () => {
       });
 
       await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+        const calls = vi.mocked(GenerateTrendGraph).mock.calls;
+        expect(calls.at(-1)?.[0]).toStrictEqual(
           expect.objectContaining({
             increasePerYear: 0.2,
             option: "avg",
             trendlinePets: [11, 12, 13, 14],
             yearPets: [10, 11, 12, 13],
           }),
-          undefined,
         );
       });
 
@@ -492,14 +492,14 @@ describe("trendAnalysis", () => {
       });
 
       await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+        const calls = vi.mocked(GenerateTrendGraph).mock.calls;
+        expect(calls.at(-1)?.[0]).toStrictEqual(
           expect.objectContaining({
             increasePerYear: 0.2,
             option: "avg",
             trendlinePets: [11, 12, 13, 14],
             yearPets: [10, 11, 12, 13],
           }),
-          undefined,
         );
       });
     });

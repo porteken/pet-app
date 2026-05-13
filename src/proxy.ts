@@ -24,7 +24,7 @@ export default function proxy(request: NextRequest) {
   if (pathname.startsWith("/") && pathname.length > 1) {
     const idPart = pathname.slice(1);
 
-    if (!/^\d+$/.test(idPart)) {
+    if (!/^\d+$/u.test(idPart)) {
       return new NextResponse(undefined, { status: 404 });
     }
 

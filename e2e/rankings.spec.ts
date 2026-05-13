@@ -72,7 +72,7 @@ test.describe("Rankings Page", () => {
     });
 
     const yearSelect = page.getByTestId("rankings-year-filter");
-    await selectCustomOption(page, yearSelect, /^2010$/);
+    await selectCustomOption(page, yearSelect, /^2010$/u);
     await expect(yearSelect).toContainText("2010");
 
     await expect(page.locator("table tbody tr").first()).toBeVisible({
@@ -108,7 +108,7 @@ test.describe("Rankings Page", () => {
     await firstRow.scrollIntoViewIfNeeded();
 
     await Promise.all([
-      page.waitForURL(/\/\d+(?:\?.*)?$/, { timeout: 15_000 }),
+      page.waitForURL(/\/\d+(?:\?.*)?$/u, { timeout: 15_000 }),
       firstRow.locator("td").nth(1).click(),
     ]);
 

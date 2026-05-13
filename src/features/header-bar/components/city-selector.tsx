@@ -1,8 +1,5 @@
 "use client";
 
-/* eslint-disable jsx-a11y/prefer-tag-over-role */
-/* oxlint-disable jsx-a11y/prefer-tag-over-role */
-
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon, SearchIcon, XIcon } from "lucide-react";
 import * as React from "react";
@@ -98,7 +95,7 @@ export function CitySelector({
 
   React.useEffect(() => {
     if (!open) {
-      return undefined;
+      return () => {};
     }
 
     const animationFrame = requestAnimationFrame(() => {
@@ -114,20 +111,21 @@ export function CitySelector({
       searchInput.setSelectionRange(caretPosition, caretPosition);
     });
 
-    return () => cancelAnimationFrame(animationFrame);
+    return () => {
+      cancelAnimationFrame(animationFrame);
+    };
   }, [open, searchTerm]);
 
   React.useEffect(() => {
     if (!open) {
-      return undefined;
+      return () => {};
     }
 
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
-      if (!(event.target instanceof Node)) {
-        return;
-      }
-
-      if (!wrapperReference.current?.contains(event.target)) {
+      if (
+        event.target instanceof Node &&
+        !wrapperReference.current?.contains(event.target)
+      ) {
         closeMenu();
       }
     };
@@ -296,11 +294,8 @@ export function CitySelector({
                 No results found.
               </div>
             ) : (
-              filteredData.map((group, groupIndex) => (
-                <div
-                  className="scroll-my-1 p-1"
-                  key={group.key ?? `group-${groupIndex}`}
-                >
+              filteredData.map((group) => (
+                <div className="scroll-my-1 p-1" key={group.key ?? group.group}>
                   <div
                     className="text-muted-foreground px-1.5 py-1 text-xs"
                     data-testid="searchable-select-group-label"
@@ -308,7 +303,7 @@ export function CitySelector({
                     {group.group}
                   </div>
 
-                  {group.items.map((item, itemIndex) => {
+                  {group.items.map((item) => {
                     const selected = item.value === value;
 
                     return (
@@ -321,7 +316,8 @@ export function CitySelector({
                         data-testid="searchable-select-option"
                         data-value={item.value}
                         key={
-                          item.key ?? `${group.key ?? group.group}-${itemIndex}`
+                          item.key ??
+                          `${group.key ?? group.group}-${item.value}`
                         }
                         onClick={handleOptionClick}
                         role="option"

@@ -153,7 +153,7 @@ export const MapComponent = memo<MapComponentProperties>(
 
     const markers = useMemo(() => {
       if (!locations || !customIcon || !marker) {
-        return undefined;
+        return null;
       }
 
       return locations.map((loc) => (

@@ -310,9 +310,9 @@ describe("db queries", () => {
         ],
       });
 
-      await expect(queries.fetchCityRankingsRows(2024, "Summer")).rejects.toBe(
-        thrownError,
-      );
+      await expect(
+        queries.fetchCityRankingsRows(2024, "Summer"),
+      ).rejects.toThrow(thrownError);
     });
 
     it("falls back from id to location_id when the legacy id column is missing", async () => {

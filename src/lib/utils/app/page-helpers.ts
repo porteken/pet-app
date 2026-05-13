@@ -18,10 +18,8 @@ import { cookies } from "next/headers";
 
 export const getGraphMeasureFromCookies = async (): Promise<string> => {
   const cookieStore = await cookies();
-  return (
-    getLatestCookieValue(cookieStore, GRAPH_MEASURE_COOKIE_NAME) ??
-    DEFAULT_GRAPH_MEASURE
-  );
+  const value = getLatestCookieValue(cookieStore, GRAPH_MEASURE_COOKIE_NAME);
+  return value && value.length > 0 ? value : DEFAULT_GRAPH_MEASURE;
 };
 
 export const getGraphSeasonFromCookies = async () => {

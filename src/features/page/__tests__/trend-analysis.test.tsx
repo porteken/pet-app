@@ -276,7 +276,8 @@ describe("trendAnalysis", () => {
       expect(toggle).toHaveAttribute("aria-expanded", "false");
 
       await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+        const calls = vi.mocked(GenerateTrendGraph).mock.calls;
+        expect(calls.at(-1)?.[0]).toStrictEqual(
           expect.objectContaining({
             isMobileViewport: true,
             showLegend: false,
@@ -287,7 +288,8 @@ describe("trendAnalysis", () => {
       fireEvent.click(toggle);
 
       await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+        const calls = vi.mocked(GenerateTrendGraph).mock.calls;
+        expect(calls.at(-1)?.[0]).toStrictEqual(
           expect.objectContaining({
             isMobileViewport: true,
             showLegend: true,
@@ -471,7 +473,8 @@ describe("trendAnalysis", () => {
       });
 
       await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+        const calls = vi.mocked(GenerateTrendGraph).mock.calls;
+        expect(calls.at(-1)?.[0]).toStrictEqual(
           expect.objectContaining({
             increasePerYear: 0.2,
             option: "avg",
@@ -489,7 +492,8 @@ describe("trendAnalysis", () => {
       });
 
       await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenLastCalledWith(
+        const calls = vi.mocked(GenerateTrendGraph).mock.calls;
+        expect(calls.at(-1)?.[0]).toStrictEqual(
           expect.objectContaining({
             increasePerYear: 0.2,
             option: "avg",

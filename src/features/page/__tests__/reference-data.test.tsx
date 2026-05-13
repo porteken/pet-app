@@ -159,7 +159,8 @@ describe("referenceData", () => {
     );
 
     await waitFor(() => {
-      expect(GenerateReferenceGraph).toHaveBeenLastCalledWith(
+      const calls = vi.mocked(GenerateReferenceGraph).mock.calls;
+      expect(calls.at(-1)?.[0]).toStrictEqual(
         expect.objectContaining({
           currentYear: 2025,
         }),

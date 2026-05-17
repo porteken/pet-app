@@ -15,6 +15,55 @@ const CI_WORKERS = 1;
 const LOCAL_WORKERS = 1;
 
 const projectRoot = import.meta.dirname;
+const runningOnLinux = process.platform === "linux";
+const runningInsideVSCodeSnap =
+  process.env.GIO_LAUNCHED_DESKTOP_FILE?.includes("/snap/") === true ||
+  process.env.GTK_EXE_PREFIX?.startsWith("/snap/") === true ||
+  process.env.GTK_PATH?.includes("/snap/") === true;
+
+const createWebKitLaunchEnvironment = () => {
+  if (!runningOnLinux || !runningInsideVSCodeSnap) {
+    return null;
+  }
+
+  const launchEnvironment = { ...process.env };
+
+  delete launchEnvironment.GIO_LAUNCHED_DESKTOP_FILE;
+  delete launchEnvironment.GIO_LAUNCHED_DESKTOP_FILE_PID;
+  delete launchEnvironment.GIO_MODULE_DIR;
+  delete launchEnvironment.GIO_MODULE_DIR_VSCODE_SNAP_ORIG;
+  delete launchEnvironment.GTK_EXE_PREFIX;
+  delete launchEnvironment.GTK_EXE_PREFIX_VSCODE_SNAP_ORIG;
+  delete launchEnvironment.GTK_IM_MODULE_FILE;
+  delete launchEnvironment.GTK_IM_MODULE_FILE_VSCODE_SNAP_ORIG;
+  delete launchEnvironment.GTK_PATH;
+  delete launchEnvironment.GTK_PATH_VSCODE_SNAP_ORIG;
+
+  const originalXdgDataDirs = process.env.XDG_DATA_DIRS_VSCODE_SNAP_ORIG;
+  if (originalXdgDataDirs && originalXdgDataDirs !== "") {
+    launchEnvironment.XDG_DATA_DIRS = originalXdgDataDirs;
+  } else {
+    delete launchEnvironment.XDG_DATA_DIRS;
+  }
+
+  const originalXdgDataHome = process.env.XDG_DATA_HOME_VSCODE_SNAP_ORIG;
+  if (originalXdgDataHome && originalXdgDataHome !== "") {
+    launchEnvironment.XDG_DATA_HOME = originalXdgDataHome;
+  } else if (process.env.HOME) {
+    launchEnvironment.XDG_DATA_HOME = `${process.env.HOME}/.local/share`;
+  } else {
+    delete launchEnvironment.XDG_DATA_HOME;
+  }
+
+  return launchEnvironment;
+};
+
+const webkitLaunchEnvironment = createWebKitLaunchEnvironment();
+const webkitLaunchOptions =
+  webkitLaunchEnvironment === null
+    ? undefined
+    : { env: webkitLaunchEnvironment };
+
 const playwrightPort =
   process.env.PLAYWRIGHT_PORT ?? process.env.PORT ?? "3000";
 const playwrightBaseURL =
@@ -23,7 +72,6 @@ const playwrightServerMode =
   process.env.PLAYWRIGHT_SERVER_MODE === "development"
     ? "development"
     : "production";
-const runningOnLinux = process.platform === "linux";
 const enableWebKitProjects =
   process.env.PLAYWRIGHT_ENABLE_WEBKIT === "true" ||
   Boolean(process.env.CI) ||
@@ -57,6 +105,7 @@ export default defineConfig({
             name: "webkit",
             use: {
               ...devices["Desktop Safari"],
+              launchOptions: webkitLaunchOptions,
             },
           },
         ]
@@ -66,41 +115,32 @@ export default defineConfig({
       name: "Mobile Chrome",
       use: { ...devices["Pixel 5"] },
     },
-    ...(enableWebKitProjects
-      ? [
-          {
-            name: "Mobile Safari",
-            use: {
-              ...devices["iPhone 12"],
-            },
-          },
-        ]
-      : []),
+    {
+      name: "Mobile Safari",
+      use: {
+        ...devices["iPhone 12"],
+        launchOptions: webkitLaunchOptions,
+      },
+    },
   ],
-  reporter: process.env.CI ? "html" : "line",
+
+  reporter: process.env.CI ? "github" : "list",
   retries: process.env.CI ? CI_RETRIES : LOCAL_RETRIES,
   testDir: "./e2e",
   timeout: GLOBAL_TIMEOUT,
+
   use: {
     actionTimeout: ACTION_TIMEOUT,
     baseURL: playwrightBaseURL,
-
     navigationTimeout: NAVIGATION_TIMEOUT,
-
     screenshot: "only-on-failure",
-    trace: "retain-on-failure",
+    trace: "on-first-retry",
   },
 
   webServer: {
     command: webServerCommand,
     cwd: projectRoot,
-    env: {
-      NEXT_PUBLIC_E2E_TEST: "true",
-      PORT: playwrightPort,
-    },
-    reuseExistingServer:
-      !process.env.CI && playwrightServerMode === "development",
-    stderr: "ignore",
+    reuseExistingServer: !process.env.CI,
     timeout: webServerTimeout,
     url: playwrightBaseURL,
   },

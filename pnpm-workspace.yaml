@@ -1,6 +1,7 @@
 allowBuilds:
   "@sentry/cli": true
   cpu-features: set this to true or false
+  esbuild: set this to true or false
   msw: true
   protobufjs: set this to true or false
   sharp: true

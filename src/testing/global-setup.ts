@@ -21,7 +21,7 @@ export async function setup() {
 
   // 1. Create tables
   const createTablesSql = await fs.readFile(
-    path.join(__dirname, "db/schema/create_tables.sql"),
+    path.join(import.meta.dirname, "db/schema/create_tables.sql"),
     "utf8",
   );
   await client.query(createTablesSql);
@@ -57,7 +57,7 @@ export async function setup() {
 
   // 4. Create views (this will compute materialized views from the seeded data)
   const createViewsSql = await fs.readFile(
-    path.join(__dirname, "db/schema/create_views.sql"),
+    path.join(import.meta.dirname, "db/schema/create_views.sql"),
     "utf8",
   );
   await client.query(createViewsSql);

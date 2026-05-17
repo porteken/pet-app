@@ -36,16 +36,15 @@ vi.mock("@/lib/utils/errors", () => {
     }
   }
 
+  class MockNetworkErrorConstructor extends MockNetworkError {}
+
+  const MockedNetworkErrorConstructor = vi.fn<
+    typeof MockNetworkErrorConstructor
+  >(MockNetworkErrorConstructor);
+
   return {
     createError: mockFn(),
-    NetworkError: mockFn(function createMockNetworkError(
-      message: string,
-      statusCode: number,
-      originalError?: unknown,
-      context?: unknown,
-    ) {
-      return new MockNetworkError(message, statusCode, originalError, context);
-    }),
+    NetworkError: MockedNetworkErrorConstructor,
   };
 });
 

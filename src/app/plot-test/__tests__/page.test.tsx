@@ -13,22 +13,20 @@ const { mockLine } = vi.hoisted(() => ({
   )),
 }));
 
-vi.mock("recharts", () => {
-  const createStub =
-    (testId: string) =>
-    ({ children }: { children?: ReactNode }) => (
-      <div data-testid={testId}>{children}</div>
-    );
+function createRechartsStub(testId: string) {
+  return ({ children }: { children?: ReactNode }) => (
+    <div data-testid={testId}>{children}</div>
+  );
+}
 
-  return {
-    CartesianGrid: createStub("recharts-grid"),
-    Line: mockLine,
-    LineChart: createStub("recharts-line-chart"),
-    ResponsiveContainer: createStub("recharts-responsive-container"),
-    XAxis: createStub("recharts-x-axis"),
-    YAxis: createStub("recharts-y-axis"),
-  };
-});
+vi.mock("recharts", () => ({
+  CartesianGrid: createRechartsStub("recharts-grid"),
+  Line: mockLine,
+  LineChart: createRechartsStub("recharts-line-chart"),
+  ResponsiveContainer: createRechartsStub("recharts-responsive-container"),
+  XAxis: createRechartsStub("recharts-x-axis"),
+  YAxis: createRechartsStub("recharts-y-axis"),
+}));
 
 import Page from "../page";
 

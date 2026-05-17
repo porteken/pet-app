@@ -1,6 +1,6 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
-export const MARKER_SELECTOR = ".pet-map-marker-icon, .leaflet-marker-icon";
+export const MARKER_SELECTOR = '[data-map-marker="true"]';
 
 const MARKER_CLICK_TIMEOUT = 2000;
 const MARKER_VISIBILITY_TIMEOUT = 10_000;
@@ -15,17 +15,45 @@ export async function clickClickableMarker(page: Page): Promise<void> {
 
   for (const index of candidateIndices) {
     const marker = markers.nth(index);
-    try {
-      await marker.scrollIntoViewIfNeeded();
-      await marker.click({ timeout: MARKER_CLICK_TIMEOUT, trial: true });
-      await marker.click();
+    if (await tryActivateMarkerWithPointer(marker)) {
       return;
-    } catch {
-      // Try the next marker if this one is not interactable.
     }
   }
 
-  throw new Error("Unable to click a map marker without using force.");
+  for (const index of candidateIndices) {
+    const marker = markers.nth(index);
+    if (await tryActivateMarkerWithKeyboard(marker)) {
+      return;
+    }
+  }
+
+  throw new Error(
+    "Unable to activate a map marker using pointer or keyboard interaction.",
+  );
+}
+
+async function tryActivateMarkerWithPointer(marker: Locator): Promise<boolean> {
+  try {
+    await marker.scrollIntoViewIfNeeded();
+    await marker.click({ timeout: MARKER_CLICK_TIMEOUT, trial: true });
+    await marker.click();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function tryActivateMarkerWithKeyboard(
+  marker: Locator,
+): Promise<boolean> {
+  try {
+    await marker.focus();
+    await expect(marker).toBeFocused({ timeout: MARKER_CLICK_TIMEOUT });
+    await marker.press("Enter", { timeout: MARKER_CLICK_TIMEOUT });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function getCandidateMarkerIndices(page: Page): Promise<number[]> {

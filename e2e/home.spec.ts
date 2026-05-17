@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import {
+  MAP_CONTAINER_SELECTOR,
   gotoAndWaitForMapPage,
   navigateToLocationDetailsFromMap,
   openLocationDetailsModal,
@@ -9,7 +10,7 @@ import {
 test.describe("Home Page", () => {
   test("should display the map and locations", async ({ page }) => {
     await gotoAndWaitForMapPage(page, "/");
-    await expect(page.locator(".leaflet-container")).toBeVisible();
+    await expect(page.locator(MAP_CONTAINER_SELECTOR)).toBeVisible();
   });
 
   test("should open modal with details when a marker is clicked", async ({

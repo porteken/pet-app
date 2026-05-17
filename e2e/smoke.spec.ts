@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import { searchAndSelectCustomOption } from "./utils/custom-select";
 import { MARKER_SELECTOR } from "./utils/map-marker";
 import {
+  MAP_CONTAINER_SELECTOR,
   gotoAndWaitForMapPage,
   openLocationDetailsModal,
   waitForLocationDetailsPage,
@@ -64,7 +65,7 @@ test.describe("Smoke Tests", () => {
     await referenceYear.selectOption("2010");
 
     await page.getByText("Map").click();
-    await expect(page.locator(".leaflet-container")).toBeVisible({
+    await expect(page.locator(MAP_CONTAINER_SELECTOR)).toBeVisible({
       timeout: 10_000,
     });
   });

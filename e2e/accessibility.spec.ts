@@ -1,8 +1,11 @@
 import { expect, test } from "@playwright/test";
 
-import { waitForLocationDetailsPage } from "./utils/map-page";
+import { MARKER_SELECTOR } from "./utils/map-marker";
+import {
+  MAP_CONTAINER_SELECTOR,
+  waitForLocationDetailsPage,
+} from "./utils/map-page";
 
-const MARKER_SELECTOR = ".pet-map-marker-icon, .leaflet-marker-icon";
 const LOCATION_CHARTS =
   '[data-testid="trend-chart"], [data-testid="reference-chart"]';
 const TREND_ANALYSIS_HEADING = { name: "Trend Analysis" } as const;
@@ -91,7 +94,7 @@ test.describe("Accessibility", () => {
 
     await page.goto("/");
 
-    await expect(page.locator(".leaflet-container")).toBeVisible();
+    await expect(page.locator(MAP_CONTAINER_SELECTOR)).toBeVisible();
 
     const marker = page.locator(MARKER_SELECTOR).first();
     await expect(marker).toBeVisible({ timeout: 10_000 });

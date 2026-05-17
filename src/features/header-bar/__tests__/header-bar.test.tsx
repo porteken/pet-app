@@ -198,7 +198,7 @@ describe("headerBar", () => {
       const selector = screen.getByTestId("city-selector");
       await user.click(selector);
 
-      const option = await screen.findByRole("option", { name: "New York" });
+      const option = await screen.findByRole("button", { name: "New York" });
       await user.click(option);
 
       expect(mockPush).toHaveBeenCalledWith("/0");
@@ -234,10 +234,10 @@ describe("headerBar", () => {
 
       expect(searchInput).toHaveValue("los");
       expect(
-        screen.getByRole("option", { name: "Los Angeles" }),
+        screen.getByRole("button", { name: "Los Angeles" }),
       ).toBeInTheDocument();
       expect(
-        screen.queryByRole("option", { name: "New York" }),
+        screen.queryByRole("button", { name: "New York" }),
       ).not.toBeInTheDocument();
     });
 

@@ -5,11 +5,31 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { OptimizedMarker } from "../components/optimized-marker";
 
-import type { Icon } from "leaflet";
-
 const mockQueryClient = {
   prefetchQuery: mockFn(),
 };
+
+const MockMarkerComponent = mockFn(
+  ({
+    anchor,
+    children,
+    latitude,
+    longitude,
+  }: {
+    anchor?: string;
+    children?: React.ReactNode;
+    latitude: number;
+    longitude: number;
+  }) => (
+    <div
+      data-anchor={anchor}
+      data-position={JSON.stringify([latitude, longitude])}
+      data-testid="marker"
+    >
+      {children}
+    </div>
+  ),
+);
 
 vi.mock("@tanstack/react-query", () => ({
   useQueryClient: () => mockQueryClient,
@@ -19,39 +39,22 @@ vi.mock("@/lib/api/query-client", () => ({
   prefetchTrendGraphData: mockFn(),
 }));
 
-const MockMarkerComponent = mockFn(
-  ({
-    eventHandlers,
-    icon,
-    position,
-  }: {
-    eventHandlers?: { click?: () => void; mouseover?: () => void };
-    icon: unknown;
-    position: unknown;
-  }) => (
-    <button
-      data-icon={JSON.stringify(icon)}
-      data-position={JSON.stringify(position)}
-      data-testid="marker"
-      onClick={eventHandlers?.click}
-      onMouseEnter={eventHandlers?.mouseover}
-      type="button"
-    />
-  ),
-);
+vi.mock("react-map-gl/maplibre", () => ({
+  Marker: (properties: unknown) => MockMarkerComponent(properties),
+}));
 
 const mockPosition: [number, number] = [40.7128, -74.006];
 
 describe("optimizedMarker", () => {
   const mockProperties: React.ComponentProps<typeof OptimizedMarker> = {
-    icon: { iconUrl: "test-icon.png" } as unknown as Icon,
+    city: "New York",
     latitude: mockPosition[0],
     longitude: mockPosition[1],
     locationId: 123,
-    MarkerComponent: MockMarkerComponent,
     onClick: mockFn(),
     selectedGraphMeasure: "temperature",
     selectedGraphSeason: "Annual",
+    state: "NY",
   };
 
   let mockPrefetchTrendGraphData: any;
@@ -67,13 +70,49 @@ describe("optimizedMarker", () => {
 
     const marker = screen.getByTestId("marker");
     expect(marker).toBeInTheDocument();
+    expect(marker).toHaveAttribute("data-anchor", "bottom");
     expect(marker).toHaveAttribute(
       "data-position",
       JSON.stringify(mockPosition),
     );
-    expect(marker).toHaveAttribute(
-      "data-icon",
-      JSON.stringify(mockProperties.icon),
+    expect(
+      screen.getByRole("button", {
+        name: "Open details for New York, NY",
+      }),
+    ).toHaveAttribute("data-map-marker", "true");
+  });
+
+  it("uses a subtler marker fill and glow", () => {
+    render(<OptimizedMarker {...mockProperties} />);
+
+    const markerButton = screen.getByRole("button", {
+      name: "Open details for New York, NY",
+    });
+    const markerSvg = markerButton.querySelector("svg");
+    const markerPath = markerSvg?.querySelector("path");
+
+    expect(markerSvg).toHaveClass(
+      "drop-shadow-[0_4px_10px_rgba(29,78,216,0.18)]",
+    );
+    expect(markerPath).toHaveAttribute("fill", "#1D4ED8");
+    expect(markerPath).toHaveAttribute("fill-opacity", "0.9");
+  });
+
+  it("prefetches data when the marker receives focus", async () => {
+    const user = userEvent.setup();
+    render(<OptimizedMarker {...mockProperties} />);
+
+    const markerButton = screen.getByRole("button", {
+      name: "Open details for New York, NY",
+    });
+    await user.tab();
+
+    expect(markerButton).toHaveFocus();
+    expect(mockPrefetchTrendGraphData).toHaveBeenCalledWith(
+      mockQueryClient,
+      mockProperties.locationId,
+      mockProperties.selectedGraphMeasure,
+      mockProperties.selectedGraphSeason,
     );
   });
 
@@ -81,8 +120,10 @@ describe("optimizedMarker", () => {
     const user = userEvent.setup();
     render(<OptimizedMarker {...mockProperties} />);
 
-    const marker = screen.getByTestId("marker");
-    await user.click(marker);
+    const markerButton = screen.getByRole("button", {
+      name: "Open details for New York, NY",
+    });
+    await user.click(markerButton);
 
     expect(mockProperties.onClick).toHaveBeenCalledWith(
       mockProperties.locationId,
@@ -93,8 +134,10 @@ describe("optimizedMarker", () => {
     const user = userEvent.setup();
     render(<OptimizedMarker {...mockProperties} />);
 
-    const marker = screen.getByTestId("marker");
-    await user.hover(marker);
+    const markerButton = screen.getByRole("button", {
+      name: "Open details for New York, NY",
+    });
+    await user.hover(markerButton);
 
     expect(mockPrefetchTrendGraphData).toHaveBeenCalledWith(
       mockQueryClient,
@@ -108,13 +151,15 @@ describe("optimizedMarker", () => {
     const user = userEvent.setup();
     render(<OptimizedMarker {...mockProperties} />);
 
-    const marker = screen.getByTestId("marker");
+    const markerButton = screen.getByRole("button", {
+      name: "Open details for New York, NY",
+    });
 
-    await user.hover(marker);
-    await user.unhover(marker);
-    await user.hover(marker);
-    await user.unhover(marker);
-    await user.hover(marker);
+    await user.hover(markerButton);
+    await user.unhover(markerButton);
+    await user.hover(markerButton);
+    await user.unhover(markerButton);
+    await user.hover(markerButton);
 
     expect(mockPrefetchTrendGraphData).toHaveBeenCalledTimes(3);
     expect(mockPrefetchTrendGraphData).toHaveBeenCalledWith(
@@ -172,14 +217,10 @@ describe("optimizedMarker", () => {
 
     expect(MockMarkerComponent).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventHandlers: expect.objectContaining({
-          click: expect.any(Function),
-          mouseover: expect.any(Function),
-        }),
-        icon: mockProperties.icon,
-        position: mockPosition,
+        anchor: "bottom",
+        latitude: mockProperties.latitude,
+        longitude: mockProperties.longitude,
       }),
-      undefined,
     );
   });
 
@@ -189,8 +230,10 @@ describe("optimizedMarker", () => {
 
     const { rerender } = render(<OptimizedMarker {...mockProperties} />);
 
-    const marker = screen.getByTestId("marker");
-    await user.click(marker);
+    const markerButton = screen.getByRole("button", {
+      name: "Open details for New York, NY",
+    });
+    await user.click(markerButton);
 
     expect(mockProperties.onClick).toHaveBeenCalledWith(
       mockProperties.locationId,
@@ -199,7 +242,11 @@ describe("optimizedMarker", () => {
 
     rerender(<OptimizedMarker {...mockProperties} onClick={newOnClick} />);
 
-    await user.click(marker);
+    await user.click(
+      screen.getByRole("button", {
+        name: "Open details for New York, NY",
+      }),
+    );
 
     expect(newOnClick).toHaveBeenCalledWith(mockProperties.locationId);
   });

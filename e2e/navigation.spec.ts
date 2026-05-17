@@ -1,6 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-import { gotoAndWaitForMapPage, waitForMapPage } from "./utils/map-page";
+import {
+  MAP_CONTAINER_SELECTOR,
+  gotoAndWaitForMapPage,
+  waitForMapPage,
+} from "./utils/map-page";
+
+const NAVIGATION_TIMEOUT = 30_000;
 
 test.describe("Navigation", () => {
   test("should navigate to Map page from nav button", async ({ page }) => {
@@ -11,8 +17,10 @@ test.describe("Navigation", () => {
 
     await mapButton.click();
 
-    await expect(page).toHaveURL("/");
-    await expect(page.locator(".leaflet-container")).toBeVisible();
+    await expect(page).toHaveURL("/", { timeout: NAVIGATION_TIMEOUT });
+    await expect(page.locator(MAP_CONTAINER_SELECTOR)).toBeVisible({
+      timeout: NAVIGATION_TIMEOUT,
+    });
   });
 
   test("should navigate to Rankings page from nav button", async ({ page }) => {
@@ -25,7 +33,7 @@ test.describe("Navigation", () => {
 
     await rankingsButton.click();
 
-    await expect(page).toHaveURL("/rankings");
+    await expect(page).toHaveURL("/rankings", { timeout: NAVIGATION_TIMEOUT });
     await expect(
       page.getByRole("heading", { name: "Cities ranked by Average PET" }),
     ).toBeVisible();
@@ -41,7 +49,7 @@ test.describe("Navigation", () => {
 
     await aboutButton.click();
 
-    await expect(page).toHaveURL("/about");
+    await expect(page).toHaveURL("/about", { timeout: NAVIGATION_TIMEOUT });
     await expect(page.getByText("Purpose of the Application")).toBeVisible();
   });
 
@@ -61,17 +69,17 @@ test.describe("Navigation", () => {
     await gotoAndWaitForMapPage(page, "/");
 
     await page.getByRole("link", { name: "Navigate to about page" }).click();
-    await expect(page).toHaveURL("/about");
+    await expect(page).toHaveURL("/about", { timeout: NAVIGATION_TIMEOUT });
     await expect(page.getByText("Purpose of the Application")).toBeVisible();
 
     await page.getByRole("link", { name: "Navigate to rankings page" }).click();
-    await expect(page).toHaveURL("/rankings");
+    await expect(page).toHaveURL("/rankings", { timeout: NAVIGATION_TIMEOUT });
     await expect(
       page.getByRole("heading", { name: "Cities ranked by Average PET" }),
     ).toBeVisible();
 
     await page.getByRole("link", { name: "Navigate to map view" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/", { timeout: NAVIGATION_TIMEOUT });
     await waitForMapPage(page);
   });
 

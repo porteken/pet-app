@@ -155,6 +155,15 @@ const getRuntimeHistoricalYearRow = (
   return row ? { year: row.year } : undefined;
 };
 
+const buildLocationRowsQuery = (selectedColumn: LocationIdentifierColumn) =>
+  getDb()
+    .selectFrom("locations")
+    .select(
+      selectedColumn === "id"
+        ? ["city", "lat", "lng", "id", "state"]
+        : ["city", "lat", "lng", "location_id", "state"],
+    );
+
 const getRuntimeForecastRows = (
   locationId: number,
   queryWindow: ForecastQueryWindow,
@@ -228,20 +237,11 @@ export async function fetchLocationRows(column: LocationIdentifierColumn) {
     return getRuntimeLocationRows(column);
   }
 
-  const buildQuery = (selectedColumn: LocationIdentifierColumn) =>
-    getDb()
-      .selectFrom("locations")
-      .select(
-        selectedColumn === "id"
-          ? ["city", "lat", "lng", "id", "state"]
-          : ["city", "lat", "lng", "location_id", "state"],
-      );
-
   try {
-    return await buildQuery(column).execute();
+    return await buildLocationRowsQuery(column).execute();
   } catch (error) {
     if (column === "id" && isMissingColumnError(error, "locations", "id")) {
-      return buildQuery("location_id").execute();
+      return buildLocationRowsQuery("location_id").execute();
     }
 
     throw error;

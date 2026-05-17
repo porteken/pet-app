@@ -16,25 +16,23 @@ const { areaMock, lineMock, yAxisMock } = vi.hoisted(() => ({
   ),
 }));
 
-vi.mock("recharts", async () => {
-  const createStub =
-    (testId: string) =>
-    ({ children }: { children?: React.ReactNode }) => (
-      <div data-testid={testId}>{children}</div>
-    );
+function createRechartsStub(testId: string) {
+  return ({ children }: { children?: React.ReactNode }) => (
+    <div data-testid={testId}>{children}</div>
+  );
+}
 
-  return {
-    Area: areaMock,
-    CartesianGrid: createStub("recharts-grid"),
-    ComposedChart: createStub("recharts-chart"),
-    Legend: createStub("recharts-legend"),
-    Line: lineMock,
-    ResponsiveContainer: createStub("recharts-responsive-container"),
-    Tooltip: createStub("recharts-tooltip"),
-    XAxis: createStub("recharts-x-axis"),
-    YAxis: yAxisMock,
-  };
-});
+vi.mock("recharts", async () => ({
+  Area: areaMock,
+  CartesianGrid: createRechartsStub("recharts-grid"),
+  ComposedChart: createRechartsStub("recharts-chart"),
+  Legend: createRechartsStub("recharts-legend"),
+  Line: lineMock,
+  ResponsiveContainer: createRechartsStub("recharts-responsive-container"),
+  Tooltip: createRechartsStub("recharts-tooltip"),
+  XAxis: createRechartsStub("recharts-x-axis"),
+  YAxis: yAxisMock,
+}));
 
 import {
   GenerateReferenceGraph,

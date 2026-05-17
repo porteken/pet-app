@@ -1,49 +1,44 @@
 import { prefetchTrendGraphData } from "@/lib/api/query-client";
 import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
 import { useQueryClient } from "@tanstack/react-query";
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback, useMemo } from "react";
+import { Marker } from "react-map-gl/maplibre";
 
-import type { Icon } from "leaflet";
-
-interface MarkerProperties {
-  eventHandlers: {
-    click: () => void;
-    mouseover?: () => void;
-  };
-  icon?: Icon;
-  key?: React.Key;
-  position: [number, number];
-}
+const MARKER_WIDTH = 30;
+const MARKER_HEIGHT = 42;
+const MARKER_FILL = "#1D4ED8";
+const MARKER_FILL_OPACITY = 0.9;
+const MARKER_GLOW_CLASS = "drop-shadow-[0_4px_10px_rgba(29,78,216,0.18)]";
 
 interface OptimizedMarkerProperties {
-  icon: Icon;
+  city: string;
   latitude: number;
   longitude: number;
   locationId: number;
-  MarkerComponent: React.ComponentType<MarkerProperties>;
   onClick: (locationId: number) => void;
   selectedGraphMeasure: string;
   selectedGraphSeason?: GraphSeason;
+  state: string;
 }
 
 export const OptimizedMarker = memo<OptimizedMarkerProperties>(
   ({
-    icon,
+    city,
     latitude,
     longitude,
     locationId,
-    MarkerComponent: Marker,
     onClick,
     selectedGraphMeasure,
     selectedGraphSeason = DEFAULT_GRAPH_SEASON,
+    state,
   }) => {
     const queryClient = useQueryClient();
-    const position = React.useMemo(
-      () => [latitude, longitude] as [number, number],
-      [latitude, longitude],
+    const markerLabel = useMemo(
+      () => `Open details for ${city}, ${state}`,
+      [city, state],
     );
 
-    const handleMouseEnter = useCallback(async () => {
+    const handlePrefetch = useCallback(async () => {
       try {
         await prefetchTrendGraphData(
           queryClient,
@@ -56,20 +51,51 @@ export const OptimizedMarker = memo<OptimizedMarkerProperties>(
       }
     }, [locationId, queryClient, selectedGraphMeasure, selectedGraphSeason]);
 
+    const handleMouseEnter = useCallback(() => {
+      void (async () => {
+        await handlePrefetch();
+      })();
+    }, [handlePrefetch]);
+
+    const handleFocus = useCallback(() => {
+      void (async () => {
+        await handlePrefetch();
+      })();
+    }, [handlePrefetch]);
+
     const handleClick = useCallback(() => {
       onClick(locationId);
     }, [onClick, locationId]);
 
-    const eventHandlers = React.useMemo(
-      () => ({
-        click: handleClick,
-        mouseover: handleMouseEnter,
-      }),
-      [handleClick, handleMouseEnter],
-    );
-
     return (
-      <Marker eventHandlers={eventHandlers} icon={icon} position={position} />
+      <Marker anchor="bottom" latitude={latitude} longitude={longitude}>
+        <button
+          aria-label={markerLabel}
+          className="focus-visible:ring-ring origin-bottom rounded-full border-0 bg-transparent p-0 leading-none transition-transform hover:scale-105 focus-visible:scale-105 focus-visible:ring-2 focus-visible:ring-offset-2"
+          data-map-marker="true"
+          onClick={handleClick}
+          onFocus={handleFocus}
+          onMouseEnter={handleMouseEnter}
+          title={`${city}, ${state}`}
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            className={MARKER_GLOW_CLASS}
+            fill="none"
+            height={MARKER_HEIGHT}
+            viewBox="0 0 28 40"
+            width={MARKER_WIDTH}
+          >
+            <path
+              d="M14 0C6.268 0 0 6.268 0 14c0 11.2 14 26 14 26s14-14.8 14-26C28 6.268 21.732 0 14 0z"
+              fill={MARKER_FILL}
+              fillOpacity={MARKER_FILL_OPACITY}
+            />
+            <circle cx="14" cy="14" fill="white" r="5" />
+          </svg>
+        </button>
+      </Marker>
     );
   },
 );

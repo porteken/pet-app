@@ -38,6 +38,7 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
       <div className="flex items-center justify-between gap-3">
         <label className="text-foreground flex items-center gap-3 text-sm font-medium">
           <input
+            aria-label="Show Forecast"
             checked={enabled}
             className="border-border bg-background text-primary focus-visible:ring-primary size-4 rounded-sm border focus-visible:ring-2"
             onChange={handleEnabledChange}
@@ -56,6 +57,7 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
             Forecast {yearsAhead} year{yearsAhead === 1 ? "" : "s"} ahead
           </label>
           <input
+            aria-label="Forecast years ahead"
             className="h-2 w-full cursor-pointer appearance-none rounded-full bg-(--slider-track) accent-(--slider-thumb)"
             id="forecast-years"
             max={MAX_FORECAST_YEARS_AHEAD}

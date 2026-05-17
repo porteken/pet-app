@@ -7,6 +7,8 @@ const LOCATION_DETAILS_TIMEOUT = 45_000;
 const MODAL_TIMEOUT = 10_000;
 const LOCATION_CHARTS =
   '[data-testid="trend-chart"], [data-testid="reference-chart"]';
+export const MAP_CONTAINER_SELECTOR =
+  '[data-testid="map-container"][data-map-provider="maplibre"]';
 
 export async function gotoAndWaitForMapPage(
   page: Page,
@@ -46,10 +48,22 @@ export async function openLocationDetailsModal(
 }
 
 export async function waitForMapPage(page: Page): Promise<void> {
-  await expect(page.getByText("Loading map...").first()).toBeHidden({
+  const loadingMap = page.getByText("Loading map...").first();
+  const mapContainer = page.locator(MAP_CONTAINER_SELECTOR);
+
+  await expect(loadingMap.or(mapContainer)).toBeVisible({
     timeout: MAP_LOAD_TIMEOUT,
   });
-  await expect(page.locator(".leaflet-container")).toBeVisible();
+
+  if (await loadingMap.isVisible().catch(() => false)) {
+    await expect(loadingMap).toBeHidden({
+      timeout: MAP_LOAD_TIMEOUT,
+    });
+  }
+
+  await expect(mapContainer).toBeVisible({
+    timeout: MAP_LOAD_TIMEOUT,
+  });
 }
 
 export async function waitForLocationDetailsPage(

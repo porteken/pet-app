@@ -279,6 +279,7 @@ export function CitySelector({
           <div className="bg-popover flex items-center border-b px-3 py-2">
             <SearchIcon className="mr-2 size-4 shrink-0 opacity-50" />
             <input
+              aria-label="Search cities"
               className="placeholder:text-muted-foreground flex h-8 w-full rounded-md bg-transparent py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50"
               onChange={handleSearchChange}
               onKeyDown={handleSearchKeyDown}
@@ -308,7 +309,7 @@ export function CitySelector({
 
                     return (
                       <button
-                        aria-selected={selected}
+                        aria-pressed={selected}
                         className={cn(
                           "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
                           selected && "bg-accent/60",
@@ -320,7 +321,6 @@ export function CitySelector({
                           `${group.key ?? group.group}-${item.value}`
                         }
                         onClick={handleOptionClick}
-                        role="option"
                         type="button"
                       >
                         <span>{item.label}</span>

@@ -37,5 +37,5 @@ Based on [this study](https://bjsm.bmj.com/content/55/15/825), PET may provide b
 - **Charts**: Recharts
 - **Data**: Postgres, Kysely
 - **Monitoring**: Sentry
-- **Testing**: Vitest, Playwright
+- **Testing**: Vitest, Playwright, Test Containers
 - **Deployment**: Vercel

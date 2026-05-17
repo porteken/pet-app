@@ -135,7 +135,7 @@ describe("rankings page", () => {
         initialSeason: "Annual",
         initialState: "",
         initialYear: 2028,
-        shouldPersistInitialSeason: true,
+        shouldPersistInitialSeason: false,
       }),
       undefined,
     );
@@ -155,7 +155,7 @@ describe("rankings page", () => {
       expect.objectContaining({
         initialSeason: "Annual",
         initialYear: 2025,
-        shouldPersistInitialSeason: true,
+        shouldPersistInitialSeason: false,
       }),
       undefined,
     );

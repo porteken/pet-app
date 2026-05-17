@@ -5,6 +5,7 @@ const ORIGINAL_ENV = { ...process.env };
 const loadEnvironmentModule = async () => import("../environment");
 
 const setBaseEnvironment = () => {
+  process.env.E2E_USE_RUNTIME_MOCKS = "false";
   process.env.NEXT_PUBLIC_E2E_TEST = "false";
   process.env.PGDATABASE = "pet";
   process.env.PGHOST = "localhost";
@@ -66,6 +67,34 @@ describe("environment", () => {
       const { getServerDatabaseEnvironment } = await loadEnvironmentModule();
 
       expect(() => getServerDatabaseEnvironment()).toThrow("PGHOST");
+    });
+  });
+
+  describe("getServerTestingEnvironment", () => {
+    it("returns the configured server testing environment", async () => {
+      setBaseEnvironment();
+      process.env.E2E_USE_RUNTIME_MOCKS = "true";
+
+      const { getServerTestingEnvironment, shouldUseRuntimeDbMocks } =
+        await loadEnvironmentModule();
+
+      expect(getServerTestingEnvironment()).toStrictEqual({
+        E2E_USE_RUNTIME_MOCKS: "true",
+      });
+      expect(shouldUseRuntimeDbMocks()).toBe(true);
+    });
+
+    it("defaults runtime DB mocks off when absent", async () => {
+      setBaseEnvironment();
+      delete process.env.E2E_USE_RUNTIME_MOCKS;
+
+      const { getServerTestingEnvironment, shouldUseRuntimeDbMocks } =
+        await loadEnvironmentModule();
+
+      expect(getServerTestingEnvironment()).toStrictEqual({
+        E2E_USE_RUNTIME_MOCKS: "false",
+      });
+      expect(shouldUseRuntimeDbMocks()).toBe(false);
     });
   });
 });

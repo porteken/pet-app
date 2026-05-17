@@ -44,6 +44,8 @@ export default async function RankingsPage({
   const yearFromCookie = cookieStore.get(RANKINGS_YEAR_COOKIE_NAME)?.value;
 
   const initialSeason = normalizeGraphSeason(seasonFromCookie);
+  const shouldPersistInitialSeason =
+    seasonFromCookie !== undefined && seasonFromCookie !== initialSeason;
   const year = yearMapping(parameters.year, yearFromCookie);
   const [rankings, { LocationOptions }] = await Promise.all([
     FetchCityRankings(year, initialSeason),
@@ -58,7 +60,7 @@ export default async function RankingsPage({
       initialYear={year}
       LocationOptions={LocationOptions}
       rankings={rankings}
-      shouldPersistInitialSeason={seasonFromCookie !== initialSeason}
+      shouldPersistInitialSeason={shouldPersistInitialSeason}
     />
   );
 }

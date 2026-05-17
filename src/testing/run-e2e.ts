@@ -9,6 +9,10 @@ const getWrappedCommand = (arguments_: string[]) =>
     .join(" ");
 
 async function main() {
+  process.env.NEXT_PUBLIC_E2E_TEST ??= "true";
+  process.env.E2E_USE_RUNTIME_MOCKS ??= "false";
+  process.env.PLAYWRIGHT_TEST ??= "1";
+
   await setup();
 
   let tornDown = false;

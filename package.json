@@ -96,13 +96,5 @@
       "oxfmt"
     ]
   },
-  "packageManager": "pnpm@11.1.2",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "cpu-features",
-      "protobufjs",
-      "ssh2",
-      "esbuild"
-    ]
-  }
+  "packageManager": "pnpm@11.1.2"
 }

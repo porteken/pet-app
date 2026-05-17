@@ -1,8 +1,10 @@
+packages:
+  - "."
 allowBuilds:
   "@sentry/cli": true
-  cpu-features: set this to true or false
-  esbuild: set this to true or false
+  cpu-features: true
+  esbuild: true
   msw: true
-  protobufjs: set this to true or false
+  protobufjs: true
   sharp: true
-  ssh2: set this to true or false
+  ssh2: true

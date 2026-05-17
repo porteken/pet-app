@@ -13,7 +13,7 @@ export async function setup() {
   container = await new PostgreSqlContainer("postgres:16-alpine").start();
 
   const client = new Client({
-    connectionString: container.getConnectionUri(),
+    connectionString: `${container.getConnectionUri()}?sslmode=disable`,
   });
   await client.connect();
 

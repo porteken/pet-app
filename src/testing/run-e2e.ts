@@ -32,8 +32,10 @@ async function main() {
   });
 }
 
-main().catch(async (error) => {
+try {
+  await main();
+} catch (error) {
   console.error("Error in run-e2e wrapper:", error);
   await teardown();
   process.exit(1);
-});
+}

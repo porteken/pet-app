@@ -32,7 +32,7 @@ export async function setup() {
     const locationValues = locations
       .map(
         (loc) =>
-          `(${loc.id}, '${loc.city.replace(/'/gu, "''")}', '${loc.state.replace(/'/gu, "''")}', ${loc.lat}, ${loc.lng})`,
+          `(${loc.id}, '${loc.city.replaceAll("'", "''")}', '${loc.state.replaceAll("'", "''")}', ${loc.lat}, ${loc.lng})`,
       )
       .join(", ");
     await client.query(

@@ -52,6 +52,23 @@ interface MapComponentProperties {
   selectedGraphSeason?: GraphSeason;
 }
 
+interface E2EMarkerSurfaceProperties {
+  isDarkTheme: boolean;
+  locations: Location[];
+  onMarkerClick: (_locationId: number) => void;
+}
+
+interface E2EMarkerPosition {
+  left: string;
+  top: string;
+}
+
+interface E2EMarkerButtonProperties {
+  location: Location;
+  onMarkerClick: (_locationId: number) => void;
+  position: E2EMarkerPosition;
+}
+
 const INITIAL_VIEW_STATE = {
   latitude: MAP_CENTER_LAT,
   longitude: MAP_CENTER_LNG,
@@ -59,6 +76,29 @@ const INITIAL_VIEW_STATE = {
 };
 const MAP_STYLE: CSSProperties = { height: "100%", width: "100%" };
 const MAP_CONTAINER_TEST_ID = "map-container";
+const E2E_MARKER_WIDTH = 30;
+const E2E_MARKER_HEIGHT = 42;
+const E2E_MARKER_FILL = "#1D4ED8";
+const E2E_MARKER_FILL_OPACITY = 0.9;
+const E2E_MARKER_GLOW_CLASS = "drop-shadow-[0_4px_10px_rgba(29,78,216,0.18)]";
+const E2E_LIGHT_BACKGROUND_CLASS_NAME =
+  "absolute inset-0 bg-linear-to-b from-[#dbeafe] to-[#e2e8f0]";
+const E2E_DARK_BACKGROUND_CLASS_NAME =
+  "absolute inset-0 bg-linear-to-b from-[#0f172a] to-[#111827]";
+const E2E_LIGHT_FRAME_CLASS_NAME =
+  "absolute inset-[8%] rounded-[45%] border border-slate-400 opacity-35";
+const E2E_DARK_FRAME_CLASS_NAME =
+  "absolute inset-[8%] rounded-[45%] border border-slate-400/20 opacity-35";
+const E2E_MARKER_BUTTON_CLASS_NAME =
+  "focus-visible:ring-ring absolute -translate-1/2 rounded-full border-0 bg-transparent p-0 leading-none focus-visible:ring-2 focus-visible:ring-offset-2";
+const E2E_MARKER_POSITIONS = [
+  { left: "18%", top: "72%" },
+  { left: "74%", top: "78%" },
+  { left: "49%", top: "69%" },
+  { left: "35%", top: "46%" },
+  { left: "14%", top: "26%" },
+  { left: "58%", top: "29%" },
+] as const;
 
 const LIGHT_MAP_STYLE = {
   layers: [
@@ -157,6 +197,104 @@ class LegendToggleButton extends React.PureComponent<LegendToggleButtonPropertie
     );
   }
 }
+
+const getE2EMarkerPosition = (index: number): E2EMarkerPosition => {
+  const fallbackColumn = index % 3;
+  const fallbackRow = Math.floor(index / 3);
+  const predefinedPosition = E2E_MARKER_POSITIONS[index];
+
+  return (
+    predefinedPosition ?? {
+      left: `${18 + fallbackColumn * 28}%`,
+      top: `${28 + fallbackRow * 18}%`,
+    }
+  );
+};
+
+const E2EMarkerButton = memo<E2EMarkerButtonProperties>(
+  ({ location, onMarkerClick, position }): React.ReactElement => {
+    const handleClick = React.useCallback(() => {
+      onMarkerClick(location.location_id);
+    }, [location.location_id, onMarkerClick]);
+
+    const markerPositionStyle = React.useMemo<CSSProperties>(
+      () => ({ left: position.left, top: position.top }),
+      [position.left, position.top],
+    );
+
+    return (
+      <button
+        aria-label={`Open details for ${location.city}, ${location.state}`}
+        className={E2E_MARKER_BUTTON_CLASS_NAME}
+        data-map-marker="true"
+        onClick={handleClick}
+        style={markerPositionStyle}
+        title={`${location.city}, ${location.state}`}
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          className={E2E_MARKER_GLOW_CLASS}
+          fill="none"
+          height={E2E_MARKER_HEIGHT}
+          viewBox="0 0 28 40"
+          width={E2E_MARKER_WIDTH}
+        >
+          <path
+            d="M14 0C6.268 0 0 6.268 0 14c0 11.2 14 26 14 26s14-14.8 14-26C28 6.268 21.732 0 14 0z"
+            fill={E2E_MARKER_FILL}
+            fillOpacity={E2E_MARKER_FILL_OPACITY}
+          />
+          <circle cx="14" cy="14" fill="white" r="5" />
+        </svg>
+      </button>
+    );
+  },
+);
+
+E2EMarkerButton.displayName = "E2EMarkerButton";
+
+const E2EMarkerSurface = ({
+  isDarkTheme,
+  locations,
+  onMarkerClick,
+}: E2EMarkerSurfaceProperties): React.ReactElement => {
+  const backgroundClassName = isDarkTheme
+    ? E2E_DARK_BACKGROUND_CLASS_NAME
+    : E2E_LIGHT_BACKGROUND_CLASS_NAME;
+  const frameClassName = isDarkTheme
+    ? E2E_DARK_FRAME_CLASS_NAME
+    : E2E_LIGHT_FRAME_CLASS_NAME;
+  const markerLocations = React.useMemo(
+    () =>
+      locations.map((location, index) => ({
+        location,
+        position: getE2EMarkerPosition(index),
+      })),
+    [locations],
+  );
+
+  return (
+    <section
+      aria-label="Map"
+      className="relative size-full overflow-hidden rounded-none"
+      data-map-provider="maplibre"
+      data-map-theme={isDarkTheme ? "dark" : "light"}
+      data-testid={MAP_CONTAINER_TEST_ID}
+    >
+      <div className={backgroundClassName} />
+      <div aria-hidden="true" className={frameClassName} />
+      {markerLocations.map(({ location, position }) => (
+        <E2EMarkerButton
+          key={location.location_id}
+          location={location}
+          onMarkerClick={onMarkerClick}
+          position={position}
+        />
+      ))}
+    </section>
+  );
+};
 
 export const MapComponent = memo<MapComponentProperties>(
   ({
@@ -257,6 +395,56 @@ export const MapComponent = memo<MapComponentProperties>(
     }
 
     const isDarkTheme = resolvedTheme === "dark";
+
+    if (IS_E2E_TEST_ENVIRONMENT) {
+      return (
+        <div className="relative size-full">
+          <E2EMarkerSurface
+            isDarkTheme={isDarkTheme}
+            locations={locations}
+            onMarkerClick={onMarkerClick}
+          />
+          <div className="pointer-events-none absolute bottom-6 left-6 z-40 hidden sm:block">
+            <div className="pointer-events-auto flex flex-col items-start gap-2">
+              <LegendToggleButton
+                ariaControls="desktop-thermal-stress-legend"
+                className="text-foreground glass-panel-muted hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
+                closedLabel="Show Thermal Stress Index"
+                isLegendOpen={isLegendOpen}
+                openLabel="Hide Thermal Stress Index"
+                setIsLegendOpen={setIsLegendOpen}
+              />
+              {isLegendOpen && (
+                <div id="desktop-thermal-stress-legend">
+                  <HeatStressLegend />
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="pointer-events-none absolute top-1/2 right-0 z-40 -translate-y-1/2 sm:hidden">
+            <div className="pointer-events-auto flex items-center">
+              {isLegendOpen && (
+                <div
+                  className="glass-panel mr-2 max-w-[78vw] rounded-3xl p-2 shadow-md"
+                  id="mobile-thermal-stress-legend"
+                >
+                  <HeatStressLegend />
+                </div>
+              )}
+              <LegendToggleButton
+                ariaControls="mobile-thermal-stress-legend"
+                className="text-foreground glass-panel-muted hover:bg-accent rounded-l-2xl border-r-0 p-3 text-xs font-semibold transition"
+                closedLabel="Thermal Stress"
+                isLegendOpen={isLegendOpen}
+                openLabel="Close"
+                setIsLegendOpen={setIsLegendOpen}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     const standardMapStyle = isDarkTheme ? DARK_MAP_STYLE : LIGHT_MAP_STYLE;
     const e2eMapStyle = isDarkTheme ? E2E_DARK_MAP_STYLE : E2E_LIGHT_MAP_STYLE;
     const mapStyleDefinition = IS_E2E_TEST_ENVIRONMENT

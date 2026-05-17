@@ -10,6 +10,7 @@ export default defineConfig({
     },
   },
   test: {
+    globalSetup: ["./src/testing/global-setup.ts"],
     coverage: {
       exclude: [
         "node_modules/**",

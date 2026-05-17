@@ -42,12 +42,7 @@ console.warn = (...args: unknown[]) => {
 };
 
 process.env.NEXT_PUBLIC_E2E_TEST ??= "false";
-process.env.PGDATABASE ??= "pet";
-process.env.PGHOST ??= "localhost";
-process.env.PGPASSWORD ??= "postgres";
-process.env.PGPORT ??= "5432";
-process.env.PGSSLMODE ??= "disable";
-process.env.PGUSER ??= "postgres";
+process.env.NEXT_PUBLIC_E2E_TEST = "false";
 
 beforeAll(() => {
   server.listen({ onUnhandledRequest: "bypass" });

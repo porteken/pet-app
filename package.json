@@ -53,6 +53,7 @@
     "@next/bundle-analyzer": "^16.2.6",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4.3.0",
+    "@testcontainers/postgresql": "^11.14.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -74,6 +75,7 @@
     "oxlint-tsgolint": "^0.22.1",
     "postcss": "^8.5.14",
     "tailwindcss": "^4.3.0",
+    "testcontainers": "^11.14.0",
     "tsc-files": "^1.1.4",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6"
@@ -94,5 +96,12 @@
       "oxfmt"
     ]
   },
-  "packageManager": "pnpm@11.1.2"
+  "packageManager": "pnpm@11.1.2",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "cpu-features",
+      "protobufjs",
+      "ssh2"
+    ]
+  }
 }

@@ -33,7 +33,7 @@ Based on [this study](https://bjsm.bmj.com/content/55/15/825), PET may provide b
 
 - **Frontend**: Next.js, React
 - **UI**: shadcn/ui
-- **Map**: Leaflet, React Leaflet, OpenStreetMap
+- **Map**: Leaflet, MapLibre, react-map-gl
 - **Charts**: Recharts
 - **Data**: Postgres, Kysely
 - **Monitoring**: Sentry

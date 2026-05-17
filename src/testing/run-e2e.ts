@@ -3,6 +3,11 @@ import { spawn } from "node:child_process";
 
 import { setup, teardown } from "./global-setup";
 
+const getWrappedCommand = (arguments_: string[]) =>
+  arguments_
+    .filter((argument, index) => !(argument === "--" && index > 0))
+    .join(" ");
+
 async function main() {
   await setup();
 
@@ -29,7 +34,7 @@ async function main() {
   };
 
   // process.argv[2...] will contain the command to run, e.g. "playwright test" or "pnpm build && playwright test"
-  const command = process.argv.slice(2).join(" ");
+  const command = getWrappedCommand(process.argv.slice(2));
   if (!command) {
     console.error("No command provided to run-e2e.ts");
     await exitWithTeardown(1);

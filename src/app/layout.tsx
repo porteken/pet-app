@@ -9,7 +9,9 @@ import * as React from "react";
 import type { Metadata } from "next";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
-const IS_E2E_TEST_ENVIRONMENT = process.env.NEXT_PUBLIC_E2E_TEST === "true";
+const IS_E2E_TEST_ENVIRONMENT =
+  process.env.NEXT_PUBLIC_E2E_TEST === "true" ||
+  process.env.PLAYWRIGHT_TEST === "1";
 
 export const metadata: Metadata = {
   description: "Physiological Equivalent Temperature data for US cities",

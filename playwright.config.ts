@@ -84,6 +84,13 @@ const webServerTimeout =
   playwrightServerMode === "production"
     ? PRODUCTION_WEB_SERVER_TIMEOUT
     : DEVELOPMENT_WEB_SERVER_TIMEOUT;
+const webServerEnvironment = {
+  ...process.env,
+  E2E_USE_RUNTIME_MOCKS: process.env.E2E_USE_RUNTIME_MOCKS ?? "false",
+  NEXT_PUBLIC_E2E_TEST: process.env.NEXT_PUBLIC_E2E_TEST ?? "false",
+  PLAYWRIGHT_TEST: process.env.PLAYWRIGHT_TEST ?? "1",
+  PORT: playwrightPort,
+};
 
 export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
@@ -140,6 +147,7 @@ export default defineConfig({
   webServer: {
     command: webServerCommand,
     cwd: projectRoot,
+    env: webServerEnvironment,
     reuseExistingServer: !process.env.CI,
     timeout: webServerTimeout,
     url: playwrightBaseURL,

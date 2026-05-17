@@ -1,4 +1,4 @@
-import { isE2ETestRun } from "@/config/environment";
+import { shouldUseRuntimeDbMocks } from "@/config/environment";
 import { getRuntimeMockTableRows } from "@/testing/runtime-mocks";
 import { sql } from "kysely";
 
@@ -189,7 +189,7 @@ export async function fetchCityRankingsRows(
   year: number,
   season?: GraphSeason,
 ) {
-  if (isE2ETestRun()) {
+  if (shouldUseRuntimeDbMocks()) {
     return getRuntimeCityRankingsRows(year, season);
   }
 
@@ -233,7 +233,7 @@ export async function fetchCityRankingsRows(
 }
 
 export async function fetchLocationRows(column: LocationIdentifierColumn) {
-  if (isE2ETestRun()) {
+  if (shouldUseRuntimeDbMocks()) {
     return getRuntimeLocationRows(column);
   }
 
@@ -253,7 +253,7 @@ export async function fetchTrendGraphRows(
   option: TrendMetricOption,
   season?: GraphSeason,
 ) {
-  if (isE2ETestRun()) {
+  if (shouldUseRuntimeDbMocks()) {
     return getRuntimeTrendRows(locationId, option, season);
   }
 
@@ -289,7 +289,7 @@ export async function fetchReferenceGraphRows(
   locationId: number,
   year: string,
 ) {
-  if (isE2ETestRun()) {
+  if (shouldUseRuntimeDbMocks()) {
     return getRuntimeReferenceRows(locationId, year);
   }
 
@@ -311,7 +311,7 @@ export async function fetchHistoricalYearRow(
   locationId: number,
   season?: GraphSeason,
 ) {
-  if (isE2ETestRun()) {
+  if (shouldUseRuntimeDbMocks()) {
     return getRuntimeHistoricalYearRow(locationId, season);
   }
 
@@ -348,7 +348,7 @@ export async function fetchForecastRows(
   season?: GraphSeason,
   option: TrendMetricOption = "avg",
 ) {
-  if (isE2ETestRun()) {
+  if (shouldUseRuntimeDbMocks()) {
     return getRuntimeForecastRows(locationId, queryWindow, season, option);
   }
 

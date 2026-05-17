@@ -15,6 +15,7 @@
     "test": "vitest run",
     "test:all": "pnpm test && pnpm run test:e2e",
     "test:e2e": "tsx src/testing/run-e2e.ts 'playwright test'",
+    "test:e2e:ci": "tsx src/testing/run-e2e.ts playwright test",
     "test:e2e:prod": "tsx src/testing/run-e2e.ts 'pnpm build && PLAYWRIGHT_SERVER_MODE=production playwright test --project=chromium'",
     "test:e2e:prod:all": "tsx src/testing/run-e2e.ts 'pnpm build && PLAYWRIGHT_SERVER_MODE=production playwright test'",
     "test:e2e:critical": "tsx src/testing/run-e2e.ts 'playwright test --grep-invert \"responsive design: mobile user journey\"'",

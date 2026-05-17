@@ -41,8 +41,8 @@ console.warn = (...args: unknown[]) => {
   originalConsoleWarn(...args);
 };
 
-process.env.NEXT_PUBLIC_E2E_TEST ??= "false";
 process.env.NEXT_PUBLIC_E2E_TEST = "false";
+process.env.E2E_USE_RUNTIME_MOCKS = "false";
 
 beforeAll(() => {
   server.listen({ onUnhandledRequest: "bypass" });

@@ -15,13 +15,19 @@ const serverDatabaseEnvironmentSchema = z.object({
   PGUSER: z.string().min(1),
 });
 
+const serverTestingEnvironmentSchema = z.object({
+  E2E_USE_RUNTIME_MOCKS: z.enum(["false", "true"]).default("false"),
+});
+
 type PublicEnvironment = z.infer<typeof publicEnvironmentSchema>;
 export type ServerDatabaseEnvironment = z.infer<
   typeof serverDatabaseEnvironmentSchema
 >;
+type ServerTestingEnvironment = z.infer<typeof serverTestingEnvironmentSchema>;
 
 let cachedPublicEnvironment: PublicEnvironment | undefined;
 let cachedServerDatabaseEnvironment: ServerDatabaseEnvironment | undefined;
+let cachedServerTestingEnvironment: ServerTestingEnvironment | undefined;
 
 const formatEnvironmentIssues = (
   issues: Array<{ message: string; path: PropertyKey[] }>,
@@ -75,5 +81,26 @@ export const getServerDatabaseEnvironment = (): ServerDatabaseEnvironment => {
   return cachedServerDatabaseEnvironment;
 };
 
+export const getServerTestingEnvironment = (): ServerTestingEnvironment => {
+  if (cachedServerTestingEnvironment) {
+    return cachedServerTestingEnvironment;
+  }
+
+  const parsed = serverTestingEnvironmentSchema.safeParse({
+    E2E_USE_RUNTIME_MOCKS: process.env.E2E_USE_RUNTIME_MOCKS,
+  });
+  if (!parsed.success) {
+    throw new Error(
+      `Invalid server testing environment variables: ${formatEnvironmentIssues(parsed.error.issues)}`,
+    );
+  }
+
+  cachedServerTestingEnvironment = parsed.data;
+  return cachedServerTestingEnvironment;
+};
+
 export const isE2ETestRun = () =>
   getPublicEnvironment().NEXT_PUBLIC_E2E_TEST === "true";
+
+export const shouldUseRuntimeDbMocks = () =>
+  getServerTestingEnvironment().E2E_USE_RUNTIME_MOCKS === "true";

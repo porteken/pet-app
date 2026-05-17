@@ -6,7 +6,10 @@ import { PostgreSqlContainer } from "@testcontainers/postgresql";
 import { Client } from "pg";
 
 import { getRuntimeMockTableRows } from "./runtime-mocks";
-let container: any;
+
+import type { StartedPostgreSqlContainer } from "@testcontainers/postgresql";
+
+let container: StartedPostgreSqlContainer | undefined;
 
 export async function setup() {
   console.warn("Starting PostgreSQL Testcontainer...");
@@ -72,8 +75,9 @@ export async function setup() {
   process.env.PGUSER = container.getUsername();
   process.env.PGSSLMODE = "disable";
 
-  // Make sure E2E test runs are disabled during these vitest runs
-  process.env.NEXT_PUBLIC_E2E_TEST = "false";
+  // Default E2E flags when the caller has not already selected a mode.
+  process.env.NEXT_PUBLIC_E2E_TEST ??= "false";
+  process.env.E2E_USE_RUNTIME_MOCKS ??= "false";
 
   console.warn("PostgreSQL Testcontainer ready on port", process.env.PGPORT);
 }
@@ -82,5 +86,6 @@ export async function teardown() {
   if (container) {
     console.warn("Stopping PostgreSQL Testcontainer...");
     await container.stop();
+    container = undefined;
   }
 }

@@ -52,11 +52,15 @@ export const OptimizedMarker = memo<OptimizedMarkerProperties>(
     }, [locationId, queryClient, selectedGraphMeasure, selectedGraphSeason]);
 
     const handleMouseEnter = useCallback(() => {
-      void handlePrefetch();
+      void (async () => {
+        await handlePrefetch();
+      })();
     }, [handlePrefetch]);
 
     const handleFocus = useCallback(() => {
-      void handlePrefetch();
+      void (async () => {
+        await handlePrefetch();
+      })();
     }, [handlePrefetch]);
 
     const handleClick = useCallback(() => {

@@ -14,6 +14,11 @@ const NAVIGATION_TIMEOUT = 30_000;
 const CI_WORKERS = 1;
 const LOCAL_WORKERS = 1;
 
+const playwrightE2ETestFlag =
+  process.env.PLAYWRIGHT_E2E_USE_REAL_DATA === "true" ? "false" : "true";
+
+process.env.NEXT_PUBLIC_E2E_TEST = playwrightE2ETestFlag;
+
 const projectRoot = import.meta.dirname;
 const runningOnLinux = process.platform === "linux";
 const runningInsideVSCodeSnap =
@@ -76,10 +81,12 @@ const enableWebKitProjects =
   process.env.PLAYWRIGHT_ENABLE_WEBKIT === "true" ||
   Boolean(process.env.CI) ||
   !runningOnLinux;
+const withPlaywrightEnvironment = (command: string) =>
+  `NEXT_PUBLIC_E2E_TEST=${playwrightE2ETestFlag} ${command}`;
 const webServerCommand =
   playwrightServerMode === "production"
-    ? "pnpm build && pnpm start"
-    : "pnpm dev";
+    ? `${withPlaywrightEnvironment("pnpm build")} && ${withPlaywrightEnvironment("pnpm start")}`
+    : withPlaywrightEnvironment("pnpm dev");
 const webServerTimeout =
   playwrightServerMode === "production"
     ? PRODUCTION_WEB_SERVER_TIMEOUT

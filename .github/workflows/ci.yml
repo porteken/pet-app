@@ -117,6 +117,8 @@ jobs:
   playwright-e2e:
     name: Playwright E2E (shard ${{ matrix.shard_index }}/20)
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_E2E_TEST: "true"
 
     strategy:
       fail-fast: false

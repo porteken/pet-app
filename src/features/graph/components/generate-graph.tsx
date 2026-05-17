@@ -361,8 +361,10 @@ const ChartShell = ({
   title,
   useCompactDesktopHeight = false,
 }: ChartShellProperties): React.ReactElement => (
-  <div className={`${getGraphFillHeightClass(useCompactDesktopHeight)} w-full`}>
-    <div className="graph-surface-panel flex h-full flex-col rounded-2xl p-3 sm:p-4">
+  <div
+    className={`${getGraphFillHeightClass(useCompactDesktopHeight)} w-full min-w-0`}
+  >
+    <div className="graph-surface-panel flex h-full min-w-0 flex-col rounded-2xl p-3 sm:p-4">
       <div className="border-border/60 mb-3 space-y-1 border-b pb-3">
         <h3 className="text-foreground text-base font-semibold sm:text-lg">
           {title}
@@ -372,7 +374,7 @@ const ChartShell = ({
         )}
       </div>
 
-      <div className="min-h-0 flex-1">
+      <div className="min-h-0 min-w-0 flex-1">
         {children ?? (
           <div className="border-border/80 bg-background/20 text-muted-foreground flex h-full items-center justify-center rounded-xl border border-dashed px-4 text-center text-sm">
             {emptyState}
@@ -553,7 +555,6 @@ const TrendChartBody = ({
       aria-label={`${graphType} ${season} PET trend chart`}
       className="size-full"
       data-testid="trend-chart"
-      role="img"
     >
       <ResponsiveContainer
         height="100%"
@@ -662,7 +663,6 @@ const ReferenceChartBody = ({
       aria-label={`${season} PET reference comparison chart`}
       className="size-full"
       data-testid="reference-chart"
-      role="img"
     >
       <ResponsiveContainer
         height="100%"

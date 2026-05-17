@@ -13,62 +13,47 @@ vi.mock("next-themes", () => ({
   useTheme: () => mockUseTheme(),
 }));
 
-vi.mock("react-leaflet", () => {
+vi.mock("react-map-gl/maplibre", () => {
   interface MockComponentProperties {
     children?: React.ReactNode;
+    mapStyle: {
+      sources: {
+        basemap: {
+          tiles: string[];
+        };
+      };
+    };
   }
   interface MockMarkerProperties {
     children?: React.ReactNode;
-    eventHandlers: { click: () => void; mouseover?: () => void };
-    key: number | string;
-    position: [number, number];
+    latitude: number;
+    longitude: number;
   }
   return {
-    MapContainer: ({ children }: MockComponentProperties) => (
-      <div data-testid="map-container">{children}</div>
-    ),
-    Marker: ({
-      children,
-      eventHandlers,
-      key,
-      position,
-    }: MockMarkerProperties) => (
-      <button
-        data-key={key}
-        data-position={position.join(",")}
-        data-testid="marker"
-        onClick={eventHandlers.click}
-        type="button"
+    __esModule: true,
+    default: ({ children, mapStyle }: MockComponentProperties) => (
+      <div
+        data-style-url={mapStyle.sources.basemap.tiles[0]}
+        data-testid="maplibre-map"
       >
         {children}
-      </button>
+      </div>
     ),
-    TileLayer: ({ attribution, url }: { attribution: string; url: string }) => (
+    Marker: ({ children, latitude, longitude }: MockMarkerProperties) => (
       <div
-        data-attribution={attribution}
-        data-testid="tile-layer"
-        data-url={url}
-      />
+        data-position={`${latitude},${longitude}`}
+        data-testid="marker-wrapper"
+      >
+        {children}
+      </div>
     ),
   };
 });
 
-vi.mock("leaflet", () => {
-  const MockIcon: any = mockFn(() => ({}));
-  MockIcon.Default = {
-    mergeOptions: mockFn(),
-  };
-
-  return {
-    __esModule: true,
-    default: {
-      Icon: MockIcon,
-      icon: mockFn(() => ({})),
-    },
-    Icon: MockIcon,
-    icon: mockFn(() => ({})),
-  };
-});
+vi.mock("maplibre-gl", () => ({
+  __esModule: true,
+  default: {},
+}));
 
 const mockLocations = [
   {
@@ -90,21 +75,21 @@ const mockLocations = [
 const emptyLocations: typeof mockLocations = [];
 const noopMarkerClick = () => {};
 
-describe("mapComponent", () => {
-  const renderWithQueryClient = (ui: React.ReactElement) => {
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: false,
-        },
+const renderWithQueryClient = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
       },
-    });
+    },
+  });
 
-    return render(
-      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
-    );
-  };
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+  );
+};
 
+describe("mapComponent", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseTheme.mockReturnValue({ resolvedTheme: "light" });
@@ -147,8 +132,8 @@ describe("mapComponent", () => {
 
     await screen.findByTestId("map-container");
 
-    expect(screen.getByTestId("tile-layer")).toBeInTheDocument();
-    const markers = screen.getAllByTestId("marker");
+    expect(screen.getByTestId("maplibre-map")).toBeInTheDocument();
+    const markers = screen.getAllByLabelText(/open details for/iu);
     expect(markers).toHaveLength(mockLocations.length);
     expect(screen.queryByText("Loading map...")).not.toBeInTheDocument();
   });
@@ -164,10 +149,10 @@ describe("mapComponent", () => {
       />,
     );
 
-    const tileLayer = await screen.findByTestId("tile-layer");
-    expect(tileLayer).toHaveAttribute(
-      "data-url",
-      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    const map = await screen.findByTestId("maplibre-map");
+    expect(map).toHaveAttribute(
+      "data-style-url",
+      "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
     );
   });
 
@@ -181,7 +166,7 @@ describe("mapComponent", () => {
       />,
     );
 
-    const markers = await screen.findAllByTestId("marker");
+    const markers = await screen.findAllByLabelText(/open details for/iu);
 
     const firstMarker = markers[0];
     if (!firstMarker) {

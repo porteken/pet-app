@@ -117,8 +117,8 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   }, [generatePetReferenceGraph, referenceYear]);
 
   return (
-    <div className="h-full min-h-0">
-      <div className="fade-in-up glass-panel flex h-full min-h-0 flex-col rounded-3xl p-4 sm:px-5 sm:py-6">
+    <div className="h-full min-h-0 min-w-0">
+      <div className="fade-in-up glass-panel flex h-full min-h-0 min-w-0 flex-col rounded-3xl p-4 sm:px-5 sm:py-6">
         <h2 className="sr-only">Reference Data</h2>
         <div className="mb-5 space-y-4">
           <label
@@ -152,13 +152,13 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
           </button>
         </div>
         <div
-          className="flex min-h-[clamp(220px,42vh,520px)] flex-1 flex-col overflow-hidden sm:min-h-[clamp(450px,70vh,850px)]"
+          className="flex min-h-[clamp(220px,42vh,520px)] min-w-0 flex-1 flex-col overflow-hidden sm:min-h-[clamp(450px,70vh,850px)]"
           id="reference-data-graph"
         >
           {referenceGraphSnapshot ? (
             <div
               aria-label="Scrollable reference graph"
-              className="-mx-4 min-h-0 flex-1 touch-pan-x overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:px-0"
+              className="-mx-4 min-h-0 min-w-0 flex-1 touch-pan-x overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:px-0"
               data-testid="reference-graph-scroll-region"
             >
               <div className="h-full min-w-full" style={containerStyle}>

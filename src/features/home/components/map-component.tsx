@@ -4,27 +4,38 @@ import { PageLoader } from "@/components/app/page-loader";
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
 import { useTheme } from "next-themes";
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import React, { memo, useEffect, useMemo, useState } from "react";
+import Map from "react-map-gl/maplibre";
 
 import { OptimizedMarker } from "./optimized-marker";
 
-import type { Icon } from "leaflet";
-import type { ComponentType, CSSProperties, ReactNode } from "react";
+import type * as MapLibreGL from "maplibre-gl";
+import type { CSSProperties } from "react";
+
+type MapLibreModule = typeof MapLibreGL;
+type StyleSpecification = MapLibreGL.StyleSpecification;
 const MAP_CENTER_LAT = 39.5;
 const MAP_CENTER_LNG = -98.35;
-const ICON_SIZE_WIDTH = 30;
-const ICON_SIZE_HEIGHT = 42;
-const ICON_ANCHOR_X = 15;
-const ICON_ANCHOR_Y = 42;
-const POPUP_ANCHOR_X = 0;
-const POPUP_ANCHOR_Y = -36;
-const LIGHT_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+const INITIAL_ZOOM = 5;
+const LIGHT_TILE_URLS = [
+  "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+];
 const LIGHT_TILE_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-const DARK_TILE_URL =
-  "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+const DARK_TILE_URLS = [
+  "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+  "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+  "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+  "https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+];
 const DARK_TILE_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+const MAP_SOURCE_ID = "basemap";
+const MAP_LAYER_ID = "basemap-raster";
+const E2E_MAP_LAYER_ID = "e2e-background";
+const IS_E2E_TEST_ENVIRONMENT = process.env.NEXT_PUBLIC_E2E_TEST === "true";
 
 interface Location {
   city: string;
@@ -41,31 +52,79 @@ interface MapComponentProperties {
   selectedGraphSeason?: GraphSeason;
 }
 
-type MapContainerType = ComponentType<{
-  center: [number, number];
-  children: ReactNode;
-  scrollWheelZoom: boolean;
-  style: CSSProperties;
-  zoom: number;
-}>;
-
-type MarkerType = ComponentType<{
-  children?: ReactNode;
-  eventHandlers: {
-    click: () => void;
-    mouseover?: () => void;
-  };
-  icon?: Icon;
-  position: [number, number];
-}>;
-
-type TileLayerType = ComponentType<{
-  attribution: string;
-  url: string;
-}>;
-
-const MAP_CENTER: [number, number] = [MAP_CENTER_LAT, MAP_CENTER_LNG];
+const INITIAL_VIEW_STATE = {
+  latitude: MAP_CENTER_LAT,
+  longitude: MAP_CENTER_LNG,
+  zoom: INITIAL_ZOOM,
+};
 const MAP_STYLE: CSSProperties = { height: "100%", width: "100%" };
+const MAP_CONTAINER_TEST_ID = "map-container";
+
+const LIGHT_MAP_STYLE = {
+  layers: [
+    {
+      id: MAP_LAYER_ID,
+      source: MAP_SOURCE_ID,
+      type: "raster",
+    },
+  ],
+  sources: {
+    [MAP_SOURCE_ID]: {
+      attribution: LIGHT_TILE_ATTRIBUTION,
+      tileSize: 256,
+      tiles: LIGHT_TILE_URLS,
+      type: "raster",
+    },
+  },
+  version: 8,
+} satisfies StyleSpecification;
+
+const DARK_MAP_STYLE = {
+  layers: [
+    {
+      id: MAP_LAYER_ID,
+      source: MAP_SOURCE_ID,
+      type: "raster",
+    },
+  ],
+  sources: {
+    [MAP_SOURCE_ID]: {
+      attribution: DARK_TILE_ATTRIBUTION,
+      tileSize: 256,
+      tiles: DARK_TILE_URLS,
+      type: "raster",
+    },
+  },
+  version: 8,
+} satisfies StyleSpecification;
+
+const E2E_LIGHT_MAP_STYLE = {
+  layers: [
+    {
+      id: E2E_MAP_LAYER_ID,
+      paint: {
+        "background-color": "#e2e8f0",
+      },
+      type: "background",
+    },
+  ],
+  sources: {},
+  version: 8,
+} satisfies StyleSpecification;
+
+const E2E_DARK_MAP_STYLE = {
+  layers: [
+    {
+      id: E2E_MAP_LAYER_ID,
+      paint: {
+        "background-color": "#0f172a",
+      },
+      type: "background",
+    },
+  ],
+  sources: {},
+  version: 8,
+} satisfies StyleSpecification;
 
 interface LegendToggleButtonProperties {
   ariaControls: string;
@@ -107,78 +166,51 @@ export const MapComponent = memo<MapComponentProperties>(
     selectedGraphSeason = DEFAULT_GRAPH_SEASON,
   }) => {
     const { resolvedTheme } = useTheme();
-    const [mapContainer, setMapContainer] = useState<MapContainerType>();
-    const [tileLayer, setTileLayer] = useState<TileLayerType>();
-    const [marker, setMarker] = useState<MarkerType>();
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [customIcon, setCustomIcon] = useState<Icon>();
+    const [mapLib, setMapLib] = useState<MapLibreModule | null>(null);
     const [isLegendOpen, setIsLegendOpen] = useState(false);
 
-    const loadMap = useCallback(async () => {
-      const reactLeaflet = await import("react-leaflet");
+    useEffect(() => {
+      let isCancelled = false;
 
-      const L = await import("leaflet");
-      const markerSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${ICON_SIZE_WIDTH}" height="${ICON_SIZE_HEIGHT}" viewBox="0 0 28 40" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 11.2 14 26 14 26s14-14.8 14-26C28 6.268 21.732 0 14 0z" fill="#2563EB"/><circle cx="14" cy="14" r="5" fill="white"/></svg>`;
-      const markerUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(markerSvg)}`;
+      const loadMapLibrary = async () => {
+        try {
+          const loadedMapLib = await import("maplibre-gl");
+          if (!isCancelled) {
+            setMapLib(loadedMapLib);
+          }
+        } catch {
+          // Ignore map library load failures and keep fallback UI.
+        }
+      };
 
-      const createdCustomIcon = L.icon({
-        className: "pet-map-marker-icon",
-        iconAnchor: [ICON_ANCHOR_X, ICON_ANCHOR_Y],
-        iconRetinaUrl: markerUrl,
-        iconSize: [ICON_SIZE_WIDTH, ICON_SIZE_HEIGHT],
-        iconUrl: markerUrl,
-        popupAnchor: [POPUP_ANCHOR_X, POPUP_ANCHOR_Y],
-      });
+      void loadMapLibrary();
 
-      setMapContainer(() => reactLeaflet.MapContainer);
-      setTileLayer(() => reactLeaflet.TileLayer);
-      setMarker(() => reactLeaflet.Marker);
-      setIsLoaded(true);
-
-      setCustomIcon(createdCustomIcon);
+      return () => {
+        isCancelled = true;
+      };
     }, []);
 
-    useEffect(() => {
-      if (typeof document !== "undefined") {
-        const performLoadMap = async () => {
-          try {
-            await loadMap();
-          } catch {
-            // Error is handled inside loadMap or ignored here
-          }
-        };
-        void performLoadMap();
-      }
-    }, [loadMap]);
-
     const markers = useMemo(() => {
-      if (!locations || !customIcon || !marker) {
+      if (!locations || locations.length === 0) {
         return null;
       }
 
       return locations.map((loc) => (
         <OptimizedMarker
-          icon={customIcon}
+          city={loc.city}
           latitude={loc.lat}
           longitude={loc.lng}
           key={loc.location_id}
           locationId={loc.location_id}
-          MarkerComponent={marker}
           onClick={onMarkerClick}
           selectedGraphMeasure={selectedGraphMeasure}
           selectedGraphSeason={selectedGraphSeason}
+          state={loc.state}
         />
       ));
-    }, [
-      locations,
-      customIcon,
-      marker,
-      onMarkerClick,
-      selectedGraphMeasure,
-      selectedGraphSeason,
-    ]);
+    }, [locations, onMarkerClick, selectedGraphMeasure, selectedGraphSeason]);
 
-    if (!isLoaded || !mapContainer || !tileLayer || !marker || !customIcon) {
+    if (!mapLib) {
       return <PageLoader />;
     }
 
@@ -224,29 +256,32 @@ export const MapComponent = memo<MapComponentProperties>(
       );
     }
 
-    const MapContainer = mapContainer;
-    const TileLayer = tileLayer;
     const isDarkTheme = resolvedTheme === "dark";
-    const tileUrl = isDarkTheme ? DARK_TILE_URL : LIGHT_TILE_URL;
-    const tileAttribution = isDarkTheme
-      ? DARK_TILE_ATTRIBUTION
-      : LIGHT_TILE_ATTRIBUTION;
+    const standardMapStyle = isDarkTheme ? DARK_MAP_STYLE : LIGHT_MAP_STYLE;
+    const e2eMapStyle = isDarkTheme ? E2E_DARK_MAP_STYLE : E2E_LIGHT_MAP_STYLE;
+    const mapStyleDefinition = IS_E2E_TEST_ENVIRONMENT
+      ? e2eMapStyle
+      : standardMapStyle;
 
     return (
       <div className="relative size-full">
-        <MapContainer
-          center={MAP_CENTER}
-          scrollWheelZoom
-          style={MAP_STYLE}
-          zoom={5}
+        <div
+          className="size-full"
+          data-map-provider="maplibre"
+          data-map-theme={isDarkTheme ? "dark" : "light"}
+          data-testid={MAP_CONTAINER_TEST_ID}
         >
-          <TileLayer
-            attribution={tileAttribution}
-            key={tileUrl}
-            url={tileUrl}
-          />
-          {markers}
-        </MapContainer>
+          <Map
+            dragRotate={false}
+            initialViewState={INITIAL_VIEW_STATE}
+            mapLib={mapLib}
+            mapStyle={mapStyleDefinition}
+            scrollZoom
+            style={MAP_STYLE}
+          >
+            {markers}
+          </Map>
+        </div>
         <div className="pointer-events-none absolute bottom-6 left-6 z-40 hidden sm:block">
           <div className="pointer-events-auto flex flex-col items-start gap-2">
             <LegendToggleButton

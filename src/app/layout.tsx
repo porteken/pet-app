@@ -1,4 +1,3 @@
-import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
 import { AppProviders } from "@/components/app/providers";
@@ -10,6 +9,7 @@ import * as React from "react";
 import type { Metadata } from "next";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const IS_E2E_TEST_ENVIRONMENT = process.env.NEXT_PUBLIC_E2E_TEST === "true";
 
 export const metadata: Metadata = {
   description: "Physiological Equivalent Temperature data for US cities",
@@ -32,7 +32,7 @@ export default function RootLayout({
           Skip to main content
         </a>
         <AppProviders>{children}</AppProviders>
-        <Analytics />
+        {!IS_E2E_TEST_ENVIRONMENT && <Analytics />}
       </body>
     </html>
   );

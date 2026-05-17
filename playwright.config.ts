@@ -12,7 +12,7 @@ const GLOBAL_TIMEOUT = 60_000;
 const ACTION_TIMEOUT = 30_000;
 const NAVIGATION_TIMEOUT = 30_000;
 const CI_WORKERS = 1;
-const LOCAL_WORKERS = 4;
+const LOCAL_WORKERS = 1;
 
 const projectRoot = import.meta.dirname;
 const playwrightPort =
@@ -20,11 +20,18 @@ const playwrightPort =
 const playwrightBaseURL =
   process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${playwrightPort}`;
 const playwrightServerMode =
-  process.env.PLAYWRIGHT_SERVER_MODE === "production"
-    ? "production"
-    : "development";
+  process.env.PLAYWRIGHT_SERVER_MODE === "development"
+    ? "development"
+    : "production";
+const runningOnLinux = process.platform === "linux";
+const enableWebKitProjects =
+  process.env.PLAYWRIGHT_ENABLE_WEBKIT === "true" ||
+  Boolean(process.env.CI) ||
+  !runningOnLinux;
 const webServerCommand =
-  playwrightServerMode === "production" ? "pnpm start" : "pnpm dev";
+  playwrightServerMode === "production"
+    ? "pnpm build && pnpm start"
+    : "pnpm dev";
 const webServerTimeout =
   playwrightServerMode === "production"
     ? PRODUCTION_WEB_SERVER_TIMEOUT
@@ -44,23 +51,31 @@ export default defineConfig({
       use: { ...devices["Desktop Firefox"] },
     },
 
-    {
-      name: "webkit",
-      use: {
-        ...devices["Desktop Safari"],
-      },
-    },
+    ...(enableWebKitProjects
+      ? [
+          {
+            name: "webkit",
+            use: {
+              ...devices["Desktop Safari"],
+            },
+          },
+        ]
+      : []),
 
     {
       name: "Mobile Chrome",
       use: { ...devices["Pixel 5"] },
     },
-    {
-      name: "Mobile Safari",
-      use: {
-        ...devices["iPhone 12"],
-      },
-    },
+    ...(enableWebKitProjects
+      ? [
+          {
+            name: "Mobile Safari",
+            use: {
+              ...devices["iPhone 12"],
+            },
+          },
+        ]
+      : []),
   ],
   reporter: process.env.CI ? "html" : "line",
   retries: process.env.CI ? CI_RETRIES : LOCAL_RETRIES,
@@ -83,7 +98,8 @@ export default defineConfig({
       NEXT_PUBLIC_E2E_TEST: "true",
       PORT: playwrightPort,
     },
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer:
+      !process.env.CI && playwrightServerMode === "development",
     stderr: "ignore",
     timeout: webServerTimeout,
     url: playwrightBaseURL,

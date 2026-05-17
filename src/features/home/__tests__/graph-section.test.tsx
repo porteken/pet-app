@@ -69,6 +69,7 @@ class MockForecastControls extends React.PureComponent<{
           {enabled ? "Disable" : "Enable"} Forecast
         </button>
         <input
+          aria-label="Forecast years"
           data-testid="forecast-years"
           onChange={this.handleYearsChange}
           type="number"

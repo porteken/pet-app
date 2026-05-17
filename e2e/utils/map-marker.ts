@@ -1,6 +1,6 @@
 import { expect, type Page } from "@playwright/test";
 
-export const MARKER_SELECTOR = ".pet-map-marker-icon, .leaflet-marker-icon";
+export const MARKER_SELECTOR = '[data-map-marker="true"]';
 
 const MARKER_CLICK_TIMEOUT = 2000;
 const MARKER_VISIBILITY_TIMEOUT = 10_000;

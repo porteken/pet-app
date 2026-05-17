@@ -12,6 +12,16 @@ interface LoadKyselyModuleOptions {
   sslMode?: ServerDatabaseEnvironment["PGSSLMODE"];
 }
 
+const createMockConstructor = <TKind extends string>(kind: TKind) =>
+  function MockConstructor(
+    configuration: Record<string, unknown>,
+  ): MockConstructedClient<TKind> {
+    return {
+      configuration,
+      kind,
+    };
+  };
+
 const resetDbGlobals = () => {
   globalThis.petAppDbSingleton = undefined;
   globalThis.petAppPgPoolSingleton = undefined;
@@ -25,28 +35,13 @@ const loadKyselyModule = async ({
 
   const poolMock = vi.fn<
     (configuration: Record<string, unknown>) => MockConstructedClient<"pool">
-  >(function MockPool(configuration: Record<string, unknown>) {
-    return {
-      configuration,
-      kind: "pool",
-    };
-  });
+  >(createMockConstructor("pool"));
   const postgresDialectMock = vi.fn<
     (configuration: Record<string, unknown>) => MockConstructedClient<"dialect">
-  >(function MockPostgresDialect(configuration: Record<string, unknown>) {
-    return {
-      configuration,
-      kind: "dialect",
-    };
-  });
+  >(createMockConstructor("dialect"));
   const kyselyMock = vi.fn<
     (configuration: Record<string, unknown>) => MockConstructedClient<"db">
-  >(function MockKysely(configuration: Record<string, unknown>) {
-    return {
-      configuration,
-      kind: "db",
-    };
-  });
+  >(createMockConstructor("db"));
 
   vi.doMock("@/config/environment", () => ({
     getServerDatabaseEnvironment: () => ({

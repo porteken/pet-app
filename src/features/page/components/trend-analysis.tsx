@@ -246,8 +246,8 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   }, []);
 
   return (
-    <div className="h-full min-h-0">
-      <div className="fade-in-up glass-panel flex h-full min-h-0 flex-col rounded-3xl p-4 sm:px-5 sm:py-6">
+    <div className="h-full min-h-0 min-w-0">
+      <div className="fade-in-up glass-panel flex h-full min-h-0 min-w-0 flex-col rounded-3xl p-4 sm:px-5 sm:py-6">
         <h2 className="sr-only">Trend Analysis</h2>
         <div className="mb-5 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -335,7 +335,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           </button>
         </div>
         <div
-          className="min-h-[clamp(220px,42vh,520px)] flex-1 overflow-hidden sm:min-h-[clamp(450px,70vh,850px)]"
+          className="min-h-[clamp(220px,42vh,520px)] min-w-0 flex-1 overflow-hidden sm:min-h-[clamp(450px,70vh,850px)]"
           id="trend-analysis-graph"
         >
           {trendGraphSnapshot ? (

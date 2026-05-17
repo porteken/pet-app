@@ -1,5 +1,6 @@
 "use client";
 
+import { ChartResponsiveContainer } from "@/components/app/chart-responsive-container";
 import {
   DEFAULT_GRAPH_SEASON,
   GRAPH_COLORS,
@@ -13,7 +14,6 @@ import {
   ComposedChart,
   Legend,
   Line,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -556,12 +556,7 @@ const TrendChartBody = ({
       className="size-full"
       data-testid="trend-chart"
     >
-      <ResponsiveContainer
-        height="100%"
-        minHeight={0}
-        minWidth={0}
-        width="100%"
-      >
+      <ChartResponsiveContainer minHeight={0} minWidth={0}>
         <ComposedChart data={chartData} margin={chartMargin}>
           <CartesianGrid
             stroke={GRAPH_COLORS.grid}
@@ -620,7 +615,7 @@ const TrendChartBody = ({
             type="monotone"
           />
         </ComposedChart>
-      </ResponsiveContainer>
+      </ChartResponsiveContainer>
     </div>
   );
 };
@@ -664,12 +659,7 @@ const ReferenceChartBody = ({
       className="size-full"
       data-testid="reference-chart"
     >
-      <ResponsiveContainer
-        height="100%"
-        minHeight={0}
-        minWidth={0}
-        width="100%"
-      >
+      <ChartResponsiveContainer minHeight={0} minWidth={0}>
         <ComposedChart data={chartData} margin={chartMargin}>
           <CartesianGrid
             stroke={GRAPH_COLORS.grid}
@@ -723,7 +713,7 @@ const ReferenceChartBody = ({
             type="linear"
           />
         </ComposedChart>
-      </ResponsiveContainer>
+      </ChartResponsiveContainer>
     </div>
   );
 };

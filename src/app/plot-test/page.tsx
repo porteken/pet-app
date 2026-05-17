@@ -1,14 +1,8 @@
 "use client";
 
+import { ChartResponsiveContainer } from "@/components/app/chart-responsive-container";
 import React, { useState } from "react";
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 const TEST_DATA = [
   { value: 18, year: "2000" },
@@ -51,7 +45,7 @@ export default function Page() {
           className="graph-surface-panel h-96 rounded-3xl p-4"
           data-testid="plot-test-chart"
         >
-          <ResponsiveContainer height="100%" width="100%">
+          <ChartResponsiveContainer minHeight={0} minWidth={0}>
             <LineChart data={TEST_DATA}>
               <CartesianGrid stroke="var(--graph-grid)" strokeDasharray="4 4" />
               <XAxis dataKey="year" stroke="var(--graph-text)" />
@@ -64,7 +58,7 @@ export default function Page() {
                 type="monotone"
               />
             </LineChart>
-          </ResponsiveContainer>
+          </ChartResponsiveContainer>
         </div>
       )}
     </div>

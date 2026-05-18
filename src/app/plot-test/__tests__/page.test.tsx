@@ -7,9 +7,19 @@ interface LineStubProperties extends Record<string, unknown> {
   children?: ReactNode;
 }
 
-const { mockLine } = vi.hoisted(() => ({
+interface ResponsiveContainerStubProperties extends Record<string, unknown> {
+  children?: ReactNode;
+  initialDimension?: { height: number; width: number };
+}
+
+const { mockLine, mockResponsiveContainer } = vi.hoisted(() => ({
   mockLine: vi.fn<(props: LineStubProperties) => ReactNode>(({ children }) => (
     <div data-testid="recharts-line">{children}</div>
+  )),
+  mockResponsiveContainer: vi.fn<
+    (props: ResponsiveContainerStubProperties) => ReactNode
+  >(({ children }) => (
+    <div data-testid="recharts-responsive-container">{children}</div>
   )),
 }));
 
@@ -23,7 +33,7 @@ vi.mock("recharts", () => ({
   CartesianGrid: createRechartsStub("recharts-grid"),
   Line: mockLine,
   LineChart: createRechartsStub("recharts-line-chart"),
-  ResponsiveContainer: createRechartsStub("recharts-responsive-container"),
+  ResponsiveContainer: mockResponsiveContainer,
   XAxis: createRechartsStub("recharts-x-axis"),
   YAxis: createRechartsStub("recharts-y-axis"),
 }));
@@ -33,6 +43,7 @@ import Page from "../page";
 describe("plot test page", () => {
   beforeEach(() => {
     mockLine.mockClear();
+    mockResponsiveContainer.mockClear();
   });
 
   it("renders the chart by default", () => {
@@ -52,6 +63,25 @@ describe("plot test page", () => {
         type: "monotone",
       }),
       undefined,
+    );
+
+    const responsiveContainerProps = mockResponsiveContainer.mock.calls[0]?.[0];
+
+    expect(responsiveContainerProps).toStrictEqual(
+      expect.objectContaining({
+        height: "100%",
+        initialDimension: expect.objectContaining({
+          height: expect.any(Number),
+          width: expect.any(Number),
+        }),
+        width: "100%",
+      }),
+    );
+    expect(responsiveContainerProps?.initialDimension?.width).toBeGreaterThan(
+      0,
+    );
+    expect(responsiveContainerProps?.initialDimension?.height).toBeGreaterThan(
+      0,
     );
   });
 

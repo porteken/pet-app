@@ -10,8 +10,13 @@ interface ChartResponsiveContainerProperties {
   minWidth?: number;
 }
 
+const MIN_INITIAL_CHART_DIMENSION = 1;
+
 const hasPositiveSize = (width: number, height: number): boolean =>
   width > 0 && height > 0;
+
+const toInitialChartDimension = (value: number): number =>
+  Math.max(MIN_INITIAL_CHART_DIMENSION, Math.round(value));
 
 export const ChartResponsiveContainer = ({
   children,
@@ -21,6 +26,10 @@ export const ChartResponsiveContainer = ({
 }: ChartResponsiveContainerProperties): React.ReactElement => {
   const containerReference = React.useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = React.useState(false);
+  const [initialDimension, setInitialDimension] = React.useState(() => ({
+    height: MIN_INITIAL_CHART_DIMENSION,
+    width: MIN_INITIAL_CHART_DIMENSION,
+  }));
   const containerClassName = ["size-full", "min-h-0", "min-w-0", className]
     .filter(Boolean)
     .join(" ");
@@ -35,12 +44,41 @@ export const ChartResponsiveContainer = ({
       process.env.NODE_ENV === "test" ||
       typeof globalThis.ResizeObserver !== "function"
     ) {
+      const { height, width } = container.getBoundingClientRect();
+      if (hasPositiveSize(width, height)) {
+        setInitialDimension((previous) => {
+          const nextWidth = toInitialChartDimension(width);
+          const nextHeight = toInitialChartDimension(height);
+
+          if (previous.width === nextWidth && previous.height === nextHeight) {
+            return previous;
+          }
+
+          return { height: nextHeight, width: nextWidth };
+        });
+      }
+
       setIsReady(true);
       return () => {};
     }
 
     const updateReadiness = (width: number, height: number) => {
-      setIsReady(hasPositiveSize(width, height));
+      if (!hasPositiveSize(width, height)) {
+        setIsReady(false);
+        return;
+      }
+
+      setInitialDimension((previous) => {
+        const nextWidth = toInitialChartDimension(width);
+        const nextHeight = toInitialChartDimension(height);
+
+        if (previous.width === nextWidth && previous.height === nextHeight) {
+          return previous;
+        }
+
+        return { height: nextHeight, width: nextWidth };
+      });
+      setIsReady(true);
     };
 
     const measureContainer = () => {
@@ -72,6 +110,7 @@ export const ChartResponsiveContainer = ({
       {isReady ? (
         <ResponsiveContainer
           height="100%"
+          initialDimension={initialDimension}
           minHeight={minHeight}
           minWidth={minWidth}
           width="100%"

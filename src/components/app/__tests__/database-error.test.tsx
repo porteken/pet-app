@@ -28,19 +28,15 @@ describe("databaseError", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/Need help\?/u)).toBeInTheDocument();
     expect(screen.getByText(/Contact Kenneth Porter/u)).toBeInTheDocument();
+    expect(screen.getByText("porteken@gmail.com")).toBeInTheDocument();
   });
 
-  it("renders with custom message", () => {
+  it("renders with custom title and message", () => {
     const customMessage = "Custom error message";
-    render(<DatabaseError message={customMessage} />);
+    const customTitle = "Custom Error Title";
+    render(<DatabaseError message={customMessage} title={customTitle} />);
 
     expect(screen.getByText(customMessage)).toBeInTheDocument();
-  });
-
-  it("renders with custom title", () => {
-    const customTitle = "Custom Error Title";
-    render(<DatabaseError title={customTitle} />);
-
     expect(screen.getByText(customTitle)).toBeInTheDocument();
   });
 
@@ -51,14 +47,6 @@ describe("databaseError", () => {
     expect(
       screen.queryByText(/Contact Kenneth Porter/u),
     ).not.toBeInTheDocument();
-  });
-
-  it("shows contact info when showContactInfo is true", () => {
-    render(<DatabaseError showContactInfo />);
-
-    expect(screen.getByText(/Need help\?/u)).toBeInTheDocument();
-    expect(screen.getByText(/Contact Kenneth Porter/u)).toBeInTheDocument();
-    expect(screen.getByText("porteken@gmail.com")).toBeInTheDocument();
   });
 
   it("calls location.reload when Try Again button is clicked", () => {

@@ -102,19 +102,3 @@ export async function selectCustomOption(
   await expect(option).toBeVisible({ timeout: CUSTOM_SELECT_TIMEOUT });
   await option.click();
 }
-
-export async function searchAndSelectCustomOption(
-  page: Page,
-  trigger: Locator,
-  query: string,
-  optionText: RegExp | string,
-): Promise<void> {
-  await openCustomSelect(page, trigger);
-  await fillOpenCustomSelectSearch(page, query);
-
-  const option = getOpenCustomSelectOptions(page)
-    .filter({ hasText: optionText })
-    .first();
-  await expect(option).toBeVisible({ timeout: CUSTOM_SELECT_TIMEOUT });
-  await option.click();
-}

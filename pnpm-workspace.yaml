@@ -1,7 +1,5 @@
 packages:
   - "."
-overrides:
-  "@sentry/cli": 3.4.2
 allowBuilds:
   "@sentry/cli": true
   cpu-features: true

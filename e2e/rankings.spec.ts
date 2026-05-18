@@ -40,6 +40,20 @@ test.describe("Rankings Page", () => {
     await expect(page.getByTestId("rankings-heat-stress-filter")).toBeVisible();
   });
 
+  test("should show the city selector in the header", async ({ page }) => {
+    await page.goto("/rankings");
+
+    await expect(
+      page.getByRole("link", { name: "Historical PET USA" }),
+    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("city-selector")).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.getByTestId("city-selector")).toContainText(
+      "Select City",
+    );
+  });
+
   test("should display thermal stress legend", async ({ page }) => {
     await page.goto("/rankings");
 

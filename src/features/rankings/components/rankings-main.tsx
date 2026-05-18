@@ -548,7 +548,7 @@ export function RankingsMain({
 
   return (
     <div className="min-h-screen">
-      <HeaderBar compact LocationOptions={LocationOptions} />
+      <HeaderBar LocationOptions={LocationOptions} />
       <main
         className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
         id="main-content"

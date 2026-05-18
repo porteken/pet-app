@@ -1,21 +1,25 @@
 import { expect, test } from "@playwright/test";
 
-const handleConsole = (errors: string[]) => (message: any) => {
+const shouldIgnoreConsoleMessage = (message: string): boolean =>
+  message.includes("403 (Forbidden)");
+
+const handleConsole = (issues: string[]) => (message: any) => {
+  const type = message.type();
   if (
-    message.type() === "error" &&
-    !message.text().includes("403 (Forbidden)")
+    (type === "error" || type === "warning") &&
+    !shouldIgnoreConsoleMessage(message.text())
   ) {
-    errors.push(message.text());
+    issues.push(`[${type}] ${message.text()}`);
   }
 };
 
-test("mounts, unmounts, and remounts the plot without browser errors", async ({
+test("mounts, unmounts, and remounts the plot without browser console issues", async ({
   page,
 }) => {
-  const consoleErrors: string[] = [];
+  const consoleIssues: string[] = [];
   const pageErrors: string[] = [];
 
-  page.on("console", handleConsole(consoleErrors));
+  page.on("console", handleConsole(consoleIssues));
   page.on("pageerror", (error) => {
     pageErrors.push(error.message);
   });
@@ -34,6 +38,6 @@ test("mounts, unmounts, and remounts the plot without browser errors", async ({
   await toggle.click();
   await expect(plot).toHaveCount(1);
 
-  expect(consoleErrors).toEqual([]);
+  expect(consoleIssues).toEqual([]);
   expect(pageErrors).toEqual([]);
 });

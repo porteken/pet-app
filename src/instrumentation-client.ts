@@ -1,6 +1,8 @@
 import * as Sentry from "@sentry/nextjs";
 
 const isE2ETestRun = process.env.NEXT_PUBLIC_E2E_TEST === "true";
+const isProductionBuild = process.env.NODE_ENV === "production";
+const shouldEnableReplay = !isE2ETestRun && isProductionBuild;
 
 Sentry.init({
   debug: false,
@@ -9,11 +11,11 @@ Sentry.init({
   enabled: !isE2ETestRun,
 
   enableLogs: true,
-  integrations: [Sentry.replayIntegration()],
+  integrations: shouldEnableReplay ? [Sentry.replayIntegration()] : [],
 
-  replaysOnErrorSampleRate: 1,
+  replaysOnErrorSampleRate: shouldEnableReplay ? 1 : 0,
 
-  replaysSessionSampleRate: 0.1,
+  replaysSessionSampleRate: shouldEnableReplay ? 0.1 : 0,
 
   tracesSampleRate: 1,
 });

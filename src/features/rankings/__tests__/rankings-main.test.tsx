@@ -11,6 +11,30 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockPush = mockFn();
+const { mockHeaderBar } = vi.hoisted(() => ({
+  mockHeaderBar: vi.fn<
+    (properties: {
+      compact?: boolean;
+      LocationOptions?: unknown[];
+    }) => React.ReactElement
+  >(
+    ({
+      compact,
+      LocationOptions,
+    }: {
+      compact?: boolean;
+      LocationOptions?: unknown[];
+    }) => (
+      <div
+        data-compact={compact === true ? "true" : "false"}
+        data-testid="header-bar"
+      >
+        HeaderBar {compact === true ? "compact" : "full"} with{" "}
+        {LocationOptions?.length ?? 0} locations
+      </div>
+    ),
+  ),
+}));
 
 class MockSelectControl extends React.PureComponent<{
   data: Array<{ label: string; value: string }>;
@@ -111,11 +135,7 @@ vi.mock("@/lib/actions/actions", () => ({
 }));
 
 vi.mock("@/features/header-bar", () => ({
-  HeaderBar: mockFn(({ LocationOptions }: { LocationOptions?: unknown[] }) => (
-    <div data-testid="header-bar">
-      HeaderBar with {LocationOptions?.length ?? 0} locations
-    </div>
-  )),
+  HeaderBar: mockHeaderBar,
 }));
 
 vi.mock("@/components/ui/select", () => ({
@@ -412,6 +432,15 @@ describe("rankingsMain", () => {
       expect(
         screen.getByText("Cities ranked by Average PET"),
       ).toBeInTheDocument();
+    });
+
+    it("should use the full header layout so the city selector remains visible", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      expect(screen.getByTestId("header-bar")).toHaveAttribute(
+        "data-compact",
+        "false",
+      );
     });
 
     it("should render the year select", () => {

@@ -3,6 +3,7 @@
 import { ThemeToggle } from "@/components/app/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { APP_CONFIG } from "@/lib/constants";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useMemo } from "react";
 
@@ -147,7 +148,12 @@ const HeaderBarComponent = ({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h1 className="text-primary text-2xl font-black tracking-tight">
-                  {APP_CONFIG.NAME}
+                  <Link
+                    className="focus-visible:ring-ring rounded-md transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                    href={buildUrl("/")}
+                  >
+                    {APP_CONFIG.NAME}
+                  </Link>
                 </h1>
               </div>
               <div className="hidden sm:block">

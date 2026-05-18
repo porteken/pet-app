@@ -113,9 +113,15 @@ describe("headerBar", () => {
   });
 
   describe("basic Rendering", () => {
-    it("should render the header bar with app name", () => {
+    it("should render the header bar with app name linked to the home page", () => {
       render(<HeaderBar LocationOptions={mockLocationOptions} />);
-      expect(screen.getByText("Historical PET USA")).toBeInTheDocument();
+
+      const homeLink = screen.getByRole("link", {
+        name: "Historical PET USA",
+      });
+
+      expect(homeLink).toBeInTheDocument();
+      expect(homeLink).toHaveAttribute("href", "/");
     });
 
     it("should render navigation links", () => {

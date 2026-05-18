@@ -1,10 +1,8 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { fileURLToPath } from "node:url";
 
-const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
-const repositoryRoot = path.resolve(scriptDirectory, "..");
+const repositoryRoot = path.resolve(import.meta.dirname, "..");
 const pnpmDirectory = path.join(repositoryRoot, "node_modules", ".pnpm");
 const cliIndexRelativePath = path.join(
   "node_modules",
@@ -110,7 +108,9 @@ const main = async () => {
 
   const action =
     patchedFiles === 0 ? "already applied" : `patched ${patchedFiles} file(s)`;
-  console.log(`[postinstall] @sentry/cli CommonJS compatibility ${action}.`);
+  process.stdout.write(
+    `[postinstall] @sentry/cli CommonJS compatibility ${action}.\n`,
+  );
 };
 
 try {
@@ -118,5 +118,5 @@ try {
 } catch (error) {
   console.error("[postinstall] Failed to patch @sentry/cli compatibility.");
   console.error(error);
-  process.exit(1);
+  process.exitCode = 1;
 }

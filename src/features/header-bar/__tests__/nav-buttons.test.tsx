@@ -48,19 +48,20 @@ describe("navButtons", () => {
 
   const mockBuildUrl = mockFn().mockImplementation((path: string) => path);
 
-  it("should render all navigation buttons", () => {
+  it("should render navigation buttons with the correct links", () => {
     render(<NavButtons buildUrl={mockBuildUrl} />);
 
     expect(screen.getByText("Map")).toBeInTheDocument();
+    expect(screen.getByText("Rankings")).toBeInTheDocument();
     expect(screen.getByText("About")).toBeInTheDocument();
-  });
-
-  it("should render buttons with correct links", () => {
-    render(<NavButtons buildUrl={mockBuildUrl} />);
 
     expect(screen.getByLabelText("Navigate to map view")).toHaveAttribute(
       "href",
       "/",
+    );
+    expect(screen.getByLabelText("Navigate to rankings page")).toHaveAttribute(
+      "href",
+      "/rankings",
     );
     expect(screen.getByLabelText("Navigate to about page")).toHaveAttribute(
       "href",

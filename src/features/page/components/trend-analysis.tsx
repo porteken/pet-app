@@ -30,6 +30,10 @@ interface TrendAnalysisProperties {
   onSeasonChange: (season: GraphSeason) => Promise<void>;
 }
 
+const DEFAULT_INITIAL_TRENDLINE_PETS: number[] = [];
+const DEFAULT_INITIAL_YEAR_PETS: number[] = [];
+const DEFAULT_INITIAL_YEARS: number[] = [];
+
 const ignorePersistenceError = async (promise: Promise<void>) => {
   try {
     await promise;
@@ -46,9 +50,9 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   initialGraphMeasure,
   initialGraphSeason,
   initialIncreasePerYear = 0,
-  initialTrendlinePets = [],
-  initialYearPets = [],
-  initialYears = [],
+  initialTrendlinePets = DEFAULT_INITIAL_TRENDLINE_PETS,
+  initialYearPets = DEFAULT_INITIAL_YEAR_PETS,
+  initialYears = DEFAULT_INITIAL_YEARS,
   onMeasureChange,
   onSeasonChange,
 }) => {

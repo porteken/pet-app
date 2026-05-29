@@ -7,6 +7,7 @@ import React from "react";
 
 import type { AboutProperties } from "../model/types";
 import type { FC } from "react";
+
 const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => (
   <>
     <HeaderBar LocationOptions={LocationOptions} />

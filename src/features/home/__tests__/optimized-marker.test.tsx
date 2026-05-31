@@ -5,10 +5,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { OptimizedMarker } from "../components/optimized-marker";
 
-const mockQueryClient = {
-  prefetchQuery: mockFn(),
-};
-
 const MockMarkerComponent = mockFn(
   ({
     anchor,
@@ -31,14 +27,6 @@ const MockMarkerComponent = mockFn(
   ),
 );
 
-vi.mock("@tanstack/react-query", () => ({
-  useQueryClient: () => mockQueryClient,
-}));
-
-vi.mock("@/lib/api/query-client", () => ({
-  prefetchTrendGraphData: mockFn(),
-}));
-
 vi.mock("react-map-gl/maplibre", () => ({
   Marker: (properties: unknown) => MockMarkerComponent(properties),
 }));
@@ -52,17 +40,12 @@ describe("optimizedMarker", () => {
     longitude: mockPosition[1],
     locationId: 123,
     onClick: mockFn(),
-    selectedGraphMeasure: "temperature",
-    selectedGraphSeason: "Annual",
+    onPrefetch: mockFn(),
     state: "NY",
   };
 
-  let mockPrefetchTrendGraphData: any;
-
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
-    const { prefetchTrendGraphData } = await import("@/lib/api/query-client");
-    mockPrefetchTrendGraphData = vi.mocked(prefetchTrendGraphData);
   });
 
   it("renders marker component with correct props", () => {
@@ -108,11 +91,8 @@ describe("optimizedMarker", () => {
     await user.tab();
 
     expect(markerButton).toHaveFocus();
-    expect(mockPrefetchTrendGraphData).toHaveBeenCalledWith(
-      mockQueryClient,
+    expect(mockProperties.onPrefetch).toHaveBeenCalledWith(
       mockProperties.locationId,
-      mockProperties.selectedGraphMeasure,
-      mockProperties.selectedGraphSeason,
     );
   });
 
@@ -139,11 +119,8 @@ describe("optimizedMarker", () => {
     });
     await user.hover(markerButton);
 
-    expect(mockPrefetchTrendGraphData).toHaveBeenCalledWith(
-      mockQueryClient,
+    expect(mockProperties.onPrefetch).toHaveBeenCalledWith(
       mockProperties.locationId,
-      mockProperties.selectedGraphMeasure,
-      mockProperties.selectedGraphSeason,
     );
   });
 
@@ -161,23 +138,31 @@ describe("optimizedMarker", () => {
     await user.unhover(markerButton);
     await user.hover(markerButton);
 
-    expect(mockPrefetchTrendGraphData).toHaveBeenCalledTimes(3);
-    expect(mockPrefetchTrendGraphData).toHaveBeenCalledWith(
-      mockQueryClient,
+    expect(mockProperties.onPrefetch).toHaveBeenCalledTimes(3);
+    expect(mockProperties.onPrefetch).toHaveBeenCalledWith(
       mockProperties.locationId,
-      mockProperties.selectedGraphMeasure,
-      mockProperties.selectedGraphSeason,
     );
   });
 
-  it("creates new component instance when selectedGraphMeasure changes", () => {
+  it("does not require a prefetch callback", async () => {
+    const user = userEvent.setup();
+
+    render(<OptimizedMarker {...mockProperties} onPrefetch={undefined} />);
+
+    const markerButton = screen.getByRole("button", {
+      name: "Open details for New York, NY",
+    });
+    await user.hover(markerButton);
+
+    expect(markerButton).toBeInTheDocument();
+  });
+
+  it("creates new component instance when the prefetch callback changes", () => {
     const { rerender } = render(<OptimizedMarker {...mockProperties} />);
 
     expect(MockMarkerComponent).toHaveBeenCalledTimes(1);
 
-    rerender(
-      <OptimizedMarker {...mockProperties} selectedGraphMeasure="humidity" />,
-    );
+    rerender(<OptimizedMarker {...mockProperties} onPrefetch={mockFn()} />);
 
     expect(MockMarkerComponent).toHaveBeenCalledTimes(2);
   });

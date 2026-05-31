@@ -1,6 +1,3 @@
-import { prefetchTrendGraphData } from "@/lib/api/query-client";
-import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
-import { useQueryClient } from "@tanstack/react-query";
 import React, { memo, useCallback, useMemo } from "react";
 import { Marker } from "react-map-gl/maplibre";
 
@@ -16,40 +13,28 @@ interface OptimizedMarkerProperties {
   longitude: number;
   locationId: number;
   onClick: (locationId: number) => void;
-  selectedGraphMeasure: string;
-  selectedGraphSeason?: GraphSeason;
+  onPrefetch?: (locationId: number) => Promise<void> | void;
   state: string;
 }
 
 export const OptimizedMarker = memo<OptimizedMarkerProperties>(
-  ({
-    city,
-    latitude,
-    longitude,
-    locationId,
-    onClick,
-    selectedGraphMeasure,
-    selectedGraphSeason = DEFAULT_GRAPH_SEASON,
-    state,
-  }) => {
-    const queryClient = useQueryClient();
+  ({ city, latitude, longitude, locationId, onClick, onPrefetch, state }) => {
     const markerLabel = useMemo(
       () => `Open details for ${city}, ${state}`,
       [city, state],
     );
 
     const handlePrefetch = useCallback(async () => {
+      if (!onPrefetch) {
+        return;
+      }
+
       try {
-        await prefetchTrendGraphData(
-          queryClient,
-          locationId,
-          selectedGraphMeasure,
-          selectedGraphSeason,
-        );
+        await onPrefetch(locationId);
       } catch {
         // Ignore prefetch failures
       }
-    }, [locationId, queryClient, selectedGraphMeasure, selectedGraphSeason]);
+    }, [locationId, onPrefetch]);
 
     const handleMouseEnter = useCallback(() => {
       void (async () => {

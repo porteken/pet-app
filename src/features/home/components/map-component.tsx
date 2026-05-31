@@ -2,7 +2,6 @@
 
 import { PageLoader } from "@/components/app/page-loader";
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
-import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
 import { useTheme } from "next-themes";
 import React, { memo, useEffect, useMemo, useState } from "react";
 import Map from "react-map-gl/maplibre";
@@ -48,8 +47,7 @@ interface Location {
 interface MapComponentProperties {
   locations: Location[];
   onMarkerClick: (_locationId: number) => void;
-  selectedGraphMeasure: string;
-  selectedGraphSeason?: GraphSeason;
+  onMarkerPrefetch?: (_locationId: number) => Promise<void> | void;
 }
 
 interface E2EMarkerSurfaceProperties {
@@ -297,12 +295,7 @@ const E2EMarkerSurface = ({
 };
 
 export const MapComponent = memo<MapComponentProperties>(
-  ({
-    locations,
-    onMarkerClick,
-    selectedGraphMeasure,
-    selectedGraphSeason = DEFAULT_GRAPH_SEASON,
-  }) => {
+  ({ locations, onMarkerClick, onMarkerPrefetch }) => {
     const { resolvedTheme } = useTheme();
     const [mapLib, setMapLib] = useState<MapLibreModule | null>(null);
     const [isLegendOpen, setIsLegendOpen] = useState(false);
@@ -341,12 +334,11 @@ export const MapComponent = memo<MapComponentProperties>(
           key={loc.location_id}
           locationId={loc.location_id}
           onClick={onMarkerClick}
-          selectedGraphMeasure={selectedGraphMeasure}
-          selectedGraphSeason={selectedGraphSeason}
+          onPrefetch={onMarkerPrefetch}
           state={loc.state}
         />
       ));
-    }, [locations, onMarkerClick, selectedGraphMeasure, selectedGraphSeason]);
+    }, [locations, onMarkerClick, onMarkerPrefetch]);
 
     if (!mapLib) {
       return <PageLoader />;

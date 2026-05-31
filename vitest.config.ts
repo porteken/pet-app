@@ -10,7 +10,6 @@ export default defineConfig({
     },
   },
   test: {
-    globalSetup: ["./src/testing/global-setup.ts"],
     coverage: {
       exclude: [
         "node_modules/**",
@@ -35,6 +34,7 @@ export default defineConfig({
         "postcss.config.mjs",
         "sentry.edge.config.ts",
         "sentry.server.config.ts",
+        "vitest.db.config.ts",
         "vitest.config.ts",
         "vitest.setup.ts",
       ],
@@ -48,6 +48,7 @@ export default defineConfig({
       ".next/**",
       "tests/**",
       "src/utils/__tests__/test-utilities.ts",
+      "**/*.db.test.*",
     ],
     globals: true,
     include: [

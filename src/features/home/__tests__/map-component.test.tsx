@@ -100,7 +100,6 @@ describe("mapComponent", () => {
       <MapComponent
         locations={emptyLocations}
         onMarkerClick={noopMarkerClick}
-        selectedGraphMeasure="avg"
       />,
     );
     expect(screen.getByText("Loading map...")).toBeInTheDocument();
@@ -111,7 +110,6 @@ describe("mapComponent", () => {
       <MapComponent
         locations={emptyLocations}
         onMarkerClick={noopMarkerClick}
-        selectedGraphMeasure="avg"
       />,
     );
 
@@ -126,7 +124,6 @@ describe("mapComponent", () => {
       <MapComponent
         locations={mockLocations}
         onMarkerClick={noopMarkerClick}
-        selectedGraphMeasure="avg"
       />,
     );
 
@@ -145,7 +142,6 @@ describe("mapComponent", () => {
       <MapComponent
         locations={mockLocations}
         onMarkerClick={noopMarkerClick}
-        selectedGraphMeasure="avg"
       />,
     );
 
@@ -159,11 +155,7 @@ describe("mapComponent", () => {
   it("should call onMarkerClick with the correct location_id when a marker is clicked", async () => {
     const onMarkerClick = mockFn();
     renderWithQueryClient(
-      <MapComponent
-        locations={mockLocations}
-        onMarkerClick={onMarkerClick}
-        selectedGraphMeasure="avg"
-      />,
+      <MapComponent locations={mockLocations} onMarkerClick={onMarkerClick} />,
     );
 
     const markers = await screen.findAllByLabelText(/open details for/iu);
@@ -187,7 +179,6 @@ describe("mapComponent", () => {
       <MapComponent
         locations={mockLocations}
         onMarkerClick={noopMarkerClick}
-        selectedGraphMeasure="avg"
       />,
     );
 

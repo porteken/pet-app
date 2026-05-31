@@ -8,7 +8,10 @@ import {
   setGraphSeason,
 } from "@/lib/actions/actions";
 import { FetchForecastData } from "@/lib/api/fetch-client";
-import { getTrendGraphQueryOptions } from "@/lib/api/query-client";
+import {
+  getTrendGraphQueryOptions,
+  prefetchTrendGraphData,
+} from "@/lib/api/query-client";
 import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
 import { GraphOptions, SeasonOptions } from "@/lib/utils/select-options";
 import {
@@ -17,7 +20,13 @@ import {
 } from "@/lib/utils/trend-analysis";
 import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { GraphSection } from "./graph-section";
 import { MapComponent } from "./map-component";
@@ -83,6 +92,15 @@ const Home: FC<MapProperties> = ({
     useState<HeatStressDescription>();
   const [forecastHeatStress, setForecastHeatStress] =
     useState<HeatStressDescription>();
+  const markerPrefetchOptionsRef = useRef({
+    graphMeasure: selectedGraphMeasure,
+    graphSeason: selectedGraphSeason,
+  });
+
+  markerPrefetchOptionsRef.current = {
+    graphMeasure: selectedGraphMeasure,
+    graphSeason: selectedGraphSeason,
+  };
 
   const locationMap = useMemo(
     () => new Map(locations.map((loc) => [loc.location_id, loc])),
@@ -203,6 +221,24 @@ const Home: FC<MapProperties> = ({
     [locationMap],
   );
 
+  const handleMarkerPrefetch = useCallback(
+    async (locationId: number) => {
+      const { graphMeasure, graphSeason } = markerPrefetchOptionsRef.current;
+
+      try {
+        await prefetchTrendGraphData(
+          queryClient,
+          locationId,
+          graphMeasure,
+          graphSeason,
+        );
+      } catch {
+        // Ignore speculative prefetch failures.
+      }
+    },
+    [queryClient],
+  );
+
   const handleForecastToggle = useCallback(
     (enabled: boolean) => {
       setForecastEnabled(enabled);
@@ -247,8 +283,7 @@ const Home: FC<MapProperties> = ({
         <MapComponent
           locations={locations}
           onMarkerClick={handleMarkerClick}
-          selectedGraphMeasure={selectedGraphMeasure}
-          selectedGraphSeason={selectedGraphSeason}
+          onMarkerPrefetch={handleMarkerPrefetch}
         />
       </main>
       <Modal

@@ -1,9 +1,9 @@
 import { ForecastControls } from "@/components/app/forecast-controls";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import { GenerateTrendGraph } from "@/features/graph";
 import { type GraphSeason, normalizeGraphSeason } from "@/lib/constants";
 import { Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import React, { memo, useCallback } from "react";
 
@@ -84,6 +84,17 @@ const GraphLoadingState = (): React.ReactElement => (
     />
     <span className="text-muted-foreground mt-2">Loading graph...</span>
   </div>
+);
+
+const GenerateTrendGraph = dynamic(
+  async () => {
+    const graphModule = await import("@/features/graph");
+    return graphModule.GenerateTrendGraph;
+  },
+  {
+    loading: () => <GraphLoadingState />,
+    ssr: false,
+  },
 );
 
 const GraphEmptyState = (): React.ReactElement => (

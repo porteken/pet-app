@@ -11,12 +11,16 @@ import type { StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 
 let container: StartedPostgreSqlContainer | undefined;
 
-export async function setup() {
+export async function startTestPostgres() {
   console.warn("Starting PostgreSQL Testcontainer...");
-  container = await new PostgreSqlContainer("postgres:16-alpine").start();
+  return new PostgreSqlContainer("postgres:16-alpine").start();
+}
 
+export async function seedTestPostgres(
+  postgresContainer: StartedPostgreSqlContainer,
+) {
   const client = new Client({
-    connectionString: `${container.getConnectionUri()}?sslmode=disable`,
+    connectionString: `${postgresContainer.getConnectionUri()}?sslmode=disable`,
   });
   await client.connect();
 
@@ -66,13 +70,17 @@ export async function setup() {
   await client.query(createViewsSql);
 
   await client.end();
+}
 
+export function applyPostgresEnv(
+  postgresContainer: StartedPostgreSqlContainer,
+) {
   // Set environment variables for Vitest workers
-  process.env.PGDATABASE = container.getDatabase();
-  process.env.PGHOST = container.getHost();
-  process.env.PGPASSWORD = container.getPassword();
-  process.env.PGPORT = container.getPort().toString();
-  process.env.PGUSER = container.getUsername();
+  process.env.PGDATABASE = postgresContainer.getDatabase();
+  process.env.PGHOST = postgresContainer.getHost();
+  process.env.PGPASSWORD = postgresContainer.getPassword();
+  process.env.PGPORT = postgresContainer.getPort().toString();
+  process.env.PGUSER = postgresContainer.getUsername();
   process.env.PGSSLMODE = "disable";
 
   // Default E2E flags when the caller has not already selected a mode.
@@ -82,10 +90,22 @@ export async function setup() {
   console.warn("PostgreSQL Testcontainer ready on port", process.env.PGPORT);
 }
 
-export async function teardown() {
-  if (container) {
+export async function stopTestPostgres(
+  postgresContainer: StartedPostgreSqlContainer | undefined,
+) {
+  if (postgresContainer) {
     console.warn("Stopping PostgreSQL Testcontainer...");
-    await container.stop();
-    container = undefined;
+    await postgresContainer.stop();
   }
+}
+
+export async function setup() {
+  container = await startTestPostgres();
+  await seedTestPostgres(container);
+  applyPostgresEnv(container);
+}
+
+export async function teardown() {
+  await stopTestPostgres(container);
+  container = undefined;
 }

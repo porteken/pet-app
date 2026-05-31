@@ -1,7 +1,14 @@
 /* eslint-disable unicorn/no-process-exit, typescript/no-misused-promises, typescript/strict-void-return, promise/prefer-await-to-then, typescript/use-unknown-in-catch-callback-variable */
 import { spawn } from "node:child_process";
 
-import { setup, teardown } from "./global-setup";
+import {
+  applyPostgresEnv,
+  seedTestPostgres,
+  startTestPostgres,
+  stopTestPostgres,
+} from "./global-setup";
+
+import type { StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 
 const getWrappedCommand = (arguments_: string[]) =>
   arguments_
@@ -13,7 +20,22 @@ async function main() {
   process.env.E2E_USE_RUNTIME_MOCKS ??= "false";
   process.env.PLAYWRIGHT_TEST ??= "1";
 
-  await setup();
+  let container: StartedPostgreSqlContainer | undefined;
+  const useRuntimeMocks = process.env.E2E_USE_RUNTIME_MOCKS === "true";
+
+  if (useRuntimeMocks) {
+    console.warn("E2E runtime DB mocks enabled; skipping PostgreSQL startup.");
+  } else {
+    container = await startTestPostgres();
+    try {
+      await seedTestPostgres(container);
+      applyPostgresEnv(container);
+    } catch (error) {
+      await stopTestPostgres(container);
+      container = undefined;
+      throw error;
+    }
+  }
 
   let tornDown = false;
   let exiting = false;
@@ -24,7 +46,8 @@ async function main() {
     }
 
     tornDown = true;
-    await teardown();
+    await stopTestPostgres(container);
+    container = undefined;
   };
 
   const exitWithTeardown = async (code: number) => {
@@ -94,6 +117,5 @@ try {
   await main();
 } catch (error) {
   console.error("Error in run-e2e wrapper:", error);
-  await teardown();
   process.exit(1);
 }

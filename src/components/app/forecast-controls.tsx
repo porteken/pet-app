@@ -34,13 +34,13 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
   );
 
   return (
-    <div className="glass-panel-muted space-y-3 rounded-2xl p-4">
+    <div className="space-y-3 rounded-2xl p-4 glass-panel-muted">
       <div className="flex items-center justify-between gap-3">
-        <label className="text-foreground flex items-center gap-3 text-sm font-medium">
+        <label className="flex items-center gap-3 text-sm font-medium text-foreground">
           <input
             aria-label="Show Forecast"
             checked={enabled}
-            className="border-border bg-background text-primary focus-visible:ring-primary size-4 rounded-sm border focus-visible:ring-2"
+            className="size-4 rounded-sm border border-border bg-background text-primary focus-visible:ring-2 focus-visible:ring-primary"
             onChange={handleEnabledChange}
             type="checkbox"
           />
@@ -51,7 +51,7 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
       {enabled && (
         <div className="space-y-2">
           <label
-            className="text-foreground block text-sm font-medium"
+            className="block text-sm font-medium text-foreground"
             htmlFor="forecast-years"
           >
             Forecast {yearsAhead} year{yearsAhead === 1 ? "" : "s"} ahead
@@ -67,7 +67,7 @@ const ForecastControlsComponent: React.FC<ForecastControlsProperties> = ({
             type="range"
             value={yearsAhead}
           />
-          <div className="text-muted-foreground flex justify-between text-xs">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>{MIN_FORECAST_YEARS_AHEAD} years</span>
             <span>{MAX_FORECAST_YEARS_AHEAD} years</span>
           </div>

@@ -76,13 +76,13 @@ interface MobileLegendToggleProperties {
 }
 
 const GraphLoadingState = (): React.ReactElement => (
-  <div className="graph-surface-panel flex size-full flex-col items-center justify-center rounded-2xl">
+  <div className="flex size-full flex-col items-center justify-center rounded-2xl graph-surface-panel">
     <Loader2
       aria-label="Loading graph"
-      className="text-primary size-6 animate-spin"
+      className="size-6 animate-spin text-primary"
       data-testid="graph-loader"
     />
-    <span className="text-muted-foreground mt-2">Loading graph...</span>
+    <span className="mt-2 text-muted-foreground">Loading graph...</span>
   </div>
 );
 
@@ -98,7 +98,7 @@ const GenerateTrendGraph = dynamic(
 );
 
 const GraphEmptyState = (): React.ReactElement => (
-  <div className="text-muted-foreground graph-surface-panel flex size-full items-center justify-center rounded-2xl px-4 text-center text-sm">
+  <div className="flex size-full items-center justify-center rounded-2xl px-4 text-center text-sm text-muted-foreground graph-surface-panel">
     Select a city to view PET trend data.
   </div>
 );
@@ -173,21 +173,21 @@ const GraphHeatStressSummary = ({
     : undefined;
 
   return (
-    <div className="glass-panel-muted rounded-2xl p-4">
-      <p className="text-foreground text-sm font-medium">
+    <div className="rounded-2xl p-4 glass-panel-muted">
+      <p className="text-sm font-medium text-foreground">
         {heatStressDescription.prefix}{" "}
         <span className={`font-bold ${heatStressDescription.colorClass}`}>
           {heatStressDescription.value}
         </span>
       </p>
       {visibleForecastHeatStress && (
-        <p className="text-foreground mt-2 text-sm font-medium">
+        <p className="mt-2 text-sm font-medium text-foreground">
           {visibleForecastHeatStress.prefix}{" "}
           <span className={`font-bold ${visibleForecastHeatStress.colorClass}`}>
             {visibleForecastHeatStress.value}
           </span>
           {visibleForecastHeatStress.confidenceRange && (
-            <span className="text-muted-foreground ml-2 text-xs">
+            <span className="ml-2 text-xs text-muted-foreground">
               {visibleForecastHeatStress.confidenceRange}
             </span>
           )}

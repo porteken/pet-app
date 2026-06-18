@@ -21,6 +21,7 @@
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll": "always",
+    "source.fixAll.eslint": "always",
     "source.organizeImports": "never"
   },
   "oxc.enable.oxfmt": true,

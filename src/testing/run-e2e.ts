@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-process-exit, typescript/no-misused-promises, typescript/strict-void-return, promise/prefer-await-to-then, typescript/use-unknown-in-catch-callback-variable */
 import { spawn } from "node:child_process";
 
 import {
@@ -14,6 +13,18 @@ const getWrappedCommand = (arguments_: string[]) =>
   arguments_
     .filter((argument, index) => !(argument === "--" && index > 0))
     .join(" ");
+
+const exitCodeFromSignal = (signal: NodeJS.Signals | null) => {
+  if (signal === "SIGINT") {
+    return 130;
+  }
+
+  if (signal === "SIGTERM") {
+    return 143;
+  }
+
+  return 1;
+};
 
 async function main() {
   process.env.NEXT_PUBLIC_E2E_TEST ??= "true";
@@ -38,8 +49,6 @@ async function main() {
   }
 
   let tornDown = false;
-  let exiting = false;
-
   const safeTeardown = async () => {
     if (tornDown) {
       return;
@@ -50,22 +59,12 @@ async function main() {
     container = undefined;
   };
 
-  const exitWithTeardown = async (code: number) => {
-    if (exiting) {
-      return;
-    }
-
-    exiting = true;
-    await safeTeardown();
-    process.exit(code);
-  };
-
   // process.argv[2...] will contain the command to run, e.g. "playwright test" or "pnpm build && playwright test"
   const command = getWrappedCommand(process.argv.slice(2));
   if (!command) {
     console.error("No command provided to run-e2e.ts");
-    await exitWithTeardown(1);
-    return;
+    await safeTeardown();
+    return 1;
   }
 
   const child = spawn(command, {
@@ -74,48 +73,39 @@ async function main() {
     shell: true,
   });
 
-  const forwardSignal = async (
-    signal: NodeJS.Signals,
-    fallbackExitCode: number,
-  ) => {
+  let signalExitCode: number | undefined;
+
+  const forwardSignal = (signal: NodeJS.Signals, fallbackExitCode: number) => {
+    signalExitCode ??= fallbackExitCode;
+
     if (!child.killed) {
       child.kill(signal);
     }
-
-    await exitWithTeardown(fallbackExitCode);
   };
 
-  child.once("error", async (error) => {
-    console.error("Failed to launch wrapped E2E command:", error);
-    await exitWithTeardown(1);
-  });
-
-  child.once("exit", async (code, signal) => {
-    let exitCode = code ?? 1;
-
-    if (code === null) {
-      if (signal === "SIGINT") {
-        exitCode = 130;
-      } else if (signal === "SIGTERM") {
-        exitCode = 143;
-      }
-    }
-
-    await exitWithTeardown(exitCode);
-  });
-
   process.once("SIGINT", () => {
-    void forwardSignal("SIGINT", 130);
+    forwardSignal("SIGINT", 130);
   });
 
   process.once("SIGTERM", () => {
-    void forwardSignal("SIGTERM", 143);
+    forwardSignal("SIGTERM", 143);
   });
+
+  try {
+    return await new Promise<number>((resolve, reject) => {
+      child.once("error", reject);
+      child.once("exit", (code, signal) => {
+        resolve(signalExitCode ?? code ?? exitCodeFromSignal(signal));
+      });
+    });
+  } finally {
+    await safeTeardown();
+  }
 }
 
 try {
-  await main();
+  process.exitCode = await main();
 } catch (error) {
   console.error("Error in run-e2e wrapper:", error);
-  process.exit(1);
+  process.exitCode = 1;
 }

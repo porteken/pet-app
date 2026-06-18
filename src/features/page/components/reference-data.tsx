@@ -118,17 +118,17 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
 
   return (
     <div className="h-full min-h-0 min-w-0">
-      <div className="fade-in-up glass-panel flex h-full min-h-0 min-w-0 flex-col rounded-3xl p-4 sm:px-5 sm:py-6">
+      <div className="flex h-full min-h-0 min-w-0 fade-in-up flex-col rounded-3xl p-4 glass-panel sm:px-5 sm:py-6">
         <h2 className="sr-only">Reference Data</h2>
         <div className="mb-5 space-y-4">
           <label
-            className="text-foreground mb-2 block text-sm font-medium"
+            className="mb-2 block text-sm font-medium text-foreground"
             htmlFor="reference-year"
           >
             Reference Year
           </label>
           <select
-            className="border-border bg-background/80 text-foreground focus:border-primary focus:ring-primary/20 h-11 w-full rounded-xl border px-3 shadow-sm transition outline-none focus:ring-2"
+            className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-foreground shadow-sm transition outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             id="reference-year"
             onChange={handleReferenceYearChange}
             value={referenceYear}
@@ -144,7 +144,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
           <button
             aria-controls="reference-data-graph"
             aria-expanded={isMobileLegendOpen}
-            className="border-border bg-background/80 text-foreground hover:bg-accent rounded-full border px-3 py-2 text-sm font-semibold shadow-sm transition"
+            className="rounded-full border border-border bg-background/80 px-3 py-2 text-sm font-semibold text-foreground shadow-sm transition hover:bg-accent"
             onClick={handleToggleMobileLegend}
             type="button"
           >
@@ -178,7 +178,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
               </div>
             </div>
           ) : (
-            <div className="text-muted-foreground graph-surface-panel flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm">
+            <div className="flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm text-muted-foreground graph-surface-panel">
               Loading chart…
             </div>
           )}

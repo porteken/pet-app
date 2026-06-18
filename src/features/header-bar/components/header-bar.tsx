@@ -133,8 +133,8 @@ const HeaderBarComponent = ({
   );
 
   return (
-    <header className="border-border/70 bg-background/80 sticky top-0 z-20 w-full border-b backdrop-blur-xl">
-      <div className="via-primary/60 absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent to-transparent" />
+    <header className="sticky top-0 z-20 w-full border-b border-border/70 bg-background/80 backdrop-blur-xl">
+      <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-primary/60 to-transparent" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {compact ? (
           <div className="flex flex-wrap items-center justify-between gap-3 py-4">
@@ -147,9 +147,9 @@ const HeaderBarComponent = ({
           <div className="flex flex-col gap-4 py-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <h1 className="text-primary text-2xl font-black tracking-tight">
+                <h1 className="text-2xl font-black tracking-tight text-primary">
                   <Link
-                    className="focus-visible:ring-ring rounded-md transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                    className="rounded-md transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                     href={buildUrl("/")}
                   >
                     {APP_CONFIG.NAME}
@@ -161,7 +161,7 @@ const HeaderBarComponent = ({
               </div>
             </div>
 
-            <div className="glass-panel-muted rounded-3xl p-3 sm:p-4">
+            <div className="rounded-3xl p-3 glass-panel-muted sm:p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <CitySelector
                   className="w-full lg:max-w-xl"

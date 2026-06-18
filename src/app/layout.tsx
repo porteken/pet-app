@@ -29,7 +29,7 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
     >
-      <body className="app-shell min-h-screen" suppressHydrationWarning>
+      <body className="min-h-screen app-shell" suppressHydrationWarning>
         <a className="skip-link" href="#main-content">
           Skip to main content
         </a>

@@ -6,9 +6,9 @@ interface ErrorGraphDisplayProperties {
 
 export const ErrorGraphDisplay = memo<ErrorGraphDisplayProperties>(
   ({ message = "Unable to load graph data" }) => (
-    <div className="graph-surface-panel flex h-75 w-full flex-col items-center justify-center rounded-2xl px-4">
+    <div className="flex h-75 w-full flex-col items-center justify-center rounded-2xl px-4 graph-surface-panel">
       <div className="text-center">
-        <div className="text-destructive mb-4">
+        <div className="mb-4 text-destructive">
           <svg
             className="mx-auto size-8"
             fill="none"
@@ -23,11 +23,11 @@ export const ErrorGraphDisplay = memo<ErrorGraphDisplayProperties>(
             />
           </svg>
         </div>
-        <p className="text-foreground mb-2">{message}</p>
-        <p className="text-muted-foreground text-sm">
+        <p className="mb-2 text-foreground">{message}</p>
+        <p className="text-sm text-muted-foreground">
           Contact Kenneth Porter at{" "}
           <a
-            className="text-primary hover:text-primary/80 underline underline-offset-4 transition"
+            className="text-primary underline underline-offset-4 transition hover:text-primary/80"
             href="mailto:porteken@gmail.com"
           >
             porteken@gmail.com

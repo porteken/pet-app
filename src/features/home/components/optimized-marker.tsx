@@ -56,7 +56,7 @@ export const OptimizedMarker = memo<OptimizedMarkerProperties>(
       <Marker anchor="bottom" latitude={latitude} longitude={longitude}>
         <button
           aria-label={markerLabel}
-          className="focus-visible:ring-ring origin-bottom rounded-full border-0 bg-transparent p-0 leading-none transition-transform hover:scale-105 focus-visible:scale-105 focus-visible:ring-2 focus-visible:ring-offset-2"
+          className="origin-bottom rounded-full border-0 bg-transparent p-0 leading-none transition-transform hover:scale-105 focus-visible:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           data-map-marker="true"
           onClick={handleClick}
           onFocus={handleFocus}

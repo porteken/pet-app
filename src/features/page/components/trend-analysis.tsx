@@ -251,19 +251,19 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
 
   return (
     <div className="h-full min-h-0 min-w-0">
-      <div className="fade-in-up glass-panel flex h-full min-h-0 min-w-0 flex-col rounded-3xl p-4 sm:px-5 sm:py-6">
+      <div className="flex h-full min-h-0 min-w-0 fade-in-up flex-col rounded-3xl p-4 glass-panel sm:px-5 sm:py-6">
         <h2 className="sr-only">Trend Analysis</h2>
         <div className="mb-5 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label
-                className="text-foreground mb-2 block text-sm font-medium"
+                className="mb-2 block text-sm font-medium text-foreground"
                 htmlFor="graph-season"
               >
                 Season
               </label>
               <select
-                className="border-border bg-background/80 text-foreground focus:border-primary focus:ring-primary/20 h-11 w-full rounded-xl border px-3 shadow-sm transition outline-none focus:ring-2"
+                className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-foreground shadow-sm transition outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 id="graph-season"
                 onChange={handleSeasonChange}
                 value={graphSeason}
@@ -277,13 +277,13 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
             </div>
             <div>
               <label
-                className="text-foreground mb-2 block text-sm font-medium"
+                className="mb-2 block text-sm font-medium text-foreground"
                 htmlFor="graph-measure"
               >
                 Graph Measure
               </label>
               <select
-                className="border-border bg-background/80 text-foreground focus:border-primary focus:ring-primary/20 h-11 w-full rounded-xl border px-3 shadow-sm transition outline-none focus:ring-2"
+                className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-foreground shadow-sm transition outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 id="graph-measure"
                 onChange={handleGraphMeasureChange}
                 value={selectedGraphMeasure}
@@ -305,21 +305,21 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           />
         </div>
         {currentHeatStress && (
-          <div className="glass-panel-muted mb-5 rounded-2xl p-4">
-            <p className="text-foreground text-sm font-medium">
+          <div className="mb-5 rounded-2xl p-4 glass-panel-muted">
+            <p className="text-sm font-medium text-foreground">
               {currentHeatStress.prefix}{" "}
               <span className={`font-bold ${currentHeatStress.colorClass}`}>
                 {currentHeatStress.value}
               </span>
             </p>
             {forecastEnabled && forecastHeatStress && (
-              <p className="text-foreground mt-2 text-sm font-medium">
+              <p className="mt-2 text-sm font-medium text-foreground">
                 {forecastHeatStress.prefix}{" "}
                 <span className={`font-bold ${forecastHeatStress.colorClass}`}>
                   {forecastHeatStress.value}
                 </span>
                 {forecastHeatStress.confidenceRange && (
-                  <span className="text-muted-foreground ml-2 text-xs">
+                  <span className="ml-2 text-xs text-muted-foreground">
                     {forecastHeatStress.confidenceRange}
                   </span>
                 )}
@@ -331,7 +331,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           <button
             aria-controls="trend-analysis-graph"
             aria-expanded={isMobileLegendOpen}
-            className="border-border bg-background/80 text-foreground hover:bg-accent rounded-full border px-3 py-2 text-sm font-semibold shadow-sm transition"
+            className="rounded-full border border-border bg-background/80 px-3 py-2 text-sm font-semibold text-foreground shadow-sm transition hover:bg-accent"
             onClick={handleToggleMobileLegend}
             type="button"
           >
@@ -355,7 +355,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
               years={trendGraphSnapshot.years}
             />
           ) : (
-            <div className="text-muted-foreground graph-surface-panel flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm">
+            <div className="flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm text-muted-foreground graph-surface-panel">
               Loading chart…
             </div>
           )}

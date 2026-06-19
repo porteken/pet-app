@@ -176,7 +176,7 @@ const REF_REFERENCE_ACTIVE_DOT = getActiveDotStyle(GRAPH_COLORS.secondary);
 
 const formatYAxisTick = (value: number) => `${value.toFixed(0)}°`;
 const formatLegendLabel = (value: string) => (
-  <span className="text-foreground/80 text-xs font-medium">{value}</span>
+  <span className="text-xs font-medium text-foreground/80">{value}</span>
 );
 
 const getGraphFillHeightClass = (useCompactDesktopHeight: boolean): string =>
@@ -364,19 +364,19 @@ const ChartShell = ({
   <div
     className={`${getGraphFillHeightClass(useCompactDesktopHeight)} w-full min-w-0`}
   >
-    <div className="graph-surface-panel flex h-full min-w-0 flex-col rounded-2xl p-3 sm:p-4">
-      <div className="border-border/60 mb-3 space-y-1 border-b pb-3">
-        <h3 className="text-foreground text-base font-semibold sm:text-lg">
+    <div className="flex h-full min-w-0 flex-col rounded-2xl p-3 graph-surface-panel sm:p-4">
+      <div className="mb-3 space-y-1 border-b border-border/60 pb-3">
+        <h3 className="text-base font-semibold text-foreground sm:text-lg">
           {title}
         </h3>
         {subtitle && (
-          <p className="text-muted-foreground text-sm">{subtitle}</p>
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
         )}
       </div>
 
       <div className="min-h-0 min-w-0 flex-1">
         {children ?? (
-          <div className="border-border/80 bg-background/20 text-muted-foreground flex h-full items-center justify-center rounded-xl border border-dashed px-4 text-center text-sm">
+          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-border/80 bg-background/20 px-4 text-center text-sm text-muted-foreground">
             {emptyState}
           </div>
         )}
@@ -413,7 +413,7 @@ const ChartTooltip = ({
       className="rounded-xl border px-3 py-2 text-xs shadow-lg"
       style={TOOLTIP_CONTAINER_STYLE}
     >
-      <p className="text-foreground mb-2 font-semibold">
+      <p className="mb-2 font-semibold text-foreground">
         {point.tooltipLabel ?? String(label ?? "")}
       </p>
       <div className="space-y-1.5">
@@ -422,14 +422,14 @@ const ChartTooltip = ({
             className="flex items-center justify-between gap-3"
             key={`${entry.dataKey}-${entry.name}`}
           >
-            <span className="text-muted-foreground flex items-center gap-2">
+            <span className="flex items-center gap-2 text-muted-foreground">
               <span
                 className="inline-flex size-2 rounded-full"
                 style={getTooltipColorStyle(entry.color)}
               />
               {entry.name}
             </span>
-            <span className="text-foreground font-semibold">
+            <span className="font-semibold text-foreground">
               {formatPetValue(entry.value)}
             </span>
           </div>
@@ -437,7 +437,7 @@ const ChartTooltip = ({
       </div>
       {typeof point.confidenceLow === "number" &&
         typeof point.confidenceHigh === "number" && (
-          <p className="border-border/70 text-muted-foreground mt-2 border-t pt-2 text-[11px]">
+          <p className="mt-2 border-t border-border/70 pt-2 text-[11px] text-muted-foreground">
             80% confidence interval: {formatPetValue(point.confidenceLow)} to{" "}
             {formatPetValue(point.confidenceHigh)}
           </p>

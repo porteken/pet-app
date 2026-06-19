@@ -238,7 +238,7 @@ export function CitySelector({
           aria-expanded={open}
           aria-haspopup="listbox"
           className={cn(
-            "flex h-8 w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30 dark:hover:bg-input/50",
+            `flex h-8 w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30 dark:hover:bg-input/50`,
             !selectedOption && "text-muted-foreground",
           )}
           data-placeholder={placeholder}
@@ -253,7 +253,7 @@ export function CitySelector({
           </span>
           <ChevronDownIcon
             className={cn(
-              "text-muted-foreground size-4 shrink-0 transition-transform",
+              "size-4 shrink-0 text-muted-foreground transition-transform",
               open && "rotate-180",
             )}
           />
@@ -261,7 +261,7 @@ export function CitySelector({
 
         {clearable && hasValue && (
           <button
-            className="text-muted-foreground hover:text-foreground focus:ring-ring absolute right-8 flex size-4 items-center justify-center rounded-sm transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none"
+            className="absolute right-8 flex size-4 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:pointer-events-none"
             onClick={handleClearClick}
             type="button"
           >
@@ -273,14 +273,14 @@ export function CitySelector({
 
       {open && (
         <div
-          className="bg-popover text-popover-foreground ring-foreground/10 absolute inset-x-0 top-full z-12000 mt-2 overflow-hidden rounded-lg shadow-md ring-1"
+          className="absolute inset-x-0 top-full z-12000 mt-2 overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10"
           data-slot="select-content"
         >
-          <div className="bg-popover flex items-center border-b px-3 py-2">
+          <div className="flex items-center border-b bg-popover px-3 py-2">
             <SearchIcon className="mr-2 size-4 shrink-0 opacity-50" />
             <input
               aria-label="Search cities"
-              className="placeholder:text-muted-foreground flex h-8 w-full rounded-md bg-transparent py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-8 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
               onChange={handleSearchChange}
               onKeyDown={handleSearchKeyDown}
               placeholder="Search..."
@@ -291,14 +291,14 @@ export function CitySelector({
 
           <div className="max-h-80 overflow-y-auto p-1" id={listboxId}>
             {filteredData.length === 0 ? (
-              <div className="text-muted-foreground py-6 text-center text-sm">
+              <div className="py-6 text-center text-sm text-muted-foreground">
                 No results found.
               </div>
             ) : (
               filteredData.map((group) => (
                 <div className="scroll-my-1 p-1" key={group.key ?? group.group}>
                   <div
-                    className="text-muted-foreground px-1.5 py-1 text-xs"
+                    className="px-1.5 py-1 text-xs text-muted-foreground"
                     data-testid="searchable-select-group-label"
                   >
                     {group.group}
@@ -311,7 +311,7 @@ export function CitySelector({
                       <button
                         aria-pressed={selected}
                         className={cn(
-                          "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                          `relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground`,
                           selected && "bg-accent/60",
                         )}
                         data-testid="searchable-select-option"

@@ -121,7 +121,7 @@ const Main: FC<PageProperties> = ({
           <div className="pointer-events-auto flex flex-col items-start gap-2">
             {isLegendOpen && (
               <div
-                className="glass-panel max-h-[80vh] max-w-[78vw] overflow-auto rounded-3xl p-2 shadow-md sm:max-w-xs"
+                className="max-h-[80vh] max-w-[78vw] overflow-auto rounded-3xl p-2 shadow-md glass-panel sm:max-w-xs"
                 id="city-thermal-stress-legend"
               >
                 <HeatStressLegend />
@@ -130,7 +130,7 @@ const Main: FC<PageProperties> = ({
             <button
               aria-controls="city-thermal-stress-legend"
               aria-expanded={isLegendOpen}
-              className="text-foreground glass-panel-muted hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
+              className="rounded-full px-4 py-2 text-sm font-semibold text-foreground glass-panel-muted transition hover:bg-accent"
               onClick={handleToggleLegend}
               type="button"
             >

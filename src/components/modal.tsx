@@ -110,7 +110,7 @@ const Modal = memo<ModalProperties>(
           overlayPositionClass,
           mobileFullscreen
             ? "sm:flex sm:items-center sm:justify-center sm:p-4"
-            : "flex items-center justify-center p-2 sm:p-4",
+            : `flex items-center justify-center p-2 sm:p-4`,
         )}
       >
         <button
@@ -124,8 +124,8 @@ const Modal = memo<ModalProperties>(
           aria-modal="true"
           className={cn(
             mobileFullscreen
-              ? "inset-0 flex h-dvh max-h-dvh w-screen max-w-none flex-col overflow-y-auto rounded-none border-0 bg-background/95 p-3 shadow-lg backdrop-blur-xl sm:h-auto sm:max-h-[95dvh] sm:w-[calc(100%-2rem)] sm:max-w-3xl sm:rounded-3xl sm:border sm:border-border sm:p-4 lg:p-5"
-              : "flex max-h-[86dvh] w-[calc(100%-1rem)] max-w-3xl flex-col overflow-y-auto rounded-3xl border border-border bg-background/95 p-3 shadow-lg backdrop-blur-xl sm:max-h-[90dvh] sm:w-[calc(100%-2rem)] sm:p-6",
+              ? `inset-0 flex h-dvh max-h-dvh w-screen max-w-none flex-col overflow-y-auto rounded-none border-0 bg-background/95 p-3 shadow-lg backdrop-blur-xl sm:h-auto sm:max-h-[95dvh] sm:w-[calc(100%-2rem)] sm:max-w-3xl sm:rounded-3xl sm:border sm:border-border sm:p-4 lg:p-5`
+              : `flex max-h-[86dvh] w-[calc(100%-1rem)] max-w-3xl flex-col overflow-y-auto rounded-3xl border border-border bg-background/95 p-3 shadow-lg backdrop-blur-xl sm:max-h-[90dvh] sm:w-[calc(100%-2rem)] sm:p-6`,
             dialogPositionClass,
             dialogClassName,
           )}
@@ -136,7 +136,7 @@ const Modal = memo<ModalProperties>(
           <h2
             className={
               title
-                ? "text-base leading-none font-semibold sm:text-lg"
+                ? `text-base leading-none font-semibold sm:text-lg`
                 : "sr-only"
             }
             id={titleId}
@@ -145,7 +145,7 @@ const Modal = memo<ModalProperties>(
           </h2>
           <button
             aria-label="Close"
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-primary/25 absolute top-3 right-3 rounded-sm transition-colors focus-visible:ring-2 focus-visible:outline-none sm:top-4 sm:right-4"
+            className="absolute top-3 right-3 rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:outline-none sm:top-4 sm:right-4"
             onClick={onClose}
             type="button"
           >

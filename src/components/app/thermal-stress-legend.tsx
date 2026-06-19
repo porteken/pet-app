@@ -10,8 +10,8 @@ interface HeatStressLegendProperties {
 const HeatStressLegendComponent: React.FC<HeatStressLegendProperties> = ({
   title = "Thermal Stress Index",
 }) => (
-  <div className="glass-panel-muted rounded-2xl p-4">
-    <h3 className="text-foreground mb-3 text-sm font-semibold">{title}</h3>
+  <div className="rounded-2xl p-4 glass-panel-muted">
+    <h3 className="mb-3 text-sm font-semibold text-foreground">{title}</h3>
     <ul className="space-y-2.5">
       {THERMAL_STRESS_LEGEND_ITEMS.map((item) => (
         <li className="flex items-center gap-3" key={item.level}>
@@ -20,7 +20,7 @@ const HeatStressLegendComponent: React.FC<HeatStressLegendProperties> = ({
             className={`size-5 rounded-sm ${item.fillClass}`}
           />
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-xs font-medium">
+            <span className="text-xs font-medium text-muted-foreground">
               {item.rangeLabel}
             </span>
             <span className={`text-xs font-medium ${item.colorClass}`}>

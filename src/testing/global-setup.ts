@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-module, sonarjs/sql-queries */
 import fs from "node:fs/promises";
 import path from "node:path";
 

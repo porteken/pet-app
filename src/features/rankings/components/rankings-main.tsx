@@ -254,7 +254,7 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
     } = this.props;
 
     return (
-      <section className="fade-in-up glass-panel mb-6 rounded-3xl p-4 [animation-delay:80ms] sm:p-5">
+      <section className="mb-6 fade-in-up rounded-3xl p-4 glass-panel [animation-delay:80ms] sm:p-5">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Select
             className="w-full"
@@ -335,7 +335,7 @@ class SortHeader extends React.PureComponent<{
 
     return (
       <th
-        className="text-muted-foreground hover:bg-accent/60 cursor-pointer px-6 py-4 text-left text-xs font-medium tracking-[0.2em] uppercase transition"
+        className="cursor-pointer px-6 py-4 text-left text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase transition hover:bg-accent/60"
         onClick={this.handleClick}
       >
         <div className="flex items-center gap-1">
@@ -376,21 +376,21 @@ class RankingRow extends React.PureComponent<{
 
     return (
       <tr
-        className="even:bg-background/30 hover:bg-accent/45 cursor-pointer transition hover:-translate-y-px"
+        className="cursor-pointer transition even:bg-background/30 hover:-translate-y-px hover:bg-accent/45"
         onClick={this.handleClick}
       >
-        <td className="text-foreground px-6 py-4 text-sm font-medium whitespace-nowrap">
+        <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-foreground">
           <span
             className={`inline-flex min-w-10 items-center justify-center rounded-full px-3 py-1 text-xs font-bold ${getRankBadgeClasses(rank)}`}
           >
             {rank}
           </span>
         </td>
-        <td className="text-foreground px-6 py-4 text-sm whitespace-nowrap">
+        <td className="px-6 py-4 text-sm whitespace-nowrap text-foreground">
           {city}
         </td>
-        <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
-          <span className="bg-background/80 text-foreground rounded-full px-2.5 py-1 font-medium">
+        <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
+          <span className="rounded-full bg-background/80 px-2.5 py-1 font-medium text-foreground">
             {state}
           </span>
         </td>
@@ -410,7 +410,7 @@ class RankingRow extends React.PureComponent<{
             </span>
           )}
         </td>
-        <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
+        <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
           {p10 !== undefined && p90 !== undefined ? (
             `${getPetRange(p10, p90)}°C`
           ) : (
@@ -568,7 +568,7 @@ export function RankingsMain({
           stateOptions={stateOptions}
         />
 
-        <section className="fade-in-up glass-panel mb-8 overflow-hidden rounded-4xl">
+        <section className="mb-8 fade-in-up overflow-hidden rounded-4xl glass-panel">
           <div className="bg-primary px-6 py-5 sm:px-8 sm:py-6">
             <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
               Cities ranked by Average PET
@@ -577,7 +577,7 @@ export function RankingsMain({
         </section>
 
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-muted-foreground text-sm">
+          <div className="text-sm text-muted-foreground">
             Showing{" "}
             {filteredAndSortedRankings.length === 0
               ? 0
@@ -600,14 +600,14 @@ export function RankingsMain({
 
         <div className="flex flex-col gap-6 xl:flex-row">
           <div className="w-full xl:w-64 xl:shrink-0">
-            <div className="glass-panel rounded-3xl p-6 xl:sticky xl:top-28">
+            <div className="rounded-3xl p-6 glass-panel xl:sticky xl:top-28">
               <HeatStressLegend />
             </div>
           </div>
 
-          <div className="glass-panel flex-1 overflow-hidden rounded-3xl">
+          <div className="flex-1 overflow-hidden rounded-3xl glass-panel">
             <div className="overflow-x-auto">
-              <table className="divide-border/70 min-w-full divide-y">
+              <table className="min-w-full divide-y divide-border/70">
                 <thead className="bg-background/55 backdrop-blur-xl">
                   <tr>
                     <SortHeader
@@ -650,7 +650,7 @@ export function RankingsMain({
                       setSortColumn={setSortColumn}
                       setSortDirection={setSortDirection}
                     />
-                    <th className="text-muted-foreground px-6 py-4 text-left text-xs font-medium tracking-[0.2em] uppercase">
+                    <th className="px-6 py-4 text-left text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
                       PET Range (10th-90th percentile)
                     </th>
                     <SortHeader
@@ -661,16 +661,16 @@ export function RankingsMain({
                       setSortColumn={setSortColumn}
                       setSortDirection={setSortDirection}
                     />
-                    <th className="text-muted-foreground px-6 py-4 text-left text-xs font-medium tracking-[0.2em] uppercase">
+                    <th className="px-6 py-4 text-left text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
                       2100 Forecast Range
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-border/70 divide-y bg-transparent">
+                <tbody className="divide-y divide-border/70 bg-transparent">
                   {paginatedRankings.length === 0 ? (
                     <tr>
                       <td
-                        className="text-muted-foreground px-6 py-12 text-center text-sm"
+                        className="px-6 py-12 text-center text-sm text-muted-foreground"
                         colSpan={8}
                       >
                         No cities match the current filters.

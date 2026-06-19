@@ -23,7 +23,7 @@ class ChartToggleButton extends React.PureComponent<{
   public render(): React.ReactNode {
     return (
       <button
-        className="border-border bg-background/80 text-foreground w-fit rounded-full border px-4 py-2 text-sm font-semibold"
+        className="w-fit rounded-full border border-border bg-background/80 px-4 py-2 text-sm font-semibold text-foreground"
         id="toggle"
         onClick={this.handleClick}
         type="button"
@@ -42,7 +42,7 @@ export default function Page() {
       <ChartToggleButton setShow={setShow} />
       {show && (
         <div
-          className="graph-surface-panel h-96 rounded-3xl p-4"
+          className="h-96 rounded-3xl p-4 graph-surface-panel"
           data-testid="plot-test-chart"
         >
           <ChartResponsiveContainer minHeight={0} minWidth={0}>

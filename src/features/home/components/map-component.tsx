@@ -346,11 +346,11 @@ export const MapComponent = memo<MapComponentProperties>(
 
     if (!locations || locations.length === 0) {
       return (
-        <div className="bg-background/30 flex h-full items-center justify-center px-4">
+        <div className="flex h-full items-center justify-center bg-background/30 px-4">
           <div className="mx-auto max-w-md p-6 text-center">
             <div className="mb-6">
               <svg
-                className="text-destructive mx-auto size-12"
+                className="mx-auto size-12 text-destructive"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -363,18 +363,18 @@ export const MapComponent = memo<MapComponentProperties>(
                 />
               </svg>
             </div>
-            <h1 className="text-foreground mb-4 text-2xl font-bold">
+            <h1 className="mb-4 text-2xl font-bold text-foreground">
               No Map Data Available
             </h1>
-            <p className="text-muted-foreground mb-6">
+            <p className="mb-6 text-muted-foreground">
               Unable to load location data for the map. The database may be
               temporarily unavailable.
             </p>
-            <div className="glass-panel-muted rounded-2xl p-4">
-              <p className="text-foreground text-sm">
+            <div className="rounded-2xl p-4 glass-panel-muted">
+              <p className="text-sm text-foreground">
                 <strong>Need help?</strong> Contact Kenneth Porter at{" "}
                 <a
-                  className="text-primary hover:text-primary/80 underline underline-offset-4"
+                  className="text-primary underline underline-offset-4 hover:text-primary/80"
                   href="mailto:porteken@gmail.com"
                 >
                   porteken@gmail.com
@@ -400,7 +400,7 @@ export const MapComponent = memo<MapComponentProperties>(
             <div className="pointer-events-auto flex flex-col items-start gap-2">
               <LegendToggleButton
                 ariaControls="desktop-thermal-stress-legend"
-                className="text-foreground glass-panel-muted hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
+                className="rounded-full px-4 py-2 text-sm font-semibold text-foreground glass-panel-muted transition hover:bg-accent"
                 closedLabel="Show Thermal Stress Index"
                 isLegendOpen={isLegendOpen}
                 openLabel="Hide Thermal Stress Index"
@@ -417,7 +417,7 @@ export const MapComponent = memo<MapComponentProperties>(
             <div className="pointer-events-auto flex items-center">
               {isLegendOpen && (
                 <div
-                  className="glass-panel mr-2 max-w-[78vw] rounded-3xl p-2 shadow-md"
+                  className="mr-2 max-w-[78vw] rounded-3xl p-2 shadow-md glass-panel"
                   id="mobile-thermal-stress-legend"
                 >
                   <HeatStressLegend />
@@ -425,7 +425,7 @@ export const MapComponent = memo<MapComponentProperties>(
               )}
               <LegendToggleButton
                 ariaControls="mobile-thermal-stress-legend"
-                className="text-foreground glass-panel-muted hover:bg-accent rounded-l-2xl border-r-0 p-3 text-xs font-semibold transition"
+                className="rounded-l-2xl border-r-0 p-3 text-xs font-semibold text-foreground glass-panel-muted transition hover:bg-accent"
                 closedLabel="Thermal Stress"
                 isLegendOpen={isLegendOpen}
                 openLabel="Close"
@@ -466,7 +466,7 @@ export const MapComponent = memo<MapComponentProperties>(
           <div className="pointer-events-auto flex flex-col items-start gap-2">
             <LegendToggleButton
               ariaControls="desktop-thermal-stress-legend"
-              className="text-foreground glass-panel-muted hover:bg-accent rounded-full px-4 py-2 text-sm font-semibold transition"
+              className="rounded-full px-4 py-2 text-sm font-semibold text-foreground glass-panel-muted transition hover:bg-accent"
               closedLabel="Show Thermal Stress Index"
               isLegendOpen={isLegendOpen}
               openLabel="Hide Thermal Stress Index"
@@ -483,7 +483,7 @@ export const MapComponent = memo<MapComponentProperties>(
           <div className="pointer-events-auto flex items-center">
             {isLegendOpen && (
               <div
-                className="glass-panel mr-2 max-w-[78vw] rounded-3xl p-2 shadow-md"
+                className="mr-2 max-w-[78vw] rounded-3xl p-2 shadow-md glass-panel"
                 id="mobile-thermal-stress-legend"
               >
                 <HeatStressLegend />
@@ -491,7 +491,7 @@ export const MapComponent = memo<MapComponentProperties>(
             )}
             <LegendToggleButton
               ariaControls="mobile-thermal-stress-legend"
-              className="text-foreground glass-panel-muted hover:bg-accent rounded-l-2xl border-r-0 p-3 text-xs font-semibold transition"
+              className="rounded-l-2xl border-r-0 p-3 text-xs font-semibold text-foreground glass-panel-muted transition hover:bg-accent"
               closedLabel="Thermal Stress"
               isLegendOpen={isLegendOpen}
               openLabel="Close"

@@ -55,7 +55,10 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   referenceYear,
   ReferencePets,
 }) => {
-  const REFERENCE_YEARS = React.useMemo(() => YearOptions(), []);
+  const REFERENCE_YEARS = React.useMemo(
+    () => YearOptions({ includeLatestYear: false }),
+    [],
+  );
   const [referenceGraphSnapshot, setReferenceGraphSnapshot] =
     React.useState<ReferenceGraphSnapshot>();
   const isMobileViewport = useIsMobileViewport();

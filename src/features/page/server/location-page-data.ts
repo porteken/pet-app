@@ -20,8 +20,8 @@ import {
   normalizeGraphSeason,
   type GraphSeason,
 } from "@/lib/constants";
+import { isSelectableReferenceYear } from "@/lib/utils/select-options";
 import { getLatestCookieValue } from "@/lib/utils/server-cookies";
-import { validateYear } from "@/lib/utils/validation";
 import { cookies } from "next/headers";
 
 import type { PageProperties } from "../model/types";
@@ -137,7 +137,7 @@ const getPreferencesFromCookies =
       REFERENCE_YEAR_COOKIE_NAME,
     );
     const initialReferenceYear =
-      rawReferenceYear && validateYear(rawReferenceYear)
+      rawReferenceYear && isSelectableReferenceYear(rawReferenceYear)
         ? rawReferenceYear
         : DEFAULT_REFERENCE_YEAR;
     const initialForecastEnabled =

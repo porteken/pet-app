@@ -4,6 +4,12 @@ vi.mock("next/headers", () => ({
   cookies: mockFn(),
 }));
 
+vi.mock("next/cache", () => ({
+  unstable_cache: <TFunction extends (...arguments_: any[]) => any>(
+    function_: TFunction,
+  ) => function_,
+}));
+
 vi.mock("@/lib/utils/simple-linear-regression", () => ({
   SimpleLinearRegression: mockFn(),
 }));

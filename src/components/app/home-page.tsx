@@ -1,5 +1,6 @@
 import { LocationErrorHandler } from "@/components/app/error-handlers";
 import Home from "@/features/home";
+import { HomeQueryProvider } from "@/features/home/components/home-query-provider";
 import {
   getForecastPreferencesFromCookies,
   getGraphMeasureFromCookies,
@@ -22,14 +23,16 @@ const HomePage = async () => {
     ]);
 
     return (
-      <Home
-        initialForecastEnabled={initialForecastPreferences.enabled}
-        initialForecastYearsAhead={initialForecastPreferences.yearsAhead}
-        initialGraphMeasure={initialGraphMeasure}
-        initialGraphSeason={initialGraphSeason}
-        LocationOptions={LocationOptions}
-        locations={locations}
-      />
+      <HomeQueryProvider>
+        <Home
+          initialForecastEnabled={initialForecastPreferences.enabled}
+          initialForecastYearsAhead={initialForecastPreferences.yearsAhead}
+          initialGraphMeasure={initialGraphMeasure}
+          initialGraphSeason={initialGraphSeason}
+          LocationOptions={LocationOptions}
+          locations={locations}
+        />
+      </HomeQueryProvider>
     );
   } catch (error) {
     const errorObject =

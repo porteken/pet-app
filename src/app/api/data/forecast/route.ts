@@ -3,9 +3,11 @@ import { DEFAULT_GRAPH_SEASON, normalizeGraphSeason } from "@/lib/constants";
 import { validateLocationId } from "@/lib/utils/validation";
 import { NextResponse } from "next/server";
 
-import { createDataRouteErrorResponse } from "../response";
+import {
+  createCachedDataRouteResponse,
+  createDataRouteErrorResponse,
+} from "../response";
 
-export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
@@ -35,7 +37,7 @@ export async function GET(request: Request) {
       season,
       option,
     );
-    return NextResponse.json(data ?? null);
+    return createCachedDataRouteResponse(data ?? null);
   } catch (error) {
     return createDataRouteErrorResponse(error, "Failed to fetch forecast data");
   }

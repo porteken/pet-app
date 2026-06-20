@@ -34,7 +34,7 @@ import {
   validateTrendOption,
   validateYear,
 } from "@/lib/utils/validation";
-import { cache } from "react";
+import { unstable_cache } from "next/cache";
 
 import type {
   FetchLocationProperties,
@@ -45,6 +45,15 @@ import type {
 
 const MIN_YEAR = 2000;
 const MAX_YEAR = 2100;
+const DATA_CACHE_REVALIDATE_SECONDS = 60 * 60;
+const fetchReferenceGraphRowsCached = unstable_cache(
+  fetchReferenceGraphRows,
+  ["reference-data-rows"],
+  {
+    revalidate: DATA_CACHE_REVALIDATE_SECONDS,
+    tags: ["reference-data"],
+  },
+);
 
 interface LocationQueryRow {
   city: unknown;
@@ -55,7 +64,7 @@ interface LocationQueryRow {
   state: unknown;
 }
 
-export async function FetchCityRankings(
+async function fetchCityRankingsUncached(
   year: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
 ): Promise<
@@ -114,56 +123,50 @@ export async function FetchCityRankings(
     }));
 }
 
-export const FetchLocations = cache(
-  async (): Promise<FetchLocationProperties> => {
-    let locations;
-    try {
-      locations = await fetchLocationRows("id");
-    } catch (error) {
-      throw new DatabaseError(
-        "Failed to fetch location data from database",
-        error,
-      );
-    }
-
-    const normalizedLocations = locations.map(normalizeLocationRow);
-    const sanitizedLocations =
-      filterRowsWithNonNegativeLocationId(normalizedLocations);
-    const validatedLocations = parseWithDatabaseError(
-      "Locations",
-      parseLocationRows,
-      sanitizedLocations,
+async function fetchLocationsUncached(): Promise<FetchLocationProperties> {
+  let locations;
+  try {
+    locations = await fetchLocationRows("id");
+  } catch (error) {
+    throw new DatabaseError(
+      "Failed to fetch location data from database",
+      error,
     );
+  }
 
-    const groupedByState = new Map<
-      string,
-      Array<{ key: number; title: string }>
-    >();
-    for (const { city, location_id, state } of validatedLocations) {
-      const stateLocations = groupedByState.get(state);
-      if (stateLocations) {
-        stateLocations.push({ key: location_id, title: city });
-      } else {
-        groupedByState.set(state, [{ key: location_id, title: city }]);
-      }
+  const normalizedLocations = locations.map(normalizeLocationRow);
+  const sanitizedLocations =
+    filterRowsWithNonNegativeLocationId(normalizedLocations);
+  const validatedLocations = parseWithDatabaseError(
+    "Locations",
+    parseLocationRows,
+    sanitizedLocations,
+  );
+
+  const groupedByState = new Map<
+    string,
+    Array<{ key: number; title: string }>
+  >();
+  for (const { city, location_id, state } of validatedLocations) {
+    const stateLocations = groupedByState.get(state);
+    if (stateLocations) {
+      stateLocations.push({ key: location_id, title: city });
+    } else {
+      groupedByState.set(state, [{ key: location_id, title: city }]);
     }
+  }
 
-    const LocationOptions: LocationOptionSection[] = [
-      ...groupedByState.entries(),
-    ]
-      .toSorted((a, b) => a[0].localeCompare(b[0]))
-      .map(([state, stateLocations]) => ({
-        items: stateLocations.toSorted((a, b) =>
-          a.title.localeCompare(b.title),
-        ),
-        title: state,
-      }));
+  const LocationOptions: LocationOptionSection[] = [...groupedByState.entries()]
+    .toSorted((a, b) => a[0].localeCompare(b[0]))
+    .map(([state, stateLocations]) => ({
+      items: stateLocations.toSorted((a, b) => a.title.localeCompare(b.title)),
+      title: state,
+    }));
 
-    return { LocationOptions, locations: validatedLocations };
-  },
-);
+  return { LocationOptions, locations: validatedLocations };
+}
 
-export async function FetchForecastData(
+async function fetchForecastDataUncached(
   locationId: number,
   yearsAhead: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
@@ -249,7 +252,7 @@ export async function FetchForecastData(
   };
 }
 
-export async function FetchReferenceGraphData(
+async function fetchReferenceGraphDataUncached(
   year: string,
   locationId: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
@@ -268,7 +271,7 @@ export async function FetchReferenceGraphData(
 
   let rows;
   try {
-    rows = await fetchReferenceGraphRows(locationId, year);
+    rows = await fetchReferenceGraphRowsCached(locationId, year);
   } catch (error) {
     throw new DatabaseError(
       "Failed to fetch reference graph data from database",
@@ -287,7 +290,7 @@ export async function FetchReferenceGraphData(
   );
 }
 
-export async function FetchTrendGraphData(
+async function fetchTrendGraphDataUncached(
   option: string,
   locationId: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
@@ -322,6 +325,44 @@ export async function FetchTrendGraphData(
 
   return mapTrendRowsToGraphData(validatedRows);
 }
+
+export const FetchCityRankings = unstable_cache(
+  fetchCityRankingsUncached,
+  ["city-rankings"],
+  {
+    revalidate: DATA_CACHE_REVALIDATE_SECONDS,
+    tags: ["rankings"],
+  },
+);
+
+export const FetchLocations = unstable_cache(
+  fetchLocationsUncached,
+  ["locations"],
+  {
+    revalidate: DATA_CACHE_REVALIDATE_SECONDS,
+    tags: ["locations"],
+  },
+);
+
+export const FetchForecastData = unstable_cache(
+  fetchForecastDataUncached,
+  ["forecast-data"],
+  {
+    revalidate: DATA_CACHE_REVALIDATE_SECONDS,
+    tags: ["forecast-data"],
+  },
+);
+
+export const FetchReferenceGraphData = fetchReferenceGraphDataUncached;
+
+export const FetchTrendGraphData = unstable_cache(
+  fetchTrendGraphDataUncached,
+  ["trend-data"],
+  {
+    revalidate: DATA_CACHE_REVALIDATE_SECONDS,
+    tags: ["trend-data"],
+  },
+);
 
 function normalizeLocationRow({
   id,

@@ -49,19 +49,10 @@ const YEAR_OPTIONS = YearOptions().map(({ key, label }) => ({
   value: key,
 }));
 
-const ALL_THERMAL_STRESS_LEVELS = THERMAL_STRESS_LEGEND_ITEMS.map((item) => ({
+const RANKINGS_HEAT_STRESS_LEVELS = THERMAL_STRESS_LEGEND_ITEMS.map((item) => ({
   label: item.level,
   value: item.level,
 }));
-
-const LAST_RANKINGS_HEAT_STRESS_LEVEL = "Strong Heat Stress";
-
-const RANKINGS_HEAT_STRESS_LEVELS = ALL_THERMAL_STRESS_LEVELS.slice(
-  0,
-  ALL_THERMAL_STRESS_LEVELS.findIndex(
-    (item) => item.value === LAST_RANKINGS_HEAT_STRESS_LEVEL,
-  ) + 1,
-);
 
 const SEASON_OPTIONS = GRAPH_SEASONS.map((season) => ({
   label: season,

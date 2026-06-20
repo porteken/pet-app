@@ -400,6 +400,19 @@ const stableCityRankings = [
   createMockRankingItem({ changeFrom2000: 0, city: "Stable City" }),
 ];
 
+const extremeHeatCityRankings = [
+  createMockRankingItem({
+    avg_pet: 42,
+    city: "Extreme Heat City",
+    max_pet: 48,
+  }),
+];
+
+const mockRankingsWithExtremeHeat = [
+  ...mockRankings,
+  ...extremeHeatCityRankings,
+];
+
 const emptyRankings: Array<ReturnType<typeof createMockRankingItem>> = [];
 const topFiveRankings = mockRankings.slice(0, 5);
 
@@ -586,6 +599,25 @@ describe("rankingsMain", () => {
   });
 
   describe("thermal Stress Filtering", () => {
+    it("should include extreme heat stress when it exists in average PET rows", () => {
+      render(
+        <RankingsMain
+          {...defaultProps}
+          rankings={mockRankingsWithExtremeHeat}
+        />,
+      );
+
+      const heatStressSelect = screen.getByTestId(
+        "avg-thermal-stress-level-select",
+      );
+
+      expect(
+        within(heatStressSelect).getByRole("option", {
+          name: "Extreme Heat Stress",
+        }),
+      ).toBeInTheDocument();
+    });
+
     it("should filter rankings by thermal stress level", () => {
       render(<RankingsMain {...defaultProps} />);
 

@@ -87,6 +87,9 @@ describe("get /api/data/forecast", () => {
       upperBound90: [31.9],
     });
     expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe(
+      "public, s-maxage=3600, stale-while-revalidate=86400",
+    );
     expect(mockFetchForecastData).toHaveBeenCalledWith(7, 12, "Summer", "avg");
   });
 

@@ -91,6 +91,9 @@ describe("get /api/data/trend", () => {
       years: [2025],
     });
     expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe(
+      "public, s-maxage=3600, stale-while-revalidate=86400",
+    );
     expect(mockFetchTrendGraphData).toHaveBeenCalledWith("max", 4, "Summer");
   });
 

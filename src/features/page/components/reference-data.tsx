@@ -1,10 +1,10 @@
 "use client";
 
-import { GenerateReferenceGraph } from "@/features/graph";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
 import { DEFAULT_GRAPH_SEASON, GRAPH_CONFIG } from "@/lib/constants";
 import { YearOptions } from "@/lib/utils/select-options";
+import dynamic from "next/dynamic";
 import React from "react";
 
 interface ReferenceDataProperties {
@@ -28,6 +28,23 @@ const REFERENCE_MIN_CHART_WIDTH_MOBILE = 840;
 const REFERENCE_MIN_CHART_WIDTH_DESKTOP = 1120;
 const REFERENCE_POINT_WIDTH_MOBILE = 3.5;
 const REFERENCE_POINT_WIDTH_DESKTOP = 4.5;
+
+const GraphLoadingState = (): React.ReactElement => (
+  <div className="flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm text-muted-foreground graph-surface-panel">
+    Loading chart…
+  </div>
+);
+
+const GenerateReferenceGraph = dynamic(
+  async () => {
+    const graphModule = await import("@/features/graph");
+    return graphModule.GenerateReferenceGraph;
+  },
+  {
+    loading: () => <GraphLoadingState />,
+    ssr: false,
+  },
+);
 
 const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   CurrentDates,
@@ -178,9 +195,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
               </div>
             </div>
           ) : (
-            <div className="flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm text-muted-foreground graph-surface-panel">
-              Loading chart…
-            </div>
+            <GraphLoadingState />
           )}
         </div>
       </div>

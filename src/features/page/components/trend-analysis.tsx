@@ -1,7 +1,6 @@
 "use client";
 
 import { ForecastControls } from "@/components/app/forecast-controls";
-import { GenerateTrendGraph } from "@/features/graph";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
@@ -10,6 +9,7 @@ import {
   buildTrendAnalysisResult,
   type TrendGraphSnapshot,
 } from "@/lib/utils/trend-analysis";
+import dynamic from "next/dynamic";
 import React from "react";
 
 import type { HeatStressDescription } from "@/lib/utils/thermal-stress";
@@ -33,6 +33,23 @@ interface TrendAnalysisProperties {
 const DEFAULT_INITIAL_TRENDLINE_PETS: number[] = [];
 const DEFAULT_INITIAL_YEAR_PETS: number[] = [];
 const DEFAULT_INITIAL_YEARS: number[] = [];
+
+const GraphLoadingState = (): React.ReactElement => (
+  <div className="flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm text-muted-foreground graph-surface-panel">
+    Loading chart…
+  </div>
+);
+
+const GenerateTrendGraph = dynamic(
+  async () => {
+    const graphModule = await import("@/features/graph");
+    return graphModule.GenerateTrendGraph;
+  },
+  {
+    loading: () => <GraphLoadingState />,
+    ssr: false,
+  },
+);
 
 const ignorePersistenceError = async (promise: Promise<void>) => {
   try {
@@ -355,9 +372,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
               years={trendGraphSnapshot.years}
             />
           ) : (
-            <div className="flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm text-muted-foreground graph-surface-panel">
-              Loading chart…
-            </div>
+            <GraphLoadingState />
           )}
         </div>
       </div>

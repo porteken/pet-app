@@ -1,8 +1,15 @@
 import * as Sentry from "@sentry/nextjs";
 
+const DEFAULT_TRACES_SAMPLE_RATE = 0.1;
 const isE2ETestRun = process.env.NEXT_PUBLIC_E2E_TEST === "true";
 const isProductionBuild = process.env.NODE_ENV === "production";
-const shouldEnableReplay = !isE2ETestRun && isProductionBuild;
+const shouldEnableReplay =
+  !isE2ETestRun &&
+  isProductionBuild &&
+  process.env.NEXT_PUBLIC_SENTRY_REPLAY_ENABLED === "true";
+const tracesSampleRate = Number(
+  process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE,
+);
 
 Sentry.init({
   debug: false,
@@ -17,7 +24,9 @@ Sentry.init({
 
   replaysSessionSampleRate: shouldEnableReplay ? 0.1 : 0,
 
-  tracesSampleRate: 1,
+  tracesSampleRate: Number.isFinite(tracesSampleRate)
+    ? tracesSampleRate
+    : DEFAULT_TRACES_SAMPLE_RATE,
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

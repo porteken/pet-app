@@ -45,7 +45,10 @@ export async function POST(request: Request) {
     const json = await request.json();
 
     if (!isRecord(json)) {
-      throw new Error("Invalid payload");
+      return NextResponse.json(
+        { error: "Invalid JSON payload" },
+        { status: 400 },
+      );
     }
 
     payload = {

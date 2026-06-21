@@ -26,6 +26,8 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+import React from "react";
+
 import LocationError from "../[id]/error";
 import AboutError from "../about/error";
 import Default from "../default";

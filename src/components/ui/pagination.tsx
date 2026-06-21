@@ -164,7 +164,7 @@ const Pagination = ({ className, onChange, total, value }: PaginationProps) => {
           />
         </PaginationItem>
 
-        {pages.map((page, index) => (
+        {pages.map((page) => (
           <PaginationItem
             key={typeof page === "string" ? page : `page-${page}`}
           >

@@ -34,10 +34,7 @@ vi.mock("recharts", async () => ({
   YAxis: yAxisMock,
 }));
 
-import {
-  GenerateReferenceGraph,
-  GenerateTrendGraph,
-} from "../components/generate-graph";
+import { GenerateReferenceGraph, GenerateTrendGraph } from "@/features/graph";
 
 const mockTrendlinePets1 = [25, 26, 27];
 const mockYearPets1 = [25.2, 26.1, 27.4];

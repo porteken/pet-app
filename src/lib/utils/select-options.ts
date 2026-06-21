@@ -11,12 +11,31 @@ export const SeasonOptions: SelectOptionProperties[] = GRAPH_SEASONS.map(
   (season) => ({ key: season, label: season }),
 );
 
-export const YearOptions = (): SelectOptionProperties[] => {
-  const { END, START } = GRAPH_CONFIG.YEAR_RANGE;
+interface YearOptionsConfig {
+  includeLatestYear?: boolean;
+}
 
-  return Array.from({ length: END - START + 1 }, (_, index) => {
+export const YearOptions = ({
+  includeLatestYear = true,
+}: YearOptionsConfig = {}): SelectOptionProperties[] => {
+  const { END, START } = GRAPH_CONFIG.YEAR_RANGE;
+  const endYear = includeLatestYear ? END : END - 1;
+
+  return Array.from({ length: endYear - START + 1 }, (_, index) => {
     const year = (START + index).toString();
 
     return { key: year, label: year };
   });
+};
+
+export const isSelectableReferenceYear = (year: string): boolean => {
+  const numericYear = Number(year);
+  const { END, START } = GRAPH_CONFIG.YEAR_RANGE;
+
+  return (
+    Number.isInteger(numericYear) &&
+    numericYear >= START &&
+    numericYear < END &&
+    year === numericYear.toString()
+  );
 };

@@ -138,9 +138,15 @@ describe("pageMain", () => {
       });
 
       const selectElement = screen.getByLabelText("Reference Year");
+      const optionValues = Array.from(
+        selectElement.querySelectorAll("option"),
+        (option) => option.value,
+      );
+
       expect(selectElement).toHaveValue("2000");
-      expect(screen.getByText("2000")).toBeInTheDocument();
-      expect(screen.getByText("2022")).toBeInTheDocument();
+      expect(optionValues).toContain("2000");
+      expect(optionValues).toContain("2024");
+      expect(optionValues).not.toContain("2025");
     });
 
     it("should render collapsible thermal stress legend popup", async () => {

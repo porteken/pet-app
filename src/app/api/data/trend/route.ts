@@ -6,9 +6,11 @@ import {
 } from "@/lib/utils/validation";
 import { NextResponse } from "next/server";
 
-import { createDataRouteErrorResponse } from "../response";
+import {
+  createCachedDataRouteResponse,
+  createDataRouteErrorResponse,
+} from "../response";
 
-export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
@@ -32,7 +34,7 @@ export async function GET(request: Request) {
 
   try {
     const data = await FetchTrendGraphData(option, locationId, season);
-    return NextResponse.json(data);
+    return createCachedDataRouteResponse(data);
   } catch (error) {
     return createDataRouteErrorResponse(
       error,

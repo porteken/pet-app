@@ -142,13 +142,26 @@ describe("pOST /api/preferences/graph", () => {
     expect(data.error).toBe("Invalid reference year");
   });
 
+  it("returns 400 when reference year is the latest configured year", async () => {
+    const request = new Request("http://localhost/api/preferences/graph", {
+      method: "POST",
+      body: JSON.stringify({ referenceYear: "2025" }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.error).toBe("Invalid reference year");
+  });
+
   it("can set multiple preferences at once", async () => {
     const request = new Request("http://localhost/api/preferences/graph", {
       method: "POST",
       body: JSON.stringify({
         graphMeasure: "max",
         graphSeason: "Winter",
-        referenceYear: "1990",
+        referenceYear: "2020",
       }),
     });
 

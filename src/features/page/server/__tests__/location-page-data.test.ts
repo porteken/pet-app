@@ -429,6 +429,55 @@ describe("loadLocationPageData", () => {
     );
   });
 
+  it("falls back when the reference year cookie is the latest configured data year", async () => {
+    mockCookies.mockResolvedValue(
+      createCookieStore({
+        [REFERENCE_YEAR_COOKIE_NAME]: "2025",
+      }),
+    );
+    mockFetchLocations.mockResolvedValue({
+      LocationOptions: [],
+      locations: [
+        {
+          city: "Boston",
+          lat: 42.3601,
+          lng: -71.0589,
+          location_id: 7,
+          state: "Massachusetts",
+        },
+      ],
+    });
+    mockFetchTrendGraphData.mockResolvedValue({
+      trendline_pets: [],
+      year_pets: [],
+      years: [],
+    });
+    mockFetchReferenceGraphData
+      .mockResolvedValueOnce({
+        dates: [],
+        pets: [],
+      })
+      .mockResolvedValueOnce({
+        dates: [],
+        pets: [],
+      });
+
+    const result = await loadLocationPageData("7");
+
+    expect(result).toStrictEqual({
+      payload: expect.objectContaining({
+        initialReferenceYear: DEFAULT_REFERENCE_YEAR,
+      }),
+      status: "success",
+    });
+    expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
+      2,
+      DEFAULT_REFERENCE_YEAR,
+      7,
+      "Annual",
+    );
+  });
+
   it("prefers the latest graph preference cookies when duplicates exist", async () => {
     mockCookies.mockResolvedValue(
       createCookieStore(

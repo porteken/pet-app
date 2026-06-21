@@ -87,6 +87,9 @@ describe("get /api/data/reference", () => {
       pets: [21.4],
     });
     expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe(
+      "public, s-maxage=3600, stale-while-revalidate=86400",
+    );
     expect(mockFetchReferenceGraphData).toHaveBeenCalledWith(
       "2025",
       9,

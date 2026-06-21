@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 
+const DATA_RESPONSE_CACHE_CONTROL =
+  "public, s-maxage=3600, stale-while-revalidate=86400";
+
 const hasStatusCode = (
   error: unknown,
 ): error is {
@@ -30,3 +33,10 @@ export const createDataRouteErrorResponse = (
 
   return NextResponse.json({ error: fallbackMessage }, { status: 500 });
 };
+
+export const createCachedDataRouteResponse = (data: unknown) =>
+  NextResponse.json(data, {
+    headers: {
+      "Cache-Control": DATA_RESPONSE_CACHE_CONTROL,
+    },
+  });

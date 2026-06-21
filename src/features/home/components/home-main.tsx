@@ -11,6 +11,7 @@ import { FetchForecastData } from "@/lib/api/fetch-client";
 import {
   getTrendGraphQueryOptions,
   prefetchTrendGraphData,
+  queryKeys,
 } from "@/lib/api/query-client";
 import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
 import { GraphOptions, SeasonOptions } from "@/lib/utils/select-options";
@@ -39,6 +40,7 @@ import type { FC } from "react";
 const Modal = dynamic(() => import("@/components/modal"), {
   ssr: false,
 });
+const TREND_PREFETCH_STALE_TIME_MS = 1000 * 60 * 5;
 
 interface GenerateGraphOptions {
   enableForecast: boolean;
@@ -92,6 +94,7 @@ const Home: FC<MapProperties> = ({
     useState<HeatStressDescription>();
   const [forecastHeatStress, setForecastHeatStress] =
     useState<HeatStressDescription>();
+  const latestGraphRequestRef = useRef(0);
   const markerPrefetchOptionsRef = useRef({
     graphMeasure: selectedGraphMeasure,
     graphSeason: selectedGraphSeason,
@@ -132,6 +135,7 @@ const Home: FC<MapProperties> = ({
       season,
       yearsAhead,
     }: GenerateGraphOptions) => {
+      const requestId = ++latestGraphRequestRef.current;
       setGraphLoading(true);
       setGraphHasError(false);
       try {
@@ -151,16 +155,26 @@ const Home: FC<MapProperties> = ({
           season,
         });
 
+        if (requestId !== latestGraphRequestRef.current) {
+          return;
+        }
+
         setHeatStressDescription(newHeatStressDescription);
         setForecastHeatStress(newForecastHeatStress);
         setTrendGraphSnapshot(snapshot);
       } catch {
+        if (requestId !== latestGraphRequestRef.current) {
+          return;
+        }
+
         setTrendGraphSnapshot(undefined);
         setGraphHasError(true);
         setHeatStressDescription(undefined);
         setForecastHeatStress(undefined);
       } finally {
-        setGraphLoading(false);
+        if (requestId === latestGraphRequestRef.current) {
+          setGraphLoading(false);
+        }
       }
     },
     [queryClient],
@@ -224,6 +238,19 @@ const Home: FC<MapProperties> = ({
   const handleMarkerPrefetch = useCallback(
     async (locationId: number) => {
       const { graphMeasure, graphSeason } = markerPrefetchOptionsRef.current;
+      const queryKey = queryKeys.trendGraph(
+        locationId,
+        graphMeasure,
+        graphSeason,
+      );
+      const queryState = queryClient.getQueryState(queryKey);
+      const isFresh =
+        queryState?.dataUpdatedAt !== undefined &&
+        Date.now() - queryState.dataUpdatedAt < TREND_PREFETCH_STALE_TIME_MS;
+
+      if (queryState?.fetchStatus === "fetching" || isFresh) {
+        return;
+      }
 
       try {
         await prefetchTrendGraphData(

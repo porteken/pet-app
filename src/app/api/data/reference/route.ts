@@ -3,9 +3,11 @@ import { DEFAULT_GRAPH_SEASON, normalizeGraphSeason } from "@/lib/constants";
 import { validateLocationId, validateYear } from "@/lib/utils/validation";
 import { NextResponse } from "next/server";
 
-import { createDataRouteErrorResponse } from "../response";
+import {
+  createCachedDataRouteResponse,
+  createDataRouteErrorResponse,
+} from "../response";
 
-export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
@@ -29,7 +31,7 @@ export async function GET(request: Request) {
 
   try {
     const data = await FetchReferenceGraphData(year, locationId, season);
-    return NextResponse.json(data);
+    return createCachedDataRouteResponse(data);
   } catch (error) {
     return createDataRouteErrorResponse(
       error,

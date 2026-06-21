@@ -5,7 +5,8 @@ import {
   normalizeGraphSeason,
   REFERENCE_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
-import { validateTrendOption, validateYear } from "@/lib/utils/validation";
+import { isSelectableReferenceYear } from "@/lib/utils/select-options";
+import { validateTrendOption } from "@/lib/utils/validation";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -100,7 +101,7 @@ export async function POST(request: Request) {
     const normalizedReferenceYear =
       payload.referenceYear || DEFAULT_REFERENCE_YEAR;
 
-    if (!validateYear(normalizedReferenceYear)) {
+    if (!isSelectableReferenceYear(normalizedReferenceYear)) {
       return NextResponse.json(
         { error: "Invalid reference year" },
         { status: 400 },

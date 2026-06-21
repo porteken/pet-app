@@ -173,6 +173,11 @@ interface LegendToggleButtonProperties {
   setIsLegendOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+interface ThermalStressLegendOverlayProperties {
+  isLegendOpen: boolean;
+  setIsLegendOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
 class LegendToggleButton extends React.PureComponent<LegendToggleButtonProperties> {
   private readonly handleClick = () => {
     this.props.setIsLegendOpen((previous) => !previous);
@@ -195,6 +200,51 @@ class LegendToggleButton extends React.PureComponent<LegendToggleButtonPropertie
     );
   }
 }
+
+const ThermalStressLegendOverlay = ({
+  isLegendOpen,
+  setIsLegendOpen,
+}: ThermalStressLegendOverlayProperties): React.ReactElement => (
+  <>
+    <div className="pointer-events-none absolute bottom-6 left-6 z-40 hidden sm:block">
+      <div className="pointer-events-auto flex flex-col items-start gap-2">
+        <LegendToggleButton
+          ariaControls="desktop-thermal-stress-legend"
+          className="rounded-full px-4 py-2 text-sm font-semibold text-foreground glass-panel-muted transition hover:bg-accent"
+          closedLabel="Show Thermal Stress Index"
+          isLegendOpen={isLegendOpen}
+          openLabel="Hide Thermal Stress Index"
+          setIsLegendOpen={setIsLegendOpen}
+        />
+        {isLegendOpen && (
+          <div id="desktop-thermal-stress-legend">
+            <HeatStressLegend />
+          </div>
+        )}
+      </div>
+    </div>
+    <div className="pointer-events-none absolute top-1/2 right-0 z-40 -translate-y-1/2 sm:hidden">
+      <div className="pointer-events-auto flex items-center">
+        {isLegendOpen && (
+          <div
+            className="mr-2 max-w-[78vw] rounded-3xl p-2 shadow-md glass-panel"
+            id="mobile-thermal-stress-legend"
+          >
+            <HeatStressLegend />
+          </div>
+        )}
+        <LegendToggleButton
+          ariaControls="mobile-thermal-stress-legend"
+          className="rounded-l-2xl border-r-0 p-3 text-xs font-semibold text-foreground glass-panel-muted transition hover:bg-accent"
+          closedLabel="Thermal Stress"
+          isLegendOpen={isLegendOpen}
+          openLabel="Close"
+          setIsLegendOpen={setIsLegendOpen}
+        />
+      </div>
+    </div>
+  </>
+);
 
 const getE2EMarkerPosition = (index: number): E2EMarkerPosition => {
   const fallbackColumn = index % 3;
@@ -396,43 +446,10 @@ export const MapComponent = memo<MapComponentProperties>(
             locations={locations}
             onMarkerClick={onMarkerClick}
           />
-          <div className="pointer-events-none absolute bottom-6 left-6 z-40 hidden sm:block">
-            <div className="pointer-events-auto flex flex-col items-start gap-2">
-              <LegendToggleButton
-                ariaControls="desktop-thermal-stress-legend"
-                className="rounded-full px-4 py-2 text-sm font-semibold text-foreground glass-panel-muted transition hover:bg-accent"
-                closedLabel="Show Thermal Stress Index"
-                isLegendOpen={isLegendOpen}
-                openLabel="Hide Thermal Stress Index"
-                setIsLegendOpen={setIsLegendOpen}
-              />
-              {isLegendOpen && (
-                <div id="desktop-thermal-stress-legend">
-                  <HeatStressLegend />
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="pointer-events-none absolute top-1/2 right-0 z-40 -translate-y-1/2 sm:hidden">
-            <div className="pointer-events-auto flex items-center">
-              {isLegendOpen && (
-                <div
-                  className="mr-2 max-w-[78vw] rounded-3xl p-2 shadow-md glass-panel"
-                  id="mobile-thermal-stress-legend"
-                >
-                  <HeatStressLegend />
-                </div>
-              )}
-              <LegendToggleButton
-                ariaControls="mobile-thermal-stress-legend"
-                className="rounded-l-2xl border-r-0 p-3 text-xs font-semibold text-foreground glass-panel-muted transition hover:bg-accent"
-                closedLabel="Thermal Stress"
-                isLegendOpen={isLegendOpen}
-                openLabel="Close"
-                setIsLegendOpen={setIsLegendOpen}
-              />
-            </div>
-          </div>
+          <ThermalStressLegendOverlay
+            isLegendOpen={isLegendOpen}
+            setIsLegendOpen={setIsLegendOpen}
+          />
         </div>
       );
     }
@@ -462,43 +479,10 @@ export const MapComponent = memo<MapComponentProperties>(
             {markers}
           </Map>
         </div>
-        <div className="pointer-events-none absolute bottom-6 left-6 z-40 hidden sm:block">
-          <div className="pointer-events-auto flex flex-col items-start gap-2">
-            <LegendToggleButton
-              ariaControls="desktop-thermal-stress-legend"
-              className="rounded-full px-4 py-2 text-sm font-semibold text-foreground glass-panel-muted transition hover:bg-accent"
-              closedLabel="Show Thermal Stress Index"
-              isLegendOpen={isLegendOpen}
-              openLabel="Hide Thermal Stress Index"
-              setIsLegendOpen={setIsLegendOpen}
-            />
-            {isLegendOpen && (
-              <div id="desktop-thermal-stress-legend">
-                <HeatStressLegend />
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="pointer-events-none absolute top-1/2 right-0 z-40 -translate-y-1/2 sm:hidden">
-          <div className="pointer-events-auto flex items-center">
-            {isLegendOpen && (
-              <div
-                className="mr-2 max-w-[78vw] rounded-3xl p-2 shadow-md glass-panel"
-                id="mobile-thermal-stress-legend"
-              >
-                <HeatStressLegend />
-              </div>
-            )}
-            <LegendToggleButton
-              ariaControls="mobile-thermal-stress-legend"
-              className="rounded-l-2xl border-r-0 p-3 text-xs font-semibold text-foreground glass-panel-muted transition hover:bg-accent"
-              closedLabel="Thermal Stress"
-              isLegendOpen={isLegendOpen}
-              openLabel="Close"
-              setIsLegendOpen={setIsLegendOpen}
-            />
-          </div>
-        </div>
+        <ThermalStressLegendOverlay
+          isLegendOpen={isLegendOpen}
+          setIsLegendOpen={setIsLegendOpen}
+        />
       </div>
     );
   },

@@ -14,7 +14,6 @@ export class SimpleLinearRegression {
   private readonly xData: number[];
   private readonly xMean: number;
   private readonly xVariance: number;
-  private readonly yData: number[];
 
   constructor(x: number[], y: number[]) {
     if (!Array.isArray(x) || !Array.isArray(y)) {
@@ -28,7 +27,6 @@ export class SimpleLinearRegression {
     }
 
     this.xData = [...x];
-    this.yData = [...y];
 
     const result = this.calculateRegression(x, y);
     this.slope = result.slope;

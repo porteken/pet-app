@@ -80,14 +80,21 @@ export const buildTrendAnalysisResult = async ({
   option,
   season = DEFAULT_GRAPH_SEASON,
 }: BuildTrendAnalysisResultOptions): Promise<TrendAnalysisResult> => {
-  const trendDataPromise = fetchTrendGraphData();
-  const forecastDataPromise = enableForecast ? fetchForecastData() : undefined;
+  const [
+    { increase_per_year, trendline_pets, year_pets, years },
+    forecastData,
+  ] = await Promise.all([
+    fetchTrendGraphData(),
+    (async (): Promise<ForecastGraphData | undefined> => {
+      let fetchedForecastData: ForecastGraphData | undefined;
 
-  const { increase_per_year, trendline_pets, year_pets, years } =
-    await trendDataPromise;
-  const forecastData = forecastDataPromise
-    ? await forecastDataPromise
-    : undefined;
+      if (enableForecast) {
+        fetchedForecastData = await fetchForecastData();
+      }
+
+      return fetchedForecastData;
+    })(),
+  ]);
 
   const snapshot = {
     forecastData,

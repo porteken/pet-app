@@ -152,13 +152,12 @@ vi.mock("@/components/ui/pagination", () => ({
   ),
 }));
 
+import { RankingsMain } from "@/features/rankings";
 import {
   setRankingsHeatStress,
   setRankingsSeason,
   setRankingsYear,
 } from "@/lib/actions/actions";
-
-import { RankingsMain } from "../components/rankings-main";
 
 const mockLocationOptions = [
   {

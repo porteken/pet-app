@@ -1,11 +1,10 @@
 import "@testing-library/jest-dom";
 
+import { HeaderBar } from "@/features/header-bar";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-
-import { HeaderBar } from "../components/header-bar";
 
 const mockUseSearchParameters = mockFn();
 const mockGet = mockFn();

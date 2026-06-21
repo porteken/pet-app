@@ -71,10 +71,15 @@ export async function fetchApiJson(path: string): Promise<unknown> {
   }
 
   if (!response.ok) {
-    const message =
-      (isRecord(payload) && typeof payload.error === "string"
-        ? payload.error
-        : undefined) ?? `Request failed with status ${response.status}`;
+    let message = `Request failed with status ${response.status}`;
+
+    if (
+      payload !== null &&
+      isRecord(payload) &&
+      typeof payload.error === "string"
+    ) {
+      message = payload.error;
+    }
 
     throw new FetchError(message, {
       payload,

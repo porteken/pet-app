@@ -5,5 +5,5 @@ export type GlobalMockFn = <T extends AnyMockFunction = AnyMockFunction>(
 ) => T extends AnyMockFunction ? any : never;
 
 declare global {
-  let mockFn: GlobalMockFn;
+  var mockFn: GlobalMockFn;
 }

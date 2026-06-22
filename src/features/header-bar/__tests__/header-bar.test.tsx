@@ -106,9 +106,8 @@ describe("headerBar", () => {
 
     const disconnect = mockFn();
     const observe = mockFn();
-    const unobserve = mockFn();
 
-    globalThis.ResizeObserver = class ResizeObserver {
+    class MockResizeObserver {
       disconnect(): void {
         disconnect();
       }
@@ -116,11 +115,12 @@ describe("headerBar", () => {
       observe(): void {
         observe();
       }
+    }
 
-      unobserve(): void {
-        unobserve();
-      }
-    };
+    Object.defineProperty(MockResizeObserver.prototype, "unobserve", {
+      value: () => {},
+    });
+    globalThis.ResizeObserver = MockResizeObserver as typeof ResizeObserver;
   });
 
   beforeEach(() => {

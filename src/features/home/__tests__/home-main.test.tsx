@@ -144,7 +144,7 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof TanstackReactQuery>();
   return {
     ...actual,
-    useQueryClient: () => mockQueryClient,
+    ...Object.fromEntries([["useQueryClient", () => mockQueryClient]]),
   };
 });
 

@@ -1,48 +1,9 @@
 import "@testing-library/jest-dom";
 
+import { MockForecastControls } from "@/testing/react-component-mocks";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-class MockForecastControls extends React.PureComponent<{
-  enabled: boolean;
-  onToggle: (enabled: boolean) => void;
-  onYearsChange: (years: number) => void;
-  yearsAhead: number;
-}> {
-  private readonly handleToggle = () => {
-    this.props.onToggle(!this.props.enabled);
-  };
-
-  private readonly handleYearsChange = (
-    event_: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    this.props.onYearsChange(Number(event_.target.value));
-  };
-
-  public render(): React.ReactNode {
-    const { enabled, yearsAhead } = this.props;
-
-    return (
-      <div data-testid="forecast-controls">
-        <button
-          data-testid="forecast-toggle"
-          onClick={this.handleToggle}
-          type="button"
-        >
-          {enabled ? "Disable" : "Enable"} Forecast
-        </button>
-        <input
-          aria-label="Forecast years"
-          data-testid="forecast-years"
-          onChange={this.handleYearsChange}
-          type="number"
-          value={yearsAhead}
-        />
-      </div>
-    );
-  }
-}
 
 vi.mock("@/features/graph", () => ({
   GenerateTrendGraph: mockFn().mockReturnValue(

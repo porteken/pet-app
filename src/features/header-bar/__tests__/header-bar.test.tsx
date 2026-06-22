@@ -1,15 +1,25 @@
 import "@testing-library/jest-dom";
 
 import { HeaderBar } from "@/features/header-bar";
+import { mockFn } from "@/testing/mock-fn";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockUseSearchParameters = mockFn();
-const mockGet = mockFn();
-const mockPush = mockFn();
-const mockToString = mockFn().mockReturnValue("");
+const {
+  mockGet,
+  mockPathname,
+  mockPush,
+  mockToString,
+  mockUseSearchParameters,
+} = vi.hoisted(() => ({
+  mockGet: vi.fn<(name: string) => string | null>(),
+  mockPathname: vi.fn<() => string>().mockReturnValue("/"),
+  mockPush: vi.fn<(href: string) => void>(),
+  mockToString: vi.fn<() => string>().mockReturnValue(""),
+  mockUseSearchParameters: vi.fn<() => unknown>(),
+}));
 
 const mockLocationOptions = [
   {
@@ -67,13 +77,13 @@ const titleOnlyLocationOptions = [{ title: "Test Section" }];
 const undefinedLocationOptions = undefined as unknown as never;
 
 vi.mock("next/navigation", () => ({
-  usePathname: mockFn().mockReturnValue("/"),
+  usePathname: mockPathname,
   useRouter: () => ({
-    back: mockFn(),
-    forward: mockFn(),
+    back: vi.fn<() => void>(),
+    forward: vi.fn<() => void>(),
     push: mockPush,
-    refresh: mockFn(),
-    replace: mockFn(),
+    refresh: vi.fn<() => void>(),
+    replace: vi.fn<() => void>(),
   }),
   useSearchParams: () => mockUseSearchParameters(),
 }));
@@ -94,11 +104,22 @@ describe("headerBar", () => {
       writable: true,
     });
 
-    globalThis.ResizeObserver = class ResizeObserver {
-      disconnect = mockFn();
-      observe = mockFn();
-      unobserve = mockFn();
-    };
+    const disconnect = mockFn();
+    const observe = mockFn();
+
+    class MockResizeObserver {
+      disconnect(): void {
+        disconnect();
+      }
+
+      observe(): void {
+        observe();
+      }
+
+      unobserve(): void {}
+    }
+
+    globalThis.ResizeObserver = MockResizeObserver as typeof ResizeObserver;
   });
 
   beforeEach(() => {

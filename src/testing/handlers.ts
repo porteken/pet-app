@@ -4,32 +4,11 @@ import {
   mapTrendRowsToGraphData,
 } from "@/lib/api/graph-data";
 import { DEFAULT_GRAPH_SEASON, normalizeGraphSeason } from "@/lib/constants";
+import { sortBy } from "@/lib/sort-by";
 import { getRuntimeMockTableRows } from "@/testing/runtime-mocks";
 import { http, HttpResponse } from "msw";
 
 type RuntimeTrendOption = "avg" | "max";
-
-const sortBy = <TRow extends Record<string, unknown>>(
-  rows: TRow[],
-  column: keyof TRow,
-  ascending = true,
-) =>
-  rows.toSorted((left, right) => {
-    const leftValue = left[column];
-    const rightValue = right[column];
-
-    if (leftValue === rightValue) {
-      return 0;
-    }
-
-    if (typeof leftValue === "number" && typeof rightValue === "number") {
-      return ascending ? leftValue - rightValue : rightValue - leftValue;
-    }
-
-    return ascending
-      ? String(leftValue).localeCompare(String(rightValue))
-      : String(rightValue).localeCompare(String(leftValue));
-  });
 
 const getTrendMetricColumn = (option: RuntimeTrendOption) =>
   option === "max" ? "max_pet" : "avg_pet";

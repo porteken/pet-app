@@ -9,9 +9,9 @@ const { mockUseTheme } = vi.hoisted(() => ({
   mockUseTheme: mockFn(() => ({ resolvedTheme: "light" })),
 }));
 
-vi.mock("next-themes", () => ({
-  useTheme: () => mockUseTheme(),
-}));
+vi.mock("next-themes", () =>
+  Object.fromEntries([["useTheme", () => mockUseTheme()]]),
+);
 
 vi.mock("react-map-gl/maplibre", () => {
   interface MockComponentProperties {

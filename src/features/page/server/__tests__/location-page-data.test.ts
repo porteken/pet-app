@@ -41,24 +41,29 @@ const createCookieStore = (
   values: Partial<Record<string, string>>,
   duplicateValues?: Partial<Record<string, string[]>>,
 ) => ({
-  get: (name: string) => {
+  get(name: string) {
     const value = values[name];
     return value ? { value } : undefined;
   },
-  getAll: (name?: string) => {
-    if (!name) {
-      return [];
-    }
+  ...Object.fromEntries([
+    [
+      "getAll",
+      (name?: string) => {
+        if (!name) {
+          return [];
+        }
 
-    const duplicates = duplicateValues?.[name];
+        const duplicates = duplicateValues?.[name];
 
-    if (duplicates && duplicates.length > 0) {
-      return duplicates.map((value) => ({ name, value }));
-    }
+        if (duplicates && duplicates.length > 0) {
+          return duplicates.map((value) => ({ name, value }));
+        }
 
-    const value = values[name];
-    return value ? [{ name, value }] : [];
-  },
+        const value = values[name];
+        return value ? [{ name, value }] : [];
+      },
+    ],
+  ]),
 });
 
 describe("loadLocationPageData", () => {

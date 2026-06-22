@@ -1,5 +1,9 @@
 import "@testing-library/jest-dom";
 
+import {
+  MockForecastControls,
+  MockSelectControl,
+} from "@/testing/react-component-mocks";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -11,6 +15,8 @@ const createDelay = (ms: number) =>
     setTimeout(resolve, ms);
   });
 const mockPush = mockFn();
+const getHomeSelectTestId = (label?: string) =>
+  label === "Season" ? "graph-season-select" : "graph-measure-select";
 
 class MockMapComponent extends React.PureComponent<{
   locations: unknown[];
@@ -33,81 +39,6 @@ class MockMapComponent extends React.PureComponent<{
         >
           Click Marker 1
         </button>
-      </div>
-    );
-  }
-}
-
-class MockSelectControl extends React.PureComponent<{
-  data: Array<{ label: string; value: string }>;
-  label?: string;
-  onChange?: (value: string) => void;
-  value?: string;
-}> {
-  private readonly handleChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    this.props.onChange?.(event.target.value);
-  };
-
-  public render(): React.ReactNode {
-    const { data, label, value } = this.props;
-
-    return (
-      <div>
-        <select
-          data-testid={
-            label === "Season" ? "graph-season-select" : "graph-measure-select"
-          }
-          onChange={this.handleChange}
-          value={value}
-        >
-          {data.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    );
-  }
-}
-
-class MockForecastControls extends React.PureComponent<{
-  enabled: boolean;
-  onToggle: (enabled: boolean) => void;
-  onYearsChange: (years: number) => void;
-  yearsAhead: number;
-}> {
-  private readonly handleToggle = () => {
-    this.props.onToggle(!this.props.enabled);
-  };
-
-  private readonly handleYearsChange = (
-    event_: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    this.props.onYearsChange(Number(event_.target.value));
-  };
-
-  public render(): React.ReactNode {
-    const { enabled, yearsAhead } = this.props;
-
-    return (
-      <div data-testid="forecast-controls">
-        <button
-          data-testid="forecast-toggle"
-          onClick={this.handleToggle}
-          type="button"
-        >
-          {enabled ? "Disable" : "Enable"} Forecast
-        </button>
-        <input
-          aria-label="Forecast years"
-          data-testid="forecast-years"
-          onChange={this.handleYearsChange}
-          type="number"
-          value={yearsAhead}
-        />
       </div>
     );
   }
@@ -144,7 +75,7 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof TanstackReactQuery>();
   return {
     ...actual,
-    useQueryClient: () => mockQueryClient,
+    ...Object.fromEntries([["useQueryClient", () => mockQueryClient]]),
   };
 });
 
@@ -235,7 +166,7 @@ vi.mock("@/components/ui/button", () => ({
 
 vi.mock("@/components/ui/select", () => ({
   Select: mockFn((props: React.ComponentProps<typeof MockSelectControl>) => (
-    <MockSelectControl {...props} />
+    <MockSelectControl {...props} getTestId={getHomeSelectTestId} />
   )),
 }));
 
@@ -303,6 +234,31 @@ const defaultProps: React.ComponentProps<typeof Home> = {
   locations: mockLocations,
 };
 
+const buildForecastData = ({
+  forecastValues = [28, 30, 32],
+  forecastYears = [2025, 2026, 2027],
+  lowerBound10 = [26, 28, 30],
+  upperBound90 = [30, 32, 34],
+}: {
+  forecastValues?: number[];
+  forecastYears?: number[];
+  lowerBound10?: number[];
+  upperBound90?: number[];
+} = {}) => ({
+  forecastValues,
+  forecastYears,
+  lowerBound10,
+  upperBound90,
+});
+
+const selectFirstMapMarker = async () => {
+  fireEvent.click(screen.getByTestId("marker-click"));
+
+  await waitFor(() => {
+    expect(screen.getByTestId("modal")).toBeInTheDocument();
+  });
+};
+
 describe("home", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -356,22 +312,17 @@ describe("home", () => {
     it("should handle marker click and open modal", async () => {
       render(<Home {...defaultProps} />);
 
-      const markerButton = screen.getByTestId("marker-click");
-      fireEvent.click(markerButton);
+      await selectFirstMapMarker();
 
-      await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
-        expect(screen.getByTestId("modal-title")).toHaveTextContent(
-          "New York, NY",
-        );
-      });
+      expect(screen.getByTestId("modal-title")).toHaveTextContent(
+        "New York, NY",
+      );
     });
 
     it("should generate graph when marker is clicked", async () => {
       render(<Home {...defaultProps} />);
 
-      const markerButton = screen.getByTestId("marker-click");
-      fireEvent.click(markerButton);
+      await selectFirstMapMarker();
 
       await waitFor(() => {
         expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1, "Annual");
@@ -385,12 +336,7 @@ describe("home", () => {
 
       render(<Home {...defaultProps} />);
 
-      const markerButton = screen.getByTestId("marker-click");
-      fireEvent.click(markerButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
-      });
+      await selectFirstMapMarker();
 
       expect(screen.getByTestId("graph-loader")).toBeInTheDocument();
       expect(screen.getByText("Loading graph...")).toBeInTheDocument();
@@ -399,11 +345,7 @@ describe("home", () => {
     it("should handle graph measure change when a location is selected", async () => {
       render(<Home {...defaultProps} />);
 
-      fireEvent.click(screen.getByTestId("marker-click"));
-
-      await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
-      });
+      await selectFirstMapMarker();
 
       const selectElement = screen.getByTestId("graph-measure-select");
       fireEvent.change(selectElement, { target: { value: "max" } });
@@ -417,11 +359,7 @@ describe("home", () => {
     it("should close modal when close button is clicked", async () => {
       render(<Home {...defaultProps} />);
 
-      fireEvent.click(screen.getByTestId("marker-click"));
-
-      await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
-      });
+      await selectFirstMapMarker();
 
       fireEvent.click(screen.getByTestId("modal-close"));
 
@@ -433,24 +371,17 @@ describe("home", () => {
     it("should display 'View Full Details' button when location is selected", async () => {
       render(<Home {...defaultProps} />);
 
-      fireEvent.click(screen.getByTestId("marker-click"));
+      await selectFirstMapMarker();
 
-      await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
-        expect(screen.getByTestId("shadcn-button")).toHaveTextContent(
-          "View Full Details",
-        );
-      });
+      expect(screen.getByTestId("shadcn-button")).toHaveTextContent(
+        "View Full Details",
+      );
     });
 
     it("should navigate to location page when 'View Full Details' is clicked", async () => {
       render(<Home {...defaultProps} />);
 
-      fireEvent.click(screen.getByTestId("marker-click"));
-
-      await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
-      });
+      await selectFirstMapMarker();
 
       fireEvent.click(screen.getByTestId("shadcn-button"));
 
@@ -483,20 +414,11 @@ describe("home", () => {
 
   describe("forecast Heat Stress", () => {
     it("should fetch forecast data when forecast is enabled and marker clicked", async () => {
-      vi.mocked(FetchForecastData).mockResolvedValue({
-        forecastValues: [28, 30, 32],
-        forecastYears: [2025, 2026, 2027],
-        lowerBound10: [26, 28, 30],
-        upperBound90: [30, 32, 34],
-      });
+      vi.mocked(FetchForecastData).mockResolvedValue(buildForecastData());
 
       render(<Home {...defaultProps} initialForecastEnabled={true} />);
 
-      fireEvent.click(screen.getByTestId("marker-click"));
-
-      await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
-      });
+      await selectFirstMapMarker();
 
       await waitFor(() => {
         expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual", "avg");
@@ -512,11 +434,7 @@ describe("home", () => {
         />,
       );
 
-      fireEvent.click(screen.getByTestId("marker-click"));
-
-      await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
-      });
+      await selectFirstMapMarker();
 
       await waitFor(() => {
         expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Winter", "avg");
@@ -524,20 +442,11 @@ describe("home", () => {
     });
 
     it("should fetch forecast when toggling forecast on", async () => {
-      vi.mocked(FetchForecastData).mockResolvedValue({
-        forecastValues: [28, 30, 32],
-        forecastYears: [2025, 2026, 2027],
-        lowerBound10: [26, 28, 30],
-        upperBound90: [30, 32, 34],
-      });
+      vi.mocked(FetchForecastData).mockResolvedValue(buildForecastData());
 
       render(<Home {...defaultProps} />);
 
-      fireEvent.click(screen.getByTestId("marker-click"));
-
-      await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
-      });
+      await selectFirstMapMarker();
 
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
@@ -547,20 +456,16 @@ describe("home", () => {
     });
 
     it("should handle forecast data with NaN bounds", async () => {
-      vi.mocked(FetchForecastData).mockResolvedValue({
-        forecastValues: [28, 30, 32],
-        forecastYears: [2025, 2026, 2027],
-        lowerBound10: [Number.NaN, Number.NaN, Number.NaN],
-        upperBound90: [Number.NaN, Number.NaN, Number.NaN],
-      });
+      vi.mocked(FetchForecastData).mockResolvedValue(
+        buildForecastData({
+          lowerBound10: [Number.NaN, Number.NaN, Number.NaN],
+          upperBound90: [Number.NaN, Number.NaN, Number.NaN],
+        }),
+      );
 
       render(<Home {...defaultProps} initialForecastEnabled={true} />);
 
-      fireEvent.click(screen.getByTestId("marker-click"));
-
-      await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
-      });
+      await selectFirstMapMarker();
 
       await waitFor(() => {
         expect(FetchForecastData).toHaveBeenCalled();
@@ -568,20 +473,18 @@ describe("home", () => {
     });
 
     it("should handle forecast data with empty arrays", async () => {
-      vi.mocked(FetchForecastData).mockResolvedValue({
-        forecastValues: [],
-        forecastYears: [],
-        lowerBound10: [],
-        upperBound90: [],
-      });
+      vi.mocked(FetchForecastData).mockResolvedValue(
+        buildForecastData({
+          forecastValues: [],
+          forecastYears: [],
+          lowerBound10: [],
+          upperBound90: [],
+        }),
+      );
 
       render(<Home {...defaultProps} initialForecastEnabled={true} />);
 
-      fireEvent.click(screen.getByTestId("marker-click"));
-
-      await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
-      });
+      await selectFirstMapMarker();
 
       await waitFor(() => {
         expect(FetchForecastData).toHaveBeenCalled();
@@ -589,20 +492,18 @@ describe("home", () => {
     });
 
     it("should handle forecast with undefined final values", async () => {
-      vi.mocked(FetchForecastData).mockResolvedValue({
-        forecastValues: [],
-        forecastYears: [2025],
-        lowerBound10: [20],
-        upperBound90: [30],
-      });
+      vi.mocked(FetchForecastData).mockResolvedValue(
+        buildForecastData({
+          forecastValues: [],
+          forecastYears: [2025],
+          lowerBound10: [20],
+          upperBound90: [30],
+        }),
+      );
 
       render(<Home {...defaultProps} initialForecastEnabled={true} />);
 
-      fireEvent.click(screen.getByTestId("marker-click"));
-
-      await waitFor(() => {
-        expect(screen.getByTestId("modal")).toBeInTheDocument();
-      });
+      await selectFirstMapMarker();
 
       await waitFor(() => {
         expect(FetchForecastData).toHaveBeenCalled();
@@ -614,7 +515,7 @@ describe("home", () => {
     it("should initialize with forecast enabled from props", async () => {
       render(<Home {...defaultProps} initialForecastEnabled={true} />);
 
-      fireEvent.click(screen.getByTestId("marker-click"));
+      await selectFirstMapMarker();
 
       await waitFor(() => {
         expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual", "avg");
@@ -624,7 +525,7 @@ describe("home", () => {
     it("should initialize with different graph measure", async () => {
       render(<Home {...defaultProps} initialGraphMeasure="max" />);
 
-      fireEvent.click(screen.getByTestId("marker-click"));
+      await selectFirstMapMarker();
 
       await waitFor(() => {
         expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1, "Annual");
@@ -640,7 +541,7 @@ describe("home", () => {
         />,
       );
 
-      fireEvent.click(screen.getByTestId("marker-click"));
+      await selectFirstMapMarker();
 
       await waitFor(() => {
         expect(FetchForecastData).toHaveBeenCalledWith(1, 20, "Annual", "avg");
@@ -659,7 +560,7 @@ describe("home", () => {
 
       render(<Home {...defaultProps} />);
 
-      fireEvent.click(screen.getByTestId("marker-click"));
+      await selectFirstMapMarker();
 
       await waitFor(() => {
         expect(GenerateTrendGraph).toHaveBeenCalledWith(
@@ -683,7 +584,7 @@ describe("home", () => {
 
       render(<Home {...defaultProps} />);
 
-      fireEvent.click(screen.getByTestId("marker-click"));
+      await selectFirstMapMarker();
 
       await waitFor(() => {
         expect(GenerateTrendGraph).toHaveBeenCalledWith(

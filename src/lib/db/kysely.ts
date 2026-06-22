@@ -5,10 +5,13 @@ import { Pool } from "pg";
 import type { Database } from "./types";
 import type { ServerDatabaseEnvironment } from "@/config/environment";
 
-declare global {
-  var petAppDbSingleton: Kysely<Database> | undefined;
-  var petAppPgPoolSingleton: Pool | undefined;
-}
+const dbSingletonKey = "petAppDbSingleton";
+const pgPoolSingletonKey = "petAppPgPoolSingleton";
+
+type PetAppGlobal = typeof globalThis & {
+  [dbSingletonKey]?: Kysely<Database>;
+  [pgPoolSingletonKey]?: Pool;
+};
 
 const resolveSslConfiguration = (
   sslMode: ServerDatabaseEnvironment["PGSSLMODE"],
@@ -37,17 +40,19 @@ const createPool = () => {
 };
 
 export const getDb = (): Kysely<Database> => {
-  if (globalThis.petAppDbSingleton) {
-    return globalThis.petAppDbSingleton;
+  const petAppGlobal = globalThis as PetAppGlobal;
+
+  if (petAppGlobal[dbSingletonKey]) {
+    return petAppGlobal[dbSingletonKey];
   }
 
-  const pool = globalThis.petAppPgPoolSingleton ?? createPool();
-  globalThis.petAppPgPoolSingleton = pool;
-  globalThis.petAppDbSingleton = new Kysely<Database>({
+  const pool = petAppGlobal[pgPoolSingletonKey] ?? createPool();
+  petAppGlobal[pgPoolSingletonKey] = pool;
+  petAppGlobal[dbSingletonKey] = new Kysely<Database>({
     dialect: new PostgresDialect({
       pool,
     }),
   });
 
-  return globalThis.petAppDbSingleton;
+  return petAppGlobal[dbSingletonKey];
 };

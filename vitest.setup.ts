@@ -4,14 +4,22 @@ import { mockFn } from "@/testing/mock-fn";
 import { server } from "@/testing/server";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
 
-vi.mock("next/font/google", () => ({
-  Geist: () => ({
-    variable: "--font-sans",
-  }),
-  Geist_Mono: () => ({
-    variable: "--font-mono",
-  }),
-}));
+vi.mock("next/font/google", () =>
+  Object.fromEntries([
+    [
+      "Geist",
+      () => ({
+        variable: "--font-sans",
+      }),
+    ],
+    [
+      "Geist_Mono",
+      () => ({
+        variable: "--font-mono",
+      }),
+    ],
+  ]),
+);
 
 globalThis.mockFn = mockFn;
 

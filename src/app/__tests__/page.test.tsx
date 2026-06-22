@@ -157,7 +157,7 @@ describe("page Component", () => {
     render(await Page());
 
     expect(mockGetGraphMeasureFromCookies).toHaveBeenCalledBefore(
-      mockGetLocationData as any,
+      mockGetLocationData,
     );
     expect(mockGetGraphMeasureFromCookies).toHaveBeenCalledTimes(1);
     expect(mockGetGraphSeasonFromCookies).toHaveBeenCalledTimes(1);

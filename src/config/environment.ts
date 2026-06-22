@@ -99,8 +99,5 @@ export const getServerTestingEnvironment = (): ServerTestingEnvironment => {
   return cachedServerTestingEnvironment;
 };
 
-export const isE2ETestRun = () =>
-  getPublicEnvironment().NEXT_PUBLIC_E2E_TEST === "true";
-
 export const shouldUseRuntimeDbMocks = () =>
   getServerTestingEnvironment().E2E_USE_RUNTIME_MOCKS === "true";

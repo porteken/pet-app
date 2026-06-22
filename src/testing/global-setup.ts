@@ -103,8 +103,3 @@ export async function setup() {
   await seedTestPostgres(container);
   applyPostgresEnv(container);
 }
-
-export async function teardown() {
-  await stopTestPostgres(container);
-  container = undefined;
-}

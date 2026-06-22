@@ -76,10 +76,18 @@ describe("app shell and error pages", () => {
     expect(layout.props.lang).toBe("en");
     expect(layout.props.children.type).toBe("body");
     expect(layout.props.children.props.suppressHydrationWarning).toBe(true);
-    expect(layout.props.children.props.children[1].type).toBe(mockAppProviders);
-    expect(
-      layout.props.children.props.children[1].props.children,
-    ).toStrictEqual(<span>Child content</span>);
+    const bodyChildren = Array.isArray(layout.props.children.props.children)
+      ? layout.props.children.props.children
+      : [layout.props.children.props.children];
+    const appProviders = bodyChildren.find(
+      (child: React.ReactNode) =>
+        React.isValidElement(child) && child.type === mockAppProviders,
+    ) as React.ReactElement<{ children: React.ReactNode }> | undefined;
+
+    expect(appProviders).toBeDefined();
+    expect(appProviders?.props.children).toStrictEqual(
+      <span>Child content</span>,
+    );
     expect(metadata).toStrictEqual({
       description: "Physiological Equivalent Temperature data for US cities",
       title: "Historical PET USA",

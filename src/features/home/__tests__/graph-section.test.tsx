@@ -1,84 +1,17 @@
 import "@testing-library/jest-dom";
 
+import {
+  MockForecastControls,
+  MockSelectControl,
+} from "@/testing/react-component-mocks";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockPush = mockFn();
 
-class MockSelectControl extends React.PureComponent<{
-  data: Array<{ label: string; value: string }>;
-  label?: string;
-  onChange?: (value: string) => void;
-  value?: string;
-}> {
-  private readonly handleChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    this.props.onChange?.(event.target.value);
-  };
-
-  public render(): React.ReactNode {
-    const { data, label, value } = this.props;
-
-    return (
-      <div>
-        {label && <label>{label}</label>}
-        <select
-          data-testid={label === "Season" ? "season-select" : "measure-select"}
-          onChange={this.handleChange}
-          value={value}
-        >
-          {data.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    );
-  }
-}
-
-class MockForecastControls extends React.PureComponent<{
-  enabled: boolean;
-  onToggle: (enabled: boolean) => void;
-  onYearsChange: (years: number) => void;
-  yearsAhead: number;
-}> {
-  private readonly handleToggle = () => {
-    this.props.onToggle(!this.props.enabled);
-  };
-
-  private readonly handleYearsChange = (
-    event_: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    this.props.onYearsChange(Number(event_.target.value));
-  };
-
-  public render(): React.ReactNode {
-    const { enabled, yearsAhead } = this.props;
-
-    return (
-      <div data-testid="forecast-controls">
-        <button
-          data-testid="forecast-toggle"
-          onClick={this.handleToggle}
-          type="button"
-        >
-          {enabled ? "Disable" : "Enable"} Forecast
-        </button>
-        <input
-          aria-label="Forecast years"
-          data-testid="forecast-years"
-          onChange={this.handleYearsChange}
-          type="number"
-          value={yearsAhead}
-        />
-      </div>
-    );
-  }
-}
+const getGraphSectionSelectTestId = (label?: string) =>
+  label === "Season" ? "season-select" : "measure-select";
 
 const highHeatStressDescription = {
   colorClass: "text-red-500",
@@ -137,7 +70,7 @@ vi.mock("@/components/ui/button", () => ({
 
 vi.mock("@/components/ui/select", () => ({
   Select: mockFn((props: React.ComponentProps<typeof MockSelectControl>) => (
-    <MockSelectControl {...props} />
+    <MockSelectControl {...props} getTestId={getGraphSectionSelectTestId} />
   )),
 }));
 

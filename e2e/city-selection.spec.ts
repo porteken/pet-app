@@ -1,4 +1,4 @@
-import { expect, type Locator, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
 import {
   fillOpenCustomSelectSearch,
@@ -11,6 +11,19 @@ const getRequiredTextContent = async (locator: Locator): Promise<string> => {
   const text = await locator.textContent();
   expect(text).not.toBeNull();
   return text ?? "";
+};
+
+const openCitySearchWithOptions = async (page: Page) => {
+  await page.goto("/");
+
+  const citySearch = page.getByTestId("city-selector");
+  await expect(citySearch).toBeVisible({ timeout: 10_000 });
+
+  await openCustomSelect(page, citySearch);
+  const filteredOptions = getOpenCustomSelectOptions(page);
+  await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
+
+  return filteredOptions;
 };
 
 test.describe("City Selection", () => {
@@ -56,14 +69,7 @@ test.describe("City Selection", () => {
   });
 
   test("should allow searching for cities", async ({ page }) => {
-    await page.goto("/");
-
-    const citySearch = page.getByTestId("city-selector");
-    await expect(citySearch).toBeVisible({ timeout: 10_000 });
-
-    await openCustomSelect(page, citySearch);
-    const filteredOptions = getOpenCustomSelectOptions(page);
-    await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
+    const filteredOptions = await openCitySearchWithOptions(page);
     const firstOptionLabel = await getRequiredTextContent(
       filteredOptions.first(),
     );
@@ -81,14 +87,7 @@ test.describe("City Selection", () => {
   });
 
   test("should allow searching for states", async ({ page }) => {
-    await page.goto("/");
-
-    const citySearch = page.getByTestId("city-selector");
-    await expect(citySearch).toBeVisible({ timeout: 10_000 });
-
-    await openCustomSelect(page, citySearch);
-    const filteredOptions = getOpenCustomSelectOptions(page);
-    await expect(filteredOptions.first()).toBeVisible({ timeout: 10_000 });
+    const filteredOptions = await openCitySearchWithOptions(page);
     const groupLabels = getOpenCustomSelectContent(page).getByTestId(
       "searchable-select-group-label",
     );

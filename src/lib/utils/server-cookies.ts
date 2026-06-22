@@ -4,7 +4,7 @@ interface CookieEntry {
 }
 
 interface CookieStoreLike {
-  get(name: string): CookieEntry | undefined;
+  get: (name: string) => CookieEntry | undefined;
   getAll?: (...arguments_: [] | [string]) => readonly CookieEntry[];
 }
 

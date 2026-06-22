@@ -30,9 +30,6 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen app-shell" suppressHydrationWarning>
-        <a className="skip-link" href="#main-content">
-          Skip to main content
-        </a>
         <AppProviders>{children}</AppProviders>
         {!IS_E2E_TEST_ENVIRONMENT && <Analytics />}
       </body>

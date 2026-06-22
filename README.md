@@ -8,7 +8,7 @@ A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) 
 - **City Trend Charts**: Open a city modal from the map and view PET trends.
 - **Seasonal Analysis**: Switch between annual, spring, summer, fall, and winter views.
 - **Measure Selection**: Switch between average and maximum PET.
-- **Forecasting**: Show 5-75 year forecasts for average and maximum PET with confidence ranges.
+- **Forecasting**: Show 5–75 year forecasts for average and maximum PET with confidence ranges.
 - **Thermal Stress Context**: See thermal stress descriptions and legend details alongside trend data.
 - **City Detail Pages**: Open a city page with trend and reference charts.
 - **Reference Comparison**: Compare the current year's PET with a selected historical year.

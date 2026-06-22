@@ -6,8 +6,8 @@ import type { Database } from "./types";
 import type { ServerDatabaseEnvironment } from "@/config/environment";
 
 declare global {
-  var petAppDbSingleton: Kysely<Database> | undefined;
-  var petAppPgPoolSingleton: Pool | undefined;
+  let petAppDbSingleton: Kysely<Database> | undefined;
+  let petAppPgPoolSingleton: Pool | undefined;
 }
 
 const resolveSslConfiguration = (

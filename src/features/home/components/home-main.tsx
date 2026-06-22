@@ -1,6 +1,6 @@
 "use client";
 
-import { HeaderBar } from "@/features/header-bar";
+import { PageShell } from "@/components/app/page-shell";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import {
   setForecastPreferences,
@@ -300,19 +300,17 @@ const Home: FC<MapProperties> = ({
 
   return (
     <div className="flex h-dvh w-full flex-col">
-      <div className="z-10010 shrink-0">
-        <HeaderBar LocationOptions={LocationOptions} />
-      </div>
-      <main
-        className="relative min-h-0 flex-1 overflow-hidden"
-        id="main-content"
+      <PageShell
+        headerWrapperClassName="z-10010 shrink-0"
+        LocationOptions={LocationOptions}
+        mainClassName="relative min-h-0 flex-1 overflow-hidden"
       >
         <MapComponent
           locations={locations}
           onMarkerClick={handleMarkerClick}
           onMarkerPrefetch={handleMarkerPrefetch}
         />
-      </main>
+      </PageShell>
       <Modal
         dialogClassName={`${desktopDialogHeightClass} !bg-background !backdrop-blur-none`}
         mobileFullscreen

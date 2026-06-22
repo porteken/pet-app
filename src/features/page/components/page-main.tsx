@@ -1,7 +1,7 @@
 "use client";
 
+import { PageShell } from "@/components/app/page-shell";
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
-import { HeaderBar } from "@/features/header-bar";
 import {
   persistGraphMeasurePreference,
   persistGraphSeasonPreference,
@@ -83,10 +83,10 @@ const Main: FC<PageProperties> = ({
 
   return (
     <div className="min-h-screen">
-      <HeaderBar id={id} LocationOptions={LocationOptions} />
-      <main
-        className="mx-auto w-full max-w-[1700px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10"
-        id="main-content"
+      <PageShell
+        id={id}
+        LocationOptions={LocationOptions}
+        mainClassName="mx-auto w-full max-w-[1700px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10"
       >
         <PageHeader location={location} />
 
@@ -140,7 +140,7 @@ const Main: FC<PageProperties> = ({
             </button>
           </div>
         </div>
-      </main>
+      </PageShell>
     </div>
   );
 };

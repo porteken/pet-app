@@ -1,9 +1,6 @@
 import { vi } from "vitest";
 
-type MockFunction = (...args: unknown[]) => unknown;
+import type { AnyMockFunction, GlobalMockFn } from "./globals";
 
-export function mockFn<T extends MockFunction = MockFunction>(
-  implementation?: T,
-) {
-  return vi.fn<T>(implementation);
-}
+export const mockFn: GlobalMockFn = (implementation) =>
+  vi.fn<AnyMockFunction>(implementation) as any;

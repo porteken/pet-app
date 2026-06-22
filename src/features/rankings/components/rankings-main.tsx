@@ -2,10 +2,10 @@
 
 const RANK_THREE = 3;
 
+import { PageShell } from "@/components/app/page-shell";
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { Pagination } from "@/components/ui/pagination";
 import { Select } from "@/components/ui/select";
-import { HeaderBar } from "@/features/header-bar";
 import {
   setRankingsHeatStress,
   setRankingsSeason,
@@ -539,10 +539,9 @@ export function RankingsMain({
 
   return (
     <div className="min-h-screen">
-      <HeaderBar LocationOptions={LocationOptions} />
-      <main
-        className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
-        id="main-content"
+      <PageShell
+        LocationOptions={LocationOptions}
+        mainClassName="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
       >
         <RankingsFilters
           heatStressFilter={heatStressFilter}
@@ -691,7 +690,7 @@ export function RankingsMain({
             />
           </div>
         )}
-      </main>
+      </PageShell>
     </div>
   );
 }

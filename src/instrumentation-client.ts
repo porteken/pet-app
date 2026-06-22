@@ -10,7 +10,7 @@ const shouldEnableReplay =
 const tracesSampleRate = Number(
   process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE,
 );
-
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
 Sentry.init({
   debug: false,
 

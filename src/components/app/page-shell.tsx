@@ -11,6 +11,9 @@ interface PageShellProperties extends NavProperties {
   mainClassName: string;
 }
 
+const MAIN_CONTENT_ID = "main-content";
+const MAIN_CONTENT_HREF = `#${MAIN_CONTENT_ID}`;
+
 export const PageShell = ({
   children,
   headerWrapperClassName,
@@ -21,7 +24,7 @@ export const PageShell = ({
 
   return (
     <>
-      <a className="skip-link" href="#main-content">
+      <a className="skip-link" href={MAIN_CONTENT_HREF}>
         Skip to main content
       </a>
       {headerWrapperClassName ? (
@@ -29,7 +32,7 @@ export const PageShell = ({
       ) : (
         header
       )}
-      <main className={mainClassName} id="main-content">
+      <main className={mainClassName} id={MAIN_CONTENT_ID}>
         {children}
       </main>
     </>

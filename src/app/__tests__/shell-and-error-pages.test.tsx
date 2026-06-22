@@ -80,7 +80,8 @@ describe("app shell and error pages", () => {
       ? layout.props.children.props.children
       : [layout.props.children.props.children];
     const appProviders = bodyChildren.find(
-      (child) => React.isValidElement(child) && child.type === mockAppProviders,
+      (child: React.ReactNode) =>
+        React.isValidElement(child) && child.type === mockAppProviders,
     ) as React.ReactElement<{ children: React.ReactNode }> | undefined;
 
     expect(appProviders).toBeDefined();

@@ -115,11 +115,10 @@ describe("headerBar", () => {
       observe(): void {
         observe();
       }
+
+      unobserve(): void {}
     }
 
-    Object.defineProperty(MockResizeObserver.prototype, "unobserve", {
-      value: () => {},
-    });
     globalThis.ResizeObserver = MockResizeObserver as typeof ResizeObserver;
   });
 

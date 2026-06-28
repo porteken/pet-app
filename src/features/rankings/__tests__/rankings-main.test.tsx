@@ -659,7 +659,7 @@ describe("rankingsMain", () => {
       const cityHeader = requireElement(
         within(table).getByText("City").closest("th"),
       );
-      fireEvent.click(cityHeader);
+      fireEvent.click(within(cityHeader).getByRole("button"));
 
       expect(within(cityHeader).getByText("↑")).toBeInTheDocument();
     });
@@ -671,7 +671,7 @@ describe("rankingsMain", () => {
       const avgPetHeader = requireElement(
         within(table).getByText("Avg PET").closest("th"),
       );
-      fireEvent.click(avgPetHeader);
+      fireEvent.click(within(avgPetHeader).getByRole("button"));
 
       const rows = screen.getAllByRole("row");
       expect(rows[1]).toHaveTextContent("Eugene");
@@ -684,7 +684,7 @@ describe("rankingsMain", () => {
       const stateHeader = requireElement(
         within(table).getByText("State").closest("th"),
       );
-      fireEvent.click(stateHeader);
+      fireEvent.click(within(stateHeader).getByRole("button"));
 
       const rows = screen.getAllByRole("row");
       expect(rows[1]).toHaveTextContent("AZ");
@@ -930,7 +930,7 @@ describe("rankingsMain", () => {
       const cityHeader = requireElement(
         within(table).getByText("City").closest("th"),
       );
-      fireEvent.click(cityHeader);
+      fireEvent.click(within(cityHeader).getByRole("button"));
 
       expect(screen.getByTestId("current-page")).toHaveTextContent("1");
     });

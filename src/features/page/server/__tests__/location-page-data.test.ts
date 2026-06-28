@@ -164,6 +164,7 @@ describe("loadLocationPageData", () => {
       payload: {
         CurrentDates: [new Date("2024-01-01")],
         CurrentPets: [31],
+        graphDataError: false,
         IncreasePerYear: 0,
         ReferencePets: [25],
         TrendlinePets: [],
@@ -215,6 +216,7 @@ describe("loadLocationPageData", () => {
       payload: {
         CurrentDates: [],
         CurrentPets: [],
+        graphDataError: false,
         IncreasePerYear: 0.5,
         ReferencePets: [],
         TrendlinePets: [28, 29],
@@ -288,6 +290,7 @@ describe("loadLocationPageData", () => {
       payload: {
         CurrentDates: currentDates,
         CurrentPets: [31, 32],
+        graphDataError: false,
         IncreasePerYear: 0.5,
         id: 7,
         initialForecastEnabled: true,

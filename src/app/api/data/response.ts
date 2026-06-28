@@ -1,7 +1,9 @@
+import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 
 const DATA_RESPONSE_CACHE_CONTROL =
   "public, s-maxage=3600, stale-while-revalidate=86400";
+const HTTP_SERVER_ERROR = 500;
 
 const hasStatusCode = (
   error: unknown,
@@ -21,6 +23,11 @@ export const createDataRouteErrorResponse = (
   fallbackMessage: string,
 ) => {
   if (hasStatusCode(error)) {
+    if (error.statusCode >= HTTP_SERVER_ERROR) {
+      Sentry.captureException(
+        error instanceof Error ? error : new Error(error.message),
+      );
+    }
     return NextResponse.json(
       { error: error.message },
       { status: error.statusCode },
@@ -28,9 +35,11 @@ export const createDataRouteErrorResponse = (
   }
 
   if (error instanceof Error) {
+    Sentry.captureException(error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  Sentry.captureException(new Error(fallbackMessage));
   return NextResponse.json({ error: fallbackMessage }, { status: 500 });
 };
 

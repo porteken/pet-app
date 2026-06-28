@@ -36,6 +36,7 @@ const ignorePersistenceError = async (promise: Promise<void>) => {
 const Main: FC<PageProperties> = ({
   CurrentDates,
   CurrentPets,
+  graphDataError,
   IncreasePerYear,
   id,
   initialForecastEnabled,
@@ -98,6 +99,7 @@ const Main: FC<PageProperties> = ({
             initialForecastYearsAhead={initialForecastYearsAhead}
             initialGraphMeasure={initialGraphMeasure}
             initialGraphSeason={initialGraphSeason}
+            initialHasError={graphDataError}
             initialIncreasePerYear={IncreasePerYear}
             initialTrendlinePets={TrendlinePets}
             initialYearPets={YearPets}
@@ -110,6 +112,7 @@ const Main: FC<PageProperties> = ({
             CurrentDates={CurrentDates}
             CurrentPets={CurrentPets}
             id={id}
+            initialHasError={graphDataError}
             initialReferenceYear={initialReferenceYear}
             onReferenceYearChange={handleReferenceYearChange}
             referenceYear={selectedReferenceYear}

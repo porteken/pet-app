@@ -1,5 +1,7 @@
 "use client";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { reloadPage } from "@/utils/reload";
 import React from "react";
 
@@ -14,12 +16,12 @@ export const DatabaseError: React.FC<DatabaseErrorProperties> = ({
   showContactInfo = true,
   title = "Database Connection Error",
 }) => (
-  <div className="flex min-h-screen items-center justify-center bg-gray-50">
+  <div className="flex min-h-screen items-center justify-center bg-background">
     <div className="mx-auto max-w-md p-6 text-center">
       <div className="mb-6">
         <svg
           aria-hidden="true"
-          className="mx-auto size-12 text-red-500"
+          className="mx-auto size-12 text-destructive"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -33,33 +35,28 @@ export const DatabaseError: React.FC<DatabaseErrorProperties> = ({
         </svg>
       </div>
 
-      <h1 className="mb-4 text-2xl font-bold text-gray-900">{title}</h1>
+      <h1 className="mb-4 text-2xl font-bold text-foreground">{title}</h1>
 
-      <p className="mb-6 text-gray-600">{message}</p>
+      <p className="mb-6 text-muted-foreground">{message}</p>
 
       {showContactInfo && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <p className="text-sm text-blue-800">
-            <strong>Need help?</strong> Contact Kenneth Porter at{" "}
+        <Alert className="mb-6 text-left" variant="default">
+          <AlertTitle>Need help?</AlertTitle>
+          <AlertDescription>
+            Contact Kenneth Porter at{" "}
             <a
-              className="text-blue-600 underline hover:text-blue-800"
+              className="text-primary underline hover:text-primary/80"
               href="mailto:porteken@gmail.com"
             >
               porteken@gmail.com
             </a>
-          </p>
-        </div>
+          </AlertDescription>
+        </Alert>
       )}
 
-      <div className="mt-6">
-        <button
-          className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
-          onClick={reloadPage}
-          type="button"
-        >
-          Try Again
-        </button>
-      </div>
+      <Button onClick={reloadPage} type="button">
+        Try Again
+      </Button>
     </div>
   </div>
 );

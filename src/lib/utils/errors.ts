@@ -1,5 +1,3 @@
-import * as Sentry from "@sentry/nextjs";
-
 const HTTP_BAD_REQUEST = 400;
 const HTTP_UNAUTHORIZED = 401;
 const HTTP_FORBIDDEN = 403;
@@ -35,20 +33,6 @@ export class AppError extends Error {
     this.statusCode = statusCode;
     this.originalError = options?.originalError;
     this.context = options?.context;
-
-    Sentry.captureException(this, {
-      contexts: {
-        error: {
-          code: this.code,
-          context: this.context,
-          statusCode: this.statusCode,
-        },
-      },
-      tags: {
-        errorCode: this.code,
-        errorType: "AppError",
-      },
-    });
   }
 }
 

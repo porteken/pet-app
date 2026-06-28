@@ -49,9 +49,10 @@ export class SimpleLinearRegression {
     const prediction = this.predict(x);
     const n = this.xData.length;
 
+    const xVarianceTerm =
+      this.xVariance === 0 ? 0 : (x - this.xMean) ** 2 / (n * this.xVariance);
     const predictionError =
-      this.standardError *
-      Math.sqrt(1 + 1 / n + (x - this.xMean) ** 2 / (n * this.xVariance));
+      this.standardError * Math.sqrt(1 + 1 / n + xVarianceTerm);
 
     const tValue = T_VALUE_MAP[confidenceLevel] ?? DEFAULT_T_VALUE;
 
@@ -84,6 +85,11 @@ export class SimpleLinearRegression {
 
     const numerator = n * xY - xSum * ySum;
     const denominator = n * xSquared - xSum * xSum;
+
+    if (denominator === 0) {
+      // All x values are identical — return a flat line at the mean of y.
+      return { intercept: ySum / n, slope: 0 };
+    }
 
     const slope = numerator / denominator;
     const intercept = (ySum - slope * xSum) / n;

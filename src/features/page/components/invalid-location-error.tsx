@@ -7,10 +7,10 @@ export const InvalidLocationError = ({
   message,
   title,
 }: InvalidLocationErrorProperties) => (
-  <div className="flex min-h-screen items-center justify-center bg-gray-50">
+  <main className="flex min-h-screen items-center justify-center bg-background">
     <div className="text-center">
-      <h1 className="mb-4 text-2xl font-bold text-gray-900">{title}</h1>
-      <p className="text-gray-600">{message}</p>
+      <h1 className="mb-4 text-2xl font-bold text-foreground">{title}</h1>
+      <p className="text-muted-foreground">{message}</p>
     </div>
-  </div>
+  </main>
 );

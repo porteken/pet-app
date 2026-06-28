@@ -34,6 +34,7 @@ import type {
 
 interface GraphData {
   dates: Date[];
+  graphDataError: boolean;
   increase_per_year: number;
   pets: number[];
   reference_pets: number[];
@@ -71,6 +72,7 @@ interface LocationPagePreferences {
 
 const createEmptyGraphData = (): GraphData => ({
   dates: [],
+  graphDataError: false,
   increase_per_year: 0,
   pets: [],
   reference_pets: [],
@@ -185,6 +187,10 @@ const fetchGraphData = async (
   const trendData = getFulfilledValue(trendResult);
   const currentData = getFulfilledValue(currentResult);
   const referenceData = getFulfilledValue(referenceResult);
+  const graphDataError =
+    trendResult.status === "rejected" &&
+    currentResult.status === "rejected" &&
+    referenceResult.status === "rejected";
   const referenceGraphData = resolveReferenceGraphData(
     currentData,
     referenceData,
@@ -195,6 +201,7 @@ const fetchGraphData = async (
   return {
     ...referenceGraphData,
     ...trendGraphData,
+    graphDataError,
   };
 };
 
@@ -290,6 +297,7 @@ export const loadLocationPageData = async (
     payload: {
       CurrentDates: graphData.dates,
       CurrentPets: graphData.pets,
+      graphDataError: graphData.graphDataError,
       IncreasePerYear: graphData.increase_per_year,
       id: locationId,
       initialForecastEnabled: preferences.initialForecastEnabled,

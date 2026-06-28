@@ -323,18 +323,29 @@ class SortHeader extends React.PureComponent<{
 
   public render(): React.ReactElement {
     const { column, currentColumn, currentDirection, label } = this.props;
+    const isActive = currentColumn === column;
+    let ariaSort: "ascending" | "descending" | "none" = "none";
+    if (isActive) {
+      ariaSort = currentDirection === "asc" ? "ascending" : "descending";
+    }
 
     return (
       <th
-        className="cursor-pointer px-6 py-4 text-left text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase transition hover:bg-accent/60"
-        onClick={this.handleClick}
+        aria-sort={ariaSort}
+        className="px-6 py-4 text-left text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase"
       >
-        <div className="flex items-center gap-1">
+        <button
+          className="flex cursor-pointer items-center gap-1 transition hover:text-foreground"
+          onClick={this.handleClick}
+          type="button"
+        >
           {label}
-          {currentColumn === column && (
-            <span>{currentDirection === "asc" ? "↑" : "↓"}</span>
+          {isActive && (
+            <span aria-hidden="true">
+              {currentDirection === "asc" ? "↑" : "↓"}
+            </span>
           )}
-        </div>
+        </button>
       </th>
     );
   }
@@ -346,6 +357,15 @@ class RankingRow extends React.PureComponent<{
 }> {
   private readonly handleClick = () => {
     this.props.push(`/${this.props.item.location_id}`);
+  };
+
+  private readonly handleKeyDown = (
+    event: React.KeyboardEvent<HTMLTableRowElement>,
+  ) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      this.handleClick();
+    }
   };
 
   public render(): React.ReactElement {
@@ -367,8 +387,10 @@ class RankingRow extends React.PureComponent<{
 
     return (
       <tr
-        className="cursor-pointer transition even:bg-background/30 hover:-translate-y-px hover:bg-accent/45"
+        className="cursor-pointer transition even:bg-background/30 hover:-translate-y-px hover:bg-accent/45 focus-visible:outline-2 focus-visible:outline-ring"
         onClick={this.handleClick}
+        onKeyDown={this.handleKeyDown}
+        tabIndex={0}
       >
         <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-foreground">
           <span

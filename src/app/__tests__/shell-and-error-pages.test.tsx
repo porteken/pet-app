@@ -100,7 +100,9 @@ describe("app shell and error pages", () => {
     render(<ErrorPage error={new Error("Unexpected failure")} reset={reset} />);
 
     expect(screen.getByText("Something went wrong!")).toBeInTheDocument();
-    expect(screen.getByText("Unexpected failure")).toBeInTheDocument();
+    expect(
+      screen.getByText("An unexpected error occurred. Please try again."),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "porteken@gmail.com" }),
     ).toHaveAttribute("href", "mailto:porteken@gmail.com");
@@ -123,7 +125,9 @@ describe("app shell and error pages", () => {
 
     render(globalErrorPage.props.children.props.children);
 
-    expect(screen.getByText("Global failure")).toBeInTheDocument();
+    expect(
+      screen.getByText("An unexpected error occurred. Please try again."),
+    ).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("Need help?");
 
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));

@@ -88,6 +88,7 @@ describe("pageMain", () => {
         title: "Test State",
       },
     ],
+    graphDataError: false,
     ReferencePets: [10, 20],
     TrendlinePets: [5, 10, 15],
     YearPets: [7, 12, 17],

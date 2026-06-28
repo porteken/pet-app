@@ -67,15 +67,18 @@ describe("plot test page", () => {
 
     const responsiveContainerProps = mockResponsiveContainer.mock.calls[0]?.[0];
 
+    const initialDimension = {
+      height: expect.any(Number),
+      width: expect.any(Number),
+    };
+    const expectedResponsiveContainerProps = expect.objectContaining({
+      height: "100%",
+      initialDimension: expect.objectContaining(initialDimension),
+      width: "100%",
+    });
+
     expect(responsiveContainerProps).toStrictEqual(
-      expect.objectContaining({
-        height: "100%",
-        initialDimension: expect.objectContaining({
-          height: expect.any(Number),
-          width: expect.any(Number),
-        }),
-        width: "100%",
-      }),
+      expectedResponsiveContainerProps,
     );
     expect(responsiveContainerProps?.initialDimension?.width).toBeGreaterThan(
       0,

@@ -559,19 +559,22 @@ describe("trendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
+        const forecastData = expect.objectContaining({
+          forecastValues: expect.any(Array),
+        });
+        const expectedTrendGraphProps = expect.objectContaining({
+          forecastData,
+          increasePerYear: expect.any(Number),
+          isMobileViewport: false,
+          option: "avg",
+          showLegend: true,
+          trendlinePets: expect.any(Array),
+          yearPets: expect.any(Array),
+          years: expect.any(Array),
+        });
+
         expect(GenerateTrendGraph).toHaveBeenCalledWith(
-          expect.objectContaining({
-            forecastData: expect.objectContaining({
-              forecastValues: expect.any(Array),
-            }),
-            increasePerYear: expect.any(Number),
-            isMobileViewport: false,
-            option: "avg",
-            showLegend: true,
-            trendlinePets: expect.any(Array),
-            yearPets: expect.any(Array),
-            years: expect.any(Array),
-          }),
+          expectedTrendGraphProps,
           undefined,
         );
       });

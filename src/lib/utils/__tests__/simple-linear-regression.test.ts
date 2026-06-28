@@ -65,14 +65,15 @@ describe("simpleLinearRegression", () => {
       expect(regression.predict(-3)).toBeCloseTo(-6, 10);
     });
 
-    it("should handle single data point", () => {
+    it("should handle single data point as flat line at y value", () => {
       const x = [5];
       const y = [10];
       const regression = new SimpleLinearRegression(x, y);
 
-      expect(Number.isNaN(regression.predict(5))).toBe(true);
-      expect(Number.isNaN(regression.predict(0))).toBe(true);
-      expect(Number.isNaN(regression.predict(100))).toBe(true);
+      expect(regression.slope).toBe(0);
+      expect(regression.predict(5)).toBe(10);
+      expect(regression.predict(0)).toBe(10);
+      expect(regression.predict(100)).toBe(10);
     });
 
     it("should handle horizontal line (all y values same)", () => {
@@ -244,6 +245,28 @@ describe("simpleLinearRegression", () => {
       const regression = new SimpleLinearRegression(x, y);
 
       expect(regression.predict(0.004)).toBeCloseTo(0.008, 6);
+    });
+
+    it("should handle constant x values as flat line at mean y", () => {
+      const x = [5, 5, 5];
+      const y = [1, 2, 3];
+      const regression = new SimpleLinearRegression(x, y);
+
+      expect(regression.slope).toBe(0);
+      expect(Number.isFinite(regression.predict(5))).toBe(true);
+      expect(Number.isFinite(regression.predict(0))).toBe(true);
+      expect(regression.predict(5)).toBe(2); // mean of [1,2,3]
+    });
+
+    it("should produce finite confidence bounds with constant x values", () => {
+      const x = [5, 5, 5, 5, 5];
+      const y = [1, 2, 3, 4, 5];
+      const regression = new SimpleLinearRegression(x, y);
+
+      const result = regression.predictWithConfidence(5);
+      expect(Number.isFinite(result.prediction)).toBe(true);
+      expect(Number.isFinite(result.lowerBound)).toBe(true);
+      expect(Number.isFinite(result.upperBound)).toBe(true);
     });
 
     it("should handle mixed positive and negative values", () => {

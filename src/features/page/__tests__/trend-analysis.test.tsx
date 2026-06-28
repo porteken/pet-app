@@ -622,20 +622,11 @@ describe("trendAnalysis", () => {
       render(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenCalledWith(
-          expect.objectContaining({
-            forecastData: undefined,
-            increasePerYear: 0,
-            isMobileViewport: false,
-            option: "avg",
-            showLegend: true,
-            trendlinePets: [],
-            yearPets: [],
-            years: [],
-          }),
-          undefined,
-        );
+        expect(
+          screen.getByText("Unable to load trend data"),
+        ).toBeInTheDocument();
       });
+      expect(GenerateTrendGraph).not.toHaveBeenCalled();
     });
 
     it("should clear thermal stress on error", async () => {
@@ -646,12 +637,12 @@ describe("trendAnalysis", () => {
       render(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenCalled();
+        expect(
+          screen.getByText("Unable to load trend data"),
+        ).toBeInTheDocument();
       });
 
-      await waitFor(() => {
-        expect(screen.queryByText("Thermal Stress:")).not.toBeInTheDocument();
-      });
+      expect(screen.queryByText("Thermal Stress:")).not.toBeInTheDocument();
     });
 
     it("should clear forecast thermal stress on error", async () => {
@@ -662,12 +653,12 @@ describe("trendAnalysis", () => {
       render(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
-        expect(GenerateTrendGraph).toHaveBeenCalled();
+        expect(
+          screen.getByText("Unable to load trend data"),
+        ).toBeInTheDocument();
       });
 
-      await waitFor(() => {
-        expect(screen.queryByText("Forecast:")).not.toBeInTheDocument();
-      });
+      expect(screen.queryByText("Forecast:")).not.toBeInTheDocument();
     });
   });
 

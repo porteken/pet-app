@@ -1,6 +1,7 @@
 "use client";
 
 import { ForecastControls } from "@/components/app/forecast-controls";
+import { ErrorGraphDisplay } from "@/features/home/components/error-graph-display";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
@@ -22,6 +23,7 @@ interface TrendAnalysisProperties {
   initialForecastYearsAhead: number;
   initialGraphMeasure: string;
   initialGraphSeason: GraphSeason;
+  initialHasError?: boolean;
   initialIncreasePerYear?: number;
   initialTrendlinePets?: number[];
   initialYearPets?: number[];
@@ -66,6 +68,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   initialForecastYearsAhead,
   initialGraphMeasure,
   initialGraphSeason,
+  initialHasError = false,
   initialIncreasePerYear = 0,
   initialTrendlinePets = DEFAULT_INITIAL_TRENDLINE_PETS,
   initialYearPets = DEFAULT_INITIAL_YEAR_PETS,
@@ -127,6 +130,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const [trendGraphSnapshot, setTrendGraphSnapshot] = React.useState<
     TrendGraphSnapshot | undefined
   >(initialTrendSnapshot);
+  const [hasTrendError, setHasTrendError] = React.useState(initialHasError);
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
   const latestTrendRequestRef = React.useRef(0);
@@ -184,15 +188,8 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           return;
         }
 
-        setTrendGraphSnapshot({
-          forecastData: undefined,
-          increase_per_year: 0,
-          option,
-          season,
-          trendline_pets: [],
-          year_pets: [],
-          years: [],
-        });
+        setHasTrendError(true);
+        setTrendGraphSnapshot(undefined);
         setCurrentHeatStress(undefined);
         setForecastHeatStress(undefined);
       }
@@ -221,6 +218,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   );
 
   React.useEffect(() => {
+    setHasTrendError(false);
     const performGenerate = async () => {
       try {
         await generatePetTrendGraph(
@@ -230,7 +228,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           forecastYearsAhead,
         );
       } catch {
-        // Error is handled by the graph component's own error state
+        // Error is handled inside generatePetTrendGraph
       }
     };
     void performGenerate();
@@ -359,21 +357,29 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           className="min-h-[clamp(220px,42vh,520px)] min-w-0 flex-1 overflow-hidden sm:min-h-[clamp(450px,70vh,850px)]"
           id="trend-analysis-graph"
         >
-          {trendGraphSnapshot ? (
-            <GenerateTrendGraph
-              forecastData={trendGraphSnapshot.forecastData}
-              increasePerYear={trendGraphSnapshot.increase_per_year}
-              isMobileViewport={isMobileViewport}
-              option={trendGraphSnapshot.option}
-              season={trendGraphSnapshot.season}
-              showLegend={showTrendLegend}
-              trendlinePets={trendGraphSnapshot.trendline_pets}
-              yearPets={trendGraphSnapshot.year_pets}
-              years={trendGraphSnapshot.years}
-            />
-          ) : (
-            <GraphLoadingState />
-          )}
+          {(() => {
+            if (trendGraphSnapshot) {
+              return (
+                <GenerateTrendGraph
+                  forecastData={trendGraphSnapshot.forecastData}
+                  increasePerYear={trendGraphSnapshot.increase_per_year}
+                  isMobileViewport={isMobileViewport}
+                  option={trendGraphSnapshot.option}
+                  season={trendGraphSnapshot.season}
+                  showLegend={showTrendLegend}
+                  trendlinePets={trendGraphSnapshot.trendline_pets}
+                  yearPets={trendGraphSnapshot.year_pets}
+                  years={trendGraphSnapshot.years}
+                />
+              );
+            }
+
+            if (hasTrendError) {
+              return <ErrorGraphDisplay message="Unable to load trend data" />;
+            }
+
+            return <GraphLoadingState />;
+          })()}
         </div>
       </div>
     </div>

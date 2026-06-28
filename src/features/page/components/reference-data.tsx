@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorGraphDisplay } from "@/features/home/components/error-graph-display";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
 import { DEFAULT_GRAPH_SEASON, GRAPH_CONFIG } from "@/lib/constants";
@@ -11,6 +12,7 @@ interface ReferenceDataProperties {
   CurrentDates: Date[];
   CurrentPets: number[];
   id: number;
+  initialHasError?: boolean;
   initialReferenceYear: string;
   onReferenceYearChange: (referenceYear: string) => void;
   referenceYear: string;
@@ -50,6 +52,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   CurrentDates,
   CurrentPets,
   id,
+  initialHasError = false,
   initialReferenceYear,
   onReferenceYearChange,
   referenceYear,
@@ -61,6 +64,8 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   );
   const [referenceGraphSnapshot, setReferenceGraphSnapshot] =
     React.useState<ReferenceGraphSnapshot>();
+  const [hasReferenceError, setHasReferenceError] =
+    React.useState(initialHasError);
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
   const latestReferenceRequestRef = React.useRef(0);
@@ -126,11 +131,12 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   }, []);
 
   React.useEffect(() => {
+    setHasReferenceError(false);
     const performGenerate = async () => {
       try {
         await generatePetReferenceGraph(referenceYear);
       } catch {
-        // Error is handled by the graph component's own error state
+        setHasReferenceError(true);
       }
     };
     void performGenerate();
@@ -175,31 +181,41 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
           className="flex min-h-[clamp(220px,42vh,520px)] min-w-0 flex-1 flex-col overflow-hidden sm:min-h-[clamp(450px,70vh,850px)]"
           id="reference-data-graph"
         >
-          {referenceGraphSnapshot ? (
-            <div
-              aria-label="Scrollable reference graph"
-              className="-mx-4 min-h-0 min-w-0 flex-1 touch-pan-x overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:px-0"
-              data-testid="reference-graph-scroll-region"
-            >
-              <div className="h-full min-w-full" style={containerStyle}>
-                <GenerateReferenceGraph
-                  currentPets={CurrentPets}
-                  currentYear={
-                    CurrentDates.at(-1)?.getUTCFullYear() ??
-                    GRAPH_CONFIG.YEAR_RANGE.END
-                  }
-                  dates={referenceGraphSnapshot.dates}
-                  isMobileViewport={isMobileViewport}
-                  referencePets={referenceGraphSnapshot.pets}
-                  referenceYear={referenceGraphSnapshot.year}
-                  season={DEFAULT_GRAPH_SEASON}
-                  showLegend={showReferenceLegend}
-                />
-              </div>
-            </div>
-          ) : (
-            <GraphLoadingState />
-          )}
+          {(() => {
+            if (referenceGraphSnapshot) {
+              return (
+                <div
+                  aria-label="Scrollable reference graph"
+                  className="-mx-4 min-h-0 min-w-0 flex-1 touch-pan-x overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:px-0"
+                  data-testid="reference-graph-scroll-region"
+                >
+                  <div className="h-full min-w-full" style={containerStyle}>
+                    <GenerateReferenceGraph
+                      currentPets={CurrentPets}
+                      currentYear={
+                        CurrentDates.at(-1)?.getUTCFullYear() ??
+                        GRAPH_CONFIG.YEAR_RANGE.END
+                      }
+                      dates={referenceGraphSnapshot.dates}
+                      isMobileViewport={isMobileViewport}
+                      referencePets={referenceGraphSnapshot.pets}
+                      referenceYear={referenceGraphSnapshot.year}
+                      season={DEFAULT_GRAPH_SEASON}
+                      showLegend={showReferenceLegend}
+                    />
+                  </div>
+                </div>
+              );
+            }
+
+            if (hasReferenceError) {
+              return (
+                <ErrorGraphDisplay message="Unable to load reference data" />
+              );
+            }
+
+            return <GraphLoadingState />;
+          })()}
         </div>
       </div>
     </div>

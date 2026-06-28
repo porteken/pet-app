@@ -138,7 +138,7 @@ describe("setForecastPreferences", () => {
     );
   });
 
-  it("uses a 5-minute expiration window", async () => {
+  it("uses a 1-year expiration window", async () => {
     const beforeCall = Date.now();
 
     await setForecastPreferences(false, 15);
@@ -151,19 +151,19 @@ describe("setForecastPreferences", () => {
     const enabledCookieOptions = call0[2];
     const yearsCookieOptions = call1[2];
     const afterCall = Date.now();
-    const fiveMinutesMs = 5 * 60 * 1000;
+    const oneYearMs = 365 * 24 * 60 * 60 * 1000;
 
     expect(enabledCookieOptions.expires.getTime()).toBeGreaterThanOrEqual(
-      beforeCall + fiveMinutesMs - 1000,
+      beforeCall + oneYearMs - 1000,
     );
     expect(enabledCookieOptions.expires.getTime()).toBeLessThanOrEqual(
-      afterCall + fiveMinutesMs + 1000,
+      afterCall + oneYearMs + 1000,
     );
     expect(yearsCookieOptions.expires.getTime()).toBeGreaterThanOrEqual(
-      beforeCall + fiveMinutesMs - 1000,
+      beforeCall + oneYearMs - 1000,
     );
     expect(yearsCookieOptions.expires.getTime()).toBeLessThanOrEqual(
-      afterCall + fiveMinutesMs + 1000,
+      afterCall + oneYearMs + 1000,
     );
   });
 });

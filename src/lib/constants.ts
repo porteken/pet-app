@@ -33,6 +33,8 @@ export const DEFAULT_FORECAST_YEARS_AHEAD = DEFAULT_FORECAST_YEARS;
 export const MIN_FORECAST_YEARS_AHEAD = MIN_FORECAST_YEARS;
 export const MAX_FORECAST_YEARS_AHEAD = MAX_FORECAST_YEARS;
 
+export const PREFERENCE_COOKIE_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
+
 const isGraphSeason = (value: string): value is GraphSeason =>
   (GRAPH_SEASONS as readonly string[]).includes(value);
 

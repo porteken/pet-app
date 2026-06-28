@@ -21,4 +21,8 @@ minimumReleaseAgeExclude:
   - "@sentry/opentelemetry@10.55.0"
   - "@sentry/react@10.55.0"
   - "@sentry/vercel-edge@10.55.0"
-  - lucide-react@1.17.0
+  - lucide-react@1.17.0 || 1.22.0
+  - '@tanstack/query-core@5.101.2'
+  - '@tanstack/react-query@5.101.2'
+  - knip@6.23.0
+  - postcss@8.5.16

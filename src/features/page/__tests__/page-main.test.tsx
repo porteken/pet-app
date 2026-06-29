@@ -1,7 +1,18 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const renderWithQueryClient = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+  });
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+  return render(ui, { wrapper: Wrapper });
+};
 
 vi.mock("@/features/graph", () => ({
   GenerateReferenceGraph: mockFn().mockReturnValue(
@@ -104,7 +115,7 @@ describe("pageMain", () => {
   describe("component Rendering", () => {
     it("should render the page with title and location information", async () => {
       await act(async () => {
-        render(<PageMain {...defaultProps} />);
+        renderWithQueryClient(<PageMain {...defaultProps} />);
       });
 
       expect(screen.getByText("Test City, Test State")).toBeInTheDocument();
@@ -114,7 +125,7 @@ describe("pageMain", () => {
 
     it("should render HeaderBar with correct props", async () => {
       await act(async () => {
-        render(<PageMain {...defaultProps} />);
+        renderWithQueryClient(<PageMain {...defaultProps} />);
       });
 
       const headerBar = screen.getByTestId("header-bar");
@@ -124,7 +135,7 @@ describe("pageMain", () => {
 
     it("should render graph measure select with correct options", async () => {
       await act(async () => {
-        render(<PageMain {...defaultProps} />);
+        renderWithQueryClient(<PageMain {...defaultProps} />);
       });
 
       const selectElement = screen.getByLabelText("Graph Measure");
@@ -135,7 +146,7 @@ describe("pageMain", () => {
 
     it("should render reference year select with correct options", async () => {
       await act(async () => {
-        render(<PageMain {...defaultProps} />);
+        renderWithQueryClient(<PageMain {...defaultProps} />);
       });
 
       const selectElement = screen.getByLabelText("Reference Year");
@@ -154,7 +165,7 @@ describe("pageMain", () => {
       const user = userEvent.setup();
 
       await act(async () => {
-        render(<PageMain {...defaultProps} />);
+        renderWithQueryClient(<PageMain {...defaultProps} />);
       });
 
       const toggle = screen.getByRole("button", {
@@ -177,7 +188,7 @@ describe("pageMain", () => {
   describe("graph Generation", () => {
     it("should generate trend graph on initial render", async () => {
       await act(async () => {
-        render(<PageMain {...defaultProps} />);
+        renderWithQueryClient(<PageMain {...defaultProps} />);
       });
 
       await waitFor(() => {
@@ -200,7 +211,7 @@ describe("pageMain", () => {
 
     it("should generate reference graph on initial render", async () => {
       await act(async () => {
-        render(<PageMain {...defaultProps} />);
+        renderWithQueryClient(<PageMain {...defaultProps} />);
       });
 
       await waitFor(() => {
@@ -213,7 +224,7 @@ describe("pageMain", () => {
     it("should change graph measure and persist it through the preferences endpoint", async () => {
       const user = userEvent.setup();
       await act(async () => {
-        render(<PageMain {...defaultProps} />);
+        renderWithQueryClient(<PageMain {...defaultProps} />);
       });
 
       const selectElement = screen.getByLabelText("Graph Measure");
@@ -235,7 +246,7 @@ describe("pageMain", () => {
     it("should change reference year and trigger API call when selected", async () => {
       const user = userEvent.setup();
       await act(async () => {
-        render(<PageMain {...defaultProps} />);
+        renderWithQueryClient(<PageMain {...defaultProps} />);
       });
 
       const selectElement = screen.getByLabelText("Reference Year");
@@ -263,7 +274,7 @@ describe("pageMain", () => {
       const user = userEvent.setup();
 
       await act(async () => {
-        render(<PageMain {...defaultProps} />);
+        renderWithQueryClient(<PageMain {...defaultProps} />);
       });
 
       await waitFor(() => {
@@ -292,7 +303,7 @@ describe("pageMain", () => {
       const user = userEvent.setup();
 
       await act(async () => {
-        render(<PageMain {...defaultProps} />);
+        renderWithQueryClient(<PageMain {...defaultProps} />);
       });
 
       vi.mocked(FetchReferenceGraphData).mockClear();

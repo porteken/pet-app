@@ -155,13 +155,18 @@ const Pagination = ({ className, onChange, total, value }: PaginationProps) => {
     <PaginationRoot className={className}>
       <PaginationContent>
         <PaginationItem>
-          <PaginationPrevious
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              if (value > 1) onChange(value - 1);
-            }}
-          />
+          <Button
+            aria-label="Go to previous page"
+            className="pl-1.5!"
+            disabled={value <= 1}
+            onClick={() => onChange(value - 1)}
+            size="default"
+            type="button"
+            variant="ghost"
+          >
+            <ChevronLeftIcon data-icon="inline-start" />
+            <span className="hidden sm:block">Previous</span>
+          </Button>
         </PaginationItem>
 
         {pages.map((page) => (
@@ -169,16 +174,16 @@ const Pagination = ({ className, onChange, total, value }: PaginationProps) => {
             key={typeof page === "string" ? page : `page-${page}`}
           >
             {typeof page === "number" ? (
-              <PaginationLink
-                href="#"
-                isActive={page === value}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onChange(page);
-                }}
+              <Button
+                aria-current={page === value ? "page" : undefined}
+                data-active={page === value}
+                onClick={() => onChange(page)}
+                size="icon"
+                type="button"
+                variant={page === value ? "outline" : "ghost"}
               >
                 {page}
-              </PaginationLink>
+              </Button>
             ) : (
               <PaginationEllipsis />
             )}
@@ -186,13 +191,18 @@ const Pagination = ({ className, onChange, total, value }: PaginationProps) => {
         ))}
 
         <PaginationItem>
-          <PaginationNext
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              if (value < total) onChange(value + 1);
-            }}
-          />
+          <Button
+            aria-label="Go to next page"
+            className="pr-1.5!"
+            disabled={value >= total}
+            onClick={() => onChange(value + 1)}
+            size="default"
+            type="button"
+            variant="ghost"
+          >
+            <span className="hidden sm:block">Next</span>
+            <ChevronRightIcon data-icon="inline-end" />
+          </Button>
         </PaginationItem>
       </PaginationContent>
     </PaginationRoot>

@@ -94,8 +94,10 @@ describe("getDb", () => {
     expect(secondDb).toBe(firstDb);
     expect(poolMock).toHaveBeenCalledTimes(1);
     expect(poolMock).toHaveBeenCalledWith({
+      connectionTimeoutMillis: 5000,
       database: "pet",
       host: "db.example.test",
+      idleTimeoutMillis: 30_000,
       max: 1,
       password: "postgres",
       port: 5432,

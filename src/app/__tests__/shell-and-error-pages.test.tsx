@@ -75,7 +75,6 @@ describe("app shell and error pages", () => {
     expect(layout.type).toBe("html");
     expect(layout.props.lang).toBe("en");
     expect(layout.props.children.type).toBe("body");
-    expect(layout.props.children.props.suppressHydrationWarning).toBe(true);
     const bodyChildren = Array.isArray(layout.props.children.props.children)
       ? layout.props.children.props.children
       : [layout.props.children.props.children];

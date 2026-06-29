@@ -3,7 +3,7 @@
 import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
 import { QueryClient } from "@tanstack/react-query";
 
-import { FetchTrendGraphData } from "./fetch-client";
+import { FetchReferenceGraphData, FetchTrendGraphData } from "./fetch-client";
 
 export const createQueryClient = () =>
   new QueryClient({
@@ -16,12 +16,26 @@ export const createQueryClient = () =>
   });
 
 export const queryKeys = {
+  referenceGraph: (
+    locationId: number,
+    year: string,
+    season: GraphSeason = DEFAULT_GRAPH_SEASON,
+  ) => ["reference-graph", locationId, year, season] as const,
   trendGraph: (
     locationId: number,
     option: string,
     season: GraphSeason = DEFAULT_GRAPH_SEASON,
   ) => ["trend-graph", locationId, option, season] as const,
 };
+
+export const getReferenceGraphQueryOptions = (
+  locationId: number,
+  year: string,
+  season: GraphSeason = DEFAULT_GRAPH_SEASON,
+) => ({
+  queryFn: () => FetchReferenceGraphData(year, locationId, season),
+  queryKey: queryKeys.referenceGraph(locationId, year, season),
+});
 
 export const getTrendGraphQueryOptions = (
   locationId: number,

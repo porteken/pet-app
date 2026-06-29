@@ -1,10 +1,15 @@
 "use client";
 
+import { ChartSkeleton } from "@/components/app/chart-skeleton";
 import { ErrorGraphDisplay } from "@/features/home/components/error-graph-display";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
-import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
+import {
+  getReferenceGraphQueryOptions,
+  queryKeys,
+} from "@/lib/api/query-client";
 import { DEFAULT_GRAPH_SEASON, GRAPH_CONFIG } from "@/lib/constants";
 import { YearOptions } from "@/lib/utils/select-options";
+import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import React from "react";
 
@@ -31,19 +36,13 @@ const REFERENCE_MIN_CHART_WIDTH_DESKTOP = 1120;
 const REFERENCE_POINT_WIDTH_MOBILE = 3.5;
 const REFERENCE_POINT_WIDTH_DESKTOP = 4.5;
 
-const GraphLoadingState = (): React.ReactElement => (
-  <div className="flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm text-muted-foreground graph-surface-panel">
-    Loading chart…
-  </div>
-);
-
 const GenerateReferenceGraph = dynamic(
   async () => {
     const graphModule = await import("@/features/graph");
     return graphModule.GenerateReferenceGraph;
   },
   {
-    loading: () => <GraphLoadingState />,
+    loading: () => <ChartSkeleton />,
     ssr: false,
   },
 );
@@ -58,6 +57,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   referenceYear,
   ReferencePets,
 }) => {
+  const queryClient = useQueryClient();
   const REFERENCE_YEARS = React.useMemo(
     () => YearOptions({ includeLatestYear: false }),
     [],
@@ -94,19 +94,37 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
     [referenceChartMinWidth],
   );
 
+  React.useEffect(() => {
+    const hasInitialReferenceSnapshot =
+      CurrentDates.length > 0 &&
+      CurrentPets.length === CurrentDates.length &&
+      ReferencePets.length === CurrentDates.length;
+
+    if (hasInitialReferenceSnapshot) {
+      queryClient.setQueryData(
+        queryKeys.referenceGraph(
+          id,
+          initialReferenceYear,
+          DEFAULT_GRAPH_SEASON,
+        ),
+        { dates: CurrentDates, pets: ReferencePets },
+      );
+    }
+  }, [
+    queryClient,
+    id,
+    initialReferenceYear,
+    CurrentDates,
+    CurrentPets.length,
+    ReferencePets,
+  ]);
+
   const generatePetReferenceGraph = React.useCallback(
     async (year: string) => {
       const requestId = ++latestReferenceRequestRef.current;
-      const hasInitialReferenceSnapshot =
-        CurrentDates.length > 0 &&
-        CurrentPets.length === CurrentDates.length &&
-        ReferencePets.length === CurrentDates.length;
-      const referenceData =
-        year === initialReferenceYear && hasInitialReferenceSnapshot
-          ? { dates: CurrentDates, pets: ReferencePets }
-          : await FetchReferenceGraphData(year, id, DEFAULT_GRAPH_SEASON);
-
-      const { dates, pets } = referenceData;
+      const { dates, pets } = await queryClient.fetchQuery(
+        getReferenceGraphQueryOptions(id, year),
+      );
 
       if (requestId !== latestReferenceRequestRef.current) {
         return;
@@ -114,7 +132,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
 
       setReferenceGraphSnapshot({ dates, pets, year });
     },
-    [CurrentDates, CurrentPets.length, ReferencePets, id, initialReferenceYear],
+    [id, queryClient],
   );
 
   const handleReferenceYearChange = React.useCallback(
@@ -184,26 +202,32 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
           {(() => {
             if (referenceGraphSnapshot) {
               return (
-                <div
-                  aria-label="Scrollable reference graph"
-                  className="-mx-4 min-h-0 min-w-0 flex-1 touch-pan-x overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:px-0"
-                  data-testid="reference-graph-scroll-region"
-                >
-                  <div className="h-full min-w-full" style={containerStyle}>
-                    <GenerateReferenceGraph
-                      currentPets={CurrentPets}
-                      currentYear={
-                        CurrentDates.at(-1)?.getUTCFullYear() ??
-                        GRAPH_CONFIG.YEAR_RANGE.END
-                      }
-                      dates={referenceGraphSnapshot.dates}
-                      isMobileViewport={isMobileViewport}
-                      referencePets={referenceGraphSnapshot.pets}
-                      referenceYear={referenceGraphSnapshot.year}
-                      season={DEFAULT_GRAPH_SEASON}
-                      showLegend={showReferenceLegend}
-                    />
+                <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+                  <div
+                    aria-label="Scrollable reference graph"
+                    className="-mx-4 min-h-0 min-w-0 flex-1 touch-pan-x overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:px-0"
+                    data-testid="reference-graph-scroll-region"
+                  >
+                    <div className="h-full min-w-full" style={containerStyle}>
+                      <GenerateReferenceGraph
+                        currentPets={CurrentPets}
+                        currentYear={
+                          CurrentDates.at(-1)?.getUTCFullYear() ??
+                          GRAPH_CONFIG.YEAR_RANGE.END
+                        }
+                        dates={referenceGraphSnapshot.dates}
+                        isMobileViewport={isMobileViewport}
+                        referencePets={referenceGraphSnapshot.pets}
+                        referenceYear={referenceGraphSnapshot.year}
+                        season={DEFAULT_GRAPH_SEASON}
+                        showLegend={showReferenceLegend}
+                      />
+                    </div>
                   </div>
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-linear-to-l from-(--graph-surface) to-transparent sm:hidden"
+                  />
                 </div>
               );
             }
@@ -214,7 +238,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
               );
             }
 
-            return <GraphLoadingState />;
+            return <ChartSkeleton />;
           })()}
         </div>
       </div>

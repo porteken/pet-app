@@ -108,6 +108,18 @@ export class ValidationError extends AppError {
   }
 }
 
+export const classifyDbError = (
+  error: unknown,
+  context?: ErrorContext,
+): DatabaseError => {
+  if (error instanceof DatabaseError) {
+    return error;
+  }
+  const message =
+    error instanceof Error ? error.message : "Database error occurred";
+  return new DatabaseError(message, error, context);
+};
+
 export const createError = (
   message: string,
   statusCode: number = HTTP_INTERNAL_ERROR,
@@ -137,6 +149,23 @@ export const createError = (
   return new NetworkError(message, statusCode, originalError, context);
 };
 
+const hasPgCode = (error: unknown): error is { code: string } =>
+  typeof error === "object" &&
+  error !== null &&
+  "code" in error &&
+  typeof (error as { code: unknown }).code === "string";
+
+const PG_DB_ERROR_CODES = new Set([
+  "08000",
+  "08003",
+  "08006", // connection errors
+  "40P01", // deadlock
+  "55P03", // lock not available
+  "57014", // statement canceled
+  "42501", // insufficient privilege
+  "42601", // syntax error
+]);
+
 export const handleAsyncError = (
   error: unknown,
   context?: ErrorContext,
@@ -145,8 +174,23 @@ export const handleAsyncError = (
     return error;
   }
 
+  if (hasPgCode(error) && PG_DB_ERROR_CODES.has(error.code)) {
+    const message =
+      error instanceof Error ? error.message : "Database error occurred";
+    return new DatabaseError(message, error, context);
+  }
+
+  if (error instanceof TypeError && error.message === "Failed to fetch") {
+    return new NetworkError(error.message, HTTP_INTERNAL_ERROR, error, context);
+  }
+
   if (error instanceof Error) {
-    if (error.message.includes("network") || error.message.includes("fetch")) {
+    const msgLower = error.message.toLowerCase();
+    if (
+      error.name === "NetworkError" ||
+      msgLower.includes("network") ||
+      error.message.includes("fetch")
+    ) {
       return new NetworkError(
         error.message,
         HTTP_INTERNAL_ERROR,
@@ -155,10 +199,7 @@ export const handleAsyncError = (
       );
     }
 
-    if (
-      error.message.includes("database") ||
-      error.message.includes("connection")
-    ) {
+    if (hasPgCode(error) || msgLower.includes("database")) {
       return new DatabaseError(error.message, error, context);
     }
 

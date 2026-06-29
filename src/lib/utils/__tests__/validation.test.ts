@@ -143,7 +143,15 @@ describe("validation utilities", () => {
       expect(validateYear("2023")).toBe(true);
       expect(validateYear("1999")).toBe(true);
       expect(validateYear("2000")).toBe(true);
-      expect(validateYear("9999")).toBe(true);
+      expect(validateYear("1900")).toBe(true);
+      expect(validateYear("2100")).toBe(true);
+    });
+
+    it("should return false for years outside the valid range", () => {
+      expect(validateYear("0000")).toBe(false);
+      expect(validateYear("1899")).toBe(false);
+      expect(validateYear("2101")).toBe(false);
+      expect(validateYear("9999")).toBe(false);
     });
 
     it("should return false for non-4-digit strings", () => {

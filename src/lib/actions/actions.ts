@@ -18,7 +18,7 @@ const PREFERENCE_COOKIE_OPTIONS = {
   expires: new Date(Date.now() + PREFERENCE_COOKIE_MAX_AGE_MS),
   httpOnly: true,
   path: "/",
-  sameSite: "strict",
+  sameSite: "lax",
 } as const;
 
 export async function setForecastPreferences(
@@ -56,42 +56,40 @@ export async function setGraphSeason(season: string) {
 
 import { revalidatePath } from "next/cache";
 
+const RANKINGS_COOKIE_OPTIONS = {
+  httpOnly: true,
+  path: "/",
+  sameSite: "lax",
+} as const;
+
 export const setRankingsHeatStress = async (heatStress: string) => {
   const cookieStore = await cookies();
-  cookieStore.set(RANKINGS_HEAT_STRESS_COOKIE_NAME, heatStress, {
-    httpOnly: true,
-    path: "/",
-    sameSite: "strict",
-  });
+  cookieStore.set(
+    RANKINGS_HEAT_STRESS_COOKIE_NAME,
+    heatStress,
+    RANKINGS_COOKIE_OPTIONS,
+  );
   revalidatePath("/rankings");
 };
 
 export const setRankingsSeason = async (season: GraphSeason) => {
   const cookieStore = await cookies();
-  cookieStore.set(RANKINGS_SEASON_COOKIE_NAME, season, {
-    httpOnly: true,
-    path: "/",
-    sameSite: "strict",
-  });
+  cookieStore.set(RANKINGS_SEASON_COOKIE_NAME, season, RANKINGS_COOKIE_OPTIONS);
   revalidatePath("/rankings");
 };
 
 export const setRankingsState = async (state: string) => {
   const cookieStore = await cookies();
-  cookieStore.set(RANKINGS_STATE_COOKIE_NAME, state, {
-    httpOnly: true,
-    path: "/",
-    sameSite: "strict",
-  });
+  cookieStore.set(RANKINGS_STATE_COOKIE_NAME, state, RANKINGS_COOKIE_OPTIONS);
   revalidatePath("/rankings");
 };
 
 export const setRankingsYear = async (year: number) => {
   const cookieStore = await cookies();
-  cookieStore.set(RANKINGS_YEAR_COOKIE_NAME, String(year), {
-    httpOnly: true,
-    path: "/",
-    sameSite: "strict",
-  });
+  cookieStore.set(
+    RANKINGS_YEAR_COOKIE_NAME,
+    String(year),
+    RANKINGS_COOKIE_OPTIONS,
+  );
   revalidatePath("/rankings");
 };

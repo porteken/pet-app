@@ -361,11 +361,11 @@ describe("error Classes", () => {
         expect(result.originalError).toBe(error);
       });
 
-      it("should convert Error with network message to DatabaseError", () => {
+      it("should convert Error with network message to NetworkError", () => {
         const error = new Error("Network connection failed");
         const result = handleAsyncError(error);
 
-        expect(result).toBeInstanceOf(DatabaseError);
+        expect(result).toBeInstanceOf(NetworkError);
         expect(result.message).toBe("Network connection failed");
         expect(result.statusCode).toBe(500);
         expect(result.originalError).toBe(error);

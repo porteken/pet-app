@@ -198,7 +198,7 @@ describe("setRankingsYear", () => {
       expect.objectContaining({
         httpOnly: true,
         path: "/",
-        sameSite: "strict",
+        sameSite: "lax",
       }),
     );
   });
@@ -232,7 +232,7 @@ describe("setRankingsState", () => {
       expect.objectContaining({
         httpOnly: true,
         path: "/",
-        sameSite: "strict",
+        sameSite: "lax",
       }),
     );
   });
@@ -266,7 +266,7 @@ describe("setRankingsSeason", () => {
       expect.objectContaining({
         httpOnly: true,
         path: "/",
-        sameSite: "strict",
+        sameSite: "lax",
       }),
     );
   });
@@ -300,7 +300,7 @@ describe("setRankingsHeatStress", () => {
       expect.objectContaining({
         httpOnly: true,
         path: "/",
-        sameSite: "strict",
+        sameSite: "lax",
       }),
     );
   });

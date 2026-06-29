@@ -10,6 +10,7 @@ const projectRoot = import.meta.dirname;
 
 const nextConfig: NextConfig = {
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         hostname: "avatars.githubusercontent.com",

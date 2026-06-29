@@ -1,5 +1,6 @@
 import { shouldUseRuntimeDbMocks } from "@/config/environment";
 import { sortBy } from "@/lib/sort-by";
+import { classifyDbError } from "@/lib/utils/errors";
 import { getRuntimeMockTableRows } from "@/testing/runtime-mocks";
 import { sql } from "kysely";
 
@@ -207,7 +208,7 @@ export async function fetchCityRankingsRows(
       return buildQuery().execute();
     }
 
-    throw error;
+    throw classifyDbError(error);
   }
 }
 
@@ -223,7 +224,7 @@ export async function fetchLocationRows(column: LocationIdentifierColumn) {
       return buildLocationRowsQuery("location_id").execute();
     }
 
-    throw error;
+    throw classifyDbError(error);
   }
 }
 
@@ -260,7 +261,7 @@ export async function fetchTrendGraphRows(
       return buildQuery().execute();
     }
 
-    throw error;
+    throw classifyDbError(error);
   }
 }
 
@@ -317,7 +318,7 @@ export async function fetchHistoricalYearRow(
       return buildQuery().executeTakeFirst();
     }
 
-    throw error;
+    throw classifyDbError(error);
   }
 }
 
@@ -355,6 +356,6 @@ export async function fetchForecastRows(
       return buildQuery().execute();
     }
 
-    throw error;
+    throw classifyDbError(error);
   }
 }

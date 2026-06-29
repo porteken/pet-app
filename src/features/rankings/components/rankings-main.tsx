@@ -302,6 +302,7 @@ class SortHeader extends React.PureComponent<{
   label: string;
   setSortColumn: React.Dispatch<React.SetStateAction<SortColumn>>;
   setSortDirection: React.Dispatch<React.SetStateAction<"asc" | "desc">>;
+  startTransition: React.TransitionStartFunction;
 }> {
   private readonly handleClick = () => {
     const {
@@ -310,15 +311,20 @@ class SortHeader extends React.PureComponent<{
       currentDirection,
       setSortColumn,
       setSortDirection,
+      startTransition,
     } = this.props;
 
     if (currentColumn === column) {
-      setSortDirection(currentDirection === "asc" ? "desc" : "asc");
+      startTransition(() => {
+        setSortDirection(currentDirection === "asc" ? "desc" : "asc");
+      });
       return;
     }
 
-    setSortColumn(column);
-    setSortDirection("asc");
+    startTransition(() => {
+      setSortColumn(column);
+      setSortDirection("asc");
+    });
   };
 
   public render(): React.ReactElement {
@@ -629,6 +635,7 @@ export function RankingsMain({
                       label="Rank"
                       setSortColumn={setSortColumn}
                       setSortDirection={setSortDirection}
+                      startTransition={startTransition}
                     />
                     <SortHeader
                       column="city"
@@ -637,6 +644,7 @@ export function RankingsMain({
                       label="City"
                       setSortColumn={setSortColumn}
                       setSortDirection={setSortDirection}
+                      startTransition={startTransition}
                     />
                     <SortHeader
                       column="state"
@@ -645,6 +653,7 @@ export function RankingsMain({
                       label="State"
                       setSortColumn={setSortColumn}
                       setSortDirection={setSortDirection}
+                      startTransition={startTransition}
                     />
                     <SortHeader
                       column="avg_pet"
@@ -653,6 +662,7 @@ export function RankingsMain({
                       label="Avg PET"
                       setSortColumn={setSortColumn}
                       setSortDirection={setSortDirection}
+                      startTransition={startTransition}
                     />
                     <SortHeader
                       column="max_pet"
@@ -661,6 +671,7 @@ export function RankingsMain({
                       label="Max PET"
                       setSortColumn={setSortColumn}
                       setSortDirection={setSortDirection}
+                      startTransition={startTransition}
                     />
                     <th className="px-6 py-4 text-left text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
                       PET Range (10th-90th percentile)
@@ -672,6 +683,7 @@ export function RankingsMain({
                       label="Change from 2000"
                       setSortColumn={setSortColumn}
                       setSortDirection={setSortDirection}
+                      startTransition={startTransition}
                     />
                     <th className="px-6 py-4 text-left text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
                       2100 Forecast Range

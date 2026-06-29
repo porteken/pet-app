@@ -1,5 +1,5 @@
 import { DatabaseError } from "@/components/app/database-error";
-import Page from "@/features/page";
+import Page, { PageQueryProvider } from "@/features/page";
 import { loadLocationPageData } from "@/features/page/server/location-page-data";
 import { notFound } from "next/navigation";
 
@@ -24,5 +24,9 @@ export default async function LocationPage({
     notFound();
   }
 
-  return <Page {...result.payload} />;
+  return (
+    <PageQueryProvider>
+      <Page {...result.payload} />
+    </PageQueryProvider>
+  );
 }

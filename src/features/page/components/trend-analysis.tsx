@@ -1,15 +1,19 @@
 "use client";
 
+import { ChartSkeleton } from "@/components/app/chart-skeleton";
 import { ForecastControls } from "@/components/app/forecast-controls";
 import { ErrorGraphDisplay } from "@/features/home/components/error-graph-display";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { setForecastPreferences } from "@/lib/actions/actions";
-import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
+import { FetchForecastData } from "@/lib/api/fetch-client";
+import { getTrendGraphQueryOptions, queryKeys } from "@/lib/api/query-client";
 import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
 import {
   buildTrendAnalysisResult,
   type TrendGraphSnapshot,
 } from "@/lib/utils/trend-analysis";
+import * as Sentry from "@sentry/nextjs";
+import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import React from "react";
 
@@ -36,19 +40,13 @@ const DEFAULT_INITIAL_TRENDLINE_PETS: number[] = [];
 const DEFAULT_INITIAL_YEAR_PETS: number[] = [];
 const DEFAULT_INITIAL_YEARS: number[] = [];
 
-const GraphLoadingState = (): React.ReactElement => (
-  <div className="flex h-full items-center justify-center rounded-2xl px-4 text-center text-sm text-muted-foreground graph-surface-panel">
-    Loading chart…
-  </div>
-);
-
 const GenerateTrendGraph = dynamic(
   async () => {
     const graphModule = await import("@/features/graph");
     return graphModule.GenerateTrendGraph;
   },
   {
-    loading: () => <GraphLoadingState />,
+    loading: () => <ChartSkeleton />,
     ssr: false,
   },
 );
@@ -56,8 +54,11 @@ const GenerateTrendGraph = dynamic(
 const ignorePersistenceError = async (promise: Promise<void>) => {
   try {
     await promise;
-  } catch {
-    // The local UI state remains valid even if persistence fails.
+  } catch (error) {
+    console.warn("Failed to persist preference", error);
+    Sentry.captureException(error, {
+      tags: { errorSource: "persistPreference" },
+    });
   }
 };
 
@@ -76,6 +77,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   onMeasureChange,
   onSeasonChange,
 }) => {
+  const queryClient = useQueryClient();
   const initialTrendData =
     React.useMemo<TrendGraphDataProperties | null>(() => {
       if (
@@ -143,6 +145,21 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
     setForecastHeatStress(undefined);
   }, [initialTrendSnapshot]);
 
+  React.useEffect(() => {
+    if (initialTrendData) {
+      queryClient.setQueryData(
+        queryKeys.trendGraph(id, initialGraphMeasure, initialGraphSeason),
+        initialTrendData,
+      );
+    }
+  }, [
+    queryClient,
+    id,
+    initialGraphMeasure,
+    initialGraphSeason,
+    initialTrendData,
+  ]);
+
   const generatePetTrendGraph = React.useCallback(
     async (
       option: string,
@@ -161,17 +178,10 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           enableForecast,
           fetchForecastData: () =>
             FetchForecastData(id, yearsAhead, season, option),
-          fetchTrendGraphData: () => {
-            if (
-              initialTrendData &&
-              option === initialGraphMeasure &&
-              season === initialGraphSeason
-            ) {
-              return Promise.resolve(initialTrendData);
-            }
-
-            return FetchTrendGraphData(option, id, season);
-          },
+          fetchTrendGraphData: () =>
+            queryClient.fetchQuery(
+              getTrendGraphQueryOptions(id, option, season),
+            ),
           option,
           season,
         });
@@ -194,7 +204,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
         setForecastHeatStress(undefined);
       }
     },
-    [id, initialGraphMeasure, initialGraphSeason, initialTrendData],
+    [id, queryClient],
   );
 
   const handleGraphMeasureChange = React.useCallback(
@@ -378,7 +388,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
               return <ErrorGraphDisplay message="Unable to load trend data" />;
             }
 
-            return <GraphLoadingState />;
+            return <ChartSkeleton />;
           })()}
         </div>
       </div>

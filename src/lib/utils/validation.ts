@@ -18,8 +18,15 @@ export function validateTrendOption(option: string): option is "avg" | "max" {
   return option === "avg" || option === "max";
 }
 
+const MIN_VALID_YEAR = 1900;
+const MAX_VALID_YEAR = 2100;
+
 export function validateYear(year: string): boolean {
-  return /^\d{4}$/u.test(year);
+  if (!/^\d{4}$/u.test(year)) {
+    return false;
+  }
+  const numeric = Number(year);
+  return numeric >= MIN_VALID_YEAR && numeric <= MAX_VALID_YEAR;
 }
 
 export function validateYearPets(yearPets: number[]): void {
@@ -27,9 +34,6 @@ export function validateYearPets(yearPets: number[]): void {
     throw new Error("Invalid pet count data detected");
   }
 }
-
-const MIN_VALID_YEAR = 1900;
-const MAX_VALID_YEAR = 2100;
 
 export function validateYears(years: number[]): void {
   if (

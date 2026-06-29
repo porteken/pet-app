@@ -1,9 +1,20 @@
 import "@testing-library/jest-dom";
 
 import { MockForecastControls } from "@/testing/react-component-mocks";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const renderWithQueryClient = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+  });
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+  return render(ui, { wrapper: Wrapper });
+};
 
 vi.mock("@/features/graph", () => ({
   GenerateTrendGraph: mockFn().mockReturnValue(
@@ -106,35 +117,39 @@ describe("trendAnalysis", () => {
 
   describe("basic Rendering", () => {
     it("should render trend analysis heading", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
       await waitForInitialTrendAnalysisRender();
 
       expect(screen.getByText("Trend Analysis")).toBeInTheDocument();
     });
 
     it("should render graph measure select", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
       await waitForInitialTrendAnalysisRender();
 
       expect(screen.getByLabelText("Graph Measure")).toBeInTheDocument();
     });
 
     it("should render forecast controls when measure is avg", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
       await waitForInitialTrendAnalysisRender();
 
       expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
     });
 
     it("should render forecast controls for seasonal averages", async () => {
-      render(<TrendAnalysis {...defaultProps} graphSeason="Winter" />);
+      renderWithQueryClient(
+        <TrendAnalysis {...defaultProps} graphSeason="Winter" />,
+      );
       await waitForInitialTrendAnalysisRender();
 
       expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
     });
 
     it("should render forecast controls when measure is max", async () => {
-      render(<TrendAnalysis {...defaultProps} initialGraphMeasure="max" />);
+      renderWithQueryClient(
+        <TrendAnalysis {...defaultProps} initialGraphMeasure="max" />,
+      );
 
       await waitFor(() => {
         expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
@@ -142,7 +157,9 @@ describe("trendAnalysis", () => {
     });
 
     it("should render trend graph", async () => {
-      const { container } = render(<TrendAnalysis {...defaultProps} />);
+      const { container } = renderWithQueryClient(
+        <TrendAnalysis {...defaultProps} />,
+      );
 
       await waitFor(() => {
         expect(screen.getByTestId("mock-trend-graph")).toBeInTheDocument();
@@ -157,7 +174,7 @@ describe("trendAnalysis", () => {
     });
 
     it("should call FetchTrendGraphData on mount when no initial trend snapshot is provided", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1, "Annual");
@@ -165,7 +182,7 @@ describe("trendAnalysis", () => {
     });
 
     it("should use the initial trend snapshot without refetching on mount", async () => {
-      render(
+      renderWithQueryClient(
         <TrendAnalysis
           {...defaultProps}
           initialIncreasePerYear={0.5}
@@ -192,7 +209,7 @@ describe("trendAnalysis", () => {
     });
 
     it("should call GenerateTrendGraph with fetched data", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(GenerateTrendGraph).toHaveBeenCalledWith(
@@ -226,7 +243,7 @@ describe("trendAnalysis", () => {
         writable: true,
       });
 
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId("mock-trend-graph")).toBeInTheDocument();
@@ -263,7 +280,7 @@ describe("trendAnalysis", () => {
 
   describe("thermal Stress Display", () => {
     it("should display current thermal stress description", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(getHeatStressDescription).toHaveBeenCalledWith(
@@ -288,7 +305,7 @@ describe("trendAnalysis", () => {
         years: [],
       });
 
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.queryByText("Thermal Stress:")).not.toBeInTheDocument();
@@ -296,7 +313,7 @@ describe("trendAnalysis", () => {
     });
 
     it("should display forecast thermal stress when forecast is enabled", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
@@ -318,7 +335,7 @@ describe("trendAnalysis", () => {
     });
 
     it("should display forecast confidence range when available", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
@@ -335,7 +352,7 @@ describe("trendAnalysis", () => {
   describe("graph Measure Change", () => {
     it("should change measure when select value changes", async () => {
       const onMeasureChange = mockFn().mockResolvedValue(Promise.resolve());
-      render(
+      renderWithQueryClient(
         <TrendAnalysis {...defaultProps} onMeasureChange={onMeasureChange} />,
       );
 
@@ -348,7 +365,7 @@ describe("trendAnalysis", () => {
     });
 
     it("should refetch graph data with new measure", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1, "Annual");
@@ -367,7 +384,7 @@ describe("trendAnalysis", () => {
         new Error("Server error"),
       );
 
-      render(
+      renderWithQueryClient(
         <TrendAnalysis {...defaultProps} onMeasureChange={onMeasureChange} />,
       );
 
@@ -390,14 +407,6 @@ describe("trendAnalysis", () => {
             years: number[];
           }) => void)
         | undefined;
-      let resolveAvgRequest:
-        | ((value: {
-            increase_per_year: number;
-            trendline_pets: number[];
-            year_pets: number[];
-            years: number[];
-          }) => void)
-        | undefined;
 
       vi.mocked(FetchTrendGraphData)
         .mockResolvedValueOnce({
@@ -411,37 +420,26 @@ describe("trendAnalysis", () => {
             new Promise((resolve) => {
               resolveMaxRequest = resolve;
             }),
-        )
-        .mockImplementationOnce(
-          () =>
-            new Promise((resolve) => {
-              resolveAvgRequest = resolve;
-            }),
         );
 
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitForInitialTrendAnalysisRender();
 
       const select = screen.getByLabelText("Graph Measure");
       fireEvent.change(select, { target: { value: "max" } });
+      // Switch back to avg — React Query returns cached avg data immediately
       fireEvent.change(select, { target: { value: "avg" } });
 
-      resolveAvgRequest?.({
-        increase_per_year: 0.2,
-        trendline_pets: [11, 12, 13, 14],
-        year_pets: [10, 11, 12, 13],
-        years: [2020, 2021, 2022, 2023],
-      });
-
+      // Switching back to avg hits the query cache; graph shows original avg data
       await waitFor(() => {
         const calls = vi.mocked(GenerateTrendGraph).mock.calls;
         expect(calls.at(-1)?.[0]).toStrictEqual(
           expect.objectContaining({
-            increasePerYear: 0.2,
+            increasePerYear: 0.5,
             option: "avg",
-            trendlinePets: [11, 12, 13, 14],
-            yearPets: [10, 11, 12, 13],
+            trendlinePets: [20, 22, 24, 26],
+            yearPets: [20, 22, 24, 26],
           }),
         );
       });
@@ -453,14 +451,15 @@ describe("trendAnalysis", () => {
         years: [2020, 2021, 2022, 2023],
       });
 
+      // Stale max response resolves but the requestId guard discards it
       await waitFor(() => {
         const calls = vi.mocked(GenerateTrendGraph).mock.calls;
         expect(calls.at(-1)?.[0]).toStrictEqual(
           expect.objectContaining({
-            increasePerYear: 0.2,
+            increasePerYear: 0.5,
             option: "avg",
-            trendlinePets: [11, 12, 13, 14],
-            yearPets: [10, 11, 12, 13],
+            trendlinePets: [20, 22, 24, 26],
+            yearPets: [20, 22, 24, 26],
           }),
         );
       });
@@ -469,7 +468,7 @@ describe("trendAnalysis", () => {
 
   describe("forecast Controls", () => {
     it("should enable forecast when toggle is clicked", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId("forecast-toggle")).toBeInTheDocument();
@@ -485,7 +484,7 @@ describe("trendAnalysis", () => {
     });
 
     it("should update years ahead when input changes", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId("forecast-years")).toBeInTheDocument();
@@ -504,7 +503,7 @@ describe("trendAnalysis", () => {
     });
 
     it("should initialize forecast controls from cookie-backed props", async () => {
-      render(
+      renderWithQueryClient(
         <TrendAnalysis
           {...defaultProps}
           initialForecastEnabled={true}
@@ -518,7 +517,9 @@ describe("trendAnalysis", () => {
     });
 
     it("should fetch seasonal forecast data when enabled", async () => {
-      render(<TrendAnalysis {...defaultProps} graphSeason="Winter" />);
+      renderWithQueryClient(
+        <TrendAnalysis {...defaultProps} graphSeason="Winter" />,
+      );
 
       await waitFor(() => {
         expect(screen.getByTestId("forecast-toggle")).toBeInTheDocument();
@@ -536,7 +537,7 @@ describe("trendAnalysis", () => {
         new Error("Cookie write failed"),
       );
 
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId("forecast-toggle")).toBeInTheDocument();
@@ -550,7 +551,7 @@ describe("trendAnalysis", () => {
     });
 
     it("should call GenerateTrendGraph with forecast data when enabled", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
@@ -581,7 +582,7 @@ describe("trendAnalysis", () => {
     });
 
     it("should disable forecast when toggle is clicked again", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId("forecast-toggle")).toBeInTheDocument();
@@ -603,7 +604,7 @@ describe("trendAnalysis", () => {
     });
 
     it("should not fetch forecast data when forecast is disabled", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(FetchTrendGraphData).toHaveBeenCalled();
@@ -619,7 +620,7 @@ describe("trendAnalysis", () => {
         new Error("API Error"),
       );
 
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(
@@ -634,7 +635,7 @@ describe("trendAnalysis", () => {
         new Error("API Error"),
       );
 
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(
@@ -650,7 +651,7 @@ describe("trendAnalysis", () => {
         new Error("API Error"),
       );
 
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(
@@ -671,7 +672,7 @@ describe("trendAnalysis", () => {
         upperBound90: [],
       });
 
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId("forecast-controls")).toBeInTheDocument();
@@ -696,7 +697,7 @@ describe("trendAnalysis", () => {
         years: [2023],
       });
 
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
         expect(getHeatStressDescription).toHaveBeenCalledWith(
@@ -709,7 +710,7 @@ describe("trendAnalysis", () => {
     });
 
     it("should have correct select options", async () => {
-      render(<TrendAnalysis {...defaultProps} />);
+      renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
       await waitForInitialTrendAnalysisRender();
 
       const select = screen.getByLabelText("Graph Measure");
@@ -721,7 +722,9 @@ describe("trendAnalysis", () => {
     });
 
     it("should have default measure selected", async () => {
-      render(<TrendAnalysis {...defaultProps} initialGraphMeasure="avg" />);
+      renderWithQueryClient(
+        <TrendAnalysis {...defaultProps} initialGraphMeasure="avg" />,
+      );
       await waitForInitialTrendAnalysisRender();
 
       const select = screen.getByLabelText("Graph Measure");

@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { mockDatabaseError, mockLoadLocationPageData, mockNotFound, mockPage } =
@@ -33,6 +34,9 @@ vi.mock("@/features/page/server/location-page-data", () => ({
 
 vi.mock("@/features/page", () => ({
   default: mockPage,
+  PageQueryProvider: mockFn(
+    ({ children }: { children: React.ReactNode }) => children,
+  ),
 }));
 
 vi.mock("next/dynamic", () => ({

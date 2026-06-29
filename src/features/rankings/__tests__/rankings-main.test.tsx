@@ -403,6 +403,7 @@ const extremeHeatCityRankings = [
   createMockRankingItem({
     avg_pet: 42,
     city: "Extreme Heat City",
+    location_id: 23,
     max_pet: 48,
   }),
 ];

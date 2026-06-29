@@ -1,8 +1,19 @@
 import "@testing-library/jest-dom";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const renderWithQueryClient = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+  return render(ui, { wrapper: Wrapper });
+};
 
 vi.mock("@/features/graph", () => ({
   GenerateReferenceGraph: mockFn().mockReturnValue(
@@ -57,7 +68,9 @@ describe("referenceData", () => {
   });
 
   it("should render reference graph controls and graph", async () => {
-    const { container } = render(<ReferenceData {...defaultProps} />);
+    const { container } = renderWithQueryClient(
+      <ReferenceData {...defaultProps} />,
+    );
 
     expect(screen.getByText("Reference Data")).toBeInTheDocument();
     expect(screen.getByLabelText("Reference Year")).toBeInTheDocument();
@@ -93,7 +106,7 @@ describe("referenceData", () => {
       writable: true,
     });
 
-    render(<ReferenceData {...defaultProps} />);
+    renderWithQueryClient(<ReferenceData {...defaultProps} />);
 
     const toggle = screen.getByRole("button", { name: "Show Graph Legend" });
     expect(toggle).toHaveAttribute("aria-expanded", "false");
@@ -123,7 +136,7 @@ describe("referenceData", () => {
 
   it("should notify the parent and fetch selected annual reference year data", async () => {
     const onReferenceYearChange = mockFn();
-    const { rerender } = render(
+    const { rerender } = renderWithQueryClient(
       <ReferenceData
         {...defaultProps}
         onReferenceYearChange={onReferenceYearChange}
@@ -149,7 +162,7 @@ describe("referenceData", () => {
   });
 
   it("should pass the current year using UTC-safe date handling", async () => {
-    render(
+    renderWithQueryClient(
       <ReferenceData
         {...defaultProps}
         CurrentDates={testCurrentDates}
@@ -169,7 +182,7 @@ describe("referenceData", () => {
   });
 
   it("should refetch the initial reference year when the server snapshot is empty", async () => {
-    render(
+    renderWithQueryClient(
       <ReferenceData
         {...defaultProps}
         CurrentDates={emptyDates}

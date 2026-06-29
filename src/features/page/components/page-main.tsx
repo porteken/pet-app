@@ -7,6 +7,7 @@ import {
   persistGraphSeasonPreference,
   persistReferenceYearPreference,
 } from "@/lib/utils/client-preferences";
+import * as Sentry from "@sentry/nextjs";
 import React from "react";
 
 import { PageHeader } from "./page-header";
@@ -20,16 +21,22 @@ import type { FC } from "react";
 const handleMeasureChange = async (measure: string): Promise<void> => {
   try {
     await persistGraphMeasurePreference(measure);
-  } catch {
-    // Ignore persistence failures; the UI can continue with the selected value.
+  } catch (error) {
+    console.warn("Failed to persist graph measure preference", error);
+    Sentry.captureException(error, {
+      tags: { errorSource: "persistPreference" },
+    });
   }
 };
 
 const ignorePersistenceError = async (promise: Promise<void>) => {
   try {
     await promise;
-  } catch {
-    // The local UI state remains valid even if persistence fails.
+  } catch (error) {
+    console.warn("Failed to persist graph preference", error);
+    Sentry.captureException(error, {
+      tags: { errorSource: "persistPreference" },
+    });
   }
 };
 
@@ -62,8 +69,11 @@ const Main: FC<PageProperties> = ({
 
     try {
       await persistGraphSeasonPreference(season);
-    } catch {
-      // Ignore persistence failures; the UI can continue with the selected value.
+    } catch (error) {
+      console.warn("Failed to persist graph season preference", error);
+      Sentry.captureException(error, {
+        tags: { errorSource: "persistPreference" },
+      });
     }
   }, []);
 

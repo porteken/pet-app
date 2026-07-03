@@ -1,4 +1,5 @@
 import {
+  FetchForecastData,
   FetchLocations,
   FetchReferenceGraphData,
   FetchTrendGraphData,
@@ -25,6 +26,7 @@ import { getLatestCookieValue } from "@/lib/utils/server-cookies";
 import { cookies } from "next/headers";
 
 import type { PageProperties } from "../model/types";
+import type { ForecastGraphData } from "@/lib/utils/trend-analysis";
 import type {
   LocationOptionSection,
   LocationProperties,
@@ -34,6 +36,7 @@ import type {
 
 interface GraphData {
   dates: Date[];
+  forecast_data?: ForecastGraphData;
   graphDataError: boolean;
   increase_per_year: number;
   pets: number[];
@@ -166,12 +169,27 @@ const getPreferencesFromCookies =
     };
   };
 
-const fetchGraphData = async (
-  locationId: number,
-  measure: string,
-  season: GraphSeason,
-  referenceYear: string,
-): Promise<GraphData> => {
+interface FetchGraphDataOptions {
+  forecastEnabled: boolean;
+  forecastYearsAhead: number;
+  locationId: number;
+  measure: string;
+  referenceYear: string;
+  season: GraphSeason;
+}
+
+const fetchGraphData = async ({
+  forecastEnabled,
+  forecastYearsAhead,
+  locationId,
+  measure,
+  referenceYear,
+  season,
+}: FetchGraphDataOptions): Promise<GraphData> => {
+  const forecastPromise = forecastEnabled
+    ? FetchForecastData(locationId, forecastYearsAhead, season, measure)
+    : undefined;
+
   const [trendResult, currentResult, referenceResult] =
     await Promise.allSettled([
       FetchTrendGraphData(measure, locationId, season),
@@ -182,6 +200,15 @@ const fetchGraphData = async (
       ),
       FetchReferenceGraphData(referenceYear, locationId, DEFAULT_GRAPH_SEASON),
     ]);
+
+  let forecastData: ForecastGraphData | undefined;
+  if (forecastPromise) {
+    try {
+      forecastData = await forecastPromise;
+    } catch {
+      // Forecast data is optional; leave forecastData unset on failure.
+    }
+  }
 
   const emptyGraphData = createEmptyGraphData();
   const trendData = getFulfilledValue(trendResult);
@@ -201,6 +228,7 @@ const fetchGraphData = async (
   return {
     ...referenceGraphData,
     ...trendGraphData,
+    forecast_data: forecastData,
     graphDataError,
   };
 };
@@ -250,9 +278,18 @@ export const loadLocationPageData = async (
     };
   }
 
-  const [preferences, locationData] = await Promise.all([
-    getPreferencesFromCookies(),
+  const preferences = await getPreferencesFromCookies();
+
+  const [locationData, graphData] = await Promise.all([
     fetchLocationData(),
+    fetchGraphData({
+      forecastEnabled: preferences.initialForecastEnabled,
+      forecastYearsAhead: preferences.initialForecastYearsAhead,
+      locationId,
+      measure: preferences.initialGraphMeasure,
+      referenceYear: preferences.initialReferenceYear,
+      season: preferences.initialGraphSeason,
+    }),
   ]);
 
   if (!locationData) {
@@ -286,13 +323,6 @@ export const loadLocationPageData = async (
     };
   }
 
-  const graphData = await fetchGraphData(
-    locationId,
-    preferences.initialGraphMeasure,
-    preferences.initialGraphSeason,
-    preferences.initialReferenceYear,
-  );
-
   return {
     payload: {
       CurrentDates: graphData.dates,
@@ -300,6 +330,7 @@ export const loadLocationPageData = async (
       graphDataError: graphData.graphDataError,
       IncreasePerYear: graphData.increase_per_year,
       id: locationId,
+      initialForecastData: graphData.forecast_data,
       initialForecastEnabled: preferences.initialForecastEnabled,
       initialForecastYearsAhead: preferences.initialForecastYearsAhead,
       initialGraphMeasure: preferences.initialGraphMeasure,

@@ -47,6 +47,23 @@ describe("queryKeys", () => {
       "Annual",
     ]);
   });
+
+  it("builds stable forecast query keys", () => {
+    expect(queryKeys.forecast(123, 10, "Winter", "max")).toStrictEqual([
+      "forecast",
+      123,
+      10,
+      "Winter",
+      "max",
+    ]);
+    expect(queryKeys.forecast(123, 10)).toStrictEqual([
+      "forecast",
+      123,
+      10,
+      "Annual",
+      "avg",
+    ]);
+  });
 });
 
 describe("getTrendGraphQueryOptions", () => {

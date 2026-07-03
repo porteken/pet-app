@@ -1,7 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockAppProviders } = vi.hoisted(() => ({
+const { captureExceptionMock, mockAppProviders } = vi.hoisted(() => ({
+  captureExceptionMock: mockFn(),
   mockAppProviders: mockFn(({ children }: { children: React.ReactNode }) => (
     <div data-testid="app-providers">{children}</div>
   )),
@@ -9,6 +10,10 @@ const { mockAppProviders } = vi.hoisted(() => ({
 
 vi.mock("@/components/app/providers", () => ({
   AppProviders: mockAppProviders,
+}));
+
+vi.mock("@sentry/nextjs", () => ({
+  captureException: captureExceptionMock,
 }));
 
 vi.mock("next/link", () => ({
@@ -37,8 +42,13 @@ import RootLayout, { metadata } from "../layout";
 import Loading from "../loading";
 import MapError from "../map/error";
 import NotFound from "../not-found";
+import RankingsError from "../rankings/error";
 
 describe("app shell and error pages", () => {
+  beforeEach(() => {
+    captureExceptionMock.mockClear();
+  });
+
   it("renders the default fallback page", () => {
     render(<Default />);
 
@@ -93,10 +103,11 @@ describe("app shell and error pages", () => {
     });
   });
 
-  it("renders the root error page and retries on click", () => {
+  it("renders the root error page, reports to Sentry, and retries on click", () => {
     const reset = mockFn();
+    const error = new Error("Unexpected failure");
 
-    render(<ErrorPage error={new Error("Unexpected failure")} reset={reset} />);
+    render(<ErrorPage error={error} reset={reset} />);
 
     expect(screen.getByText("Something went wrong!")).toBeInTheDocument();
     expect(
@@ -105,18 +116,17 @@ describe("app shell and error pages", () => {
     expect(
       screen.getByRole("link", { name: "porteken@gmail.com" }),
     ).toHaveAttribute("href", "mailto:porteken@gmail.com");
+    expect(captureExceptionMock).toHaveBeenCalledWith(error);
 
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
 
     expect(reset).toHaveBeenCalledTimes(1);
   });
 
-  it("renders the global error page and retries on click", () => {
+  it("renders the global error page, reports to Sentry, and retries on click", () => {
     const reset = mockFn();
-    const globalErrorPage = GlobalErrorPage({
-      error: new Error("Global failure"),
-      reset,
-    });
+    const error = new Error("Global failure");
+    const globalErrorPage = GlobalErrorPage({ error, reset });
 
     expect(globalErrorPage.type).toBe("html");
     expect(globalErrorPage.props.lang).toBe("en");
@@ -128,40 +138,75 @@ describe("app shell and error pages", () => {
       screen.getByText("An unexpected error occurred. Please try again."),
     ).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("Need help?");
+    expect(captureExceptionMock).toHaveBeenCalledWith(error);
 
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
 
     expect(reset).toHaveBeenCalledTimes(1);
   });
 
-  it("renders the about page error content", () => {
+  it("renders the about page error content without leaking the raw error message", () => {
     const reset = mockFn();
+    const error = new Error("About exploded");
 
-    render(<AboutError error={new Error("About exploded")} reset={reset} />);
+    render(<AboutError error={error} reset={reset} />);
 
     expect(screen.getByText("About Page Error")).toBeInTheDocument();
-    expect(screen.getByText("About exploded")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "An error occurred while loading the about page content.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("About exploded")).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Return to homepage" }),
     ).toHaveAttribute("href", "/");
+    expect(captureExceptionMock).toHaveBeenCalledWith(error);
   });
 
-  it("renders the map error fallback content", () => {
-    render(<MapError error={new Error("Map load failed")} reset={mockFn()} />);
+  it("renders the map error fallback content without leaking the raw error message", () => {
+    const error = new Error("Map load failed");
+    render(<MapError error={error} reset={mockFn()} />);
 
     expect(screen.getByText("Map Error")).toBeInTheDocument();
-    expect(screen.getByText("Map load failed")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "An error occurred while loading the map data or rendering the map.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Map load failed")).not.toBeInTheDocument();
+    expect(captureExceptionMock).toHaveBeenCalledWith(error);
   });
 
-  it("renders the location error fallback content", () => {
-    render(
-      <LocationError
-        error={new Error("Location data load failed")}
-        reset={mockFn()}
-      />,
-    );
+  it("renders the rankings error fallback content and reports to Sentry", () => {
+    const error = new Error("Rankings query failed");
+    render(<RankingsError error={error} reset={mockFn()} />);
+
+    expect(screen.getByText("Rankings Error")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Failed to load city rankings. The database may be temporarily unavailable.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Return to homepage" }),
+    ).toHaveAttribute("href", "/");
+    expect(captureExceptionMock).toHaveBeenCalledWith(error);
+  });
+
+  it("renders the location error fallback content without leaking the raw error message", () => {
+    const error = new Error("Location data load failed");
+    render(<LocationError error={error} reset={mockFn()} />);
 
     expect(screen.getByText("Location Data Error")).toBeInTheDocument();
-    expect(screen.getByText("Location data load failed")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Failed to load the location data. The location may not exist or there was an error retrieving the data.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Location data load failed"),
+    ).not.toBeInTheDocument();
+    expect(captureExceptionMock).toHaveBeenCalledWith(error);
   });
 });

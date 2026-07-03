@@ -4,16 +4,30 @@ import {
   MockForecastControls,
   MockSelectControl,
 } from "@/testing/react-component-mocks";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import type * as TanstackReactQuery from "@tanstack/react-query";
 
 const createDelay = (ms: number) =>
   new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+
+const renderHome = (element: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        gcTime: 0,
+        retry: false,
+      },
+    },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>{element}</QueryClientProvider>,
+  );
+};
 const mockPush = mockFn();
 const getHomeSelectTestId = (label?: string) =>
   label === "Season" ? "graph-season-select" : "graph-measure-select";
@@ -65,24 +79,16 @@ class MockButton extends React.PureComponent<{
   }
 }
 
-const mockQueryClient = {
-  fetchQuery: mockFn(async (options: { queryFn: () => unknown }) =>
-    options.queryFn(),
-  ),
-};
-
-vi.mock("@tanstack/react-query", async (importOriginal) => {
-  const actual = await importOriginal<typeof TanstackReactQuery>();
-  return {
-    ...actual,
-    ...Object.fromEntries([["useQueryClient", () => mockQueryClient]]),
-  };
-});
-
 vi.mock("@/lib/actions/actions", () => ({
   setForecastPreferences: mockFn().mockResolvedValue({}),
   setGraphMeasure: mockFn().mockResolvedValue({}),
   setGraphSeason: mockFn().mockResolvedValue({}),
+}));
+
+const { mockToast } = vi.hoisted(() => ({ mockToast: mockFn() }));
+
+vi.mock("@/components/ui/toast", () => ({
+  useToast: () => ({ toast: mockToast }),
 }));
 
 vi.mock("@/features/graph", () => ({
@@ -280,29 +286,31 @@ describe("home", () => {
   });
 
   describe("component Rendering", () => {
-    it("should render all main components", () => {
-      render(<Home {...defaultProps} />);
+    it("should render all main components", async () => {
+      renderHome(<Home {...defaultProps} />);
 
       expect(screen.getByTestId("header-bar")).toBeInTheDocument();
-      expect(screen.getByTestId("map-component")).toBeInTheDocument();
+      await expect(
+        screen.findByTestId("map-component"),
+      ).resolves.toBeInTheDocument();
       expect(screen.getByText("Map with 2 locations")).toBeInTheDocument();
     });
 
     it("should initialize with correct graph measure", () => {
-      render(<Home {...defaultProps} />);
+      renderHome(<Home {...defaultProps} />);
 
       expect(screen.getByTestId("header-bar")).toBeInTheDocument();
     });
 
     it("should render without graph initially", () => {
-      render(<Home {...defaultProps} />);
+      renderHome(<Home {...defaultProps} />);
 
       expect(screen.queryByTestId("mock-trend-graph")).not.toBeInTheDocument();
       expect(screen.queryByTestId("modal")).not.toBeInTheDocument();
     });
 
     it("should handle empty locations array", () => {
-      render(<Home {...defaultProps} locations={emptyLocations} />);
+      renderHome(<Home {...defaultProps} locations={emptyLocations} />);
 
       expect(screen.getByText("Map with 0 locations")).toBeInTheDocument();
     });
@@ -310,7 +318,7 @@ describe("home", () => {
 
   describe("interaction Handling", () => {
     it("should handle marker click and open modal", async () => {
-      render(<Home {...defaultProps} />);
+      renderHome(<Home {...defaultProps} />);
 
       await selectFirstMapMarker();
 
@@ -320,7 +328,7 @@ describe("home", () => {
     });
 
     it("should generate graph when marker is clicked", async () => {
-      render(<Home {...defaultProps} />);
+      renderHome(<Home {...defaultProps} />);
 
       await selectFirstMapMarker();
 
@@ -334,7 +342,7 @@ describe("home", () => {
       const slowFetch = mockFn().mockReturnValue(createDelay(100));
       vi.mocked(FetchTrendGraphData).mockImplementation(slowFetch);
 
-      render(<Home {...defaultProps} />);
+      renderHome(<Home {...defaultProps} />);
 
       await selectFirstMapMarker();
 
@@ -343,7 +351,7 @@ describe("home", () => {
     });
 
     it("should handle graph measure change when a location is selected", async () => {
-      render(<Home {...defaultProps} />);
+      renderHome(<Home {...defaultProps} />);
 
       await selectFirstMapMarker();
 
@@ -357,7 +365,7 @@ describe("home", () => {
     });
 
     it("should close modal when close button is clicked", async () => {
-      render(<Home {...defaultProps} />);
+      renderHome(<Home {...defaultProps} />);
 
       await selectFirstMapMarker();
 
@@ -369,7 +377,7 @@ describe("home", () => {
 
   describe("navigation and View Details", () => {
     it("should display 'View Full Details' button when location is selected", async () => {
-      render(<Home {...defaultProps} />);
+      renderHome(<Home {...defaultProps} />);
 
       await selectFirstMapMarker();
 
@@ -379,7 +387,7 @@ describe("home", () => {
     });
 
     it("should navigate to location page when 'View Full Details' is clicked", async () => {
-      render(<Home {...defaultProps} />);
+      renderHome(<Home {...defaultProps} />);
 
       await selectFirstMapMarker();
 
@@ -394,7 +402,7 @@ describe("home", () => {
       const errorMessage = "API Error";
       vi.mocked(FetchTrendGraphData).mockRejectedValue(new Error(errorMessage));
 
-      render(<Home {...defaultProps} />);
+      renderHome(<Home {...defaultProps} />);
 
       fireEvent.click(screen.getByTestId("marker-click"));
 
@@ -416,7 +424,7 @@ describe("home", () => {
     it("should fetch forecast data when forecast is enabled and marker clicked", async () => {
       vi.mocked(FetchForecastData).mockResolvedValue(buildForecastData());
 
-      render(<Home {...defaultProps} initialForecastEnabled={true} />);
+      renderHome(<Home {...defaultProps} initialForecastEnabled={true} />);
 
       await selectFirstMapMarker();
 
@@ -426,7 +434,7 @@ describe("home", () => {
     });
 
     it("should fetch seasonal forecast data when seasonal forecast is enabled", async () => {
-      render(
+      renderHome(
         <Home
           {...defaultProps}
           initialForecastEnabled={true}
@@ -444,7 +452,7 @@ describe("home", () => {
     it("should fetch forecast when toggling forecast on", async () => {
       vi.mocked(FetchForecastData).mockResolvedValue(buildForecastData());
 
-      render(<Home {...defaultProps} />);
+      renderHome(<Home {...defaultProps} />);
 
       await selectFirstMapMarker();
 
@@ -463,7 +471,7 @@ describe("home", () => {
         }),
       );
 
-      render(<Home {...defaultProps} initialForecastEnabled={true} />);
+      renderHome(<Home {...defaultProps} initialForecastEnabled={true} />);
 
       await selectFirstMapMarker();
 
@@ -482,7 +490,7 @@ describe("home", () => {
         }),
       );
 
-      render(<Home {...defaultProps} initialForecastEnabled={true} />);
+      renderHome(<Home {...defaultProps} initialForecastEnabled={true} />);
 
       await selectFirstMapMarker();
 
@@ -501,7 +509,7 @@ describe("home", () => {
         }),
       );
 
-      render(<Home {...defaultProps} initialForecastEnabled={true} />);
+      renderHome(<Home {...defaultProps} initialForecastEnabled={true} />);
 
       await selectFirstMapMarker();
 
@@ -513,7 +521,7 @@ describe("home", () => {
 
   describe("initial State Handling", () => {
     it("should initialize with forecast enabled from props", async () => {
-      render(<Home {...defaultProps} initialForecastEnabled={true} />);
+      renderHome(<Home {...defaultProps} initialForecastEnabled={true} />);
 
       await selectFirstMapMarker();
 
@@ -523,7 +531,7 @@ describe("home", () => {
     });
 
     it("should initialize with different graph measure", async () => {
-      render(<Home {...defaultProps} initialGraphMeasure="max" />);
+      renderHome(<Home {...defaultProps} initialGraphMeasure="max" />);
 
       await selectFirstMapMarker();
 
@@ -533,7 +541,7 @@ describe("home", () => {
     });
 
     it("should initialize with custom forecast years ahead", async () => {
-      render(
+      renderHome(
         <Home
           {...defaultProps}
           initialForecastEnabled={true}
@@ -558,7 +566,7 @@ describe("home", () => {
         years: [],
       });
 
-      render(<Home {...defaultProps} />);
+      renderHome(<Home {...defaultProps} />);
 
       await selectFirstMapMarker();
 
@@ -582,7 +590,7 @@ describe("home", () => {
         years: [2000],
       });
 
-      render(<Home {...defaultProps} />);
+      renderHome(<Home {...defaultProps} />);
 
       await selectFirstMapMarker();
 

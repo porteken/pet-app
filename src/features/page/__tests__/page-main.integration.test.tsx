@@ -86,6 +86,12 @@ vi.mock("@/features/graph", () => ({
   ),
 }));
 
+const { mockToast } = vi.hoisted(() => ({ mockToast: mockFn() }));
+
+vi.mock("@/components/ui/toast", () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
+
 vi.mock("@/features/header-bar", () => ({
   HeaderBar: mockFn(
     ({ id, LocationOptions }: { id?: number; LocationOptions?: unknown[] }) => (

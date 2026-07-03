@@ -1,5 +1,6 @@
+import { LocationPageSkeleton } from "@/features/page/components/location-page-skeleton";
 import { render, screen } from "@testing-library/react";
-import React from "react";
+import React, { Suspense } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { mockDatabaseError, mockLoadLocationPageData, mockNotFound, mockPage } =
@@ -43,11 +44,22 @@ vi.mock("next/dynamic", () => ({
   default: mockFn(() => mockPage),
 }));
 
-import LocationPage from "../page";
+import LocationPage, { LocationPageContent } from "../page";
 
 describe("location route page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("wraps the data-loading content in a Suspense boundary with a loading skeleton", async () => {
+    const element = await LocationPage({
+      params: Promise.resolve({ id: "7" }),
+    });
+
+    expect(element.type).toBe(Suspense);
+    expect(element.props.fallback.type).toBe(LocationPageSkeleton);
+    expect(element.props.children.type).toBe(LocationPageContent);
+    expect(element.props.children.props).toStrictEqual({ id: "7" });
   });
 
   it("renders the page feature for successful data loads", async () => {
@@ -79,7 +91,7 @@ describe("location route page", () => {
       status: "success",
     });
 
-    render(await LocationPage({ params: Promise.resolve({ id: "7" }) }));
+    render(await LocationPageContent({ id: "7" }));
 
     expect(mockLoadLocationPageData).toHaveBeenCalledWith("7");
     expect(screen.getByTestId("location-page")).toBeInTheDocument();
@@ -95,7 +107,7 @@ describe("location route page", () => {
       status: "database-error",
     });
 
-    render(await LocationPage({ params: Promise.resolve({ id: "7" }) }));
+    render(await LocationPageContent({ id: "7" }));
 
     expect(screen.getByTestId("database-error")).toHaveTextContent(
       "Database Connection Error:Unable to connect",
@@ -112,9 +124,9 @@ describe("location route page", () => {
       status: "invalid-location",
     });
 
-    await expect(
-      LocationPage({ params: Promise.resolve({ id: "404" }) }),
-    ).rejects.toThrow("NEXT_NOT_FOUND");
+    await expect(LocationPageContent({ id: "404" })).rejects.toThrow(
+      "NEXT_NOT_FOUND",
+    );
 
     expect(mockNotFound).toHaveBeenCalledTimes(1);
     expect(mockPage).not.toHaveBeenCalled();

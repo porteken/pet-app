@@ -2,8 +2,19 @@
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
+
+function CaptureError({ error }: Readonly<{ error: Error }>) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
+  return null;
+}
 
 export default function GlobalError({
+  error,
   reset,
 }: Readonly<{
   error: Error;
@@ -12,6 +23,7 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
+        <CaptureError error={error} />
         <div className="mx-auto max-w-xl px-4 py-12">
           <div className="flex flex-col items-center gap-6 text-center">
             <h1 className="text-3xl font-bold text-destructive">

@@ -214,31 +214,37 @@ const MobileLegendToggle = ({
   </div>
 );
 
-class GraphControlsPanel extends React.PureComponent<GraphControlsPanelProperties> {
-  private readonly handleMeasureChange = (value: string | undefined) => {
-    handleMeasureSelectChange(value, this.props.onSelectChange);
-  };
+const GraphControlsPanel = memo(
+  ({
+    forecastEnabled,
+    forecastHeatStress,
+    forecastYearsAhead,
+    heatStressDescription,
+    isMobileGraphLegendOpen,
+    isMobileViewport,
+    onForecastToggle,
+    onForecastYearsChange,
+    onSeasonChange,
+    onSelectChange,
+    onToggleMobileGraphLegend,
+    selectedGraphMeasure,
+    selectedGraphSeason,
+    seasonOptions,
+    selectOptions,
+  }: GraphControlsPanelProperties) => {
+    const handleMeasureChange = useCallback(
+      (value: string | undefined) => {
+        handleMeasureSelectChange(value, onSelectChange);
+      },
+      [onSelectChange],
+    );
 
-  private readonly handleSeasonChange = (value: string | undefined) => {
-    handleSeasonSelectChange(value, this.props.onSeasonChange);
-  };
-
-  public render(): React.ReactElement {
-    const {
-      forecastEnabled,
-      forecastHeatStress,
-      forecastYearsAhead,
-      heatStressDescription,
-      isMobileGraphLegendOpen,
-      isMobileViewport,
-      onForecastToggle,
-      onForecastYearsChange,
-      onToggleMobileGraphLegend,
-      selectedGraphMeasure,
-      selectedGraphSeason,
-      seasonOptions,
-      selectOptions,
-    } = this.props;
+    const handleSeasonChange = useCallback(
+      (value: string | undefined) => {
+        handleSeasonSelectChange(value, onSeasonChange);
+      },
+      [onSeasonChange],
+    );
 
     const showMobileLegendToggle =
       isMobileViewport && onToggleMobileGraphLegend !== undefined;
@@ -249,7 +255,7 @@ class GraphControlsPanel extends React.PureComponent<GraphControlsPanelPropertie
           className="w-full"
           data={seasonOptions}
           label="Season"
-          onChange={this.handleSeasonChange}
+          onChange={handleSeasonChange}
           size="sm"
           value={selectedGraphSeason}
         />
@@ -257,7 +263,7 @@ class GraphControlsPanel extends React.PureComponent<GraphControlsPanelPropertie
           className="w-full"
           data={selectOptions}
           label="Measure"
-          onChange={this.handleMeasureChange}
+          onChange={handleMeasureChange}
           size="sm"
           value={selectedGraphMeasure}
         />
@@ -280,8 +286,10 @@ class GraphControlsPanel extends React.PureComponent<GraphControlsPanelPropertie
         )}
       </div>
     );
-  }
-}
+  },
+);
+
+GraphControlsPanel.displayName = "GraphControlsPanel";
 
 export const GraphSection = memo<GraphSectionProperties>(
   ({

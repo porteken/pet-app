@@ -3,31 +3,29 @@
 import { ChartSkeleton } from "@/components/app/chart-skeleton";
 import { ForecastControls } from "@/components/app/forecast-controls";
 import { ErrorGraphDisplay } from "@/features/home/components/error-graph-display";
+import { useForecastData } from "@/features/home/hooks/use-forecast-data";
+import { useTrendGraphData } from "@/features/home/hooks/use-trend-graph-data";
+import { useIgnorePersistenceError } from "@/hooks/use-ignore-persistence-error";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { setForecastPreferences } from "@/lib/actions/actions";
-import { FetchForecastData } from "@/lib/api/fetch-client";
-import { getTrendGraphQueryOptions, queryKeys } from "@/lib/api/query-client";
 import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
 import {
-  buildTrendAnalysisResult,
-  type TrendGraphSnapshot,
+  deriveTrendAnalysis,
+  type ForecastGraphData,
 } from "@/lib/utils/trend-analysis";
-import * as Sentry from "@sentry/nextjs";
-import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import React from "react";
 
-import type { HeatStressDescription } from "@/lib/utils/thermal-stress";
 import type { TrendGraphDataProperties } from "@/types/types";
 
 interface TrendAnalysisProperties {
   graphSeason: GraphSeason;
   id: number;
+  initialForecastData?: ForecastGraphData;
   initialForecastEnabled: boolean;
   initialForecastYearsAhead: number;
   initialGraphMeasure: string;
   initialGraphSeason: GraphSeason;
-  initialHasError?: boolean;
   initialIncreasePerYear?: number;
   initialTrendlinePets?: number[];
   initialYearPets?: number[];
@@ -51,25 +49,35 @@ const GenerateTrendGraph = dynamic(
   },
 );
 
-const ignorePersistenceError = async (promise: Promise<void>) => {
-  try {
-    await promise;
-  } catch (error) {
-    console.warn("Failed to persist preference", error);
-    Sentry.captureException(error, {
-      tags: { errorSource: "persistPreference" },
-    });
-  }
-};
+interface ForecastSelectionMatchOptions {
+  forecastEnabled: boolean;
+  forecastYearsAhead: number;
+  initialForecastEnabled: boolean;
+  initialForecastYearsAhead: number;
+  matchesInitialGraphSelection: boolean;
+}
+
+// The SSR-provided initialForecastData is only valid to seed the forecast
+// query when every preference it was fetched with still matches selection.
+const matchesInitialForecastSelection = ({
+  forecastEnabled,
+  forecastYearsAhead,
+  initialForecastEnabled,
+  initialForecastYearsAhead,
+  matchesInitialGraphSelection,
+}: ForecastSelectionMatchOptions): boolean =>
+  matchesInitialGraphSelection &&
+  forecastEnabled === initialForecastEnabled &&
+  forecastYearsAhead === initialForecastYearsAhead;
 
 const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   graphSeason,
   id,
+  initialForecastData,
   initialForecastEnabled,
   initialForecastYearsAhead,
   initialGraphMeasure,
   initialGraphSeason,
-  initialHasError = false,
   initialIncreasePerYear = 0,
   initialTrendlinePets = DEFAULT_INITIAL_TRENDLINE_PETS,
   initialYearPets = DEFAULT_INITIAL_YEAR_PETS,
@@ -77,44 +85,28 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   onMeasureChange,
   onSeasonChange,
 }) => {
-  const queryClient = useQueryClient();
-  const initialTrendData =
-    React.useMemo<TrendGraphDataProperties | null>(() => {
-      if (
-        initialYears.length === 0 ||
-        initialYearPets.length !== initialYears.length ||
-        initialTrendlinePets.length !== initialYears.length
-      ) {
-        return null;
-      }
+  const initialTrendData = React.useMemo<
+    TrendGraphDataProperties | undefined
+  >(() => {
+    const hasValidInitialData =
+      initialYears.length > 0 &&
+      initialYearPets.length === initialYears.length &&
+      initialTrendlinePets.length === initialYears.length;
 
-      return {
-        increase_per_year: initialIncreasePerYear,
-        trendline_pets: initialTrendlinePets,
-        year_pets: initialYearPets,
-        years: initialYears,
-      };
-    }, [
-      initialIncreasePerYear,
-      initialTrendlinePets,
-      initialYearPets,
-      initialYears,
-    ]);
-  const initialTrendSnapshot = React.useMemo<TrendGraphSnapshot | undefined>(
-    () =>
-      initialTrendData
-        ? {
-            forecastData: undefined,
-            increase_per_year: initialTrendData.increase_per_year,
-            option: initialGraphMeasure,
-            season: initialGraphSeason,
-            trendline_pets: initialTrendData.trendline_pets,
-            year_pets: initialTrendData.year_pets,
-            years: initialTrendData.years,
-          }
-        : undefined,
-    [initialGraphMeasure, initialGraphSeason, initialTrendData],
-  );
+    return hasValidInitialData
+      ? {
+          increase_per_year: initialIncreasePerYear,
+          trendline_pets: initialTrendlinePets,
+          year_pets: initialYearPets,
+          years: initialYears,
+        }
+      : undefined;
+  }, [
+    initialIncreasePerYear,
+    initialTrendlinePets,
+    initialYearPets,
+    initialYears,
+  ]);
   const [selectedGraphMeasure, setSelectedGraphMeasure] =
     React.useState(initialGraphMeasure);
   const [forecastEnabled, setForecastEnabled] = React.useState(
@@ -123,98 +115,75 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const [forecastYearsAhead, setForecastYearsAhead] = React.useState(
     () => initialForecastYearsAhead,
   );
-  const [currentHeatStress, setCurrentHeatStress] = React.useState<
-    HeatStressDescription | undefined
-  >();
-  const [forecastHeatStress, setForecastHeatStress] = React.useState<
-    HeatStressDescription | undefined
-  >();
-  const [trendGraphSnapshot, setTrendGraphSnapshot] = React.useState<
-    TrendGraphSnapshot | undefined
-  >(initialTrendSnapshot);
-  const [hasTrendError, setHasTrendError] = React.useState(initialHasError);
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
-  const latestTrendRequestRef = React.useRef(0);
+  const ignorePersistenceError = useIgnorePersistenceError();
 
   const showTrendLegend = !isMobileViewport || isMobileLegendOpen;
 
-  React.useEffect(() => {
-    setTrendGraphSnapshot(initialTrendSnapshot);
-    setCurrentHeatStress(undefined);
-    setForecastHeatStress(undefined);
-  }, [initialTrendSnapshot]);
+  const matchesInitialGraphSelection =
+    selectedGraphMeasure === initialGraphMeasure &&
+    graphSeason === initialGraphSeason;
 
-  React.useEffect(() => {
-    if (initialTrendData) {
-      queryClient.setQueryData(
-        queryKeys.trendGraph(id, initialGraphMeasure, initialGraphSeason),
-        initialTrendData,
-      );
+  const trendQuery = useTrendGraphData({
+    initialData: matchesInitialGraphSelection ? initialTrendData : undefined,
+    locationId: id,
+    option: selectedGraphMeasure,
+    season: graphSeason,
+  });
+  const forecastQuery = useForecastData({
+    enabled: forecastEnabled,
+    initialData: matchesInitialForecastSelection({
+      forecastEnabled,
+      forecastYearsAhead,
+      initialForecastEnabled,
+      initialForecastYearsAhead,
+      matchesInitialGraphSelection,
+    })
+      ? initialForecastData
+      : undefined,
+    locationId: id,
+    option: selectedGraphMeasure,
+    season: graphSeason,
+    yearsAhead: forecastYearsAhead,
+  });
+
+  const {
+    forecastHeatStress,
+    heatStressDescription: currentHeatStress,
+    trendGraphSnapshot,
+  } = React.useMemo(() => {
+    if (!trendQuery.data) {
+      return {
+        forecastHeatStress: undefined,
+        heatStressDescription: undefined,
+        trendGraphSnapshot: undefined,
+      };
     }
-  }, [
-    queryClient,
-    id,
-    initialGraphMeasure,
-    initialGraphSeason,
-    initialTrendData,
-  ]);
 
-  const generatePetTrendGraph = React.useCallback(
-    async (
-      option: string,
-      season: GraphSeason,
-      enableForecast: boolean,
-      yearsAhead: number,
-    ) => {
-      const requestId = ++latestTrendRequestRef.current;
+    const result = deriveTrendAnalysis(
+      trendQuery.data,
+      forecastQuery.data,
+      selectedGraphMeasure,
+      graphSeason,
+    );
 
-      try {
-        const {
-          forecastHeatStress: newForecastHeatStress,
-          heatStressDescription: newHeatStressDescription,
-          snapshot,
-        } = await buildTrendAnalysisResult({
-          enableForecast,
-          fetchForecastData: () =>
-            FetchForecastData(id, yearsAhead, season, option),
-          fetchTrendGraphData: () =>
-            queryClient.fetchQuery(
-              getTrendGraphQueryOptions(id, option, season),
-            ),
-          option,
-          season,
-        });
-
-        if (requestId !== latestTrendRequestRef.current) {
-          return;
-        }
-
-        setCurrentHeatStress(newHeatStressDescription);
-        setForecastHeatStress(newForecastHeatStress);
-        setTrendGraphSnapshot(snapshot);
-      } catch {
-        if (requestId !== latestTrendRequestRef.current) {
-          return;
-        }
-
-        setHasTrendError(true);
-        setTrendGraphSnapshot(undefined);
-        setCurrentHeatStress(undefined);
-        setForecastHeatStress(undefined);
-      }
-    },
-    [id, queryClient],
-  );
+    return {
+      forecastHeatStress: result.forecastHeatStress,
+      heatStressDescription: result.heatStressDescription,
+      trendGraphSnapshot: result.snapshot,
+    };
+  }, [trendQuery.data, forecastQuery.data, selectedGraphMeasure, graphSeason]);
+  const hasTrendError = trendQuery.isError;
 
   const handleGraphMeasureChange = React.useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       const option = event.target.value;
       setIsMobileLegendOpen(false);
       setSelectedGraphMeasure(option);
-      void ignorePersistenceError(onMeasureChange(option));
+      ignorePersistenceError(onMeasureChange(option));
     },
-    [onMeasureChange],
+    [onMeasureChange, ignorePersistenceError],
   );
 
   const handleSeasonChange = React.useCallback(
@@ -222,52 +191,29 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       const season = normalizeGraphSeason(event.target.value);
       setIsMobileLegendOpen(false);
 
-      void ignorePersistenceError(onSeasonChange(season));
+      ignorePersistenceError(onSeasonChange(season));
     },
-    [onSeasonChange],
+    [onSeasonChange, ignorePersistenceError],
   );
-
-  React.useEffect(() => {
-    setHasTrendError(false);
-    const performGenerate = async () => {
-      try {
-        await generatePetTrendGraph(
-          selectedGraphMeasure,
-          graphSeason,
-          forecastEnabled,
-          forecastYearsAhead,
-        );
-      } catch {
-        // Error is handled inside generatePetTrendGraph
-      }
-    };
-    void performGenerate();
-  }, [
-    generatePetTrendGraph,
-    selectedGraphMeasure,
-    graphSeason,
-    forecastEnabled,
-    forecastYearsAhead,
-  ]);
 
   const handleForecastToggle = React.useCallback(
     (enabled: boolean) => {
       setForecastEnabled(enabled);
-      void ignorePersistenceError(
+      ignorePersistenceError(
         setForecastPreferences(enabled, forecastYearsAhead),
       );
     },
-    [forecastYearsAhead],
+    [forecastYearsAhead, ignorePersistenceError],
   );
 
   const handleForecastYearsChange = React.useCallback(
     (yearsAhead: number) => {
       setForecastYearsAhead(yearsAhead);
-      void ignorePersistenceError(
+      ignorePersistenceError(
         setForecastPreferences(forecastEnabled, yearsAhead),
       );
     },
-    [forecastEnabled],
+    [forecastEnabled, ignorePersistenceError],
   );
 
   const handleToggleMobileLegend = React.useCallback(() => {

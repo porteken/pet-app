@@ -9,24 +9,8 @@ const withBundleAnalyzer = initializeBundleAnalyzer({
 const projectRoot = import.meta.dirname;
 
 const nextConfig: NextConfig = {
-  images: {
-    formats: ["image/avif", "image/webp"],
-    remotePatterns: [
-      {
-        hostname: "avatars.githubusercontent.com",
-        protocol: "https",
-      },
-      {
-        hostname: "images.unsplash.com",
-        protocol: "https",
-      },
-    ],
-  },
   output: "standalone",
   outputFileTracingRoot: projectRoot,
-  outputFileTracingIncludes: {
-    "/*": ["./registry/**/*"],
-  },
   serverExternalPackages: ["pg"],
   turbopack: {
     resolveAlias: {

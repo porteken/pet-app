@@ -134,6 +134,12 @@ vi.mock("@/lib/actions/actions", () => ({
   setRankingsYear: mockFn(),
 }));
 
+const { mockToast } = vi.hoisted(() => ({ mockToast: mockFn() }));
+
+vi.mock("@/components/ui/toast", () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
+
 vi.mock("@/features/header-bar", () => ({
   HeaderBar: mockHeaderBar,
 }));
@@ -841,7 +847,7 @@ describe("rankingsMain", () => {
       render(<RankingsMain {...defaultProps} rankings={stableCityRankings} />);
 
       const changeCell = screen.getByText("0.0°C");
-      expect(changeCell).toHaveClass("text-gray-600");
+      expect(changeCell).toHaveClass("text-muted-foreground");
     });
   });
 

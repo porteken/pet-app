@@ -1,3 +1,5 @@
+export { isProductionRuntime as isSecureCookieEnvironment } from "@/config/environment";
+
 interface CookieEntry {
   name?: string;
   value: string;

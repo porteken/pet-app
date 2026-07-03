@@ -7,6 +7,10 @@ interface MockConstructedClient<TKind extends string> {
   kind: TKind;
 }
 
+interface MockPoolClient extends MockConstructedClient<"pool"> {
+  on: ReturnType<typeof vi.fn>;
+}
+
 interface LoadKyselyModuleOptions {
   nodeEnv?: string;
   sslMode?: ServerDatabaseEnvironment["PGSSLMODE"];
@@ -22,6 +26,16 @@ const createMockConstructor = <TKind extends string>(kind: TKind) =>
     };
   };
 
+function MockPoolConstructor(
+  configuration: Record<string, unknown>,
+): MockPoolClient {
+  return {
+    configuration,
+    kind: "pool",
+    on: vi.fn<(event: string, listener: (error: unknown) => void) => void>(),
+  };
+}
+
 const resetDbGlobals = () => {
   globalThis.petAppDbSingleton = undefined;
   globalThis.petAppPgPoolSingleton = undefined;
@@ -33,9 +47,10 @@ const loadKyselyModule = async ({
 }: LoadKyselyModuleOptions = {}) => {
   vi.stubEnv("NODE_ENV", nodeEnv);
 
-  const poolMock = vi.fn<
-    (configuration: Record<string, unknown>) => MockConstructedClient<"pool">
-  >(createMockConstructor("pool"));
+  const poolMock =
+    vi.fn<(configuration: Record<string, unknown>) => MockPoolClient>(
+      MockPoolConstructor,
+    );
   const postgresDialectMock = vi.fn<
     (configuration: Record<string, unknown>) => MockConstructedClient<"dialect">
   >(createMockConstructor("dialect"));
@@ -61,9 +76,15 @@ const loadKyselyModule = async ({
     Pool: poolMock,
   }));
 
+  const captureExceptionMock = vi.fn<(error: unknown) => void>();
+  vi.doMock("@sentry/nextjs", () => ({
+    captureException: captureExceptionMock,
+  }));
+
   const kyselyModule = await import("../kysely");
 
   return {
+    captureExceptionMock,
     kyselyModule,
     kyselyMock,
     poolMock,
@@ -112,6 +133,24 @@ describe("getDb", () => {
     expect(globalThis.petAppDbSingleton).toBe(firstDb);
     expect(postgresDialectMock).toHaveBeenCalledWith({ pool });
     expect(kyselyMock).toHaveBeenCalledWith({ dialect });
+  });
+
+  it("registers a pool error handler that reports to Sentry", async () => {
+    const { captureExceptionMock, kyselyModule, poolMock } =
+      await loadKyselyModule({ nodeEnv: "test", sslMode: "disable" });
+
+    kyselyModule.getDb();
+
+    const pool = poolMock.mock.results[0]?.value;
+    expect(pool?.on).toHaveBeenCalledWith("error", expect.any(Function));
+
+    const errorHandler = pool?.on.mock.calls[0]?.[1] as (
+      error: unknown,
+    ) => void;
+    const idleClientError = new Error("connection terminated unexpectedly");
+    errorHandler(idleClientError);
+
+    expect(captureExceptionMock).toHaveBeenCalledWith(idleClientError);
   });
 
   it("uses strict ssl verification for verify-full mode", async () => {
@@ -164,5 +203,88 @@ describe("getDb", () => {
     expect(poolMock).not.toHaveBeenCalled();
     expect(postgresDialectMock).not.toHaveBeenCalled();
     expect(kyselyMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("isTransientDbError", () => {
+  it("treats connection-level error codes as transient", async () => {
+    const { isTransientDbError } = await import("../kysely");
+
+    expect(isTransientDbError({ code: "ECONNRESET" })).toBe(true);
+    expect(isTransientDbError({ code: "57P01" })).toBe(true);
+  });
+
+  it("treats query-level errors and non-error values as non-transient", async () => {
+    const { isTransientDbError } = await import("../kysely");
+
+    expect(isTransientDbError({ code: "42703" })).toBe(false);
+    expect(isTransientDbError(new Error("boom"))).toBe(false);
+    expect(isTransientDbError(null)).toBe(false);
+  });
+});
+
+describe("withDbRetry", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("retries transient failures with backoff and eventually succeeds", async () => {
+    const { withDbRetry } = await import("../kysely");
+
+    const transientError = Object.assign(new Error("connection reset"), {
+      code: "ECONNRESET",
+    });
+    const fn = vi
+      .fn<() => Promise<string>>()
+      .mockRejectedValueOnce(transientError)
+      .mockRejectedValueOnce(transientError)
+      .mockResolvedValueOnce("ok");
+
+    const resultPromise = withDbRetry(fn);
+    await vi.runAllTimersAsync();
+
+    await expect(resultPromise).resolves.toBe("ok");
+    expect(fn).toHaveBeenCalledTimes(3);
+  });
+
+  it("throws immediately without retrying non-transient errors", async () => {
+    const { withDbRetry } = await import("../kysely");
+
+    const queryError = Object.assign(new Error("missing column"), {
+      code: "42703",
+    });
+    const fn = vi.fn<() => Promise<string>>().mockRejectedValue(queryError);
+
+    await expect(withDbRetry(fn)).rejects.toBe(queryError);
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it("gives up after exhausting retry attempts on transient errors", async () => {
+    const { withDbRetry } = await import("../kysely");
+
+    const transientError = Object.assign(new Error("timed out"), {
+      code: "ETIMEDOUT",
+    });
+    const fn = vi.fn<() => Promise<string>>().mockRejectedValue(transientError);
+
+    let caughtError: unknown;
+    const drive = async () => {
+      try {
+        await withDbRetry(fn);
+      } catch (error) {
+        caughtError = error;
+      }
+    };
+
+    const donePromise = drive();
+    await vi.runAllTimersAsync();
+    await donePromise;
+
+    expect(caughtError).toBe(transientError);
+    expect(fn).toHaveBeenCalledTimes(3);
   });
 });

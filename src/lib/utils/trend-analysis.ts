@@ -17,15 +17,7 @@ export interface TrendGraphSnapshot {
   years: number[];
 }
 
-interface BuildTrendAnalysisResultOptions {
-  enableForecast: boolean;
-  fetchForecastData: () => Promise<ForecastGraphData | undefined>;
-  fetchTrendGraphData: () => Promise<TrendGraphDataProperties>;
-  option: string;
-  season?: GraphSeason;
-}
-
-interface ForecastGraphData {
+export interface ForecastGraphData {
   forecastValues: number[];
   forecastYears: number[];
   lowerBound10: number[];
@@ -73,30 +65,17 @@ function computeForecastHeatStress(
   );
 }
 
-export const buildTrendAnalysisResult = async ({
-  enableForecast,
-  fetchForecastData,
-  fetchTrendGraphData,
-  option,
-  season = DEFAULT_GRAPH_SEASON,
-}: BuildTrendAnalysisResultOptions): Promise<TrendAnalysisResult> => {
-  const [
-    { increase_per_year, trendline_pets, year_pets, years },
-    forecastData,
-  ] = await Promise.all([
-    fetchTrendGraphData(),
-    (async (): Promise<ForecastGraphData | undefined> => {
-      let fetchedForecastData: ForecastGraphData | undefined;
-
-      if (enableForecast) {
-        fetchedForecastData = await fetchForecastData();
-      }
-
-      return fetchedForecastData;
-    })(),
-  ]);
-
-  const snapshot = {
+// Pure derivation over already-fetched trend/forecast data — pairs with
+// useTrendGraphData/useForecastData so the fetching itself is left to
+// React Query instead of being re-implemented here.
+export const deriveTrendAnalysis = (
+  trendData: TrendGraphDataProperties,
+  forecastData: ForecastGraphData | undefined,
+  option: string,
+  season: GraphSeason = DEFAULT_GRAPH_SEASON,
+): TrendAnalysisResult => {
+  const { increase_per_year, trendline_pets, year_pets, years } = trendData;
+  const snapshot: TrendGraphSnapshot = {
     forecastData,
     increase_per_year,
     option,
@@ -125,13 +104,10 @@ export const buildTrendAnalysisResult = async ({
     };
   }
 
-  const forecastHeatStress =
-    enableForecast && forecastData
-      ? computeForecastHeatStress(forecastData)
-      : undefined;
-
   return {
-    forecastHeatStress,
+    forecastHeatStress: forecastData
+      ? computeForecastHeatStress(forecastData)
+      : undefined,
     heatStressDescription: getHeatStressDescription(
       currentPetValue,
       option,

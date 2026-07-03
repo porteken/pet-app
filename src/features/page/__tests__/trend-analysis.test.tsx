@@ -67,6 +67,12 @@ vi.mock("@/lib/actions/actions", () => ({
   setForecastPreferences: mockFn().mockResolvedValue({}),
 }));
 
+const { mockToast } = vi.hoisted(() => ({ mockToast: mockFn() }));
+
+vi.mock("@/components/ui/toast", () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
+
 import { GenerateTrendGraph } from "@/features/graph";
 import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";

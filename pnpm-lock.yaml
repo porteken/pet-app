@@ -56,9 +56,6 @@ importers:
       recharts:
         specifier: ^3.9.0
         version: 3.9.0(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react-is@17.0.2)(react@19.2.7)(redux@5.0.1)
-      shadcn:
-        specifier: ^4.12.0
-        version: 4.12.0(typescript@6.0.3)
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
@@ -150,6 +147,9 @@ importers:
       postcss:
         specifier: ^8.5.16
         version: 8.5.16
+      shadcn:
+        specifier: ^4.12.0
+        version: 4.12.0(typescript@6.0.3)
       tailwindcss:
         specifier: ^4.3.1
         version: 4.3.1
@@ -12009,7 +12009,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
-      postcss: 8.5.15
+      postcss: 8.5.16
       rolldown: 1.0.0-rc.15
       tinyglobby: 0.2.17
     optionalDependencies:

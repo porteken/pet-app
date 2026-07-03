@@ -51,7 +51,7 @@ describe("useTrendGraphData", () => {
 
   it("does not fetch when locationId is undefined", () => {
     const { result } = renderHook(
-      () => useTrendGraphData(undefined, "temperature"),
+      () => useTrendGraphData({ locationId: undefined, option: "temperature" }),
       {
         wrapper: createWrapper(),
       },
@@ -63,7 +63,13 @@ describe("useTrendGraphData", () => {
 
   it("does not fetch when enabled is false", () => {
     const { result } = renderHook(
-      () => useTrendGraphData(123, "temperature", "Annual", false),
+      () =>
+        useTrendGraphData({
+          locationId: 123,
+          option: "temperature",
+          season: "Annual",
+          enabled: false,
+        }),
       {
         wrapper: createWrapper(),
       },
@@ -78,7 +84,13 @@ describe("useTrendGraphData", () => {
     mockFetchTrendGraphData.mockResolvedValue(mockData);
 
     const { result } = renderHook(
-      () => useTrendGraphData(123, "temperature", "Annual", true),
+      () =>
+        useTrendGraphData({
+          locationId: 123,
+          option: "temperature",
+          season: "Annual",
+          enabled: true,
+        }),
       {
         wrapper: createWrapper(),
       },
@@ -100,9 +112,12 @@ describe("useTrendGraphData", () => {
     const mockData = { data: "test data" };
     mockFetchTrendGraphData.mockResolvedValue(mockData);
 
-    const { result } = renderHook(() => useTrendGraphData(123, "temperature"), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useTrendGraphData({ locationId: 123, option: "temperature" }),
+      {
+        wrapper: createWrapper(),
+      },
+    );
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -120,9 +135,12 @@ describe("useTrendGraphData", () => {
     const mockError = new Error("Fetch failed");
     mockFetchTrendGraphData.mockRejectedValue(mockError);
 
-    const { result } = renderHook(() => useTrendGraphData(123, "temperature"), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useTrendGraphData({ locationId: 123, option: "temperature" }),
+      {
+        wrapper: createWrapper(),
+      },
+    );
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
@@ -139,7 +157,8 @@ describe("useTrendGraphData", () => {
     mockFetchTrendGraphData.mockResolvedValueOnce(mockData2);
 
     const { rerender, result } = renderHook(
-      ({ locationId }) => useTrendGraphData(locationId, "temperature"),
+      ({ locationId }) =>
+        useTrendGraphData({ locationId, option: "temperature" }),
       {
         initialProps: { locationId: 123 },
         wrapper: createWrapper(),
@@ -180,7 +199,7 @@ describe("useTrendGraphData", () => {
     mockFetchTrendGraphData.mockResolvedValueOnce(mockData2);
 
     const { rerender, result } = renderHook(
-      ({ option }) => useTrendGraphData(123, option),
+      ({ option }) => useTrendGraphData({ locationId: 123, option }),
       {
         initialProps: { option: "temperature" },
         wrapper: createWrapper(),
@@ -222,7 +241,11 @@ describe("useTrendGraphData", () => {
 
     const { rerender, result } = renderHook(
       ({ season }: { season: GraphSeason }) =>
-        useTrendGraphData(123, "temperature", season),
+        useTrendGraphData({
+          locationId: 123,
+          option: "temperature",
+          season,
+        }),
       {
         initialProps: { season: "Annual" as GraphSeason },
         wrapper: createWrapper(),
@@ -256,9 +279,12 @@ describe("useTrendGraphData", () => {
   });
 
   it("has correct stale time", () => {
-    const { result } = renderHook(() => useTrendGraphData(123, "temperature"), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useTrendGraphData({ locationId: 123, option: "temperature" }),
+      {
+        wrapper: createWrapper(),
+      },
+    );
 
     expect(result.current.dataUpdatedAt).toBeDefined();
   });
@@ -268,7 +294,13 @@ describe("useTrendGraphData", () => {
     mockFetchTrendGraphData.mockResolvedValue(mockData);
 
     const { rerender, result } = renderHook(
-      ({ enabled }) => useTrendGraphData(123, "temperature", "Annual", enabled),
+      ({ enabled }) =>
+        useTrendGraphData({
+          locationId: 123,
+          option: "temperature",
+          season: "Annual",
+          enabled,
+        }),
       {
         initialProps: { enabled: false },
         wrapper: createWrapper(),
@@ -296,9 +328,12 @@ describe("useTrendGraphData", () => {
     const mockData = { data: "data for location 0" };
     mockFetchTrendGraphData.mockResolvedValue(mockData);
 
-    const { result } = renderHook(() => useTrendGraphData(0, "temperature"), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useTrendGraphData({ locationId: 0, option: "temperature" }),
+      {
+        wrapper: createWrapper(),
+      },
+    );
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -313,9 +348,12 @@ describe("useTrendGraphData", () => {
   });
 
   it("uses correct query key format", () => {
-    const { result } = renderHook(() => useTrendGraphData(123, "temperature"), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useTrendGraphData({ locationId: 123, option: "temperature" }),
+      {
+        wrapper: createWrapper(),
+      },
+    );
 
     expect(result.current).toBeDefined();
   });

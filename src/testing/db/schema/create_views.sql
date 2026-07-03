@@ -609,6 +609,9 @@ ON public.pet_year_stats (year) ;
 CREATE INDEX if not exists pet_year_stats_season_idx
 ON public.pet_year_stats (season) ;
 
+CREATE INDEX if not exists pet_year_stats_location_season_year_idx
+ON public.pet_year_stats (location_id, season, year) ;
+
 
 CREATE MATERIALIZED VIEW public.pet_forecast AS
 WITH pet_with_seasons AS (
@@ -706,6 +709,9 @@ ON public.pet_forecast (year) ;
 CREATE INDEX if not exists pet_forecast_season_idx
 ON public.pet_forecast (season) ;
 
+CREATE INDEX if not exists pet_forecast_location_season_year_idx
+ON public.pet_forecast (location_id, season, year) ;
+
 CREATE MATERIALIZED VIEW public.pet_forecast_max AS
 WITH pet_with_seasons AS (
 SELECT
@@ -800,6 +806,9 @@ ON public.pet_forecast_max (year) ;
 
 CREATE INDEX if not exists pet_forecast_max_season_idx
 ON public.pet_forecast_max (season) ;
+
+CREATE INDEX if not exists pet_forecast_max_location_season_year_idx
+ON public.pet_forecast_max (location_id, season, year) ;
 
 CREATE VIEW public.city_rankings_view AS
 WITH combined_yearly_avg AS (

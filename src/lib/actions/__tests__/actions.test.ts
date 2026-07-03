@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   setForecastPreferences,
@@ -9,6 +9,8 @@ import {
   setRankingsState,
   setRankingsYear,
 } from "../actions";
+
+import type { GraphSeason } from "@/lib/constants";
 
 vi.mock("next/headers", () => ({
   cookies: mockFn().mockResolvedValue({
@@ -28,7 +30,7 @@ describe("setGraphMeasure", () => {
   });
 
   it("sets the graph measure cookie with correct parameters", async () => {
-    const measure = "temperature";
+    const measure = "max";
 
     await setGraphMeasure(measure);
 
@@ -39,12 +41,19 @@ describe("setGraphMeasure", () => {
         expires: expect.any(Date),
         httpOnly: true,
         path: "/",
+        secure: false,
       }),
     );
   });
 
+  it("ignores an invalid graph measure without setting a cookie", async () => {
+    await setGraphMeasure("temperature");
+
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
   it("sets cookie with expiration date approximately 1 year from now", async () => {
-    const measure = "humidity";
+    const measure = "avg";
     const beforeCall = Date.now();
 
     await setGraphMeasure(measure);
@@ -97,8 +106,15 @@ describe("setGraphSeason", () => {
         expires: expect.any(Date),
         httpOnly: true,
         path: "/",
+        secure: false,
       }),
     );
+  });
+
+  it("ignores an invalid graph season without setting a cookie", async () => {
+    await setGraphSeason("Not A Season");
+
+    expect(mockSet).not.toHaveBeenCalled();
   });
 });
 
@@ -166,6 +182,24 @@ describe("setForecastPreferences", () => {
       afterCall + oneYearMs + 1000,
     );
   });
+
+  it("ignores forecast years ahead below the minimum without setting a cookie", async () => {
+    await setForecastPreferences(true, 1);
+
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it("ignores forecast years ahead above the maximum without setting a cookie", async () => {
+    await setForecastPreferences(true, 1000);
+
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it("ignores a non-integer forecast years ahead value without setting a cookie", async () => {
+    await setForecastPreferences(true, 10.5);
+
+    expect(mockSet).not.toHaveBeenCalled();
+  });
 });
 
 vi.mock("next/headers", () => ({
@@ -199,6 +233,7 @@ describe("setRankingsYear", () => {
         httpOnly: true,
         path: "/",
         sameSite: "lax",
+        secure: false,
       }),
     );
   });
@@ -209,6 +244,15 @@ describe("setRankingsYear", () => {
     await setRankingsYear(2020);
 
     expect(revalidatePath).toHaveBeenCalledWith("/rankings");
+  });
+
+  it("ignores a year outside the configured range without setting a cookie", async () => {
+    const { revalidatePath } = await import("next/cache");
+
+    await setRankingsYear(1999);
+
+    expect(mockSet).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
   });
 });
 
@@ -233,6 +277,7 @@ describe("setRankingsState", () => {
         httpOnly: true,
         path: "/",
         sameSite: "lax",
+        secure: false,
       }),
     );
   });
@@ -243,6 +288,15 @@ describe("setRankingsState", () => {
     await setRankingsState("NY");
 
     expect(revalidatePath).toHaveBeenCalledWith("/rankings");
+  });
+
+  it("ignores a state value with disallowed characters without setting a cookie", async () => {
+    const { revalidatePath } = await import("next/cache");
+
+    await setRankingsState("TX; DROP TABLE locations;");
+
+    expect(mockSet).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
   });
 });
 
@@ -267,6 +321,7 @@ describe("setRankingsSeason", () => {
         httpOnly: true,
         path: "/",
         sameSite: "lax",
+        secure: false,
       }),
     );
   });
@@ -277,6 +332,15 @@ describe("setRankingsSeason", () => {
     await setRankingsSeason("Spring");
 
     expect(revalidatePath).toHaveBeenCalledWith("/rankings");
+  });
+
+  it("ignores an invalid season without setting a cookie", async () => {
+    const { revalidatePath } = await import("next/cache");
+
+    await setRankingsSeason("Not A Season" as GraphSeason);
+
+    expect(mockSet).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
   });
 });
 
@@ -292,15 +356,16 @@ describe("setRankingsHeatStress", () => {
   });
 
   it("sets the rankings heat stress cookie with correct parameters", async () => {
-    await setRankingsHeatStress("Moderate");
+    await setRankingsHeatStress("Moderate Heat Stress");
 
     expect(mockSet).toHaveBeenCalledWith(
       "rankings-heat-stress",
-      "Moderate",
+      "Moderate Heat Stress",
       expect.objectContaining({
         httpOnly: true,
         path: "/",
         sameSite: "lax",
+        secure: false,
       }),
     );
   });
@@ -308,8 +373,82 @@ describe("setRankingsHeatStress", () => {
   it("calls revalidatePath with /rankings", async () => {
     const { revalidatePath } = await import("next/cache");
 
-    await setRankingsHeatStress("Strong");
+    await setRankingsHeatStress("Strong Heat Stress");
 
     expect(revalidatePath).toHaveBeenCalledWith("/rankings");
+  });
+
+  it("allows clearing the filter with an empty string", async () => {
+    await setRankingsHeatStress("");
+
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-heat-stress",
+      "",
+      expect.any(Object),
+    );
+  });
+
+  it("ignores an unrecognized heat stress level without setting a cookie", async () => {
+    const { revalidatePath } = await import("next/cache");
+
+    await setRankingsHeatStress("Moderate");
+
+    expect(mockSet).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+});
+
+describe("cookie security", () => {
+  afterEach(() => {
+    vi.resetModules();
+    vi.unstubAllEnvs();
+  });
+
+  it("sets secure cookies in production outside of e2e test runs", async () => {
+    vi.resetModules();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_E2E_TEST", "false");
+
+    vi.doMock("next/headers", () => ({
+      cookies: mockFn().mockResolvedValue({ set: mockFn() }),
+    }));
+    vi.doMock("next/cache", () => ({ revalidatePath: mockFn() }));
+
+    const actionsModule = await import("../actions");
+    const { cookies } = await import("next/headers");
+    const cookiesResult = await cookies();
+    const mockSet = vi.mocked(cookiesResult.set);
+
+    await actionsModule.setGraphMeasure("avg");
+
+    expect(mockSet).toHaveBeenCalledWith(
+      "graph-measure",
+      "avg",
+      expect.objectContaining({ secure: true }),
+    );
+  });
+
+  it("does not set secure cookies during production e2e test runs", async () => {
+    vi.resetModules();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_E2E_TEST", "true");
+
+    vi.doMock("next/headers", () => ({
+      cookies: mockFn().mockResolvedValue({ set: mockFn() }),
+    }));
+    vi.doMock("next/cache", () => ({ revalidatePath: mockFn() }));
+
+    const actionsModule = await import("../actions");
+    const { cookies } = await import("next/headers");
+    const cookiesResult = await cookies();
+    const mockSet = vi.mocked(cookiesResult.set);
+
+    await actionsModule.setGraphMeasure("avg");
+
+    expect(mockSet).toHaveBeenCalledWith(
+      "graph-measure",
+      "avg",
+      expect.objectContaining({ secure: false }),
+    );
   });
 });

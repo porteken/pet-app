@@ -2,10 +2,10 @@
 
 import { ChartSkeleton } from "@/components/app/chart-skeleton";
 import { ForecastControls } from "@/components/app/forecast-controls";
-import { useToast } from "@/components/ui/toast";
 import { ErrorGraphDisplay } from "@/features/home/components/error-graph-display";
 import { useForecastData } from "@/features/home/hooks/use-forecast-data";
 import { useTrendGraphData } from "@/features/home/hooks/use-trend-graph-data";
+import { useIgnorePersistenceError } from "@/hooks/use-ignore-persistence-error";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { setForecastPreferences } from "@/lib/actions/actions";
 import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
@@ -13,7 +13,6 @@ import {
   deriveTrendAnalysis,
   type ForecastGraphData,
 } from "@/lib/utils/trend-analysis";
-import * as Sentry from "@sentry/nextjs";
 import dynamic from "next/dynamic";
 import React from "react";
 
@@ -118,26 +117,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   );
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
-  const { toast } = useToast();
-
-  const ignorePersistenceError = React.useCallback(
-    async (promise: Promise<void>) => {
-      try {
-        await promise;
-      } catch (error) {
-        console.warn("Failed to persist preference", error);
-        Sentry.captureException(error, {
-          tags: { errorSource: "persistPreference" },
-        });
-        toast({
-          description: "It will reset next visit.",
-          title: "Couldn't save your preference",
-          variant: "destructive",
-        });
-      }
-    },
-    [toast],
-  );
+  const ignorePersistenceError = useIgnorePersistenceError();
 
   const showTrendLegend = !isMobileViewport || isMobileLegendOpen;
 
@@ -201,7 +181,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       const option = event.target.value;
       setIsMobileLegendOpen(false);
       setSelectedGraphMeasure(option);
-      void ignorePersistenceError(onMeasureChange(option));
+      ignorePersistenceError(onMeasureChange(option));
     },
     [onMeasureChange, ignorePersistenceError],
   );
@@ -211,7 +191,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       const season = normalizeGraphSeason(event.target.value);
       setIsMobileLegendOpen(false);
 
-      void ignorePersistenceError(onSeasonChange(season));
+      ignorePersistenceError(onSeasonChange(season));
     },
     [onSeasonChange, ignorePersistenceError],
   );
@@ -219,7 +199,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const handleForecastToggle = React.useCallback(
     (enabled: boolean) => {
       setForecastEnabled(enabled);
-      void ignorePersistenceError(
+      ignorePersistenceError(
         setForecastPreferences(enabled, forecastYearsAhead),
       );
     },
@@ -229,7 +209,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const handleForecastYearsChange = React.useCallback(
     (yearsAhead: number) => {
       setForecastYearsAhead(yearsAhead);
-      void ignorePersistenceError(
+      ignorePersistenceError(
         setForecastPreferences(forecastEnabled, yearsAhead),
       );
     },

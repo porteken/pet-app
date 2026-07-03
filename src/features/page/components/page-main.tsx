@@ -2,13 +2,12 @@
 
 import { PageShell } from "@/components/app/page-shell";
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
-import { useToast } from "@/components/ui/toast";
+import { useIgnorePersistenceError } from "@/hooks/use-ignore-persistence-error";
 import {
   persistGraphMeasurePreference,
   persistGraphSeasonPreference,
   persistReferenceYearPreference,
 } from "@/lib/utils/client-preferences";
-import * as Sentry from "@sentry/nextjs";
 import React from "react";
 
 import { PageHeader } from "./page-header";
@@ -43,26 +42,7 @@ const Main: FC<PageProperties> = ({
   const [selectedReferenceYear, setSelectedReferenceYear] =
     React.useState(initialReferenceYear);
   const [isLegendOpen, setIsLegendOpen] = React.useState(false);
-  const { toast } = useToast();
-
-  const ignorePersistenceError = React.useCallback(
-    async (promise: Promise<void>) => {
-      try {
-        await promise;
-      } catch (error) {
-        console.warn("Failed to persist graph preference", error);
-        Sentry.captureException(error, {
-          tags: { errorSource: "persistPreference" },
-        });
-        toast({
-          description: "It will reset next visit.",
-          title: "Couldn't save your preference",
-          variant: "destructive",
-        });
-      }
-    },
-    [toast],
-  );
+  const ignorePersistenceError = useIgnorePersistenceError();
 
   const handleMeasureChange = React.useCallback(
     async (measure: string) => {
@@ -83,9 +63,7 @@ const Main: FC<PageProperties> = ({
     (referenceYear: string) => {
       setSelectedReferenceYear(referenceYear);
 
-      void ignorePersistenceError(
-        persistReferenceYearPreference(referenceYear),
-      );
+      ignorePersistenceError(persistReferenceYearPreference(referenceYear));
     },
     [ignorePersistenceError],
   );

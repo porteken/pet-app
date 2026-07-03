@@ -2,7 +2,7 @@
 
 import { PageLoader } from "@/components/app/page-loader";
 import { PageShell } from "@/components/app/page-shell";
-import { useToast } from "@/components/ui/toast";
+import { useIgnorePersistenceError } from "@/hooks/use-ignore-persistence-error";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import {
   setForecastPreferences,
@@ -13,7 +13,6 @@ import { prefetchTrendGraphData, queryKeys } from "@/lib/api/query-client";
 import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
 import { GraphOptions, SeasonOptions } from "@/lib/utils/select-options";
 import { deriveTrendAnalysis } from "@/lib/utils/trend-analysis";
-import * as Sentry from "@sentry/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import React, { useCallback, useMemo, useRef, useState } from "react";
@@ -50,26 +49,7 @@ const Home: FC<MapProperties> = ({
   locations,
 }: MapProperties) => {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  const ignorePersistenceError = useCallback(
-    async (promise: Promise<void>) => {
-      try {
-        await promise;
-      } catch (error) {
-        console.warn("Failed to persist graph preference", error);
-        Sentry.captureException(error, {
-          tags: { errorSource: "persistPreference" },
-        });
-        toast({
-          description: "It will reset next visit.",
-          title: "Couldn't save your preference",
-          variant: "destructive",
-        });
-      }
-    },
-    [toast],
-  );
+  const ignorePersistenceError = useIgnorePersistenceError();
   const [selectedGraphMeasure, setSelectedGraphMeasure] = useState(
     () => initialGraphMeasure,
   );
@@ -170,7 +150,7 @@ const Home: FC<MapProperties> = ({
       if (selectedLocationId !== undefined) {
         setIsMobileGraphLegendOpen(false);
         setSelectedGraphMeasure(option);
-        void ignorePersistenceError(setGraphMeasure(option));
+        ignorePersistenceError(setGraphMeasure(option));
       }
     },
     [selectedLocationId, ignorePersistenceError],
@@ -181,7 +161,7 @@ const Home: FC<MapProperties> = ({
       const nextSeason = normalizeGraphSeason(season);
       setIsMobileGraphLegendOpen(false);
       setSelectedGraphSeason(nextSeason);
-      void ignorePersistenceError(setGraphSeason(nextSeason));
+      ignorePersistenceError(setGraphSeason(nextSeason));
     },
     [ignorePersistenceError],
   );

@@ -202,7 +202,7 @@ interface SelectProps {
   data: (SelectOption | SelectGroupOption)[];
   disabled?: boolean;
   label?: string;
-  onChange?: (value: any) => void;
+  onChange?: (value: string) => void;
   onClear?: () => void;
   placeholder?: string;
   searchable?: boolean;
@@ -226,6 +226,22 @@ const Select = ({
   "data-testid": testId,
 }: SelectProps) => {
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [open, setOpen] = React.useState(false);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (!open || !searchable) {
+      return undefined;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      searchInputRef.current?.focus();
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [open, searchable]);
 
   const filteredData = React.useMemo(() => {
     if (!searchTerm) return data;
@@ -257,6 +273,13 @@ const Select = ({
     }
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      setSearchTerm("");
+    }
+  };
+
   const hasValue = value !== undefined && value !== null && value !== "";
 
   return (
@@ -269,7 +292,9 @@ const Select = ({
       <div className="relative flex items-center gap-2">
         <SelectRoot
           disabled={disabled}
+          onOpenChange={handleOpenChange}
           onValueChange={handleValueChange}
+          open={open}
           value={value ?? ""}
         >
           <SelectTrigger className="w-full" data-testid={testId} size={size}>
@@ -285,6 +310,7 @@ const Select = ({
                   onClick={(e) => e.stopPropagation()}
                   onKeyDown={(e) => e.stopPropagation()}
                   placeholder="Search..."
+                  ref={searchInputRef}
                   value={searchTerm}
                 />
               </div>

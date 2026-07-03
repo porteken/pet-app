@@ -1,4 +1,5 @@
 import type { GraphSeason } from "@/lib/constants";
+import type { ForecastGraphData } from "@/lib/utils/trend-analysis";
 import type { LocationOptionSection, LocationProperties } from "@/types/types";
 
 export interface PageProperties {
@@ -7,6 +8,7 @@ export interface PageProperties {
   graphDataError: boolean;
   IncreasePerYear: number;
   id: number;
+  initialForecastData?: ForecastGraphData;
   initialForecastEnabled: boolean;
   initialForecastYearsAhead: number;
   initialGraphMeasure: string;

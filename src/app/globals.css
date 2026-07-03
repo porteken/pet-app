@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import "./shadcn-tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 @layer utilities {
@@ -120,16 +120,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .map-error {
-    min-height: 400px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 0.5rem;
   }
 
   ::-webkit-scrollbar {

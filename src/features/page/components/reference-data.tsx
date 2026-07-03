@@ -3,13 +3,10 @@
 import { ChartSkeleton } from "@/components/app/chart-skeleton";
 import { ErrorGraphDisplay } from "@/features/home/components/error-graph-display";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
-import {
-  getReferenceGraphQueryOptions,
-  queryKeys,
-} from "@/lib/api/query-client";
+import { getReferenceGraphQueryOptions } from "@/lib/api/query-client";
 import { DEFAULT_GRAPH_SEASON, GRAPH_CONFIG } from "@/lib/constants";
 import { YearOptions } from "@/lib/utils/select-options";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import React from "react";
 
@@ -22,12 +19,6 @@ interface ReferenceDataProperties {
   onReferenceYearChange: (referenceYear: string) => void;
   referenceYear: string;
   ReferencePets: number[];
-}
-
-interface ReferenceGraphSnapshot {
-  dates: Date[];
-  pets: number[];
-  year: string;
 }
 
 const REFERENCE_SCROLL_HINT_THRESHOLD = 90;
@@ -57,20 +48,35 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   referenceYear,
   ReferencePets,
 }) => {
-  const queryClient = useQueryClient();
   const REFERENCE_YEARS = React.useMemo(
     () => YearOptions({ includeLatestYear: false }),
     [],
   );
-  const [referenceGraphSnapshot, setReferenceGraphSnapshot] =
-    React.useState<ReferenceGraphSnapshot>();
-  const [hasReferenceError, setHasReferenceError] =
-    React.useState(initialHasError);
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
-  const latestReferenceRequestRef = React.useRef(0);
 
   const showReferenceLegend = !isMobileViewport || isMobileLegendOpen;
+
+  const initialReferenceData = React.useMemo(() => {
+    const hasValidInitialData =
+      CurrentDates.length > 0 &&
+      CurrentPets.length === CurrentDates.length &&
+      ReferencePets.length === CurrentDates.length;
+
+    return hasValidInitialData
+      ? { dates: CurrentDates, pets: ReferencePets }
+      : undefined;
+  }, [CurrentDates, CurrentPets.length, ReferencePets]);
+
+  const referenceQuery = useQuery({
+    ...getReferenceGraphQueryOptions(id, referenceYear),
+    initialData:
+      referenceYear === initialReferenceYear ? initialReferenceData : undefined,
+  });
+
+  const referenceGraphSnapshot = referenceQuery.data;
+  const hasReferenceError =
+    referenceQuery.isError || (initialHasError && !referenceQuery.data);
   const referencePointCount = referenceGraphSnapshot?.dates.length ?? 0;
   const needsHorizontalScroll =
     referencePointCount >= REFERENCE_SCROLL_HINT_THRESHOLD;
@@ -94,47 +100,6 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
     [referenceChartMinWidth],
   );
 
-  React.useEffect(() => {
-    const hasInitialReferenceSnapshot =
-      CurrentDates.length > 0 &&
-      CurrentPets.length === CurrentDates.length &&
-      ReferencePets.length === CurrentDates.length;
-
-    if (hasInitialReferenceSnapshot) {
-      queryClient.setQueryData(
-        queryKeys.referenceGraph(
-          id,
-          initialReferenceYear,
-          DEFAULT_GRAPH_SEASON,
-        ),
-        { dates: CurrentDates, pets: ReferencePets },
-      );
-    }
-  }, [
-    queryClient,
-    id,
-    initialReferenceYear,
-    CurrentDates,
-    CurrentPets.length,
-    ReferencePets,
-  ]);
-
-  const generatePetReferenceGraph = React.useCallback(
-    async (year: string) => {
-      const requestId = ++latestReferenceRequestRef.current;
-      const { dates, pets } = await queryClient.fetchQuery(
-        getReferenceGraphQueryOptions(id, year),
-      );
-
-      if (requestId !== latestReferenceRequestRef.current) {
-        return;
-      }
-
-      setReferenceGraphSnapshot({ dates, pets, year });
-    },
-    [id, queryClient],
-  );
-
   const handleReferenceYearChange = React.useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       const year = event.target.value;
@@ -147,18 +112,6 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   const handleToggleMobileLegend = React.useCallback(() => {
     setIsMobileLegendOpen((previous) => !previous);
   }, []);
-
-  React.useEffect(() => {
-    setHasReferenceError(false);
-    const performGenerate = async () => {
-      try {
-        await generatePetReferenceGraph(referenceYear);
-      } catch {
-        setHasReferenceError(true);
-      }
-    };
-    void performGenerate();
-  }, [generatePetReferenceGraph, referenceYear]);
 
   return (
     <div className="h-full min-h-0 min-w-0">
@@ -218,7 +171,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
                         dates={referenceGraphSnapshot.dates}
                         isMobileViewport={isMobileViewport}
                         referencePets={referenceGraphSnapshot.pets}
-                        referenceYear={referenceGraphSnapshot.year}
+                        referenceYear={referenceYear}
                         season={DEFAULT_GRAPH_SEASON}
                         showLegend={showReferenceLegend}
                       />

@@ -63,8 +63,48 @@ describe("pOST /api/preferences/graph", () => {
     expect(mockSet).toHaveBeenCalledWith(
       GRAPH_MEASURE_COOKIE_NAME,
       "avg",
-      expect.any(Object),
+      expect.objectContaining({ secure: false }),
     );
+  });
+
+  it("sets secure cookies in production outside of e2e test runs", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_E2E_TEST", "false");
+
+    const request = new Request("http://localhost/api/preferences/graph", {
+      method: "POST",
+      body: JSON.stringify({ graphMeasure: "avg" }),
+    });
+
+    await POST(request);
+
+    expect(mockSet).toHaveBeenCalledWith(
+      GRAPH_MEASURE_COOKIE_NAME,
+      "avg",
+      expect.objectContaining({ secure: true }),
+    );
+
+    vi.unstubAllEnvs();
+  });
+
+  it("does not set secure cookies during production e2e test runs", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_E2E_TEST", "true");
+
+    const request = new Request("http://localhost/api/preferences/graph", {
+      method: "POST",
+      body: JSON.stringify({ graphMeasure: "avg" }),
+    });
+
+    await POST(request);
+
+    expect(mockSet).toHaveBeenCalledWith(
+      GRAPH_MEASURE_COOKIE_NAME,
+      "avg",
+      expect.objectContaining({ secure: false }),
+    );
+
+    vi.unstubAllEnvs();
   });
 
   it("returns 400 for invalid graph measure", async () => {

@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/app/page-shell";
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
+import { useToast } from "@/components/ui/toast";
 import {
   persistGraphMeasurePreference,
   persistGraphSeasonPreference,
@@ -18,34 +19,13 @@ import type { PageProperties } from "../model/types";
 import type { GraphSeason } from "@/lib/constants";
 import type { FC } from "react";
 
-const handleMeasureChange = async (measure: string): Promise<void> => {
-  try {
-    await persistGraphMeasurePreference(measure);
-  } catch (error) {
-    console.warn("Failed to persist graph measure preference", error);
-    Sentry.captureException(error, {
-      tags: { errorSource: "persistPreference" },
-    });
-  }
-};
-
-const ignorePersistenceError = async (promise: Promise<void>) => {
-  try {
-    await promise;
-  } catch (error) {
-    console.warn("Failed to persist graph preference", error);
-    Sentry.captureException(error, {
-      tags: { errorSource: "persistPreference" },
-    });
-  }
-};
-
 const Main: FC<PageProperties> = ({
   CurrentDates,
   CurrentPets,
   graphDataError,
   IncreasePerYear,
   id,
+  initialForecastData,
   initialForecastEnabled,
   initialForecastYearsAhead,
   initialGraphMeasure,
@@ -63,19 +43,41 @@ const Main: FC<PageProperties> = ({
   const [selectedReferenceYear, setSelectedReferenceYear] =
     React.useState(initialReferenceYear);
   const [isLegendOpen, setIsLegendOpen] = React.useState(false);
+  const { toast } = useToast();
 
-  const handleSeasonChange = React.useCallback(async (season: GraphSeason) => {
-    setSelectedGraphSeason(season);
+  const ignorePersistenceError = React.useCallback(
+    async (promise: Promise<void>) => {
+      try {
+        await promise;
+      } catch (error) {
+        console.warn("Failed to persist graph preference", error);
+        Sentry.captureException(error, {
+          tags: { errorSource: "persistPreference" },
+        });
+        toast({
+          description: "It will reset next visit.",
+          title: "Couldn't save your preference",
+          variant: "destructive",
+        });
+      }
+    },
+    [toast],
+  );
 
-    try {
-      await persistGraphSeasonPreference(season);
-    } catch (error) {
-      console.warn("Failed to persist graph season preference", error);
-      Sentry.captureException(error, {
-        tags: { errorSource: "persistPreference" },
-      });
-    }
-  }, []);
+  const handleMeasureChange = React.useCallback(
+    async (measure: string) => {
+      await ignorePersistenceError(persistGraphMeasurePreference(measure));
+    },
+    [ignorePersistenceError],
+  );
+
+  const handleSeasonChange = React.useCallback(
+    async (season: GraphSeason) => {
+      setSelectedGraphSeason(season);
+      await ignorePersistenceError(persistGraphSeasonPreference(season));
+    },
+    [ignorePersistenceError],
+  );
 
   const handleReferenceYearChange = React.useCallback(
     (referenceYear: string) => {
@@ -85,7 +87,7 @@ const Main: FC<PageProperties> = ({
         persistReferenceYearPreference(referenceYear),
       );
     },
-    [],
+    [ignorePersistenceError],
   );
 
   const handleToggleLegend = React.useCallback(() => {
@@ -105,11 +107,11 @@ const Main: FC<PageProperties> = ({
           <TrendAnalysis
             graphSeason={selectedGraphSeason}
             id={id}
+            initialForecastData={initialForecastData}
             initialForecastEnabled={initialForecastEnabled}
             initialForecastYearsAhead={initialForecastYearsAhead}
             initialGraphMeasure={initialGraphMeasure}
             initialGraphSeason={initialGraphSeason}
-            initialHasError={graphDataError}
             initialIncreasePerYear={IncreasePerYear}
             initialTrendlinePets={TrendlinePets}
             initialYearPets={YearPets}

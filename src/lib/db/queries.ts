@@ -4,7 +4,7 @@ import { classifyDbError } from "@/lib/utils/errors";
 import { getRuntimeMockTableRows } from "@/testing/runtime-mocks";
 import { sql } from "kysely";
 
-import { getDb } from "./kysely";
+import { getDb, withDbRetry } from "./kysely";
 
 import type { NumericLike } from "./types";
 import type { GraphSeason } from "@/lib/constants";
@@ -199,7 +199,7 @@ export async function fetchCityRankingsRows(
   };
 
   try {
-    return await buildQuery(season).execute();
+    return await withDbRetry(() => buildQuery(season).execute());
   } catch (error) {
     if (
       season !== undefined &&
@@ -218,7 +218,7 @@ export async function fetchLocationRows(column: LocationIdentifierColumn) {
   }
 
   try {
-    return await buildLocationRowsQuery(column).execute();
+    return await withDbRetry(() => buildLocationRowsQuery(column).execute());
   } catch (error) {
     if (column === "id" && isMissingColumnError(error, "locations", "id")) {
       return buildLocationRowsQuery("location_id").execute();
@@ -252,7 +252,7 @@ export async function fetchTrendGraphRows(
   };
 
   try {
-    return await buildQuery(season).execute();
+    return await withDbRetry(() => buildQuery(season).execute());
   } catch (error) {
     if (
       season !== undefined &&
@@ -273,18 +273,20 @@ export async function fetchReferenceGraphRows(
     return getRuntimeReferenceRows(locationId, year);
   }
 
-  return getDb()
-    .selectFrom("pet")
-    .select(({ ref }) => [
-      sql<string>`cast(${ref("date")} as text)`.as("date"),
-      "location_id",
-      "pet",
-    ])
-    .where("location_id", "=", locationId)
-    .where("date", ">=", `${year}-01-01`)
-    .where("date", "<", `${Number(year) + 1}-01-01`)
-    .orderBy("date", "asc")
-    .execute();
+  return withDbRetry(() =>
+    getDb()
+      .selectFrom("pet")
+      .select(({ ref }) => [
+        sql<string>`cast(${ref("date")} as text)`.as("date"),
+        "location_id",
+        "pet",
+      ])
+      .where("location_id", "=", locationId)
+      .where("date", ">=", `${year}-01-01`)
+      .where("date", "<", `${Number(year) + 1}-01-01`)
+      .orderBy("date", "asc")
+      .execute(),
+  );
 }
 
 export async function fetchHistoricalYearRow(
@@ -309,7 +311,7 @@ export async function fetchHistoricalYearRow(
   };
 
   try {
-    return await buildQuery(season).executeTakeFirst();
+    return await withDbRetry(() => buildQuery(season).executeTakeFirst());
   } catch (error) {
     if (
       season !== undefined &&
@@ -350,7 +352,7 @@ export async function fetchForecastRows(
   };
 
   try {
-    return await buildQuery(season).execute();
+    return await withDbRetry(() => buildQuery(season).execute());
   } catch (error) {
     if (season !== undefined && isMissingColumnError(error, table, "season")) {
       return buildQuery().execute();

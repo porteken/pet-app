@@ -6,6 +6,7 @@ import {
   REFERENCE_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
 import { isSelectableReferenceYear } from "@/lib/utils/select-options";
+import { isSecureCookieEnvironment } from "@/lib/utils/server-cookies";
 import { validateTrendOption } from "@/lib/utils/validation";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
@@ -33,6 +34,7 @@ const buildCookieOptions = () => ({
   httpOnly: true,
   path: "/",
   sameSite: "lax" as const,
+  secure: isSecureCookieEnvironment(),
 });
 
 const isRecord = (val: unknown): val is Record<string, unknown> =>

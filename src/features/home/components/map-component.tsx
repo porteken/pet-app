@@ -178,28 +178,34 @@ interface ThermalStressLegendOverlayProperties {
   setIsLegendOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-class LegendToggleButton extends React.PureComponent<LegendToggleButtonProperties> {
-  private readonly handleClick = () => {
-    this.props.setIsLegendOpen((previous) => !previous);
-  };
-
-  public render(): React.ReactElement {
-    const { ariaControls, className, closedLabel, isLegendOpen, openLabel } =
-      this.props;
+const LegendToggleButton = React.memo(
+  ({
+    ariaControls,
+    className,
+    closedLabel,
+    isLegendOpen,
+    openLabel,
+    setIsLegendOpen,
+  }: LegendToggleButtonProperties) => {
+    const handleClick = React.useCallback(() => {
+      setIsLegendOpen((previous) => !previous);
+    }, [setIsLegendOpen]);
 
     return (
       <button
         aria-controls={ariaControls}
         aria-expanded={isLegendOpen}
         className={className}
-        onClick={this.handleClick}
+        onClick={handleClick}
         type="button"
       >
         {isLegendOpen ? openLabel : closedLabel}
       </button>
     );
-  }
-}
+  },
+);
+
+LegendToggleButton.displayName = "LegendToggleButton";
 
 const ThermalStressLegendOverlay = ({
   isLegendOpen,

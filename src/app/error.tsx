@@ -2,6 +2,8 @@
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
 
 export default function ErrorPage({
   error,
@@ -10,6 +12,10 @@ export default function ErrorPage({
   readonly error: Error & { digest?: string };
   readonly reset: () => void;
 }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   return (
     <div className="mx-auto max-w-xl px-4 py-12">
       <div className="flex flex-col items-center gap-6 text-center">

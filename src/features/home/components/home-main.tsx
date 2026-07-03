@@ -1,62 +1,45 @@
 "use client";
 
+import { PageLoader } from "@/components/app/page-loader";
 import { PageShell } from "@/components/app/page-shell";
+import { useToast } from "@/components/ui/toast";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import {
   setForecastPreferences,
   setGraphMeasure,
   setGraphSeason,
 } from "@/lib/actions/actions";
-import { FetchForecastData } from "@/lib/api/fetch-client";
-import {
-  getTrendGraphQueryOptions,
-  prefetchTrendGraphData,
-  queryKeys,
-} from "@/lib/api/query-client";
+import { prefetchTrendGraphData, queryKeys } from "@/lib/api/query-client";
 import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
 import { GraphOptions, SeasonOptions } from "@/lib/utils/select-options";
-import {
-  buildTrendAnalysisResult,
-  type TrendGraphSnapshot,
-} from "@/lib/utils/trend-analysis";
+import { deriveTrendAnalysis } from "@/lib/utils/trend-analysis";
+import * as Sentry from "@sentry/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 
+import { useForecastData } from "../hooks/use-forecast-data";
+import { useTrendGraphData } from "../hooks/use-trend-graph-data";
 import { GraphSection } from "./graph-section";
-import { MapComponent } from "./map-component";
 
 import type { MapProperties } from "../model/types";
-import type { HeatStressDescription } from "@/lib/utils/thermal-stress";
 import type { LocationProperties } from "@/types/types";
 import type { FC } from "react";
 
 const Modal = dynamic(() => import("@/components/modal"), {
   ssr: false,
 });
+const MapComponent = dynamic(
+  async () => {
+    const mapComponentModule = await import("./map-component");
+    return mapComponentModule.MapComponent;
+  },
+  {
+    loading: () => <PageLoader />,
+    ssr: false,
+  },
+);
 const TREND_PREFETCH_STALE_TIME_MS = 1000 * 60 * 5;
-
-interface GenerateGraphOptions {
-  enableForecast: boolean;
-  locationId: number;
-  option: string;
-  season: GraphSeason;
-  yearsAhead: number;
-}
-
-const ignorePersistenceError = async (promise: Promise<void>) => {
-  try {
-    await promise;
-  } catch {
-    // The local UI state remains valid even if persistence fails.
-  }
-};
 
 const Home: FC<MapProperties> = ({
   initialForecastEnabled,
@@ -67,6 +50,26 @@ const Home: FC<MapProperties> = ({
   locations,
 }: MapProperties) => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const ignorePersistenceError = useCallback(
+    async (promise: Promise<void>) => {
+      try {
+        await promise;
+      } catch (error) {
+        console.warn("Failed to persist graph preference", error);
+        Sentry.captureException(error, {
+          tags: { errorSource: "persistPreference" },
+        });
+        toast({
+          description: "It will reset next visit.",
+          title: "Couldn't save your preference",
+          variant: "destructive",
+        });
+      }
+    },
+    [toast],
+  );
   const [selectedGraphMeasure, setSelectedGraphMeasure] = useState(
     () => initialGraphMeasure,
   );
@@ -74,10 +77,6 @@ const Home: FC<MapProperties> = ({
     () => initialGraphSeason,
   );
 
-  const [trendGraphSnapshot, setTrendGraphSnapshot] =
-    useState<TrendGraphSnapshot>();
-  const [graphHasError, setGraphHasError] = useState(false);
-  const [graphLoading, setGraphLoading] = useState(false);
   const [selectedLocationId, setSelectedLocationId] = useState<number>();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] =
@@ -90,11 +89,6 @@ const Home: FC<MapProperties> = ({
   );
   const isMobileViewport = useIsMobileViewport();
   const [isMobileGraphLegendOpen, setIsMobileGraphLegendOpen] = useState(false);
-  const [heatStressDescription, setHeatStressDescription] =
-    useState<HeatStressDescription>();
-  const [forecastHeatStress, setForecastHeatStress] =
-    useState<HeatStressDescription>();
-  const latestGraphRequestRef = useRef(0);
   const markerPrefetchOptionsRef = useRef({
     graphMeasure: selectedGraphMeasure,
     graphSeason: selectedGraphSeason,
@@ -127,58 +121,49 @@ const Home: FC<MapProperties> = ({
     [],
   );
 
-  const generateGraph = useCallback(
-    async ({
-      enableForecast,
-      locationId,
-      option,
-      season,
-      yearsAhead,
-    }: GenerateGraphOptions) => {
-      const requestId = ++latestGraphRequestRef.current;
-      setGraphLoading(true);
-      setGraphHasError(false);
-      try {
-        const {
-          forecastHeatStress: newForecastHeatStress,
-          heatStressDescription: newHeatStressDescription,
-          snapshot,
-        } = await buildTrendAnalysisResult({
-          enableForecast,
-          fetchForecastData: () =>
-            FetchForecastData(locationId, yearsAhead, season, option),
-          fetchTrendGraphData: () =>
-            queryClient.fetchQuery(
-              getTrendGraphQueryOptions(locationId, option, season),
-            ),
-          option,
-          season,
-        });
+  const trendQuery = useTrendGraphData({
+    locationId: selectedLocationId,
+    option: selectedGraphMeasure,
+    season: selectedGraphSeason,
+  });
+  const forecastQuery = useForecastData({
+    enabled: forecastEnabled && selectedLocationId !== undefined,
+    locationId: selectedLocationId,
+    option: selectedGraphMeasure,
+    season: selectedGraphSeason,
+    yearsAhead: forecastYearsAhead,
+  });
 
-        if (requestId !== latestGraphRequestRef.current) {
-          return;
-        }
-
-        setHeatStressDescription(newHeatStressDescription);
-        setForecastHeatStress(newForecastHeatStress);
-        setTrendGraphSnapshot(snapshot);
-      } catch {
-        if (requestId !== latestGraphRequestRef.current) {
-          return;
-        }
-
-        setTrendGraphSnapshot(undefined);
-        setGraphHasError(true);
-        setHeatStressDescription(undefined);
-        setForecastHeatStress(undefined);
-      } finally {
-        if (requestId === latestGraphRequestRef.current) {
-          setGraphLoading(false);
-        }
+  const { forecastHeatStress, heatStressDescription, trendGraphSnapshot } =
+    useMemo(() => {
+      if (!trendQuery.data) {
+        return {
+          forecastHeatStress: undefined,
+          heatStressDescription: undefined,
+          trendGraphSnapshot: undefined,
+        };
       }
-    },
-    [queryClient],
-  );
+
+      const result = deriveTrendAnalysis(
+        trendQuery.data,
+        forecastQuery.data,
+        selectedGraphMeasure,
+        selectedGraphSeason,
+      );
+
+      return {
+        forecastHeatStress: result.forecastHeatStress,
+        heatStressDescription: result.heatStressDescription,
+        trendGraphSnapshot: result.snapshot,
+      };
+    }, [
+      trendQuery.data,
+      forecastQuery.data,
+      selectedGraphMeasure,
+      selectedGraphSeason,
+    ]);
+  const graphLoading = trendQuery.isLoading;
+  const graphHasError = trendQuery.isError;
 
   const handleSelectChange = useCallback(
     (option: string) => {
@@ -188,41 +173,18 @@ const Home: FC<MapProperties> = ({
         void ignorePersistenceError(setGraphMeasure(option));
       }
     },
-    [selectedLocationId],
+    [selectedLocationId, ignorePersistenceError],
   );
 
-  const handleSeasonChange = useCallback((season: GraphSeason) => {
-    const nextSeason = normalizeGraphSeason(season);
-    setIsMobileGraphLegendOpen(false);
-    setSelectedGraphSeason(nextSeason);
-    void ignorePersistenceError(setGraphSeason(nextSeason));
-  }, []);
-
-  useEffect(() => {
-    if (selectedLocationId !== undefined) {
-      const performGenerate = async () => {
-        try {
-          await generateGraph({
-            enableForecast: forecastEnabled,
-            locationId: selectedLocationId,
-            option: selectedGraphMeasure,
-            season: selectedGraphSeason,
-            yearsAhead: forecastYearsAhead,
-          });
-        } catch {
-          // Error is handled by generateGraph try/catch
-        }
-      };
-      void performGenerate();
-    }
-  }, [
-    selectedLocationId,
-    selectedGraphMeasure,
-    selectedGraphSeason,
-    forecastEnabled,
-    forecastYearsAhead,
-    generateGraph,
-  ]);
+  const handleSeasonChange = useCallback(
+    (season: GraphSeason) => {
+      const nextSeason = normalizeGraphSeason(season);
+      setIsMobileGraphLegendOpen(false);
+      setSelectedGraphSeason(nextSeason);
+      void ignorePersistenceError(setGraphSeason(nextSeason));
+    },
+    [ignorePersistenceError],
+  );
 
   const handleMarkerClick = useCallback(
     (locationId: number) => {

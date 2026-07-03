@@ -9,6 +9,17 @@ export async function register() {
 
   if (process.env.NEXT_RUNTIME === "nodejs") {
     await import("../sentry.server.config");
+
+    const {
+      getPublicEnvironment,
+      getServerDatabaseEnvironment,
+      shouldUseRuntimeDbMocks,
+    } = await import("@/config/environment");
+
+    getPublicEnvironment();
+    if (!shouldUseRuntimeDbMocks()) {
+      getServerDatabaseEnvironment();
+    }
   }
 
   if (process.env.NEXT_RUNTIME === "edge") {

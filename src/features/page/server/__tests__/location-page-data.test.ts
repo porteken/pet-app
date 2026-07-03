@@ -2,11 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   mockCookies,
+  mockFetchForecastData,
   mockFetchLocations,
   mockFetchReferenceGraphData,
   mockFetchTrendGraphData,
 } = vi.hoisted(() => ({
   mockCookies: mockFn(),
+  mockFetchForecastData: mockFn(),
   mockFetchLocations: mockFn(),
   mockFetchReferenceGraphData: mockFn(),
   mockFetchTrendGraphData: mockFn(),
@@ -17,6 +19,7 @@ vi.mock("next/headers", () => ({
 }));
 
 vi.mock("@/lib/api/fetch-server", () => ({
+  FetchForecastData: mockFetchForecastData,
   FetchLocations: mockFetchLocations,
   FetchReferenceGraphData: mockFetchReferenceGraphData,
   FetchTrendGraphData: mockFetchTrendGraphData,
@@ -171,6 +174,7 @@ describe("loadLocationPageData", () => {
         YearPets: [],
         Years: [],
         id: 7,
+        initialForecastData: undefined,
         initialForecastEnabled: DEFAULT_FORECAST_ENABLED,
         initialForecastYearsAhead: DEFAULT_FORECAST_YEARS_AHEAD,
         initialGraphMeasure: DEFAULT_GRAPH_MEASURE,
@@ -223,6 +227,7 @@ describe("loadLocationPageData", () => {
         YearPets: [27, 28],
         Years: [2023, 2024],
         id: 7,
+        initialForecastData: undefined,
         initialForecastEnabled: DEFAULT_FORECAST_ENABLED,
         initialForecastYearsAhead: DEFAULT_FORECAST_YEARS_AHEAD,
         initialGraphMeasure: DEFAULT_GRAPH_MEASURE,
@@ -285,6 +290,13 @@ describe("loadLocationPageData", () => {
         dates: currentDates,
         pets: [25, 26],
       });
+    const forecastData = {
+      forecastValues: [33, 34],
+      forecastYears: [2025, 2026],
+      lowerBound10: [30, 31],
+      upperBound90: [36, 37],
+    };
+    mockFetchForecastData.mockResolvedValue(forecastData);
 
     await expect(loadLocationPageData("7")).resolves.toStrictEqual({
       payload: {
@@ -293,6 +305,7 @@ describe("loadLocationPageData", () => {
         graphDataError: false,
         IncreasePerYear: 0.5,
         id: 7,
+        initialForecastData: forecastData,
         initialForecastEnabled: true,
         initialForecastYearsAhead: 25,
         initialGraphMeasure: "max",
@@ -321,6 +334,41 @@ describe("loadLocationPageData", () => {
       7,
       "Annual",
     );
+    expect(mockFetchForecastData).toHaveBeenCalledWith(7, 25, "Winter", "max");
+  });
+
+  it("skips fetching forecast data when forecasting is disabled", async () => {
+    mockFetchLocations.mockResolvedValue({
+      LocationOptions: [],
+      locations: [
+        {
+          city: "Boston",
+          lat: 42.3601,
+          lng: -71.0589,
+          location_id: 7,
+          state: "Massachusetts",
+        },
+      ],
+    });
+    mockFetchTrendGraphData.mockResolvedValue({
+      increase_per_year: 0.5,
+      trendline_pets: [28, 29],
+      year_pets: [27, 28],
+      years: [2023, 2024],
+    });
+    mockFetchReferenceGraphData
+      .mockResolvedValueOnce({ dates: [], pets: [] })
+      .mockResolvedValueOnce({ dates: [], pets: [] });
+
+    const result = await loadLocationPageData("7");
+
+    expect(result).toStrictEqual({
+      payload: expect.objectContaining({
+        initialForecastData: undefined,
+      }),
+      status: "success",
+    });
+    expect(mockFetchForecastData).not.toHaveBeenCalled();
   });
 
   it("returns the assembled page data for location id zero when present", async () => {

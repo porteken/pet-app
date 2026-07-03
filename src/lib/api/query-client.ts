@@ -16,6 +16,12 @@ export const createQueryClient = () =>
   });
 
 export const queryKeys = {
+  forecast: (
+    locationId: number,
+    yearsAhead: number,
+    season: GraphSeason = DEFAULT_GRAPH_SEASON,
+    option = "avg",
+  ) => ["forecast", locationId, yearsAhead, season, option] as const,
   referenceGraph: (
     locationId: number,
     year: string,

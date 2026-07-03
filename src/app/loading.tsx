@@ -6,9 +6,9 @@ export default function Loading() {
       <div className="flex flex-col items-center gap-4 text-center">
         <Loader2
           aria-label="Loading"
-          className="size-8 animate-spin text-blue-600"
+          className="size-8 animate-spin text-primary"
         />
-        <p className="text-base text-gray-600">Loading...</p>
+        <p className="text-base text-muted-foreground">Loading...</p>
       </div>
     </div>
   );

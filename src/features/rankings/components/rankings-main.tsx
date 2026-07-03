@@ -6,6 +6,7 @@ import { PageShell } from "@/components/app/page-shell";
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { Pagination } from "@/components/ui/pagination";
 import { Select } from "@/components/ui/select";
+import { useToast } from "@/components/ui/toast";
 import {
   setRankingsHeatStress,
   setRankingsSeason,
@@ -22,8 +23,10 @@ import {
   getHeatStressInfo,
   THERMAL_STRESS_LEGEND_ITEMS,
 } from "@/lib/utils/thermal-stress";
+import * as Sentry from "@sentry/nextjs";
+import { cva } from "class-variance-authority";
 import { useRouter } from "next/navigation";
-import React, { useMemo, useState, useTransition } from "react";
+import React, { memo, useCallback, useMemo, useTransition } from "react";
 
 import type { LocationOptionSection } from "@/types/types";
 
@@ -31,12 +34,12 @@ const getPetRange = (p10: number, p90: number): string =>
   `${p10.toFixed(1)}-${p90.toFixed(1)}`;
 const colorMapping = (value: number) => {
   if (value > 0) {
-    return "text-red-600";
+    return "text-red-600 dark:text-red-400";
   } else if (value < 0) {
-    return "text-blue-600";
+    return "text-blue-600 dark:text-blue-400";
   }
 
-  return "text-gray-600";
+  return "text-muted-foreground";
 };
 
 interface SelectOption {
@@ -122,20 +125,26 @@ function filterRanking(
   return true;
 }
 
+const rankBadgeVariants = cva("border", {
+  defaultVariants: {
+    rank: "other",
+  },
+  variants: {
+    rank: {
+      1: "border-amber-300 bg-amber-100 text-amber-900 dark:border-amber-500/40 dark:bg-amber-950 dark:text-amber-200",
+      2: "border-slate-300 bg-slate-100 text-slate-900 dark:border-slate-500/40 dark:bg-slate-800 dark:text-slate-100",
+      3: "border-orange-300 bg-orange-100 text-orange-900 dark:border-orange-500/40 dark:bg-orange-950 dark:text-orange-200",
+      other: "border-border bg-background/80 text-foreground",
+    },
+  },
+});
+
 function getRankBadgeClasses(rank: number): string {
-  if (rank === 1) {
-    return "border border-amber-300 bg-amber-100 text-amber-900";
+  if (rank === 1 || rank === 2 || rank === RANK_THREE) {
+    return rankBadgeVariants({ rank });
   }
 
-  if (rank === 2) {
-    return "border border-slate-300 bg-slate-100 text-slate-900";
-  }
-
-  if (rank === RANK_THREE) {
-    return "border border-orange-300 bg-orange-100 text-orange-900";
-  }
-
-  return "border border-border bg-background/80 text-foreground";
+  return rankBadgeVariants({ rank: "other" });
 }
 
 interface RankingsMainProperties {
@@ -148,101 +157,172 @@ interface RankingsMainProperties {
   shouldPersistInitialSeason?: boolean;
 }
 
+interface RankingsState {
+  currentPage: number;
+  heatStressFilter: string;
+  selectedSeason: GraphSeason;
+  selectedYear: number;
+  sortColumn: SortColumn;
+  sortDirection: "asc" | "desc";
+  stateFilter: string;
+}
+
+type RankingsAction =
+  | { column: SortColumn; type: "SET_SORT" }
+  | { heatStress: string; type: "SET_HEAT_STRESS_FILTER" }
+  | { page: number; type: "SET_PAGE" }
+  | { season: GraphSeason; type: "SET_SEASON" }
+  | { state: string; type: "SET_STATE_FILTER" }
+  | { type: "SET_YEAR"; year: number };
+
+type RankingsDispatch = React.Dispatch<RankingsAction>;
+type PersistAction = (...actions: Array<() => Promise<unknown>>) => void;
+
+const createInitialRankingsState = (properties: {
+  initialHeatStress: string;
+  initialSeason: GraphSeason;
+  initialState: string;
+  initialYear: number;
+}): RankingsState => ({
+  currentPage: 1,
+  heatStressFilter: properties.initialHeatStress,
+  selectedSeason: properties.initialSeason,
+  selectedYear: properties.initialYear,
+  sortColumn: "rank",
+  sortDirection: "asc",
+  stateFilter: properties.initialState,
+});
+
+function rankingsReducer(
+  state: RankingsState,
+  action: RankingsAction,
+): RankingsState {
+  switch (action.type) {
+    case "SET_YEAR": {
+      // Matches prior behavior: changing the year resets an out-of-range
+      // heat-stress filter but does not reset pagination.
+      return { ...state, heatStressFilter: "", selectedYear: action.year };
+    }
+    case "SET_SEASON": {
+      return {
+        ...state,
+        currentPage: 1,
+        heatStressFilter: "",
+        selectedSeason: action.season,
+      };
+    }
+    case "SET_STATE_FILTER": {
+      return { ...state, currentPage: 1, stateFilter: action.state };
+    }
+    case "SET_HEAT_STRESS_FILTER": {
+      return { ...state, currentPage: 1, heatStressFilter: action.heatStress };
+    }
+    case "SET_SORT": {
+      if (state.sortColumn === action.column) {
+        return {
+          ...state,
+          currentPage: 1,
+          sortDirection: state.sortDirection === "asc" ? "desc" : "asc",
+        };
+      }
+
+      return {
+        ...state,
+        currentPage: 1,
+        sortColumn: action.column,
+        sortDirection: "asc",
+      };
+    }
+    case "SET_PAGE": {
+      return { ...state, currentPage: action.page };
+    }
+    default: {
+      return state;
+    }
+  }
+}
+
 interface RankingsFiltersProperties {
+  dispatch: RankingsDispatch;
   heatStressFilter: string;
   heatStressOptions: SelectOption[];
   isPending: boolean;
+  persist: PersistAction;
   selectedSeason: GraphSeason;
   selectedYear: number;
-  setHeatStressFilter: React.Dispatch<React.SetStateAction<string>>;
-  setSelectedSeason: React.Dispatch<React.SetStateAction<GraphSeason>>;
-  setSelectedYear: React.Dispatch<React.SetStateAction<number>>;
-  setStateFilter: React.Dispatch<React.SetStateAction<string>>;
-  startTransition: React.TransitionStartFunction;
   stateFilter: string;
   stateOptions: SelectOption[];
 }
 
-class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
-  private readonly resetHeatStressFilter = (): boolean => {
-    if (this.props.heatStressFilter === "") {
-      return false;
-    }
+const RankingsFilters = memo(
+  ({
+    dispatch,
+    heatStressFilter,
+    heatStressOptions,
+    isPending,
+    persist,
+    selectedSeason,
+    selectedYear,
+    stateFilter,
+    stateOptions,
+  }: RankingsFiltersProperties) => {
+    const handleYearChange = useCallback(
+      (value: string) => {
+        if (!value) {
+          return;
+        }
 
-    this.props.setHeatStressFilter("");
-    return true;
-  };
+        const year = Number(value);
+        const shouldResetHeatStress = heatStressFilter !== "";
 
-  private readonly handleHeatStressChange = (value: string) => {
-    this.props.setHeatStressFilter(value);
-    this.props.startTransition(() => {
-      void setRankingsHeatStress(value);
-    });
-  };
+        dispatch({ type: "SET_YEAR", year });
+        persist(
+          ...(shouldResetHeatStress ? [() => setRankingsHeatStress("")] : []),
+          () => setRankingsYear(year),
+        );
+      },
+      [dispatch, heatStressFilter, persist],
+    );
 
-  private readonly handleHeatStressClear = () => {
-    this.props.setHeatStressFilter("");
-    this.props.startTransition(() => {
-      void setRankingsHeatStress("");
-    });
-  };
+    const handleSeasonChange = useCallback(
+      (value: string) => {
+        const season = normalizeGraphSeason(value);
+        const shouldResetHeatStress = heatStressFilter !== "";
 
-  private readonly handleSeasonChange = (value: string) => {
-    const season = normalizeGraphSeason(value);
-    const shouldResetHeatStress = this.resetHeatStressFilter();
+        dispatch({ season, type: "SET_SEASON" });
+        persist(
+          ...(shouldResetHeatStress ? [() => setRankingsHeatStress("")] : []),
+          () => setRankingsSeason(season),
+        );
+      },
+      [dispatch, heatStressFilter, persist],
+    );
 
-    this.props.setSelectedSeason(season);
-    this.props.startTransition(() => {
-      if (shouldResetHeatStress) {
-        void setRankingsHeatStress("");
-      }
+    const handleStateChange = useCallback(
+      (value: string) => {
+        dispatch({ state: value, type: "SET_STATE_FILTER" });
+        persist(() => setRankingsState(value));
+      },
+      [dispatch, persist],
+    );
 
-      void setRankingsSeason(season);
-    });
-  };
+    const handleStateClear = useCallback(() => {
+      dispatch({ state: "", type: "SET_STATE_FILTER" });
+      persist(() => setRankingsState(""));
+    }, [dispatch, persist]);
 
-  private readonly handleStateChange = (value: string) => {
-    this.props.setStateFilter(value);
-    this.props.startTransition(() => {
-      void setRankingsState(value);
-    });
-  };
+    const handleHeatStressChange = useCallback(
+      (value: string) => {
+        dispatch({ heatStress: value, type: "SET_HEAT_STRESS_FILTER" });
+        persist(() => setRankingsHeatStress(value));
+      },
+      [dispatch, persist],
+    );
 
-  private readonly handleStateClear = () => {
-    this.props.setStateFilter("");
-    this.props.startTransition(() => {
-      void setRankingsState("");
-    });
-  };
-
-  private readonly handleYearChange = (value: string) => {
-    if (!value) {
-      return;
-    }
-
-    const year = Number(value);
-    const shouldResetHeatStress = this.resetHeatStressFilter();
-
-    this.props.setSelectedYear(year);
-    this.props.startTransition(() => {
-      if (shouldResetHeatStress) {
-        void setRankingsHeatStress("");
-      }
-
-      void setRankingsYear(year);
-    });
-  };
-
-  public render(): React.ReactElement {
-    const {
-      heatStressFilter,
-      heatStressOptions,
-      isPending,
-      selectedSeason,
-      selectedYear,
-      stateFilter,
-      stateOptions,
-    } = this.props;
+    const handleHeatStressClear = useCallback(() => {
+      dispatch({ heatStress: "", type: "SET_HEAT_STRESS_FILTER" });
+      persist(() => setRankingsHeatStress(""));
+    }, [dispatch, persist]);
 
     return (
       <section className="mb-6 fade-in-up rounded-3xl p-4 glass-panel [animation-delay:80ms] sm:p-5">
@@ -253,7 +333,7 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
             data-testid="rankings-year-filter"
             disabled={isPending}
             label="Year"
-            onChange={this.handleYearChange}
+            onChange={handleYearChange}
             value={String(selectedYear)}
           />
           <Select
@@ -262,7 +342,7 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
             data-testid="rankings-season-filter"
             disabled={isPending}
             label="Season"
-            onChange={this.handleSeasonChange}
+            onChange={handleSeasonChange}
             value={selectedSeason}
           />
           <Select
@@ -272,8 +352,8 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
             data-testid="rankings-state-filter"
             disabled={isPending}
             label="State"
-            onChange={this.handleStateChange}
-            onClear={this.handleStateClear}
+            onChange={handleStateChange}
+            onClear={handleStateClear}
             placeholder="All states"
             value={stateFilter}
           />
@@ -284,51 +364,39 @@ class RankingsFilters extends React.PureComponent<RankingsFiltersProperties> {
             data-testid="rankings-heat-stress-filter"
             disabled={isPending}
             label="Avg Thermal Stress Level"
-            onChange={this.handleHeatStressChange}
-            onClear={this.handleHeatStressClear}
+            onChange={handleHeatStressChange}
+            onClear={handleHeatStressClear}
             placeholder="All levels"
             value={heatStressFilter}
           />
         </div>
       </section>
     );
-  }
-}
+  },
+);
 
-class SortHeader extends React.PureComponent<{
+RankingsFilters.displayName = "RankingsFilters";
+
+interface SortHeaderProperties {
   column: SortColumn;
   currentColumn: SortColumn;
   currentDirection: "asc" | "desc";
+  dispatch: RankingsDispatch;
   label: string;
-  setSortColumn: React.Dispatch<React.SetStateAction<SortColumn>>;
-  setSortDirection: React.Dispatch<React.SetStateAction<"asc" | "desc">>;
-  startTransition: React.TransitionStartFunction;
-}> {
-  private readonly handleClick = () => {
-    const {
-      column,
-      currentColumn,
-      currentDirection,
-      setSortColumn,
-      setSortDirection,
-      startTransition,
-    } = this.props;
+}
 
-    if (currentColumn === column) {
-      startTransition(() => {
-        setSortDirection(currentDirection === "asc" ? "desc" : "asc");
-      });
-      return;
-    }
+const SortHeader = memo(
+  ({
+    column,
+    currentColumn,
+    currentDirection,
+    dispatch,
+    label,
+  }: SortHeaderProperties) => {
+    const handleClick = useCallback(() => {
+      dispatch({ column, type: "SET_SORT" });
+    }, [dispatch, column]);
 
-    startTransition(() => {
-      setSortColumn(column);
-      setSortDirection("asc");
-    });
-  };
-
-  public render(): React.ReactElement {
-    const { column, currentColumn, currentDirection, label } = this.props;
     const isActive = currentColumn === column;
     let ariaSort: "ascending" | "descending" | "none" = "none";
     if (isActive) {
@@ -342,7 +410,7 @@ class SortHeader extends React.PureComponent<{
       >
         <button
           className="flex cursor-pointer items-center gap-1 transition hover:text-foreground"
-          onClick={this.handleClick}
+          onClick={handleClick}
           type="button"
         >
           {label}
@@ -354,121 +422,124 @@ class SortHeader extends React.PureComponent<{
         </button>
       </th>
     );
-  }
-}
+  },
+);
 
-class RankingRow extends React.PureComponent<{
+SortHeader.displayName = "SortHeader";
+
+interface RankingRowProperties {
   item: RankingItem;
   push: (href: string) => void;
-}> {
-  private readonly handleClick = () => {
-    this.props.push(`/${this.props.item.location_id}`);
-  };
-
-  private readonly handleKeyDown = (
-    event: React.KeyboardEvent<HTMLTableRowElement>,
-  ) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      this.handleClick();
-    }
-  };
-
-  public render(): React.ReactElement {
-    const {
-      item: {
-        avg_pet,
-        changeFrom2000,
-        city,
-        FutureValueLower,
-        FutureValueUpper,
-        max_pet,
-        p10,
-        p90,
-        rank,
-        state,
-      },
-    } = this.props;
-    const avgHeatStressInfo = getHeatStressInfo(avg_pet);
-
-    return (
-      <tr
-        className="cursor-pointer transition even:bg-background/30 hover:-translate-y-px hover:bg-accent/45 focus-visible:outline-2 focus-visible:outline-ring"
-        onClick={this.handleClick}
-        onKeyDown={this.handleKeyDown}
-        tabIndex={0}
-      >
-        <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-foreground">
-          <span
-            className={`inline-flex min-w-10 items-center justify-center rounded-full px-3 py-1 text-xs font-bold ${getRankBadgeClasses(rank)}`}
-          >
-            {rank}
-          </span>
-        </td>
-        <td className="px-6 py-4 text-sm whitespace-nowrap text-foreground">
-          {city}
-        </td>
-        <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
-          <span className="rounded-full bg-background/80 px-2.5 py-1 font-medium text-foreground">
-            {state}
-          </span>
-        </td>
-        <td className="px-6 py-4 text-sm whitespace-nowrap">
-          <span className={`font-semibold ${avgHeatStressInfo.color}`}>
-            {avg_pet.toFixed(1)}°C
-          </span>
-        </td>
-        <td className="px-6 py-4 text-sm whitespace-nowrap">
-          {max_pet === undefined ? (
-            <span className="text-muted-foreground">N/A</span>
-          ) : (
-            <span
-              className={`font-semibold ${getHeatStressInfo(max_pet).color}`}
-            >
-              {max_pet.toFixed(1)}°C
-            </span>
-          )}
-        </td>
-        <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
-          {p10 !== undefined && p90 !== undefined ? (
-            `${getPetRange(p10, p90)}°C`
-          ) : (
-            <span className="text-muted-foreground">N/A</span>
-          )}
-        </td>
-        <td className="px-6 py-4 text-sm whitespace-nowrap">
-          {changeFrom2000 === undefined ? (
-            <span className="text-muted-foreground">N/A</span>
-          ) : (
-            <span className={`font-semibold ${colorMapping(changeFrom2000)}`}>
-              {changeFrom2000 > 0 ? "+" : ""}
-              {changeFrom2000.toFixed(1)}°C
-            </span>
-          )}
-        </td>
-        <td className="px-6 py-4 text-sm whitespace-nowrap">
-          {FutureValueLower !== undefined && FutureValueUpper !== undefined ? (
-            <div>
-              <span
-                className={`font-semibold ${getHeatStressInfo(FutureValueLower).color}`}
-              >
-                {FutureValueLower.toFixed(1)}
-              </span>
-              <span className="text-muted-foreground"> - </span>
-              <span
-                className={`font-semibold ${getHeatStressInfo(FutureValueUpper).color}`}
-              >
-                {FutureValueUpper.toFixed(1)}°C
-              </span>
-            </div>
-          ) : (
-            <span className="text-muted-foreground">N/A</span>
-          )}
-        </td>
-      </tr>
-    );
-  }
 }
+
+const RankingRow = memo(({ item, push }: RankingRowProperties) => {
+  const {
+    avg_pet,
+    changeFrom2000,
+    city,
+    FutureValueLower,
+    FutureValueUpper,
+    location_id,
+    max_pet,
+    p10,
+    p90,
+    rank,
+    state,
+  } = item;
+
+  const handleClick = useCallback(() => {
+    push(`/${location_id}`);
+  }, [push, location_id]);
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLTableRowElement>) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        handleClick();
+      }
+    },
+    [handleClick],
+  );
+
+  const avgHeatStressInfo = getHeatStressInfo(avg_pet);
+
+  return (
+    <tr
+      className="cursor-pointer transition even:bg-background/30 hover:-translate-y-px hover:bg-accent/45 focus-visible:outline-2 focus-visible:outline-ring"
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+    >
+      <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-foreground">
+        <span
+          className={`inline-flex min-w-10 items-center justify-center rounded-full px-3 py-1 text-xs font-bold ${getRankBadgeClasses(rank)}`}
+        >
+          {rank}
+        </span>
+      </td>
+      <td className="px-6 py-4 text-sm whitespace-nowrap text-foreground">
+        {city}
+      </td>
+      <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
+        <span className="rounded-full bg-background/80 px-2.5 py-1 font-medium text-foreground">
+          {state}
+        </span>
+      </td>
+      <td className="px-6 py-4 text-sm whitespace-nowrap">
+        <span className={`font-semibold ${avgHeatStressInfo.color}`}>
+          {avg_pet.toFixed(1)}°C
+        </span>
+      </td>
+      <td className="px-6 py-4 text-sm whitespace-nowrap">
+        {max_pet === undefined ? (
+          <span className="text-muted-foreground">N/A</span>
+        ) : (
+          <span className={`font-semibold ${getHeatStressInfo(max_pet).color}`}>
+            {max_pet.toFixed(1)}°C
+          </span>
+        )}
+      </td>
+      <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
+        {p10 !== undefined && p90 !== undefined ? (
+          `${getPetRange(p10, p90)}°C`
+        ) : (
+          <span className="text-muted-foreground">N/A</span>
+        )}
+      </td>
+      <td className="px-6 py-4 text-sm whitespace-nowrap">
+        {changeFrom2000 === undefined ? (
+          <span className="text-muted-foreground">N/A</span>
+        ) : (
+          <span className={`font-semibold ${colorMapping(changeFrom2000)}`}>
+            {changeFrom2000 > 0 ? "+" : ""}
+            {changeFrom2000.toFixed(1)}°C
+          </span>
+        )}
+      </td>
+      <td className="px-6 py-4 text-sm whitespace-nowrap">
+        {FutureValueLower !== undefined && FutureValueUpper !== undefined ? (
+          <div>
+            <span
+              className={`font-semibold ${getHeatStressInfo(FutureValueLower).color}`}
+            >
+              {FutureValueLower.toFixed(1)}
+            </span>
+            <span className="text-muted-foreground"> - </span>
+            <span
+              className={`font-semibold ${getHeatStressInfo(FutureValueUpper).color}`}
+            >
+              {FutureValueUpper.toFixed(1)}°C
+            </span>
+          </div>
+        ) : (
+          <span className="text-muted-foreground">N/A</span>
+        )}
+      </td>
+    </tr>
+  );
+});
+
+RankingRow.displayName = "RankingRow";
 
 export function RankingsMain({
   initialHeatStress,
@@ -486,17 +557,49 @@ export function RankingsMain({
     },
     [router],
   );
-  const [selectedSeason, setSelectedSeason] = useState(initialSeason);
-  const [selectedYear, setSelectedYear] = useState(initialYear);
+
+  const [state, dispatch] = React.useReducer(
+    rankingsReducer,
+    { initialHeatStress, initialSeason, initialState, initialYear },
+    createInitialRankingsState,
+  );
+  const {
+    currentPage,
+    heatStressFilter,
+    selectedSeason,
+    selectedYear,
+    sortColumn,
+    sortDirection,
+    stateFilter,
+  } = state;
+
   const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
+  const persist = useCallback<PersistAction>(
+    (...actions) => {
+      startTransition(() => {
+        for (const action of actions) {
+          void (async () => {
+            try {
+              await action();
+            } catch (error) {
+              console.warn("Failed to persist rankings preference", error);
+              Sentry.captureException(error, {
+                tags: { errorSource: "persistPreference" },
+              });
+              toast({
+                description: "It will reset next visit.",
+                title: "Couldn't save your preference",
+                variant: "destructive",
+              });
+            }
+          })();
+        }
+      });
+    },
+    [startTransition, toast],
+  );
 
-  const [stateFilter, setStateFilter] = useState(initialState);
-  const [heatStressFilter, setHeatStressFilter] = useState(initialHeatStress);
-
-  const [sortColumn, setSortColumn] = useState<SortColumn>("rank");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-
-  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
   const stateOptions = useMemo(() => {
@@ -509,7 +612,7 @@ export function RankingsMain({
     const uniqueStates = [
       ...new Set(filteredByHeatStress.map((r) => r.state)),
     ].toSorted((a, b) => a.localeCompare(b));
-    return uniqueStates.map((state) => ({ label: state, value: state }));
+    return uniqueStates.map((state_) => ({ label: state_, value: state_ }));
   }, [rankings, heatStressFilter]);
 
   const heatStressOptions = useMemo(() => {
@@ -545,25 +648,20 @@ export function RankingsMain({
 
   const totalPages = Math.ceil(filteredAndSortedRankings.length / itemsPerPage);
 
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    stateFilter,
-    heatStressFilter,
-    selectedSeason,
-    sortColumn,
-    sortDirection,
-  ]);
+  const handlePageChange = useCallback(
+    (page: number) => {
+      dispatch({ page, type: "SET_PAGE" });
+    },
+    [dispatch],
+  );
 
   React.useEffect(() => {
     if (!shouldPersistInitialSeason) {
       return;
     }
 
-    startTransition(() => {
-      void setRankingsSeason(initialSeason);
-    });
-  }, [initialSeason, shouldPersistInitialSeason, startTransition]);
+    persist(() => setRankingsSeason(initialSeason));
+  }, [initialSeason, shouldPersistInitialSeason, persist]);
 
   return (
     <div className="min-h-screen">
@@ -572,16 +670,13 @@ export function RankingsMain({
         mainClassName="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
       >
         <RankingsFilters
+          dispatch={dispatch}
           heatStressFilter={heatStressFilter}
           heatStressOptions={heatStressOptions}
           isPending={isPending}
+          persist={persist}
           selectedSeason={selectedSeason}
           selectedYear={selectedYear}
-          setHeatStressFilter={setHeatStressFilter}
-          setSelectedSeason={setSelectedSeason}
-          setSelectedYear={setSelectedYear}
-          setStateFilter={setStateFilter}
-          startTransition={startTransition}
           stateFilter={stateFilter}
           stateOptions={stateOptions}
         />
@@ -632,46 +727,36 @@ export function RankingsMain({
                       column="rank"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
+                      dispatch={dispatch}
                       label="Rank"
-                      setSortColumn={setSortColumn}
-                      setSortDirection={setSortDirection}
-                      startTransition={startTransition}
                     />
                     <SortHeader
                       column="city"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
+                      dispatch={dispatch}
                       label="City"
-                      setSortColumn={setSortColumn}
-                      setSortDirection={setSortDirection}
-                      startTransition={startTransition}
                     />
                     <SortHeader
                       column="state"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
+                      dispatch={dispatch}
                       label="State"
-                      setSortColumn={setSortColumn}
-                      setSortDirection={setSortDirection}
-                      startTransition={startTransition}
                     />
                     <SortHeader
                       column="avg_pet"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
+                      dispatch={dispatch}
                       label="Avg PET"
-                      setSortColumn={setSortColumn}
-                      setSortDirection={setSortDirection}
-                      startTransition={startTransition}
                     />
                     <SortHeader
                       column="max_pet"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
+                      dispatch={dispatch}
                       label="Max PET"
-                      setSortColumn={setSortColumn}
-                      setSortDirection={setSortDirection}
-                      startTransition={startTransition}
                     />
                     <th className="px-6 py-4 text-left text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
                       PET Range (10th-90th percentile)
@@ -680,10 +765,8 @@ export function RankingsMain({
                       column="change"
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
+                      dispatch={dispatch}
                       label="Change from 2000"
-                      setSortColumn={setSortColumn}
-                      setSortDirection={setSortDirection}
-                      startTransition={startTransition}
                     />
                     <th className="px-6 py-4 text-left text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
                       2100 Forecast Range
@@ -718,7 +801,7 @@ export function RankingsMain({
         {totalPages > 1 && (
           <div className="mt-6 flex justify-center">
             <Pagination
-              onChange={setCurrentPage}
+              onChange={handlePageChange}
               total={totalPages}
               value={currentPage}
             />

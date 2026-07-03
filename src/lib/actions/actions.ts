@@ -3,8 +3,12 @@
 import {
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
+  GRAPH_CONFIG,
   GRAPH_MEASURE_COOKIE_NAME,
   GRAPH_SEASON_COOKIE_NAME,
+  MAX_FORECAST_YEARS_AHEAD,
+  MIN_FORECAST_YEARS_AHEAD,
+  normalizeGraphSeason,
   PREFERENCE_COOKIE_MAX_AGE_MS,
   type GraphSeason,
   RANKINGS_HEAT_STRESS_COOKIE_NAME,
@@ -12,6 +16,10 @@ import {
   RANKINGS_STATE_COOKIE_NAME,
   RANKINGS_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
+import { isSecureCookieEnvironment } from "@/lib/utils/server-cookies";
+import { THERMAL_STRESS_LEGEND_ITEMS } from "@/lib/utils/thermal-stress";
+import { validateTrendOption } from "@/lib/utils/validation";
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 const PREFERENCE_COOKIE_OPTIONS = {
@@ -19,12 +27,39 @@ const PREFERENCE_COOKIE_OPTIONS = {
   httpOnly: true,
   path: "/",
   sameSite: "lax",
+  secure: isSecureCookieEnvironment(),
 } as const;
+
+const RANKINGS_COOKIE_OPTIONS = {
+  httpOnly: true,
+  path: "/",
+  sameSite: "lax",
+  secure: isSecureCookieEnvironment(),
+} as const;
+
+const RANKINGS_STATE_PATTERN = /^[A-Za-z .]{0,30}$/u;
+const VALID_HEAT_STRESS_LEVELS = new Set(
+  THERMAL_STRESS_LEGEND_ITEMS.map((item) => item.level as string),
+);
+
+const isValidRankingsYear = (year: number) =>
+  Number.isInteger(year) &&
+  year >= GRAPH_CONFIG.YEAR_RANGE.START &&
+  year <= GRAPH_CONFIG.YEAR_RANGE.END;
 
 export async function setForecastPreferences(
   forecastEnabled: boolean,
   forecastYearsAhead: number,
 ) {
+  if (
+    typeof forecastEnabled !== "boolean" ||
+    !Number.isInteger(forecastYearsAhead) ||
+    forecastYearsAhead < MIN_FORECAST_YEARS_AHEAD ||
+    forecastYearsAhead > MAX_FORECAST_YEARS_AHEAD
+  ) {
+    return;
+  }
+
   const cookieStore = await cookies();
 
   cookieStore.set(
@@ -41,6 +76,10 @@ export async function setForecastPreferences(
 }
 
 export async function setGraphMeasure(measure: string) {
+  if (!validateTrendOption(measure)) {
+    return;
+  }
+
   const cookieStore = await cookies();
   cookieStore.set(
     GRAPH_MEASURE_COOKIE_NAME,
@@ -50,19 +89,19 @@ export async function setGraphMeasure(measure: string) {
 }
 
 export async function setGraphSeason(season: string) {
+  if (normalizeGraphSeason(season) !== season) {
+    return;
+  }
+
   const cookieStore = await cookies();
   cookieStore.set(GRAPH_SEASON_COOKIE_NAME, season, PREFERENCE_COOKIE_OPTIONS);
 }
 
-import { revalidatePath } from "next/cache";
-
-const RANKINGS_COOKIE_OPTIONS = {
-  httpOnly: true,
-  path: "/",
-  sameSite: "lax",
-} as const;
-
 export const setRankingsHeatStress = async (heatStress: string) => {
+  if (heatStress !== "" && !VALID_HEAT_STRESS_LEVELS.has(heatStress)) {
+    return;
+  }
+
   const cookieStore = await cookies();
   cookieStore.set(
     RANKINGS_HEAT_STRESS_COOKIE_NAME,
@@ -73,18 +112,30 @@ export const setRankingsHeatStress = async (heatStress: string) => {
 };
 
 export const setRankingsSeason = async (season: GraphSeason) => {
+  if (normalizeGraphSeason(season) !== season) {
+    return;
+  }
+
   const cookieStore = await cookies();
   cookieStore.set(RANKINGS_SEASON_COOKIE_NAME, season, RANKINGS_COOKIE_OPTIONS);
   revalidatePath("/rankings");
 };
 
 export const setRankingsState = async (state: string) => {
+  if (!RANKINGS_STATE_PATTERN.test(state)) {
+    return;
+  }
+
   const cookieStore = await cookies();
   cookieStore.set(RANKINGS_STATE_COOKIE_NAME, state, RANKINGS_COOKIE_OPTIONS);
   revalidatePath("/rankings");
 };
 
 export const setRankingsYear = async (year: number) => {
+  if (!isValidRankingsYear(year)) {
+    return;
+  }
+
   const cookieStore = await cookies();
   cookieStore.set(
     RANKINGS_YEAR_COOKIE_NAME,

@@ -2,12 +2,12 @@
 
 import { ThemeToggle } from "@/components/app/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { APP_CONFIG } from "@/lib/constants";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useMemo } from "react";
 
-import { CitySelector } from "./city-selector";
 import { NavButtons } from "./nav-buttons";
 
 import type { NavProperties } from "@/types/types";
@@ -68,10 +68,8 @@ const HeaderBarComponent = ({
   );
 
   const handleCityChange = useCallback(
-    (value: string | null) => {
-      if (value) {
-        router.push(`/${value}`);
-      }
+    (value: string) => {
+      router.push(`/${value}`);
     },
     [router],
   );
@@ -163,7 +161,7 @@ const HeaderBarComponent = ({
 
             <div className="rounded-3xl p-3 glass-panel-muted sm:p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <CitySelector
+                <Select
                   className="w-full lg:max-w-xl"
                   clearable
                   data={selectData}
@@ -173,6 +171,7 @@ const HeaderBarComponent = ({
                   placeholder={
                     id !== undefined && id >= 0 ? "Change City" : "Select City"
                   }
+                  searchable
                   value={currentCity?.key.toString()}
                 />
 

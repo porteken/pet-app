@@ -51,6 +51,12 @@ vi.mock("@/lib/actions/actions", () => ({
   setForecastPreferences: mockFn().mockResolvedValue(),
 }));
 
+const { mockToast } = vi.hoisted(() => ({ mockToast: mockFn() }));
+
+vi.mock("@/components/ui/toast", () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
+
 vi.mock("@/lib/api/fetch-client", () => ({
   FetchForecastData: mockFn().mockResolvedValue(),
   FetchReferenceGraphData: mockFn().mockResolvedValue({

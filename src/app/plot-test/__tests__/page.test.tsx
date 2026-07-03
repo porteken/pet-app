@@ -1,100 +1,53 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { ReactNode } from "react";
-
-interface LineStubProperties extends Record<string, unknown> {
-  children?: ReactNode;
+function PlotTestClientStub() {
+  return null;
 }
 
-interface ResponsiveContainerStubProperties extends Record<string, unknown> {
-  children?: ReactNode;
-  initialDimension?: { height: number; width: number };
-}
-
-const { mockLine, mockResponsiveContainer } = vi.hoisted(() => ({
-  mockLine: vi.fn<(props: LineStubProperties) => ReactNode>(({ children }) => (
-    <div data-testid="recharts-line">{children}</div>
-  )),
-  mockResponsiveContainer: vi.fn<
-    (props: ResponsiveContainerStubProperties) => ReactNode
-  >(({ children }) => (
-    <div data-testid="recharts-responsive-container">{children}</div>
-  )),
+vi.mock("../plot-test-client", () => ({
+  default: PlotTestClientStub,
 }));
 
-function createRechartsStub(testId: string) {
-  return ({ children }: { children?: ReactNode }) => (
-    <div data-testid={testId}>{children}</div>
-  );
-}
-
-vi.mock("recharts", () => ({
-  CartesianGrid: createRechartsStub("recharts-grid"),
-  Line: mockLine,
-  LineChart: createRechartsStub("recharts-line-chart"),
-  ResponsiveContainer: mockResponsiveContainer,
-  XAxis: createRechartsStub("recharts-x-axis"),
-  YAxis: createRechartsStub("recharts-y-axis"),
+vi.mock("next/navigation", () => ({
+  notFound: vi.fn<() => never>(() => {
+    throw new Error("NEXT_NOT_FOUND");
+  }),
 }));
 
-import Page from "../page";
-
-describe("plot test page", () => {
+describe("plot-test page", () => {
   beforeEach(() => {
-    mockLine.mockClear();
-    mockResponsiveContainer.mockClear();
+    vi.resetModules();
   });
 
-  it("renders the chart by default", () => {
-    render(<Page />);
-
-    expect(screen.getByRole("button", { name: "Toggle" })).toBeInTheDocument();
-    expect(screen.getByTestId("plot-test-chart")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("recharts-responsive-container"),
-    ).toBeInTheDocument();
-    expect(mockLine).toHaveBeenCalledWith(
-      expect.objectContaining({
-        dataKey: "value",
-        dot: { fill: "var(--graph-primary)", r: 4 },
-        stroke: "var(--graph-primary)",
-        strokeWidth: 2.5,
-        type: "monotone",
-      }),
-      undefined,
-    );
-
-    const responsiveContainerProps = mockResponsiveContainer.mock.calls[0]?.[0];
-
-    const initialDimension = {
-      height: expect.any(Number),
-      width: expect.any(Number),
-    };
-    const expectedResponsiveContainerProps = expect.objectContaining({
-      height: "100%",
-      initialDimension: expect.objectContaining(initialDimension),
-      width: "100%",
-    });
-
-    expect(responsiveContainerProps).toStrictEqual(
-      expectedResponsiveContainerProps,
-    );
-    expect(responsiveContainerProps?.initialDimension?.width).toBeGreaterThan(
-      0,
-    );
-    expect(responsiveContainerProps?.initialDimension?.height).toBeGreaterThan(
-      0,
-    );
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
-  it("toggles the chart visibility", () => {
-    render(<Page />);
+  it("renders the client component outside of production", async () => {
+    vi.stubEnv("NODE_ENV", "development");
 
-    fireEvent.click(screen.getByRole("button", { name: "Toggle" }));
-    expect(screen.queryByTestId("plot-test-chart")).not.toBeInTheDocument();
+    const { default: Page } = await import("../page");
 
-    fireEvent.click(screen.getByRole("button", { name: "Toggle" }));
-    expect(screen.getByTestId("plot-test-chart")).toBeInTheDocument();
+    expect(Page().type).toBe(PlotTestClientStub);
+  });
+
+  it("renders the client component during production e2e test runs", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_E2E_TEST", "true");
+
+    const { default: Page } = await import("../page");
+
+    expect(Page().type).toBe(PlotTestClientStub);
+  });
+
+  it("calls notFound in a real production deployment", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_E2E_TEST", "false");
+
+    const { default: Page } = await import("../page");
+    const { notFound } = await import("next/navigation");
+
+    expect(() => Page()).toThrow("NEXT_NOT_FOUND");
+    expect(notFound).toHaveBeenCalledTimes(1);
   });
 });

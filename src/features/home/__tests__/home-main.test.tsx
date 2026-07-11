@@ -339,8 +339,16 @@ describe("home", () => {
     });
 
     it("should show loading state during graph generation", async () => {
-      const slowFetch = mockFn().mockReturnValue(createDelay(100));
-      vi.mocked(FetchTrendGraphData).mockImplementation(slowFetch);
+      const slowFetch = mockFn().mockImplementation(async () => {
+        await createDelay(100);
+        return {
+          increase_per_year: 0.5,
+          trendline_pets: [20, 22, 24],
+          year_pets: [20, 22, 24],
+          years: [2000, 2001, 2002],
+        };
+      });
+      vi.mocked(FetchTrendGraphData).mockImplementationOnce(slowFetch);
 
       renderHome(<Home {...defaultProps} />);
 

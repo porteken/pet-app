@@ -642,8 +642,10 @@ describe("rankingsMain", () => {
     it("should sort by rank by default", () => {
       render(<RankingsMain {...defaultProps} />);
 
+      // Rank is derived from the shown data by Avg PET (desc), so the city
+      // with the highest Avg PET ranks first.
       const rows = screen.getAllByRole("row");
-      expect(rows[1]).toHaveTextContent("Austin");
+      expect(rows[1]).toHaveTextContent("Miami");
     });
 
     it("should sort by city when city header is clicked", () => {
@@ -653,7 +655,7 @@ describe("rankingsMain", () => {
       const cityHeader = requireElement(
         within(table).getByText("City").closest("th"),
       );
-      fireEvent.click(cityHeader);
+      fireEvent.click(within(cityHeader).getByRole("button"));
 
       const rows = screen.getAllByRole("row");
       expect(rows[1]).toHaveTextContent("Austin");

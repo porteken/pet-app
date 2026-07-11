@@ -97,7 +97,9 @@ function compareRankingItems(
       return (a.max_pet ?? 0) - (b.max_pet ?? 0);
     }
     case "rank": {
-      return a.rank - b.rank;
+      // Rank is derived from Avg PET (desc) over the shown data, so ranking
+      // ascending is equivalent to ordering by Avg PET descending.
+      return b.avg_pet - a.avg_pet;
     }
     case "state": {
       return a.state.localeCompare(b.state);
@@ -430,9 +432,10 @@ SortHeader.displayName = "SortHeader";
 interface RankingRowProperties {
   item: RankingItem;
   push: (href: string) => void;
+  rank: number;
 }
 
-const RankingRow = memo(({ item, push }: RankingRowProperties) => {
+const RankingRow = memo(({ item, push, rank }: RankingRowProperties) => {
   const {
     avg_pet,
     changeFrom2000,
@@ -443,7 +446,6 @@ const RankingRow = memo(({ item, push }: RankingRowProperties) => {
     max_pet,
     p10,
     p90,
-    rank,
     state,
   } = item;
 
@@ -640,6 +642,19 @@ export function RankingsMain({
     });
   }, [rankings, stateFilter, heatStressFilter, sortColumn, sortDirection]);
 
+  // Derive ranks from the filtered data so the numbers reflect what is shown:
+  // rank 1 is the highest Avg PET within the current filters.
+  const rankByLocation = useMemo(() => {
+    const map = new Map<number, number>();
+    const sortedByPet = filteredAndSortedRankings.toSorted(
+      (a, b) => b.avg_pet - a.avg_pet,
+    );
+    for (const [index, item] of sortedByPet.entries()) {
+      map.set(item.location_id, index + 1);
+    }
+    return map;
+  }, [filteredAndSortedRankings]);
+
   const paginatedRankings = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -789,6 +804,7 @@ export function RankingsMain({
                         item={item}
                         key={item.location_id}
                         push={handlePush}
+                        rank={rankByLocation.get(item.location_id) ?? item.rank}
                       />
                     ))
                   )}

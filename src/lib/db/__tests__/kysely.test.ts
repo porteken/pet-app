@@ -136,6 +136,9 @@ describe("getDb", () => {
   });
 
   it("registers a pool error handler that reports to Sentry", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const { captureExceptionMock, kyselyModule, poolMock } =
       await loadKyselyModule({ nodeEnv: "test", sslMode: "disable" });
 
@@ -151,6 +154,11 @@ describe("getDb", () => {
     errorHandler(idleClientError);
 
     expect(captureExceptionMock).toHaveBeenCalledWith(idleClientError);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Postgres pool idle client error",
+      idleClientError,
+    );
+    consoleErrorSpy.mockRestore();
   });
 
   it("uses strict ssl verification for verify-full mode", async () => {

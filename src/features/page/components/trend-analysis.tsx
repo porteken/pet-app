@@ -181,7 +181,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       const option = event.target.value;
       setIsMobileLegendOpen(false);
       setSelectedGraphMeasure(option);
-      ignorePersistenceError(onMeasureChange(option));
+      void ignorePersistenceError(onMeasureChange(option));
     },
     [onMeasureChange, ignorePersistenceError],
   );
@@ -191,7 +191,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       const season = normalizeGraphSeason(event.target.value);
       setIsMobileLegendOpen(false);
 
-      ignorePersistenceError(onSeasonChange(season));
+      void ignorePersistenceError(onSeasonChange(season));
     },
     [onSeasonChange, ignorePersistenceError],
   );
@@ -199,7 +199,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const handleForecastToggle = React.useCallback(
     (enabled: boolean) => {
       setForecastEnabled(enabled);
-      ignorePersistenceError(
+      void ignorePersistenceError(
         setForecastPreferences(enabled, forecastYearsAhead),
       );
     },
@@ -209,7 +209,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const handleForecastYearsChange = React.useCallback(
     (yearsAhead: number) => {
       setForecastYearsAhead(yearsAhead);
-      ignorePersistenceError(
+      void ignorePersistenceError(
         setForecastPreferences(forecastEnabled, yearsAhead),
       );
     },

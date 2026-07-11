@@ -150,7 +150,7 @@ const Home: FC<MapProperties> = ({
       if (selectedLocationId !== undefined) {
         setIsMobileGraphLegendOpen(false);
         setSelectedGraphMeasure(option);
-        ignorePersistenceError(setGraphMeasure(option));
+        void ignorePersistenceError(setGraphMeasure(option));
       }
     },
     [selectedLocationId, ignorePersistenceError],
@@ -161,7 +161,7 @@ const Home: FC<MapProperties> = ({
       const nextSeason = normalizeGraphSeason(season);
       setIsMobileGraphLegendOpen(false);
       setSelectedGraphSeason(nextSeason);
-      ignorePersistenceError(setGraphSeason(nextSeason));
+      void ignorePersistenceError(setGraphSeason(nextSeason));
     },
     [ignorePersistenceError],
   );

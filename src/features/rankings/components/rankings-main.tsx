@@ -1,7 +1,5 @@
 "use client";
 
-const RANK_THREE = 3;
-
 import { PageShell } from "@/components/app/page-shell";
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { Pagination } from "@/components/ui/pagination";
@@ -29,6 +27,8 @@ import { useRouter } from "next/navigation";
 import React, { memo, useCallback, useMemo, useTransition } from "react";
 
 import type { LocationOptionSection } from "@/types/types";
+
+const RANK_THREE = 3;
 
 const getPetRange = (p10: number, p90: number): string =>
   `${p10.toFixed(1)}-${p90.toFixed(1)}`;

@@ -273,7 +273,7 @@ export async function fetchReferenceGraphRows(
     return getRuntimeReferenceRows(locationId, year);
   }
 
-  return withDbRetry(() =>
+  return await withDbRetry(() =>
     getDb()
       .selectFrom("pet")
       .select(({ ref }) => [

@@ -1,7 +1,5 @@
 "use client";
 
-const RANK_THREE = 3;
-
 import { PageShell } from "@/components/app/page-shell";
 import { HeatStressLegend } from "@/components/app/thermal-stress-legend";
 import { Pagination } from "@/components/ui/pagination";
@@ -18,7 +16,7 @@ import {
   normalizeGraphSeason,
   type GraphSeason,
 } from "@/lib/constants";
-import { YearOptions } from "@/lib/utils/select-options";
+import { yearOptions } from "@/lib/utils/select-options";
 import {
   getHeatStressInfo,
   THERMAL_STRESS_LEGEND_ITEMS,
@@ -29,6 +27,8 @@ import { useRouter } from "next/navigation";
 import React, { memo, useCallback, useMemo, useTransition } from "react";
 
 import type { LocationOptionSection } from "@/types/types";
+
+const RANK_THREE = 3;
 
 const getPetRange = (p10: number, p90: number): string =>
   `${p10.toFixed(1)}-${p90.toFixed(1)}`;
@@ -47,7 +47,7 @@ interface SelectOption {
   value: string;
 }
 
-const YEAR_OPTIONS = YearOptions().map(({ key, label }) => ({
+const YEAR_OPTIONS = yearOptions().map(({ key, label }) => ({
   label,
   value: key,
 }));

@@ -1,6 +1,6 @@
 import {
   FetchForecastData,
-  FetchLocations,
+  fetchLocations,
   FetchReferenceGraphData,
   FetchTrendGraphData,
 } from "@/lib/api/fetch-server";
@@ -241,7 +241,7 @@ const fetchLocationData = async (): Promise<
     }
 > => {
   try {
-    const result = await FetchLocations();
+    const result = await fetchLocations();
     return {
       LocationOptions: result.LocationOptions,
       locations: result.locations,

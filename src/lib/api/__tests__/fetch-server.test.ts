@@ -3,9 +3,9 @@ import { clearAllMocks, setupApiServerTest } from "@/testing/test-utilities";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type {
-  FetchCityRankings as FetchCityRankingsFunction,
+  fetchCityRankings as FetchCityRankingsFunction,
   FetchForecastData as FetchForecastDataFunction,
-  FetchLocations as FetchLocationsFunction,
+  fetchLocations as FetchLocationsFunction,
   FetchReferenceGraphData as FetchReferenceGraphDataFunction,
   FetchTrendGraphData as FetchTrendGraphDataFunction,
 } from "../fetch-server";
@@ -15,9 +15,9 @@ import type {
 } from "@/testing/mocks";
 
 interface FetchServerModule {
-  FetchCityRankings: typeof FetchCityRankingsFunction;
+  fetchCityRankings: typeof FetchCityRankingsFunction;
   FetchForecastData: typeof FetchForecastDataFunction;
-  FetchLocations: typeof FetchLocationsFunction;
+  fetchLocations: typeof FetchLocationsFunction;
   FetchReferenceGraphData: typeof FetchReferenceGraphDataFunction;
   FetchTrendGraphData: typeof FetchTrendGraphDataFunction;
 }
@@ -73,7 +73,7 @@ describe("fetch-server", () => {
         },
       ]);
 
-      const result = await fetchServer.FetchCityRankings(2024);
+      const result = await fetchServer.fetchCityRankings(2024);
 
       expect(mockDbQueries.fetchCityRankingsRows).toHaveBeenCalledWith(
         2024,
@@ -96,7 +96,7 @@ describe("fetch-server", () => {
     });
 
     it("throws for an invalid year", async () => {
-      await expect(fetchServer.FetchCityRankings(1999)).rejects.toThrow(
+      await expect(fetchServer.fetchCityRankings(1999)).rejects.toThrow(
         new DatabaseError("Invalid year: 1999. Must be between 2000 and 2100."),
       );
     });
@@ -105,7 +105,7 @@ describe("fetch-server", () => {
       const mockError = new Error("Database connection failed");
       mockDbQueries.fetchCityRankingsRows.mockRejectedValue(mockError);
 
-      await expect(fetchServer.FetchCityRankings(2024)).rejects.toThrow(
+      await expect(fetchServer.fetchCityRankings(2024)).rejects.toThrow(
         new DatabaseError(
           "Failed to fetch city rankings from database",
           mockError,
@@ -140,7 +140,7 @@ describe("fetch-server", () => {
         },
       ]);
 
-      const result = await fetchServer.FetchLocations();
+      const result = await fetchServer.fetchLocations();
 
       expect(mockDbQueries.fetchLocationRows).toHaveBeenCalledWith("id");
       expect(result.locations).toStrictEqual([
@@ -192,7 +192,7 @@ describe("fetch-server", () => {
         },
       ]);
 
-      const result = await fetchServer.FetchLocations();
+      const result = await fetchServer.fetchLocations();
 
       expect(result.locations).toStrictEqual([
         {
@@ -230,7 +230,7 @@ describe("fetch-server", () => {
         },
       ]);
 
-      const result = await fetchServer.FetchLocations();
+      const result = await fetchServer.fetchLocations();
 
       expect(result.locations).toStrictEqual([
         {
@@ -254,7 +254,7 @@ describe("fetch-server", () => {
       const mockError = new Error("Database connection failed");
       mockDbQueries.fetchLocationRows.mockRejectedValue(mockError);
 
-      await expect(fetchServer.FetchLocations()).rejects.toThrow(
+      await expect(fetchServer.fetchLocations()).rejects.toThrow(
         new DatabaseError(
           "Failed to fetch location data from database",
           mockError,

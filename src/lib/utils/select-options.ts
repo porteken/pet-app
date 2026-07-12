@@ -15,7 +15,7 @@ interface YearOptionsConfig {
   includeLatestYear?: boolean;
 }
 
-export const YearOptions = ({
+export const yearOptions = ({
   includeLatestYear = true,
 }: YearOptionsConfig = {}): SelectOptionProperties[] => {
   const { END, START } = GRAPH_CONFIG.YEAR_RANGE;

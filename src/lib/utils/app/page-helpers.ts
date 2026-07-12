@@ -1,4 +1,4 @@
-import { FetchLocations } from "@/lib/api/fetch-server";
+import { fetchLocations } from "@/lib/api/fetch-server";
 import {
   DEFAULT_FORECAST_ENABLED,
   DEFAULT_FORECAST_YEARS_AHEAD,
@@ -65,9 +65,9 @@ export const getForecastPreferencesFromCookies = async (): Promise<{
 };
 
 export const getLocationData = async () => {
-  const { LocationOptions, locations } = await FetchLocations();
+  const { LocationOptions, locations } = await fetchLocations();
 
-  if (!locations || locations.length === 0) {
+  if (!Array.isArray(locations) || locations.length === 0) {
     throw new Error(ERROR_MESSAGES.NO_DATA);
   }
 

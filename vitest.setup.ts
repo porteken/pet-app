@@ -64,34 +64,32 @@ afterAll(() => {
   server.close();
 });
 
-if (typeof globalThis !== "undefined" && globalThis.HTMLElement) {
-  if (!globalThis.HTMLElement.prototype.hasPointerCapture) {
-    globalThis.HTMLElement.prototype.hasPointerCapture = () => false;
-  }
-  if (!globalThis.HTMLElement.prototype.releasePointerCapture) {
-    globalThis.HTMLElement.prototype.releasePointerCapture = () => {};
-  }
-  if (!globalThis.HTMLElement.prototype.setPointerCapture) {
-    globalThis.HTMLElement.prototype.setPointerCapture = () => {};
-  }
-  if (!globalThis.HTMLElement.prototype.scrollIntoView) {
-    globalThis.HTMLElement.prototype.scrollIntoView = () => {};
-  }
-
-  vi.spyOn(
-    globalThis.HTMLElement.prototype,
-    "hasPointerCapture",
-  ).mockReturnValue(false);
-  vi.spyOn(
-    globalThis.HTMLElement.prototype,
-    "releasePointerCapture",
-  ).mockImplementation(() => {});
-  vi.spyOn(
-    globalThis.HTMLElement.prototype,
-    "setPointerCapture",
-  ).mockImplementation(() => {});
-  vi.spyOn(
-    globalThis.HTMLElement.prototype,
-    "scrollIntoView",
-  ).mockImplementation(() => {});
+if (typeof globalThis.HTMLElement.prototype.hasPointerCapture !== "function") {
+  globalThis.HTMLElement.prototype.hasPointerCapture = () => false;
 }
+if (
+  typeof globalThis.HTMLElement.prototype.releasePointerCapture !== "function"
+) {
+  globalThis.HTMLElement.prototype.releasePointerCapture = () => {};
+}
+if (typeof globalThis.HTMLElement.prototype.setPointerCapture !== "function") {
+  globalThis.HTMLElement.prototype.setPointerCapture = () => {};
+}
+if (typeof globalThis.HTMLElement.prototype.scrollIntoView !== "function") {
+  globalThis.HTMLElement.prototype.scrollIntoView = () => {};
+}
+
+vi.spyOn(globalThis.HTMLElement.prototype, "hasPointerCapture").mockReturnValue(
+  false,
+);
+vi.spyOn(
+  globalThis.HTMLElement.prototype,
+  "releasePointerCapture",
+).mockImplementation(() => {});
+vi.spyOn(
+  globalThis.HTMLElement.prototype,
+  "setPointerCapture",
+).mockImplementation(() => {});
+vi.spyOn(globalThis.HTMLElement.prototype, "scrollIntoView").mockImplementation(
+  () => {},
+);

@@ -5,7 +5,7 @@ import { ErrorGraphDisplay } from "@/features/home/components/error-graph-displa
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { getReferenceGraphQueryOptions } from "@/lib/api/query-client";
 import { DEFAULT_GRAPH_SEASON, GRAPH_CONFIG } from "@/lib/constants";
-import { YearOptions } from "@/lib/utils/select-options";
+import { yearOptions } from "@/lib/utils/select-options";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import React from "react";
@@ -49,7 +49,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   ReferencePets,
 }) => {
   const REFERENCE_YEARS = React.useMemo(
-    () => YearOptions({ includeLatestYear: false }),
+    () => yearOptions({ includeLatestYear: false }),
     [],
   );
   const isMobileViewport = useIsMobileViewport();

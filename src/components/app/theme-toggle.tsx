@@ -5,13 +5,15 @@ import { MoonStar, SunMedium } from "lucide-react";
 import { useTheme } from "next-themes";
 import * as React from "react";
 
+const emptySubscribe = () => () => {};
+
 export const ThemeToggle = () => {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
 
   const isDarkMode = mounted && resolvedTheme === "dark";
   const nextTheme = isDarkMode ? "light" : "dark";

@@ -1,5 +1,5 @@
 import { RankingsMain } from "@/features/rankings";
-import { FetchCityRankings, FetchLocations } from "@/lib/api/fetch-server";
+import { fetchCityRankings, fetchLocations } from "@/lib/api/fetch-server";
 import {
   GRAPH_CONFIG,
   normalizeGraphSeason,
@@ -48,8 +48,8 @@ export default async function RankingsPage({
     seasonFromCookie !== undefined && seasonFromCookie !== initialSeason;
   const year = yearMapping(parameters.year, yearFromCookie);
   const [rankings, { LocationOptions }] = await Promise.all([
-    FetchCityRankings(year, initialSeason),
-    FetchLocations(),
+    fetchCityRankings(year, initialSeason),
+    fetchLocations(),
   ]);
 
   return (

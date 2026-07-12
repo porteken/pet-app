@@ -9,36 +9,39 @@ import {
 } from "@/lib/utils/app/page-helpers";
 
 const HomePage = async () => {
+  let results;
   try {
-    const [
-      initialGraphMeasure,
-      initialGraphSeason,
-      initialForecastPreferences,
-      { LocationOptions, locations },
-    ] = await Promise.all([
+    results = await Promise.all([
       getGraphMeasureFromCookies(),
       getGraphSeasonFromCookies(),
       getForecastPreferencesFromCookies(),
       getLocationData(),
     ]);
-
-    return (
-      <HomeQueryProvider>
-        <Home
-          initialForecastEnabled={initialForecastPreferences.enabled}
-          initialForecastYearsAhead={initialForecastPreferences.yearsAhead}
-          initialGraphMeasure={initialGraphMeasure}
-          initialGraphSeason={initialGraphSeason}
-          LocationOptions={LocationOptions}
-          locations={locations}
-        />
-      </HomeQueryProvider>
-    );
   } catch (error) {
     const errorObject =
       error instanceof Error ? error : new Error(String(error));
     return <LocationErrorHandler error={errorObject} />;
   }
+
+  const [
+    initialGraphMeasure,
+    initialGraphSeason,
+    initialForecastPreferences,
+    { LocationOptions, locations },
+  ] = results;
+
+  return (
+    <HomeQueryProvider>
+      <Home
+        initialForecastEnabled={initialForecastPreferences.enabled}
+        initialForecastYearsAhead={initialForecastPreferences.yearsAhead}
+        initialGraphMeasure={initialGraphMeasure}
+        initialGraphSeason={initialGraphSeason}
+        LocationOptions={LocationOptions}
+        locations={locations}
+      />
+    </HomeQueryProvider>
+  );
 };
 
 export default HomePage;

@@ -20,7 +20,7 @@ vi.mock("next/headers", () => ({
 
 vi.mock("@/lib/api/fetch-server", () => ({
   FetchForecastData: mockFetchForecastData,
-  FetchLocations: mockFetchLocations,
+  fetchLocations: mockFetchLocations,
   FetchReferenceGraphData: mockFetchReferenceGraphData,
   FetchTrendGraphData: mockFetchTrendGraphData,
 }));

@@ -16,7 +16,7 @@ import {
   normalizeGraphSeason,
   type GraphSeason,
 } from "@/lib/constants";
-import { YearOptions } from "@/lib/utils/select-options";
+import { yearOptions } from "@/lib/utils/select-options";
 import {
   getHeatStressInfo,
   THERMAL_STRESS_LEGEND_ITEMS,
@@ -47,7 +47,7 @@ interface SelectOption {
   value: string;
 }
 
-const YEAR_OPTIONS = YearOptions().map(({ key, label }) => ({
+const YEAR_OPTIONS = yearOptions().map(({ key, label }) => ({
   label,
   value: key,
 }));

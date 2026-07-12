@@ -345,7 +345,7 @@ async function fetchTrendGraphDataUncached(
   return mapTrendRowsToGraphData(validatedRows);
 }
 
-export const FetchCityRankings = unstable_cache(
+export const fetchCityRankings = unstable_cache(
   fetchCityRankingsUncached,
   ["city-rankings"],
   {
@@ -354,7 +354,7 @@ export const FetchCityRankings = unstable_cache(
   },
 );
 
-export const FetchLocations = unstable_cache(
+export const fetchLocations = unstable_cache(
   fetchLocationsUncached,
   ["locations"],
   {

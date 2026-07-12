@@ -15,7 +15,13 @@ import { GraphOptions, SeasonOptions } from "@/lib/utils/select-options";
 import { deriveTrendAnalysis } from "@/lib/utils/trend-analysis";
 import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { useForecastData } from "../hooks/use-forecast-data";
 import { useTrendGraphData } from "../hooks/use-trend-graph-data";
@@ -74,10 +80,12 @@ const Home: FC<MapProperties> = ({
     graphSeason: selectedGraphSeason,
   });
 
-  markerPrefetchOptionsRef.current = {
-    graphMeasure: selectedGraphMeasure,
-    graphSeason: selectedGraphSeason,
-  };
+  useEffect(() => {
+    markerPrefetchOptionsRef.current = {
+      graphMeasure: selectedGraphMeasure,
+      graphSeason: selectedGraphSeason,
+    };
+  });
 
   const locationMap = useMemo(
     () => new Map(locations.map((loc) => [loc.location_id, loc])),

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   GraphOptions,
   isSelectableReferenceYear,
-  YearOptions,
+  yearOptions,
 } from "../select-options";
 
 describe("select Options", () => {
@@ -18,20 +18,20 @@ describe("select Options", () => {
 
   describe("yearOptions", () => {
     it("should return year options from 2000 to 2025 by default", () => {
-      const yearOptions = YearOptions();
+      const result = yearOptions();
 
-      expect(yearOptions).toHaveLength(26);
-      expect(yearOptions[0]).toStrictEqual({ key: "2000", label: "2000" });
-      expect(yearOptions[25]).toStrictEqual({ key: "2025", label: "2025" });
+      expect(result).toHaveLength(26);
+      expect(result[0]).toStrictEqual({ key: "2000", label: "2000" });
+      expect(result[25]).toStrictEqual({ key: "2025", label: "2025" });
     });
 
     it("should exclude the latest year when requested", () => {
-      const yearOptions = YearOptions({ includeLatestYear: false });
+      const result = yearOptions({ includeLatestYear: false });
 
-      expect(yearOptions).toHaveLength(25);
-      expect(yearOptions[0]).toStrictEqual({ key: "2000", label: "2000" });
-      expect(yearOptions[24]).toStrictEqual({ key: "2024", label: "2024" });
-      expect(yearOptions).not.toContainEqual({ key: "2025", label: "2025" });
+      expect(result).toHaveLength(25);
+      expect(result[0]).toStrictEqual({ key: "2000", label: "2000" });
+      expect(result[24]).toStrictEqual({ key: "2024", label: "2024" });
+      expect(result).not.toContainEqual({ key: "2025", label: "2025" });
     });
   });
 

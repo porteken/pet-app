@@ -24,7 +24,7 @@ vi.mock("@/components/app/database-error", () => ({
 }));
 
 vi.mock("@/lib/api/fetch-server", () => ({
-  FetchLocations: mockFetchLocations,
+  fetchLocations: mockFetchLocations,
 }));
 
 vi.mock("next/dynamic", () => ({

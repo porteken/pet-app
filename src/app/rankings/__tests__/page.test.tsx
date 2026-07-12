@@ -24,8 +24,8 @@ vi.mock("@/features/rankings", () => ({
 }));
 
 vi.mock("@/lib/api/fetch-server", () => ({
-  FetchCityRankings: mockFetchCityRankings,
-  FetchLocations: mockFetchLocations,
+  fetchCityRankings: mockFetchCityRankings,
+  fetchLocations: mockFetchLocations,
 }));
 
 import {

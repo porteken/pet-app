@@ -11,12 +11,12 @@ vi.mock("next/headers", () => ({
 }));
 
 vi.mock("@/lib/api/fetch-server", () => ({
-  FetchLocations: mockFn(),
+  fetchLocations: mockFn(),
 }));
 
 async function getMockFetchLocations() {
   const fetchServer = await import("@/lib/api/fetch-server");
-  return vi.mocked(fetchServer.FetchLocations);
+  return vi.mocked(fetchServer.fetchLocations);
 }
 
 vi.mock("@/lib/constants", () => ({
@@ -329,7 +329,7 @@ describe("page-helpers", () => {
       expect(mockFetchLocations).toHaveBeenCalled();
     });
 
-    it("propagates fetch error when FetchLocations fails", async () => {
+    it("propagates fetch error when fetchLocations fails", async () => {
       const fetchError = new Error("Network error");
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockRejectedValue(fetchError);

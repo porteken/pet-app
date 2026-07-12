@@ -208,10 +208,6 @@ const useInitialChartAnimation = (): boolean => {
     hasRenderedRef.current = true;
   }, []);
 
-  // One-time mount flag read during render is intentional and safe: it only
-  // ever flips false -> true once, so it can't tear or produce stale UI
-  // across re-renders.
-  // oxlint-disable-next-line react/react-compiler
   return animationsAllowed && !hasRenderedRef.current;
 };
 

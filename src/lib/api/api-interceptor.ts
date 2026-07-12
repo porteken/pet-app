@@ -71,10 +71,10 @@ const extractErrorMessage = async (response: Response): Promise<string> => {
   }
 };
 
-export const handleApiResponse = async <T>(
+export const handleApiResponse = async (
   response: Response,
   context?: ErrorContext,
-): Promise<T> => {
+): Promise<unknown> => {
   if (!response.ok) {
     const errorMessage = await extractErrorMessage(response);
     throw createError(errorMessage, response.status, undefined, {
@@ -84,10 +84,8 @@ export const handleApiResponse = async <T>(
   }
 
   try {
-    const data: unknown = await response.json();
     // Generic deserialization boundary; callers validate the shape with zod schemas.
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-    return data as T;
+    return await response.json();
   } catch (parseError) {
     throw new NetworkError(
       "Failed to parse server response",
@@ -98,11 +96,11 @@ export const handleApiResponse = async <T>(
   }
 };
 
-export const apiRequest = async <T>(
+export const apiRequest = async (
   url: string,
   options: RequestInit = {},
   context?: ErrorContext,
-): Promise<T> => {
+): Promise<unknown> => {
   let headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
@@ -121,7 +119,7 @@ export const apiRequest = async <T>(
       headers,
     });
 
-    return await handleApiResponse<T>(response, {
+    return await handleApiResponse(response, {
       ...context,
       method: options.method ?? "GET",
     });
@@ -134,17 +132,17 @@ export const apiRequest = async <T>(
   }
 };
 
-export const apiRequestWithRetry = async <T>(
+export const apiRequestWithRetry = async (
   url: string,
   options: RequestInit = {},
   retries: number = 3,
   context?: ErrorContext,
-): Promise<T> => {
+): Promise<unknown> => {
   let lastError: Error | undefined;
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      return await apiRequest<T>(url, options, { ...context, attempt });
+      return await apiRequest(url, options, { ...context, attempt });
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 

@@ -82,9 +82,7 @@ const HeaderBarComponent = ({
     const options = Array.isArray(LocationOptions) ? LocationOptions : [];
 
     const allCities = options.flatMap((section) =>
-      // section is untrusted prop input; items may be missing at runtime despite types
-      // oxlint-disable-next-line typescript/no-unnecessary-condition
-      [...(section.items || [])].map((item) => ({
+      (Array.isArray(section.items) ? section.items : []).map((item) => ({
         key: item.key,
         state: section.title,
         title: item.title,

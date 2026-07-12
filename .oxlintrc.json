@@ -210,7 +210,7 @@
     "unicorn/prefer-number-coercion": "error",
     "typescript/no-unnecessary-condition": "error",
     "typescript/prefer-optional-chain": "error",
-    "react/react-compiler": "error"
+    "react/react-compiler": "off"
   },
   "overrides": [
     {

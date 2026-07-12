@@ -67,10 +67,7 @@ export const getForecastPreferencesFromCookies = async (): Promise<{
 export const getLocationData = async () => {
   const { LocationOptions, locations } = await fetchLocations();
 
-  // locations comes from an external data source and may be malformed at
-  // runtime despite the declared type
-  // oxlint-disable-next-line typescript/no-unnecessary-condition
-  if (!locations || locations.length === 0) {
+  if (!Array.isArray(locations) || locations.length === 0) {
     throw new Error(ERROR_MESSAGES.NO_DATA);
   }
 

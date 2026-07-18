@@ -84,7 +84,6 @@ export const handleApiResponse = async (
   }
 
   try {
-    // Generic deserialization boundary; callers validate the shape with zod schemas.
     return await response.json();
   } catch (parseError) {
     throw new NetworkError(

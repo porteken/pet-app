@@ -25,14 +25,12 @@ export async function seedTestPostgres(
 
   console.warn("Applying schema and seeding data...");
 
-  // 1. Create tables
   const createTablesSql = await fs.readFile(
     path.join(import.meta.dirname, "db/schema/create_tables.sql"),
     "utf8",
   );
   await client.query(createTablesSql);
 
-  // 2. Seed locations
   const locations = getRuntimeMockTableRows("locations") as any[];
   if (locations.length > 0) {
     const locationValues = locations
@@ -46,7 +44,6 @@ export async function seedTestPostgres(
     );
   }
 
-  // 3. Seed pet data
   const pets = getRuntimeMockTableRows("pet") as any[];
   if (pets.length > 0) {
     const chunkSize = 1000;
@@ -61,7 +58,6 @@ export async function seedTestPostgres(
     }
   }
 
-  // 4. Create views (this will compute materialized views from the seeded data)
   const createViewsSql = await fs.readFile(
     path.join(import.meta.dirname, "db/schema/create_views.sql"),
     "utf8",
@@ -74,7 +70,6 @@ export async function seedTestPostgres(
 export function applyPostgresEnv(
   postgresContainer: StartedPostgreSqlContainer,
 ) {
-  // Set environment variables for Vitest workers
   process.env.PGDATABASE = postgresContainer.getDatabase();
   process.env.PGHOST = postgresContainer.getHost();
   process.env.PGPASSWORD = postgresContainer.getPassword();
@@ -82,7 +77,6 @@ export function applyPostgresEnv(
   process.env.PGUSER = postgresContainer.getUsername();
   process.env.PGSSLMODE = "disable";
 
-  // Default E2E flags when the caller has not already selected a mode.
   process.env.NEXT_PUBLIC_E2E_TEST ??= "false";
   process.env.E2E_USE_RUNTIME_MOCKS ??= "false";
 

@@ -9,10 +9,6 @@ import {
   fetchTrendGraphRows,
 } from "../queries";
 
-// ---------------------------------------------------------------------------
-// Helpers that manufacture errors matching the isMissingColumnError shapes
-// ---------------------------------------------------------------------------
-
 const makePGRST204Error = (relation: string, column: string) =>
   Object.assign(new Error(`Column '${column}' not found in '${relation}'`), {
     code: "PGRST204",
@@ -31,17 +27,11 @@ const make42703Error = (relation: string, column: string) =>
 const makeUnknownError = () =>
   Object.assign(new Error("something went wrong"), { code: "99999" });
 
-// ---------------------------------------------------------------------------
-// Shared mock setup: use runtime mocks OFF, stub the DB layer
-// ---------------------------------------------------------------------------
-
 vi.mock("@/config/environment", async (importOriginal) => ({
   ...(await importOriginal<typeof environment>()),
   shouldUseRuntimeDbMocks: vi.fn<() => boolean>(() => false),
 }));
 
-// We'll override withDbRetry per test using vi.doMock / vi.importMock patterns;
-// simpler is to mock the whole kysely module and the db module once here.
 const mockExecute = vi.fn<() => Promise<unknown>>();
 const mockExecuteTakeFirst = vi.fn<() => Promise<unknown>>();
 
@@ -89,10 +79,6 @@ describe("queries isMissingColumnError + fallback branches", () => {
     vi.restoreAllMocks();
   });
 
-  // -------------------------------------------------------------------------
-  // fetchCityRankingsRows
-  // -------------------------------------------------------------------------
-
   describe("fetchCityRankingsRows", () => {
     it("returns rows from DB when no error occurs", async () => {
       const rows = [{ location_id: 1, city: "Boston", avg_pet: 20 }];
@@ -138,14 +124,9 @@ describe("queries isMissingColumnError + fallback branches", () => {
       const err = makePGRST204Error("city_rankings_view", "season");
       mockExecute.mockRejectedValue(err);
 
-      // season is undefined → should NOT fall back, should rethrow
       await expect(fetchCityRankingsRows(2024)).rejects.toBe(err);
     });
   });
-
-  // -------------------------------------------------------------------------
-  // fetchLocationRows
-  // -------------------------------------------------------------------------
 
   describe("fetchLocationRows", () => {
     it("returns rows from DB for 'id' column", async () => {
@@ -185,10 +166,6 @@ describe("queries isMissingColumnError + fallback branches", () => {
       });
     });
   });
-
-  // -------------------------------------------------------------------------
-  // fetchTrendGraphRows
-  // -------------------------------------------------------------------------
 
   describe("fetchTrendGraphRows", () => {
     it("returns rows from DB when no error occurs", async () => {
@@ -237,10 +214,6 @@ describe("queries isMissingColumnError + fallback branches", () => {
     });
   });
 
-  // -------------------------------------------------------------------------
-  // fetchHistoricalYearRow
-  // -------------------------------------------------------------------------
-
   describe("fetchHistoricalYearRow", () => {
     it("returns a row from DB when no error occurs", async () => {
       mockExecuteTakeFirst.mockResolvedValue({ year: 2025 });
@@ -284,10 +257,6 @@ describe("queries isMissingColumnError + fallback branches", () => {
       await expect(fetchHistoricalYearRow(1)).rejects.toBe(err);
     });
   });
-
-  // -------------------------------------------------------------------------
-  // fetchForecastRows
-  // -------------------------------------------------------------------------
 
   describe("fetchForecastRows", () => {
     const queryWindow = { lastHistoricalYear: 2025, targetYear: 2075 };
@@ -349,11 +318,6 @@ describe("queries isMissingColumnError + fallback branches", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// isMissingColumnError — white-box tests via the exported query functions
-// to exercise the null / non-object / non-string-message guard paths
-// ---------------------------------------------------------------------------
-
 describe("isMissingColumnError guard paths", () => {
   beforeEach(() => {
     vi.spyOn(environment, "shouldUseRuntimeDbMocks").mockReturnValue(false);
@@ -389,7 +353,6 @@ describe("isMissingColumnError guard paths", () => {
   });
 
   it("does not treat a PGRST204 error for the wrong column as a match", async () => {
-    // Column name mismatch — 'other_col' ≠ 'season'
     const wrongColumnError = Object.assign(
       new Error("Column 'other_col' not found in 'city_rankings_view'"),
       {

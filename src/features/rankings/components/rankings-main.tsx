@@ -97,8 +97,6 @@ function compareRankingItems(
       return (a.max_pet ?? 0) - (b.max_pet ?? 0);
     }
     case "rank": {
-      // Rank is derived from Avg PET (desc) over the shown data, so ranking
-      // ascending is equivalent to ordering by Avg PET descending.
       return b.avg_pet - a.avg_pet;
     }
     case "state": {
@@ -201,8 +199,6 @@ function rankingsReducer(
 ): RankingsState {
   switch (action.type) {
     case "SET_YEAR": {
-      // Matches prior behavior: changing the year resets an out-of-range
-      // heat-stress filter but does not reset pagination.
       return { ...state, heatStressFilter: "", selectedYear: action.year };
     }
     case "SET_SEASON": {
@@ -642,8 +638,6 @@ export function RankingsMain({
     });
   }, [rankings, stateFilter, heatStressFilter, sortColumn, sortDirection]);
 
-  // Derive ranks from the filtered data so the numbers reflect what is shown:
-  // rank 1 is the highest Avg PET within the current filters.
   const rankByLocation = useMemo(() => {
     const map = new Map<number, number>();
     const sortedByPet = filteredAndSortedRankings.toSorted(

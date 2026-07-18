@@ -678,6 +678,10 @@ export function RankingsMain({
         LocationOptions={LocationOptions}
         mainClassName="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
       >
+        <h1 className="mb-8 fade-in-up text-3xl font-black tracking-tight text-primary sm:text-4xl">
+          Cities ranked by Average PET
+        </h1>
+
         <RankingsFilters
           dispatch={dispatch}
           heatStressFilter={heatStressFilter}
@@ -689,14 +693,6 @@ export function RankingsMain({
           stateFilter={stateFilter}
           stateOptions={stateOptions}
         />
-
-        <section className="mb-8 fade-in-up overflow-hidden rounded-4xl glass-panel">
-          <div className="bg-primary px-6 py-5 sm:px-8 sm:py-6">
-            <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
-              Cities ranked by Average PET
-            </h1>
-          </div>
-        </section>
 
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-muted-foreground">

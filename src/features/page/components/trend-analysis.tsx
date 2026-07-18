@@ -57,8 +57,6 @@ interface ForecastSelectionMatchOptions {
   matchesInitialGraphSelection: boolean;
 }
 
-// The SSR-provided initialForecastData is only valid to seed the forecast
-// query when every preference it was fetched with still matches selection.
 const matchesInitialForecastSelection = ({
   forecastEnabled,
   forecastYearsAhead,

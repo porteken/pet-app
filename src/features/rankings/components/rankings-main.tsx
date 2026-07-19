@@ -97,6 +97,8 @@ function compareRankingItems(
       return (a.max_pet ?? 0) - (b.max_pet ?? 0);
     }
     case "rank": {
+      // Rank is derived from Avg Pet (desc) over the shown data, so ranking
+      // ascending is equivalent to ordering by Avg Pet descending.
       return b.avg_pet - a.avg_pet;
     }
     case "state": {
@@ -638,6 +640,8 @@ export function RankingsMain({
     });
   }, [rankings, stateFilter, heatStressFilter, sortColumn, sortDirection]);
 
+  // Derive ranks from the filtered data so the numbers reflect what is shown:
+  // rank 1 is the highest Avg Pet within the current filters.
   const rankByLocation = useMemo(() => {
     const map = new Map<number, number>();
     const sortedByPet = filteredAndSortedRankings.toSorted(

@@ -4,6 +4,22 @@ export const APP_CONFIG = {
   STUDY_URL: "https://bjsm.bmj.com/content/55/15/825",
 } as const;
 
+export const PET_BASIS_COOKIE_NAME = "pet-basis" as const;
+const PET_BASES = ["max", "avg"] as const;
+export type PetBasis = (typeof PET_BASES)[number];
+export const DEFAULT_PET_BASIS: PetBasis = "max";
+
+const isPetBasis = (value: string): value is PetBasis =>
+  (PET_BASES as readonly string[]).includes(value);
+
+export const normalizePetBasis = (value: string | undefined): PetBasis => {
+  if (value && isPetBasis(value)) {
+    return value;
+  }
+
+  return DEFAULT_PET_BASIS;
+};
+
 export const GRAPH_MEASURE_COOKIE_NAME = "graph-measure" as const;
 export const GRAPH_SEASON_COOKIE_NAME = "graph-season" as const;
 export const REFERENCE_YEAR_COOKIE_NAME = "reference-year" as const;

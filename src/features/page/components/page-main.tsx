@@ -30,6 +30,7 @@ const Main: FC<PageProperties> = ({
   initialGraphMeasure,
   initialGraphSeason,
   initialReferenceYear,
+  initialPetBasis,
   location,
   LocationOptions,
   ReferencePets,
@@ -94,6 +95,7 @@ const Main: FC<PageProperties> = ({
             initialGraphSeason={initialGraphSeason}
             initialIncreasePerYear={IncreasePerYear}
             initialTrendlinePets={TrendlinePets}
+            initialPetBasis={initialPetBasis}
             initialYearPets={YearPets}
             initialYears={Years}
             onMeasureChange={handleMeasureChange}

@@ -1,4 +1,4 @@
-import type { GraphSeason } from "@/lib/constants";
+import type { GraphSeason, PetBasis } from "@/lib/constants";
 import type { ForecastGraphData } from "@/lib/utils/trend-analysis";
 import type { LocationOptionSection, LocationProperties } from "@/types/types";
 
@@ -14,6 +14,7 @@ export interface PageProperties {
   initialGraphMeasure: string;
   initialGraphSeason: GraphSeason;
   initialReferenceYear: string;
+  initialPetBasis: PetBasis;
   location: LocationProperties;
   LocationOptions: LocationOptionSection[];
   ReferencePets: number[];

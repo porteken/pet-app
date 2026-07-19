@@ -642,6 +642,8 @@ describe("rankingsMain", () => {
     it("should sort by rank by default", () => {
       render(<RankingsMain {...defaultProps} />);
 
+      // Rank is derived from the shown data by Avg Pet (desc), so the city
+      // with the highest Avg Pet ranks first.
       const rows = screen.getAllByRole("row");
       expect(rows[1]).toHaveTextContent("Miami");
     });

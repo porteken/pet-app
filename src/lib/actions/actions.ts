@@ -9,12 +9,14 @@ import {
   MAX_FORECAST_YEARS_AHEAD,
   MIN_FORECAST_YEARS_AHEAD,
   normalizeGraphSeason,
+  normalizePetBasis,
   PREFERENCE_COOKIE_MAX_AGE_MS,
   type GraphSeason,
   RANKINGS_HEAT_STRESS_COOKIE_NAME,
   RANKINGS_SEASON_COOKIE_NAME,
   RANKINGS_STATE_COOKIE_NAME,
   RANKINGS_YEAR_COOKIE_NAME,
+  PET_BASIS_COOKIE_NAME,
 } from "@/lib/constants";
 import { isSecureCookieEnvironment } from "@/lib/utils/server-cookies";
 import { THERMAL_STRESS_LEGEND_ITEMS } from "@/lib/utils/thermal-stress";
@@ -95,6 +97,20 @@ export async function setGraphSeason(season: string) {
 
   const cookieStore = await cookies();
   cookieStore.set(GRAPH_SEASON_COOKIE_NAME, season, PREFERENCE_COOKIE_OPTIONS);
+}
+
+export async function setPetBasis(basis: string) {
+  if (normalizePetBasis(basis) !== basis) {
+    return;
+  }
+
+  const cookieStore = await cookies();
+  // Not httpOnly: BasisProvider reads this cookie client-side (see readCookieBasis).
+  cookieStore.set(PET_BASIS_COOKIE_NAME, basis, {
+    ...PREFERENCE_COOKIE_OPTIONS,
+    httpOnly: false,
+  });
+  revalidatePath("/rankings");
 }
 
 export const setRankingsHeatStress = async (heatStress: string) => {

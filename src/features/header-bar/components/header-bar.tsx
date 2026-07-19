@@ -1,5 +1,6 @@
 "use client";
 
+import { BasisToggle } from "@/components/app/basis-toggle";
 import { ThemeToggle } from "@/components/app/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -42,6 +43,7 @@ const HeaderActions = (): React.ReactElement => (
         <span className="hidden sm:inline">GitHub</span>
       </a>
     </Button>
+    <BasisToggle />
     <ThemeToggle />
   </div>
 );

@@ -4,6 +4,17 @@ import { mockFn } from "@/testing/mock-fn";
 import { server } from "@/testing/server";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
 
+import type { PetBasis } from "@/lib/constants";
+import type { ReactNode } from "react";
+
+vi.mock("@/components/app/basis-provider", () => ({
+  BasisProvider: ({ children }: { children: ReactNode }) => children,
+  usePetBasis: () => ({
+    basis: "max" as const,
+    setBasis: vi.fn<(basis: PetBasis) => void>(),
+  }),
+}));
+
 vi.mock("next/font/google", () =>
   Object.fromEntries([
     [

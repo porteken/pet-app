@@ -80,6 +80,10 @@ export const test = base.extend<BrowserErrorFixtures>({
       );
 
     page.on("pageerror", (error: Error) => {
+      if (isWebKitRscPrefetchAbort(error.message)) {
+        return;
+      }
+
       if (seenExceptionMessages.has(error.message)) {
         return;
       }

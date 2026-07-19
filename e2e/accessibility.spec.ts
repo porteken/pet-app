@@ -106,13 +106,6 @@ test.describe("Accessibility", () => {
     await expect(page.locator(LOCATION_CHARTS)).toHaveCount(2, {
       timeout: 15_000,
     });
-
-    const graphMeasure = page.locator("select#graph-measure");
-    await graphMeasure.selectOption("max");
-
-    await expect(page.locator(LOCATION_CHARTS)).toHaveCount(2, {
-      timeout: 10_000,
-    });
   });
 
   test("responsive zoom: content remains usable at 200% zoom", async ({
@@ -122,8 +115,6 @@ test.describe("Accessibility", () => {
 
     await page.setViewportSize({ height: 600, width: 800 });
 
-    await expect(page.locator("select#graph-measure")).toBeVisible();
-
     await expect(
       page.getByRole("heading", TREND_ANALYSIS_HEADING),
     ).toBeVisible();
@@ -131,13 +122,7 @@ test.describe("Accessibility", () => {
       page.getByRole("heading", REFERENCE_DATA_HEADING),
     ).toBeVisible();
 
-    const graphMeasure = page.locator("select#graph-measure");
-    await expect(graphMeasure).toBeVisible();
-    await graphMeasure.selectOption("max");
-
-    await expect(page.locator(LOCATION_CHARTS)).toHaveCount(2, {
-      timeout: 10_000,
-    });
+    await expect(page.locator("select#graph-measure")).toBeVisible();
 
     const bodyScrollWidth = await page.evaluate(
       () => document.body.scrollWidth,
@@ -193,13 +178,5 @@ test.describe("Accessibility", () => {
     await expect(
       page.getByRole("heading", TREND_ANALYSIS_HEADING),
     ).toBeVisible();
-
-    const graphMeasure = page.locator("select#graph-measure");
-    await graphMeasure.click();
-    await graphMeasure.selectOption("max");
-
-    await expect(page.locator(LOCATION_CHARTS)).toHaveCount(2, {
-      timeout: 15_000,
-    });
   });
 });

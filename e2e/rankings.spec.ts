@@ -5,66 +5,35 @@ import {
   selectCustomOption,
 } from "./utils/custom-select";
 import { waitForLocationDetailsPage } from "./utils/map-page";
+import { gotoRankingsPage, getFirstRow } from "./utils/rankings-page";
 
 test.describe("Rankings Page", () => {
-  test("should display rankings table with data", async ({ page }) => {
-    await page.goto("/rankings");
-
-    await expect(
-      page.getByRole("heading", { name: "Cities ranked by Average PET" }),
-    ).toBeVisible({
-      timeout: 10_000,
-    });
-
-    await expect(page.locator("table")).toBeVisible();
+  test("should render rankings page with table, filters, and legend", async ({
+    page,
+  }) => {
+    await gotoRankingsPage(page);
 
     const rows = page.locator("table tbody tr");
-    await expect(rows.first()).toBeVisible({ timeout: 10_000 });
-
     const rowCount = await rows.count();
     expect(rowCount).toBeGreaterThan(0);
-  });
-
-  test("should display year selector and filter controls", async ({ page }) => {
-    await page.goto("/rankings");
-
-    await expect(
-      page.getByRole("heading", { name: "Cities ranked by Average PET" }),
-    ).toBeVisible({
-      timeout: 10_000,
-    });
 
     await expect(page.getByTestId("rankings-year-filter")).toBeVisible();
+    await expect(page.getByTestId("rankings-season-filter")).toBeVisible();
     await expect(page.getByTestId("rankings-state-filter")).toBeVisible();
     await expect(page.getByTestId("rankings-heat-stress-filter")).toBeVisible();
-  });
-
-  test("should show the city selector in the header", async ({ page }) => {
-    await page.goto("/rankings");
 
     await expect(
       page.getByRole("link", { name: "Historical PET USA" }),
-    ).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByTestId("city-selector")).toBeVisible({
-      timeout: 10_000,
-    });
+    ).toBeVisible();
     await expect(page.getByTestId("city-selector")).toContainText(
       "Select City",
     );
-  });
 
-  test("should display thermal stress legend", async ({ page }) => {
-    await page.goto("/rankings");
-
-    await expect(page.getByText("Thermal Stress Index")).toBeVisible({
-      timeout: 10_000,
-    });
-
+    await expect(page.getByText("Thermal Stress Index")).toBeVisible();
     const legendSection = page
       .locator("div")
       .filter({ has: page.getByText("Thermal Stress Index") })
       .first();
-
     await expect(legendSection).toContainText("Extreme Cold Stress");
     await expect(legendSection).toContainText("No Thermal Stress");
     await expect(legendSection).toContainText("Strong Heat Stress");
@@ -72,52 +41,51 @@ test.describe("Rankings Page", () => {
   });
 
   test("should change year and update rankings", async ({ page }) => {
-    await page.goto("/rankings");
-
-    await expect(
-      page.getByRole("heading", { name: "Cities ranked by Average PET" }),
-    ).toBeVisible({
-      timeout: 10_000,
-    });
-
-    await expect(page.getByTestId("rankings-year-filter")).toBeVisible({
-      timeout: 10_000,
-    });
+    await gotoRankingsPage(page);
 
     const yearSelect = page.getByTestId("rankings-year-filter");
     await selectCustomOption(page, yearSelect, /^2010$/u);
     await expect(yearSelect).toContainText("2010");
 
-    await expect(page.locator("table tbody tr").first()).toBeVisible({
-      timeout: 10_000,
-    });
+    await expect(getFirstRow(page)).toBeVisible({ timeout: 10_000 });
   });
 
   test("should sort table by clicking header", async ({ page }) => {
-    await page.goto("/rankings");
+    await gotoRankingsPage(page);
 
-    await expect(
-      page.getByRole("heading", { name: "Cities ranked by Average PET" }),
-    ).toBeVisible({
-      timeout: 10_000,
-    });
+    const cityHeader = page.locator("table thead th").nth(1);
+    const cityHeaderButton = cityHeader.getByRole("button");
+    const firstCityCell = () => getFirstRow(page).locator("td").nth(1);
+    const secondCityCell = () =>
+      page.locator("table tbody tr").nth(1).locator("td").nth(1);
 
-    const tableHeaders = page.locator("table thead th");
-    await expect(tableHeaders.first()).toBeVisible({ timeout: 10_000 });
+    await cityHeaderButton.click();
+    await expect(cityHeader).toHaveAttribute("aria-sort", "ascending");
+    const [ascendingFirst, ascendingSecond] = await Promise.all([
+      firstCityCell().textContent(),
+      secondCityCell().textContent(),
+    ]);
+    expect(
+      (ascendingFirst ?? "").localeCompare(ascendingSecond ?? ""),
+    ).toBeLessThanOrEqual(0);
 
-    const cityHeader = tableHeaders.nth(1);
-    await cityHeader.click();
-
-    await expect(page.locator("table tbody tr").first()).toBeVisible();
+    await cityHeaderButton.click();
+    await expect(cityHeader).toHaveAttribute("aria-sort", "descending");
+    const [descendingFirst, descendingSecond] = await Promise.all([
+      firstCityCell().textContent(),
+      secondCityCell().textContent(),
+    ]);
+    expect(
+      (descendingFirst ?? "").localeCompare(descendingSecond ?? ""),
+    ).toBeGreaterThanOrEqual(0);
   });
 
   test("should navigate to location page when row is clicked", async ({
     page,
   }) => {
-    await page.goto("/rankings");
+    await gotoRankingsPage(page);
 
-    const firstRow = page.locator("table tbody tr").first();
-    await expect(firstRow).toBeVisible({ timeout: 10_000 });
+    const firstRow = getFirstRow(page);
     await firstRow.scrollIntoViewIfNeeded();
 
     await Promise.all([
@@ -129,17 +97,7 @@ test.describe("Rankings Page", () => {
   });
 
   test("should filter by state", async ({ page }) => {
-    await page.goto("/rankings", { waitUntil: "domcontentloaded" });
-
-    await expect(
-      page.getByRole("heading", { name: "Cities ranked by Average PET" }),
-    ).toBeVisible({
-      timeout: 15_000,
-    });
-
-    await expect(page.getByTestId("rankings-state-filter")).toBeVisible({
-      timeout: 10_000,
-    });
+    await gotoRankingsPage(page);
 
     const stateSelect = page.getByTestId("rankings-state-filter");
     await openCustomSelect(page, stateSelect);
@@ -151,26 +109,14 @@ test.describe("Rankings Page", () => {
 
     await expect(stateSelect).toContainText(stateLabel ?? "");
 
-    await expect(page.locator("table tbody tr").first()).toBeVisible({
-      timeout: 10_000,
-    });
-    await expect(
-      page.locator("table tbody tr").first().locator("td").nth(2),
-    ).toContainText(stateLabel ?? "");
+    await expect(getFirstRow(page)).toBeVisible({ timeout: 10_000 });
+    await expect(getFirstRow(page).locator("td").nth(2)).toContainText(
+      stateLabel ?? "",
+    );
   });
 
   test("should filter by thermal stress level", async ({ page }) => {
-    await page.goto("/rankings", { waitUntil: "domcontentloaded" });
-
-    await expect(
-      page.getByRole("heading", { name: "Cities ranked by Average PET" }),
-    ).toBeVisible({
-      timeout: 15_000,
-    });
-
-    await expect(page.getByTestId("rankings-heat-stress-filter")).toBeVisible({
-      timeout: 10_000,
-    });
+    await gotoRankingsPage(page);
 
     const heatStressSelect = page.getByTestId("rankings-heat-stress-filter");
     await openCustomSelect(page, heatStressSelect);
@@ -182,22 +128,33 @@ test.describe("Rankings Page", () => {
 
     await expect(heatStressSelect).toContainText(optionLabel ?? "");
 
-    await expect(page.locator("table tbody tr").first()).toBeVisible({
-      timeout: 15_000,
-    });
+    await expect(getFirstRow(page)).toBeVisible({ timeout: 15_000 });
+  });
+
+  test("should filter by season and update rankings", async ({ page }) => {
+    await gotoRankingsPage(page);
+
+    const seasonFilter = page.getByTestId("rankings-season-filter");
+    const firstRow = getFirstRow(page);
+    const initialRowText = await firstRow.textContent();
+
+    await selectCustomOption(page, seasonFilter, /^Summer$/u);
+    await expect(seasonFilter).toContainText("Summer");
+
+    await expect(async () => {
+      expect(await firstRow.textContent()).not.toStrictEqual(initialRowText);
+    }).toPass({ timeout: 10_000 });
+
+    await page.reload();
+    await expect(seasonFilter).toContainText("Summer");
   });
 
   test("should default to daily max and switch basis via the header toggle", async ({
     page,
   }) => {
-    await page.goto("/rankings");
+    await gotoRankingsPage(page);
 
-    await expect(
-      page.getByRole("heading", { name: "Cities ranked by Average PET" }),
-    ).toBeVisible({ timeout: 10_000 });
-
-    const firstRow = page.locator("table tbody tr").first();
-    await expect(firstRow).toBeVisible({ timeout: 10_000 });
+    const firstRow = getFirstRow(page);
 
     const basisToggle = page.getByRole("button", {
       name: /switch to daily (?<basis>average|maximum) pet/iu,

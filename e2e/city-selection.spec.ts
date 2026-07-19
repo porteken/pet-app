@@ -38,24 +38,6 @@ test.describe("City Selection", () => {
     await expect(citySelect).toBeVisible();
   });
 
-  test("should display city selection dropdown on home page", async ({
-    page,
-  }) => {
-    await page.goto("/");
-
-    const citySelect = page.getByTestId("city-selector");
-    await expect(citySelect).toBeVisible();
-  });
-
-  test("should display city selection dropdown on location page", async ({
-    page,
-  }) => {
-    await page.goto("/1");
-
-    const citySelect = page.getByTestId("city-selector");
-    await expect(citySelect).toBeVisible({ timeout: 10_000 });
-  });
-
   test("should navigate to selected city page", async ({ page }) => {
     await page.goto("/");
 

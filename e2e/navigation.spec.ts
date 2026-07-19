@@ -2,23 +2,19 @@ import { expect, test } from "./fixtures";
 import {
   MAP_CONTAINER_SELECTOR,
   gotoAndWaitForMapPage,
+  waitForLocationDetailsPage,
   waitForMapPage,
 } from "./utils/map-page";
+import { RANKINGS_HEADING } from "./utils/rankings-page";
 
 import type { Page } from "@playwright/test";
 
 const NAVIGATION_TIMEOUT = 30_000;
 
-const expectRankingsPage = async (page: Page) => {
-  await expect(page).toHaveURL("/rankings", { timeout: NAVIGATION_TIMEOUT });
-  await expect(
-    page.getByRole("heading", { name: "Cities ranked by Average PET" }),
-  ).toBeVisible();
-};
-
 const navigateToRankingsPage = async (page: Page) => {
   await page.getByRole("link", { name: "Navigate to rankings page" }).click();
-  await expectRankingsPage(page);
+  await expect(page).toHaveURL("/rankings", { timeout: NAVIGATION_TIMEOUT });
+  await expect(page.getByRole("heading", RANKINGS_HEADING)).toBeVisible();
 };
 
 const navigateToMapView = async (page: Page) => {
@@ -36,25 +32,44 @@ test.describe("Navigation", () => {
     await expect(page.getByText("Purpose of the Application")).toBeVisible();
 
     await navigateToRankingsPage(page);
-
     await navigateToMapView(page);
-  });
 
-  test("should navigate away from a location page", async ({ page }) => {
     await page.goto("/1");
-    await expect(
-      page.getByRole("heading", { name: "Trend Analysis" }),
-    ).toBeVisible({ timeout: 10_000 });
-
+    await waitForLocationDetailsPage(page, /\/1(?:\?.*)?$/u);
     await expect(
       page.getByRole("link", { name: "Navigate to rankings page" }),
     ).toBeVisible({ timeout: 10_000 });
 
     await navigateToRankingsPage(page);
-
     await navigateToMapView(page);
     await expect(page.locator(MAP_CONTAINER_SELECTOR)).toBeVisible({
       timeout: NAVIGATION_TIMEOUT,
     });
+  });
+
+  test("should toggle and persist the color theme", async ({ page }) => {
+    await page.goto("/about");
+
+    const themeToggle = page.getByRole("button", {
+      name: /switch to (?<theme>dark|light) mode/iu,
+    });
+    await expect(themeToggle).toBeVisible();
+
+    const isDarkMode = () =>
+      page
+        .locator("html")
+        .evaluate((element) => element.classList.contains("dark"));
+
+    const hadDark = await isDarkMode();
+
+    await themeToggle.click();
+    await expect.poll(isDarkMode, { timeout: 5000 }).toBe(!hadDark);
+    await expect(themeToggle).toHaveAccessibleName(
+      hadDark ? /switch to dark mode/iu : /switch to light mode/iu,
+    );
+
+    await page.reload();
+
+    await expect.poll(isDarkMode).toBe(!hadDark);
   });
 });

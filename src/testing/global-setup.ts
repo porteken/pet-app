@@ -50,10 +50,10 @@ export async function seedTestPostgres(
     for (let i = 0; i < pets.length; i += chunkSize) {
       const chunk = pets.slice(i, i + chunkSize);
       const petValues = chunk
-        .map((p) => `(${p.location_id}, '${p.date}', ${p.pet})`)
+        .map((p) => `(${p.location_id}, '${p.date}', ${p.pet}, ${p.pet_avg})`)
         .join(", ");
       await client.query(
-        `INSERT INTO pet (location_id, date, pet) VALUES ${petValues};`,
+        `INSERT INTO pet (location_id, date, pet, pet_avg) VALUES ${petValues};`,
       );
     }
   }

@@ -10,6 +10,7 @@ import {
   DEFAULT_FORECAST_ENABLED,
   DEFAULT_FORECAST_YEARS_AHEAD,
   DEFAULT_GRAPH_MEASURE,
+  DEFAULT_PET_BASIS,
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
   GRAPH_CONFIG,
@@ -19,7 +20,10 @@ import {
   MAX_FORECAST_YEARS_AHEAD,
   MIN_FORECAST_YEARS_AHEAD,
   normalizeGraphSeason,
+  normalizePetBasis,
   type GraphSeason,
+  type PetBasis,
+  PET_BASIS_COOKIE_NAME,
 } from "@/lib/constants";
 import { isSelectableReferenceYear } from "@/lib/utils/select-options";
 import { getLatestCookieValue } from "@/lib/utils/server-cookies";
@@ -71,6 +75,7 @@ interface LocationPagePreferences {
   initialGraphMeasure: string;
   initialGraphSeason: GraphSeason;
   initialReferenceYear: string;
+  initialPetBasis: PetBasis;
 }
 
 const createEmptyGraphData = (): GraphData => ({
@@ -161,16 +166,23 @@ const getPreferencesFromCookies =
         ? rawForecastYearsAhead
         : DEFAULT_FORECAST_YEARS_AHEAD;
 
+    const initialPetBasis = normalizePetBasis(
+      getLatestCookieValue(cookieStore, PET_BASIS_COOKIE_NAME) ??
+        DEFAULT_PET_BASIS,
+    );
+
     return {
       initialForecastEnabled,
       initialForecastYearsAhead,
       initialGraphMeasure,
       initialGraphSeason,
       initialReferenceYear,
+      initialPetBasis,
     };
   };
 
 interface FetchGraphDataOptions {
+  basis: PetBasis;
   forecastEnabled: boolean;
   forecastYearsAhead: number;
   locationId: number;
@@ -180,6 +192,7 @@ interface FetchGraphDataOptions {
 }
 
 const fetchGraphData = async ({
+  basis,
   forecastEnabled,
   forecastYearsAhead,
   locationId,
@@ -188,12 +201,16 @@ const fetchGraphData = async ({
   season,
 }: FetchGraphDataOptions): Promise<GraphData> => {
   const forecastPromise = forecastEnabled
-    ? FetchForecastData(locationId, forecastYearsAhead, season, measure)
+    ? FetchForecastData(locationId, forecastYearsAhead, {
+        basis,
+        option: measure,
+        season,
+      })
     : undefined;
 
   const [trendResult, currentResult, referenceResult] =
     await Promise.allSettled([
-      FetchTrendGraphData(measure, locationId, season),
+      FetchTrendGraphData(measure, locationId, season, basis),
       FetchReferenceGraphData(
         String(GRAPH_CONFIG.YEAR_RANGE.END),
         locationId,
@@ -284,6 +301,7 @@ export const loadLocationPageData = async (
   const [locationData, graphData] = await Promise.all([
     fetchLocationData(),
     fetchGraphData({
+      basis: preferences.initialPetBasis,
       forecastEnabled: preferences.initialForecastEnabled,
       forecastYearsAhead: preferences.initialForecastYearsAhead,
       locationId,
@@ -337,6 +355,7 @@ export const loadLocationPageData = async (
       initialGraphMeasure: preferences.initialGraphMeasure,
       initialGraphSeason: preferences.initialGraphSeason,
       initialReferenceYear: preferences.initialReferenceYear,
+      initialPetBasis: preferences.initialPetBasis,
       location: selectedLocation,
       LocationOptions,
       ReferencePets: graphData.reference_pets,

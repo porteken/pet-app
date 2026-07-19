@@ -1,5 +1,6 @@
 "use client";
 
+import { usePetBasis } from "@/components/app/basis-provider";
 import { ChartSkeleton } from "@/components/app/chart-skeleton";
 import { ForecastControls } from "@/components/app/forecast-controls";
 import { ErrorGraphDisplay } from "@/features/home/components/error-graph-display";
@@ -8,7 +9,11 @@ import { useTrendGraphData } from "@/features/home/hooks/use-trend-graph-data";
 import { useIgnorePersistenceError } from "@/hooks/use-ignore-persistence-error";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { setForecastPreferences } from "@/lib/actions/actions";
-import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
+import {
+  normalizeGraphSeason,
+  type GraphSeason,
+  type PetBasis,
+} from "@/lib/constants";
 import {
   deriveTrendAnalysis,
   type ForecastGraphData,
@@ -28,6 +33,7 @@ interface TrendAnalysisProperties {
   initialGraphSeason: GraphSeason;
   initialIncreasePerYear?: number;
   initialTrendlinePets?: number[];
+  initialPetBasis: PetBasis;
   initialYearPets?: number[];
   initialYears?: number[];
   onMeasureChange: (measure: string) => Promise<void>;
@@ -78,6 +84,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   initialGraphSeason,
   initialIncreasePerYear = 0,
   initialTrendlinePets = DEFAULT_INITIAL_TRENDLINE_PETS,
+  initialPetBasis,
   initialYearPets = DEFAULT_INITIAL_YEAR_PETS,
   initialYears = DEFAULT_INITIAL_YEARS,
   onMeasureChange,
@@ -116,20 +123,24 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
   const ignorePersistenceError = useIgnorePersistenceError();
+  const { basis } = usePetBasis();
 
   const showTrendLegend = !isMobileViewport || isMobileLegendOpen;
 
   const matchesInitialGraphSelection =
     selectedGraphMeasure === initialGraphMeasure &&
-    graphSeason === initialGraphSeason;
+    graphSeason === initialGraphSeason &&
+    basis === initialPetBasis;
 
   const trendQuery = useTrendGraphData({
+    basis,
     initialData: matchesInitialGraphSelection ? initialTrendData : undefined,
     locationId: id,
     option: selectedGraphMeasure,
     season: graphSeason,
   });
   const forecastQuery = useForecastData({
+    basis,
     enabled: forecastEnabled,
     initialData: matchesInitialForecastSelection({
       forecastEnabled,
@@ -161,7 +172,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
 
     const result = deriveTrendAnalysis(
       trendQuery.data,
-      forecastQuery.data,
+      forecastQuery.data ?? undefined,
       selectedGraphMeasure,
       graphSeason,
     );

@@ -86,7 +86,7 @@ describe("rankings page", () => {
       description: "City rankings by thermal stress (PET) values",
       title: "City Rankings - Thermal Stress Analysis",
     });
-    expect(mockFetchCityRankings).toHaveBeenCalledWith(2031, "Winter");
+    expect(mockFetchCityRankings).toHaveBeenCalledWith(2031, "Winter", "max");
     expect(screen.getByTestId("rankings-main")).toBeInTheDocument();
     expect(mockRankingsMain).toHaveBeenCalledWith(
       {
@@ -128,7 +128,7 @@ describe("rankings page", () => {
       }),
     );
 
-    expect(mockFetchCityRankings).toHaveBeenCalledWith(2028, "Annual");
+    expect(mockFetchCityRankings).toHaveBeenCalledWith(2028, "Annual", "max");
     expect(mockRankingsMain).toHaveBeenCalledWith(
       expect.objectContaining({
         initialHeatStress: "",
@@ -150,7 +150,7 @@ describe("rankings page", () => {
       }),
     );
 
-    expect(mockFetchCityRankings).toHaveBeenCalledWith(2025, "Annual");
+    expect(mockFetchCityRankings).toHaveBeenCalledWith(2025, "Annual", "max");
     expect(mockRankingsMain).toHaveBeenCalledWith(
       expect.objectContaining({
         initialSeason: "Annual",
@@ -174,7 +174,7 @@ describe("rankings page", () => {
       }),
     );
 
-    expect(mockFetchCityRankings).toHaveBeenCalledWith(2025, "Annual");
+    expect(mockFetchCityRankings).toHaveBeenCalledWith(2025, "Annual", "max");
     expect(mockRankingsMain).toHaveBeenCalledWith(
       expect.objectContaining({
         initialSeason: "Annual",

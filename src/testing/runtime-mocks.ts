@@ -32,6 +32,7 @@ interface RuntimePetRow extends MockRow {
   date: string;
   location_id: number;
   pet: number;
+  pet_avg: number;
   year: number;
 }
 
@@ -121,6 +122,10 @@ const LOCATIONS = [
   },
 ] as const;
 
+// Daily-average-basis mock values are offset from the daily-max-basis
+// values by a flat amount so the two bases are distinguishable in tests.
+const AVG_BASIS_OFFSET = -1.5;
+
 const round = (value: number) => Math.round(value * 100) / 100;
 
 const getAveragePet = (locationId: number, year: number) => {
@@ -149,6 +154,7 @@ const buildPetYearRows = (): RuntimePetRow[] => {
           date,
           location_id: location.location_id,
           pet,
+          pet_avg: round(pet + AVG_BASIS_OFFSET),
           year,
         });
       }
@@ -173,19 +179,29 @@ const MOCK_TABLES: RuntimeMockTables = {
             SEASONAL_AVG_OFFSETS[season] +
             (2100 - 2025) * location.trendPerYear,
         );
+        const max = round(
+          getAveragePet(location.location_id, year) +
+            SEASONAL_MAX_OFFSETS[season],
+        );
         return {
           avg_pet: avg,
+          avg_pet_avg: round(avg + AVG_BASIS_OFFSET),
           change_from_2000: round((year - 2000) * location.trendPerYear),
+          change_from_2000_avg: round(
+            (year - 2000) * location.trendPerYear + AVG_BASIS_OFFSET,
+          ),
           city: location.city,
           future_lower: round(forecastPet - 2.2),
+          future_lower_avg: round(forecastPet - 2.2 + AVG_BASIS_OFFSET),
           future_upper: round(forecastPet + 2.2),
+          future_upper_avg: round(forecastPet + 2.2 + AVG_BASIS_OFFSET),
           location_id: location.location_id,
-          max_pet: round(
-            getAveragePet(location.location_id, year) +
-              SEASONAL_MAX_OFFSETS[season],
-          ),
+          max_pet: max,
+          max_pet_avg: round(max + AVG_BASIS_OFFSET),
           p10: round(avg - 2.5),
+          p10_avg: round(avg - 2.5 + AVG_BASIS_OFFSET),
           p90: round(avg + 2.5),
+          p90_avg: round(avg + 2.5 + AVG_BASIS_OFFSET),
           season,
           state: location.state,
           year,
@@ -219,13 +235,17 @@ const MOCK_TABLES: RuntimeMockTables = {
         const forecastPet = round(
           lastHistoricalAvg + yearsAhead * location.trendPerYear,
         );
+        const forecastPetAvg = round(forecastPet + AVG_BASIS_OFFSET);
 
         return {
           location_id: location.location_id,
           lower: round(forecastPet - 2.2),
+          lower_avg: round(forecastPetAvg - 2.2),
           pet: forecastPet,
+          pet_avg: forecastPetAvg,
           season,
           upper: round(forecastPet + 2.2),
+          upper_avg: round(forecastPetAvg + 2.2),
           year,
         };
       });
@@ -245,13 +265,17 @@ const MOCK_TABLES: RuntimeMockTables = {
         const forecastPet = round(
           lastHistoricalMax + yearsAhead * location.trendPerYear,
         );
+        const forecastPetAvg = round(forecastPet + AVG_BASIS_OFFSET);
 
         return {
           location_id: location.location_id,
           lower: round(forecastPet - 2.2),
+          lower_avg: round(forecastPetAvg - 2.2),
           pet: forecastPet,
+          pet_avg: forecastPetAvg,
           season,
           upper: round(forecastPet + 2.2),
+          upper_avg: round(forecastPetAvg + 2.2),
           year,
         };
       });
@@ -273,12 +297,19 @@ const MOCK_TABLES: RuntimeMockTables = {
     YEARS.flatMap((year) =>
       GRAPH_SEASONS.map((season) => {
         const avg = getAveragePet(location.location_id, year);
+        const maxPet = round(avg + SEASONAL_MAX_OFFSETS[season]);
         return {
           avg_pet: round(avg + SEASONAL_AVG_OFFSETS[season]),
+          avg_pet_avg: round(
+            avg + SEASONAL_AVG_OFFSETS[season] + AVG_BASIS_OFFSET,
+          ),
           location_id: location.location_id,
-          max_pet: round(avg + SEASONAL_MAX_OFFSETS[season]),
+          max_pet: maxPet,
+          max_pet_avg: round(maxPet + AVG_BASIS_OFFSET),
           p10: round(avg - 2.5),
+          p10_avg: round(avg - 2.5 + AVG_BASIS_OFFSET),
           p90: round(avg + 2.5),
+          p90_avg: round(avg + 2.5 + AVG_BASIS_OFFSET),
           season,
           year,
         };

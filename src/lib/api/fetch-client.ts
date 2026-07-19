@@ -6,8 +6,11 @@ import {
 } from "@/lib/api/schemas";
 import {
   DEFAULT_GRAPH_SEASON,
+  DEFAULT_PET_BASIS,
   type GraphSeason,
   normalizeGraphSeason,
+  normalizePetBasis,
+  type PetBasis,
 } from "@/lib/constants";
 import { FetchError } from "@/lib/utils/errors";
 import {
@@ -40,11 +43,16 @@ const parseWithFetchError = <T>(
   }
 };
 
+interface ForecastDataFilters {
+  basis?: PetBasis;
+  option?: string;
+  season?: GraphSeason;
+}
+
 export async function FetchForecastData(
   locationId: number,
   yearsAhead: number,
-  season: GraphSeason = DEFAULT_GRAPH_SEASON,
-  option: string = "avg",
+  filters: ForecastDataFilters = {},
 ): Promise<
   | undefined
   | {
@@ -54,6 +62,12 @@ export async function FetchForecastData(
       upperBound90: number[];
     }
 > {
+  const {
+    basis = DEFAULT_PET_BASIS,
+    option = "avg",
+    season = DEFAULT_GRAPH_SEASON,
+  } = filters;
+
   if (!validateLocationId(locationId)) {
     throw new FetchError(`Invalid location ID: ${locationId}`);
   }
@@ -69,10 +83,12 @@ export async function FetchForecastData(
   }
 
   const resolvedSeason = normalizeGraphSeason(season);
+  const resolvedBasis = normalizePetBasis(basis);
 
   const response = await apiRequest(async () => {
     const payload = await fetchApiJson(
       `/api/data/forecast?${buildQueryString({
+        basis: resolvedBasis,
         locationId,
         option,
         season: resolvedSeason,
@@ -100,8 +116,10 @@ export async function FetchTrendGraphData(
   option: string,
   locationId: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
+  basis: PetBasis = DEFAULT_PET_BASIS,
 ): Promise<TrendGraphDataProperties> {
   const resolvedSeason = normalizeGraphSeason(season);
+  const resolvedBasis = normalizePetBasis(basis);
 
   if (!validateTrendOption(option)) {
     throw new FetchError("Invalid trend option. Must be 'avg' or 'max'");
@@ -114,6 +132,7 @@ export async function FetchTrendGraphData(
   const response = await apiRequest(async () => {
     const payload = await fetchApiJson(
       `/api/data/trend?${buildQueryString({
+        basis: resolvedBasis,
         locationId,
         option,
         season: resolvedSeason,

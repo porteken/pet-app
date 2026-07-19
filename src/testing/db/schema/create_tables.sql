@@ -72,6 +72,9 @@ BEGIN
     ALTER COLUMN location_id TYPE smallint USING location_id::smallint,
     ALTER COLUMN pet TYPE real USING pet::real ;
 
+    ALTER TABLE IF EXISTS public.pet
+    ADD COLUMN IF NOT EXISTS pet_avg real ;
+
     IF EXISTS (
         SELECT
             1

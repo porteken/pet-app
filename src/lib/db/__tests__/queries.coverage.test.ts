@@ -265,7 +265,10 @@ describe("queries isMissingColumnError + fallback branches", () => {
       const rows = [{ year: 2030, pet: 20, lower: 18, upper: 22 }];
       mockExecute.mockResolvedValue(rows);
 
-      const result = await fetchForecastRows(1, queryWindow, "Annual", "avg");
+      const result = await fetchForecastRows(1, queryWindow, {
+        option: "avg",
+        season: "Annual",
+      });
       expect(result).toStrictEqual(rows);
     });
 
@@ -273,7 +276,10 @@ describe("queries isMissingColumnError + fallback branches", () => {
       const rows = [{ year: 2030, pet: 25, lower: 23, upper: 27 }];
       mockExecute.mockResolvedValue(rows);
 
-      const result = await fetchForecastRows(1, queryWindow, "Annual", "max");
+      const result = await fetchForecastRows(1, queryWindow, {
+        option: "max",
+        season: "Annual",
+      });
       expect(result).toStrictEqual(rows);
     });
 
@@ -284,7 +290,10 @@ describe("queries isMissingColumnError + fallback branches", () => {
         .mockRejectedValueOnce(seasonError)
         .mockResolvedValue(fallbackRows);
 
-      const result = await fetchForecastRows(1, queryWindow, "Summer", "avg");
+      const result = await fetchForecastRows(1, queryWindow, {
+        option: "avg",
+        season: "Summer",
+      });
       expect(result).toStrictEqual(fallbackRows);
     });
 
@@ -295,7 +304,10 @@ describe("queries isMissingColumnError + fallback branches", () => {
         .mockRejectedValueOnce(seasonError)
         .mockResolvedValue(fallbackRows);
 
-      const result = await fetchForecastRows(1, queryWindow, "Winter", "max");
+      const result = await fetchForecastRows(1, queryWindow, {
+        option: "max",
+        season: "Winter",
+      });
       expect(result).toStrictEqual(fallbackRows);
     });
 
@@ -303,7 +315,7 @@ describe("queries isMissingColumnError + fallback branches", () => {
       mockExecute.mockRejectedValue(makeUnknownError());
 
       await expect(
-        fetchForecastRows(1, queryWindow, "Annual", "avg"),
+        fetchForecastRows(1, queryWindow, { option: "avg", season: "Annual" }),
       ).rejects.toMatchObject({ code: "99999" });
     });
 
@@ -312,7 +324,7 @@ describe("queries isMissingColumnError + fallback branches", () => {
       mockExecute.mockRejectedValue(err);
 
       await expect(
-        fetchForecastRows(1, queryWindow, undefined, "avg"),
+        fetchForecastRows(1, queryWindow, { option: "avg" }),
       ).rejects.toBe(err);
     });
   });

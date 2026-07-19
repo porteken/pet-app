@@ -30,6 +30,7 @@ const Main: FC<PageProperties> = ({
   initialGraphMeasure,
   initialGraphSeason,
   initialReferenceYear,
+  initialPetBasis,
   location,
   LocationOptions,
   ReferencePets,
@@ -79,7 +80,7 @@ const Main: FC<PageProperties> = ({
       <PageShell
         id={id}
         LocationOptions={LocationOptions}
-        mainClassName="mx-auto w-full max-w-[1700px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10"
+        mainClassName="mx-auto w-full max-w-[1700px] px-4 pt-8 pb-28 sm:px-6 sm:pb-8 lg:px-8 lg:pt-10 lg:pb-10"
       >
         <PageHeader location={location} />
 
@@ -94,6 +95,7 @@ const Main: FC<PageProperties> = ({
             initialGraphSeason={initialGraphSeason}
             initialIncreasePerYear={IncreasePerYear}
             initialTrendlinePets={TrendlinePets}
+            initialPetBasis={initialPetBasis}
             initialYearPets={YearPets}
             initialYears={Years}
             onMeasureChange={handleMeasureChange}

@@ -17,7 +17,7 @@ export const ThemeToggle = () => {
 
   const isDarkMode = mounted && resolvedTheme === "dark";
   const nextTheme = isDarkMode ? "light" : "dark";
-  const themeLabel = isDarkMode ? "Light mode" : "Dark mode";
+  const themeLabel = isDarkMode ? "Dark" : "Light";
   const label = mounted ? `Switch to ${nextTheme} mode` : "Toggle color theme";
 
   const handleToggle = React.useCallback(() => {
@@ -27,19 +27,18 @@ export const ThemeToggle = () => {
   return (
     <Button
       aria-label={label}
-      className="min-w-30 justify-center sm:min-w-35"
+      className="justify-center sm:min-w-35"
       onClick={handleToggle}
       size="sm"
       type="button"
       variant="outline"
     >
       {isDarkMode ? (
-        <SunMedium className="size-4" />
-      ) : (
         <MoonStar className="size-4" />
+      ) : (
+        <SunMedium className="size-4" />
       )}
       <span className="hidden sm:inline">{mounted ? themeLabel : "Theme"}</span>
-      <span className="sm:hidden">Theme</span>
     </Button>
   );
 };

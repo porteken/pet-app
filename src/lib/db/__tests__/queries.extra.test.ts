@@ -33,4 +33,36 @@ describe("db queries extra coverage", () => {
 
     vi.restoreAllMocks();
   });
+
+  it("returns distinct values for the avg vs max pet basis", async () => {
+    vi.spyOn(environment, "shouldUseRuntimeDbMocks").mockReturnValue(true);
+
+    const maxBasisRankings = await fetchCityRankingsRows(2024, "Annual", "max");
+    const avgBasisRankings = await fetchCityRankingsRows(2024, "Annual", "avg");
+    expect(avgBasisRankings[0]?.avg_pet).not.toStrictEqual(
+      maxBasisRankings[0]?.avg_pet,
+    );
+    expect(avgBasisRankings[0]?.max_pet).not.toStrictEqual(
+      maxBasisRankings[0]?.max_pet,
+    );
+
+    const maxBasisTrend = await fetchTrendGraphRows(1, "avg", undefined, "max");
+    const avgBasisTrend = await fetchTrendGraphRows(1, "avg", undefined, "avg");
+    expect(avgBasisTrend[0]?.pet).not.toStrictEqual(maxBasisTrend[0]?.pet);
+
+    const queryWindow = { lastHistoricalYear: 2020, targetYear: 2030 };
+    const maxBasisForecast = await fetchForecastRows(1, queryWindow, {
+      basis: "max",
+      option: "avg",
+    });
+    const avgBasisForecast = await fetchForecastRows(1, queryWindow, {
+      basis: "avg",
+      option: "avg",
+    });
+    expect(avgBasisForecast[0]?.pet).not.toStrictEqual(
+      maxBasisForecast[0]?.pet,
+    );
+
+    vi.restoreAllMocks();
+  });
 });

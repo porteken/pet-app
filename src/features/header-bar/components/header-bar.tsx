@@ -1,5 +1,6 @@
 "use client";
 
+import { BasisToggle } from "@/components/app/basis-toggle";
 import { ThemeToggle } from "@/components/app/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -30,7 +31,7 @@ const GitHubMark = (): React.ReactElement => (
 );
 
 const HeaderActions = (): React.ReactElement => (
-  <div className="flex items-center gap-2">
+  <div className="flex flex-wrap items-center gap-2">
     <Button
       aria-label="View source code on GitHub"
       asChild
@@ -40,9 +41,9 @@ const HeaderActions = (): React.ReactElement => (
       <a href={APP_CONFIG.GITHUB_URL} rel="noopener noreferrer" target="_blank">
         <GitHubMark />
         <span className="hidden sm:inline">GitHub</span>
-        <span className="sm:hidden">Code</span>
       </a>
     </Button>
+    <BasisToggle />
     <ThemeToggle />
   </div>
 );

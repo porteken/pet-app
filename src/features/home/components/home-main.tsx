@@ -1,5 +1,6 @@
 "use client";
 
+import { usePetBasis } from "@/components/app/basis-provider";
 import { PageLoader } from "@/components/app/page-loader";
 import { PageShell } from "@/components/app/page-shell";
 import { useIgnorePersistenceError } from "@/hooks/use-ignore-persistence-error";
@@ -75,13 +76,16 @@ const Home: FC<MapProperties> = ({
   );
   const isMobileViewport = useIsMobileViewport();
   const [isMobileGraphLegendOpen, setIsMobileGraphLegendOpen] = useState(false);
+  const { basis } = usePetBasis();
   const markerPrefetchOptionsRef = useRef({
+    basis,
     graphMeasure: selectedGraphMeasure,
     graphSeason: selectedGraphSeason,
   });
 
   useEffect(() => {
     markerPrefetchOptionsRef.current = {
+      basis,
       graphMeasure: selectedGraphMeasure,
       graphSeason: selectedGraphSeason,
     };
@@ -110,11 +114,13 @@ const Home: FC<MapProperties> = ({
   );
 
   const trendQuery = useTrendGraphData({
+    basis,
     locationId: selectedLocationId,
     option: selectedGraphMeasure,
     season: selectedGraphSeason,
   });
   const forecastQuery = useForecastData({
+    basis,
     enabled: forecastEnabled && selectedLocationId !== undefined,
     locationId: selectedLocationId,
     option: selectedGraphMeasure,
@@ -134,7 +140,7 @@ const Home: FC<MapProperties> = ({
 
       const result = deriveTrendAnalysis(
         trendQuery.data,
-        forecastQuery.data,
+        forecastQuery.data ?? undefined,
         selectedGraphMeasure,
         selectedGraphSeason,
       );
@@ -187,11 +193,16 @@ const Home: FC<MapProperties> = ({
 
   const handleMarkerPrefetch = useCallback(
     async (locationId: number) => {
-      const { graphMeasure, graphSeason } = markerPrefetchOptionsRef.current;
+      const {
+        basis: prefetchBasis,
+        graphMeasure,
+        graphSeason,
+      } = markerPrefetchOptionsRef.current;
       const queryKey = queryKeys.trendGraph(
         locationId,
         graphMeasure,
         graphSeason,
+        prefetchBasis,
       );
       const queryState = queryClient.getQueryState(queryKey);
       const isFresh =
@@ -203,12 +214,10 @@ const Home: FC<MapProperties> = ({
       }
 
       try {
-        await prefetchTrendGraphData(
-          queryClient,
-          locationId,
-          graphMeasure,
-          graphSeason,
-        );
+        await prefetchTrendGraphData(queryClient, locationId, graphMeasure, {
+          basis: prefetchBasis,
+          season: graphSeason,
+        });
       } catch {
         // Ignore speculative prefetch failures.
       }

@@ -97,6 +97,8 @@ function compareRankingItems(
       return (a.max_pet ?? 0) - (b.max_pet ?? 0);
     }
     case "rank": {
+      // Rank is derived from Avg Pet (desc) over the shown data, so ranking
+      // ascending is equivalent to ordering by Avg Pet descending.
       return b.avg_pet - a.avg_pet;
     }
     case "state": {
@@ -638,6 +640,8 @@ export function RankingsMain({
     });
   }, [rankings, stateFilter, heatStressFilter, sortColumn, sortDirection]);
 
+  // Derive ranks from the filtered data so the numbers reflect what is shown:
+  // rank 1 is the highest Avg Pet within the current filters.
   const rankByLocation = useMemo(() => {
     const map = new Map<number, number>();
     const sortedByPet = filteredAndSortedRankings.toSorted(
@@ -678,6 +682,10 @@ export function RankingsMain({
         LocationOptions={LocationOptions}
         mainClassName="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10"
       >
+        <h1 className="mb-8 fade-in-up text-3xl font-black tracking-tight text-primary sm:text-4xl">
+          Cities ranked by Average PET
+        </h1>
+
         <RankingsFilters
           dispatch={dispatch}
           heatStressFilter={heatStressFilter}
@@ -689,14 +697,6 @@ export function RankingsMain({
           stateFilter={stateFilter}
           stateOptions={stateOptions}
         />
-
-        <section className="mb-8 fade-in-up overflow-hidden rounded-4xl glass-panel">
-          <div className="bg-primary px-6 py-5 sm:px-8 sm:py-6">
-            <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
-              Cities ranked by Average PET
-            </h1>
-          </div>
-        </section>
 
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-muted-foreground">

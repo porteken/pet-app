@@ -90,6 +90,7 @@ const defaultProps: React.ComponentProps<typeof TrendAnalysis> = {
   initialForecastYearsAhead: 10,
   initialGraphMeasure: "avg",
   initialGraphSeason: "Annual",
+  initialPetBasis: "max",
   onMeasureChange: mockFn().mockResolvedValue(Promise.resolve()),
   onSeasonChange: mockFn().mockResolvedValue(Promise.resolve()),
 };
@@ -183,7 +184,12 @@ describe("trendAnalysis", () => {
       renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1, "Annual");
+        expect(FetchTrendGraphData).toHaveBeenCalledWith(
+          "avg",
+          1,
+          "Annual",
+          "max",
+        );
       });
     });
 
@@ -328,7 +334,11 @@ describe("trendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual", "avg");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, {
+          basis: "max",
+          option: "avg",
+          season: "Annual",
+        });
       });
 
       await waitFor(() => {
@@ -374,14 +384,24 @@ describe("trendAnalysis", () => {
       renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1, "Annual");
+        expect(FetchTrendGraphData).toHaveBeenCalledWith(
+          "avg",
+          1,
+          "Annual",
+          "max",
+        );
       });
 
       const select = screen.getByLabelText("Graph Measure");
       fireEvent.change(select, { target: { value: "max" } });
 
       await waitFor(() => {
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1, "Annual");
+        expect(FetchTrendGraphData).toHaveBeenCalledWith(
+          "max",
+          1,
+          "Annual",
+          "max",
+        );
       });
     });
 
@@ -488,7 +508,11 @@ describe("trendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual", "avg");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, {
+          basis: "max",
+          option: "avg",
+          season: "Annual",
+        });
       });
 
       expect(setForecastPreferences).toHaveBeenCalledWith(true, 10);
@@ -507,7 +531,11 @@ describe("trendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 15, "Annual", "avg");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 15, {
+          basis: "max",
+          option: "avg",
+          season: "Annual",
+        });
       });
 
       expect(setForecastPreferences).toHaveBeenCalledWith(false, 15);
@@ -523,7 +551,11 @@ describe("trendAnalysis", () => {
       );
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 20, "Annual", "avg");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 20, {
+          basis: "max",
+          option: "avg",
+          season: "Annual",
+        });
       });
     });
 
@@ -539,7 +571,11 @@ describe("trendAnalysis", () => {
       fireEvent.click(screen.getByTestId("forecast-toggle"));
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Winter", "avg");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, {
+          basis: "max",
+          option: "avg",
+          season: "Winter",
+        });
       });
     });
 

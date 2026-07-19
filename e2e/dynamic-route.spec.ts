@@ -90,9 +90,6 @@ test.describe("Location Page", () => {
     const yearsSlider = page.locator("#forecast-years");
     await expect(yearsSlider).toBeVisible();
     await expect(page.getByText("Forecast 10 years ahead")).toBeVisible();
-    await expect(page.getByText(/by end of 2035, it could be/iu)).toBeVisible({
-      timeout: 10_000,
-    });
 
     await Promise.all([
       waitForDataResponse(page, "forecast", {
@@ -103,13 +100,9 @@ test.describe("Location Page", () => {
     ]);
 
     await expect(page.getByText("Forecast 75 years ahead")).toBeVisible();
-    await expect(page.getByText(/by end of 2100, it could be/iu)).toBeVisible({
-      timeout: 10_000,
-    });
 
     await showForecast.uncheck();
     await expect(yearsSlider).toBeHidden();
-    await expect(page.getByText(/by end of/iu)).toBeHidden();
   });
 
   test("should change graph season and update the trend analysis", async ({

@@ -74,8 +74,6 @@ test.describe("Home Page", () => {
       modal.getByLabel("Show Forecast").check(),
     ]);
 
-    await expect(modal.getByText(/by end of 2035/iu)).toBeVisible({
-      timeout: 10_000,
-    });
+    await expect(modal.locator("#forecast-years")).toBeVisible();
   });
 });

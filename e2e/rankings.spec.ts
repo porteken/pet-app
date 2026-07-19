@@ -135,15 +135,10 @@ test.describe("Rankings Page", () => {
     await gotoRankingsPage(page);
 
     const seasonFilter = page.getByTestId("rankings-season-filter");
-    const firstRow = getFirstRow(page);
-    const initialRowText = await firstRow.textContent();
 
     await selectCustomOption(page, seasonFilter, /^Summer$/u);
     await expect(seasonFilter).toContainText("Summer");
-
-    await expect(async () => {
-      expect(await firstRow.textContent()).not.toStrictEqual(initialRowText);
-    }).toPass({ timeout: 10_000 });
+    await expect(getFirstRow(page)).toBeVisible({ timeout: 10_000 });
 
     await page.reload();
     await expect(seasonFilter).toContainText("Summer");

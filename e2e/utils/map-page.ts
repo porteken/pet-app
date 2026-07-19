@@ -171,8 +171,19 @@ export async function waitForLocationDetailsPage(
   });
   const stopWatchingGraphMeasure =
     await watchForDuplicateGraphMeasureSelect(page);
+  const graphMeasure = page.locator("select#graph-measure");
   try {
-    await expect(page.locator("select#graph-measure")).toBeVisible({
+    // WebKit intermittently renders a second #graph-measure for a few
+    // milliseconds during navigation. Asserting on the strict locator would
+    // throw a "resolved to 2 elements" strict-mode violation the instant that
+    // happens; instead wait for the DOM to settle back to a single instance.
+    // A genuinely persistent duplicate still fails here (with the captured-DOM
+    // diagnostic attached), so this waits out the transient case without
+    // masking a real regression.
+    await expect(graphMeasure).toHaveCount(1, {
+      timeout: LOCATION_DETAILS_TIMEOUT,
+    });
+    await expect(graphMeasure).toBeVisible({
       timeout: LOCATION_DETAILS_TIMEOUT,
     });
   } finally {

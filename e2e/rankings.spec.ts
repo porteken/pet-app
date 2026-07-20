@@ -3,6 +3,7 @@ import {
   getOpenCustomSelectOptions,
   openCustomSelect,
   selectCustomOption,
+  waitForStableSelect,
 } from "./utils/custom-select";
 import { waitForLocationDetailsPage } from "./utils/map-page";
 import { gotoRankingsPage, getFirstRow } from "./utils/rankings-page";
@@ -17,10 +18,16 @@ test.describe("Rankings Page", () => {
     const rowCount = await rows.count();
     expect(rowCount).toBeGreaterThan(0);
 
-    await expect(page.getByTestId("rankings-year-filter")).toBeVisible();
-    await expect(page.getByTestId("rankings-season-filter")).toBeVisible();
-    await expect(page.getByTestId("rankings-state-filter")).toBeVisible();
-    await expect(page.getByTestId("rankings-heat-stress-filter")).toBeVisible();
+    for (const filterTestId of [
+      "rankings-year-filter",
+      "rankings-season-filter",
+      "rankings-state-filter",
+      "rankings-heat-stress-filter",
+    ]) {
+      const filter = page.getByTestId(filterTestId);
+      await waitForStableSelect(filter);
+      await expect(filter).toBeVisible();
+    }
 
     await expect(
       page.getByRole("link", { name: "Historical PET USA" }),
@@ -29,10 +36,23 @@ test.describe("Rankings Page", () => {
       "Select City",
     );
 
-    await expect(page.getByText("Thermal Stress Index")).toBeVisible();
+    // The legend is always shown on wide (xl) viewports but collapses behind a
+    // toggle button on narrower ones; expand it first when that toggle is
+    // present so the assertions below hold on every viewport.
+    const legendToggle = page.getByRole("button", {
+      name: /Thermal Stress Index/u,
+    });
+    if (await legendToggle.isVisible().catch(() => false)) {
+      await legendToggle.click();
+    }
+
+    const legendHeading = page.getByRole("heading", {
+      name: "Thermal Stress Index",
+    });
+    await expect(legendHeading).toBeVisible();
     const legendSection = page
       .locator("div")
-      .filter({ has: page.getByText("Thermal Stress Index") })
+      .filter({ has: legendHeading })
       .first();
     await expect(legendSection).toContainText("Extreme Cold Stress");
     await expect(legendSection).toContainText("No Thermal Stress");
@@ -45,6 +65,7 @@ test.describe("Rankings Page", () => {
 
     const yearSelect = page.getByTestId("rankings-year-filter");
     await selectCustomOption(page, yearSelect, /^2010$/u);
+    await waitForStableSelect(yearSelect);
     await expect(yearSelect).toContainText("2010");
 
     await expect(getFirstRow(page)).toBeVisible({ timeout: 10_000 });
@@ -107,6 +128,7 @@ test.describe("Rankings Page", () => {
     expect(stateLabel).toBeTruthy();
     await firstStateOption.click();
 
+    await waitForStableSelect(stateSelect);
     await expect(stateSelect).toContainText(stateLabel ?? "");
 
     await expect(getFirstRow(page)).toBeVisible({ timeout: 10_000 });
@@ -126,6 +148,7 @@ test.describe("Rankings Page", () => {
     expect(optionLabel).toBeTruthy();
     await firstOption.click();
 
+    await waitForStableSelect(heatStressSelect);
     await expect(heatStressSelect).toContainText(optionLabel ?? "");
 
     await expect(getFirstRow(page)).toBeVisible({ timeout: 15_000 });
@@ -137,10 +160,24 @@ test.describe("Rankings Page", () => {
     const seasonFilter = page.getByTestId("rankings-season-filter");
 
     await selectCustomOption(page, seasonFilter, /^Summer$/u);
+    await waitForStableSelect(seasonFilter);
     await expect(seasonFilter).toContainText("Summer");
     await expect(getFirstRow(page)).toBeVisible({ timeout: 10_000 });
 
+    // Selecting a season persists it via a fire-and-forget server action that
+    // writes the rankings-season cookie. Wait for that write to land before
+    // reloading; otherwise the reload can beat the cookie and the server
+    // re-renders with the default season.
+    await expect(async () => {
+      const cookies = await page.context().cookies();
+      const seasonCookie = cookies.find(
+        (cookie) => cookie.name === "rankings-season",
+      );
+      expect(seasonCookie?.value).toBe("Summer");
+    }).toPass({ timeout: 10_000 });
+
     await page.reload();
+    await waitForStableSelect(seasonFilter);
     await expect(seasonFilter).toContainText("Summer");
   });
 

@@ -226,6 +226,7 @@
         "playwright.config.ts"
       ],
       "rules": {
+        "eslint/no-empty-function": "off",
         "import/no-unassigned-import": "off",
         "vitest/prefer-import-in-mock": "off",
         "vitest/require-top-level-describe": "off"

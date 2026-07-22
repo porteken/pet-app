@@ -1,8 +1,8 @@
-import "@testing-library/jest-dom";
-
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
+
+import { LocationErrorHandler } from "../error-handlers";
 
 vi.mock("@/components/app/database-error", () => ({
   DatabaseError: ({ message, title }: { message?: string; title?: string }) => (
@@ -12,8 +12,6 @@ vi.mock("@/components/app/database-error", () => ({
     </div>
   ),
 }));
-
-import { LocationErrorHandler } from "../error-handlers";
 
 describe("locationErrorHandler", () => {
   it("renders the no-data error UI when error message is NO_DATA", () => {

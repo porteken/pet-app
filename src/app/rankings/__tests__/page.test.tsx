@@ -1,5 +1,13 @@
+import {
+  RANKINGS_HEAT_STRESS_COOKIE_NAME,
+  RANKINGS_SEASON_COOKIE_NAME,
+  RANKINGS_STATE_COOKIE_NAME,
+  RANKINGS_YEAR_COOKIE_NAME,
+} from "@/lib/constants";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import RankingsPage, { metadata } from "../page";
 
 const {
   mockCookies,
@@ -27,15 +35,6 @@ vi.mock("@/lib/api/fetch-server", () => ({
   fetchCityRankings: mockFetchCityRankings,
   fetchLocations: mockFetchLocations,
 }));
-
-import {
-  RANKINGS_HEAT_STRESS_COOKIE_NAME,
-  RANKINGS_SEASON_COOKIE_NAME,
-  RANKINGS_STATE_COOKIE_NAME,
-  RANKINGS_YEAR_COOKIE_NAME,
-} from "@/lib/constants";
-
-import RankingsPage, { metadata } from "../page";
 
 const createCookieStore = (values: Partial<Record<string, string>>) => ({
   get: (name: string) => {

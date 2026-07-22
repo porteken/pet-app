@@ -1,5 +1,6 @@
-import "@testing-library/jest-dom";
-
+import { GenerateTrendGraph } from "@/features/graph";
+import { setGraphMeasure } from "@/lib/actions/actions";
+import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 import {
   MockForecastControls,
   MockSelectControl,
@@ -8,6 +9,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import Home from "../components/home-main";
 
 const createDelay = (ms: number) =>
   new Promise((resolve) => {
@@ -92,9 +95,13 @@ vi.mock("@/components/ui/toast", () => ({
 }));
 
 vi.mock("@/features/graph", () => ({
-  GenerateTrendGraph: mockFn().mockReturnValue(
-    <div data-testid="mock-trend-graph">Trend Graph</div>,
-  ),
+  // Returns the element lazily from the mock implementation rather than via
+  // mockReturnValue: this factory is hoisted and triggered by the top-level
+  // `@/features/graph` import before the auto-injected jsx-runtime import has
+  // initialized, so evaluating JSX at factory time would throw a TDZ error.
+  GenerateTrendGraph: mockFn(() => (
+    <div data-testid="mock-trend-graph">Trend Graph</div>
+  )),
 }));
 
 vi.mock("@/lib/api/fetch-client", () => ({
@@ -195,12 +202,6 @@ vi.mock("@/components/app/forecast-controls", () => ({
     ),
   ),
 }));
-
-import { GenerateTrendGraph } from "@/features/graph";
-import { setGraphMeasure } from "@/lib/actions/actions";
-import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
-
-import Home from "../components/home-main";
 
 const mockLocationOptions = [
   {

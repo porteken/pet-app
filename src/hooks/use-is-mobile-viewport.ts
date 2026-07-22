@@ -19,7 +19,9 @@ export const useIsMobileViewport = (query = MOBILE_VIEWPORT_QUERY): boolean => {
 
   React.useEffect(() => {
     if (typeof globalThis.matchMedia !== "function") {
-      return () => {};
+      return () => {
+        /* no cleanup needed */
+      };
     }
 
     const mediaQuery = globalThis.matchMedia(query);

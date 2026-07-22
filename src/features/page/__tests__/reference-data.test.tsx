@@ -1,9 +1,11 @@
-import "@testing-library/jest-dom";
-
+import { GenerateReferenceGraph } from "@/features/graph";
+import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { ReferenceData } from "../components/reference-data";
 
 const renderWithQueryClient = (ui: React.ReactElement) => {
   const queryClient = new QueryClient({
@@ -16,9 +18,13 @@ const renderWithQueryClient = (ui: React.ReactElement) => {
 };
 
 vi.mock("@/features/graph", () => ({
-  GenerateReferenceGraph: mockFn().mockReturnValue(
-    <div data-testid="mock-reference-graph">Reference Graph</div>,
-  ),
+  // Returns the element lazily from the mock implementation rather than via
+  // mockReturnValue: this factory is hoisted and triggered by the top-level
+  // `@/features/graph` import before the auto-injected jsx-runtime import has
+  // initialized, so evaluating JSX at factory time would throw a TDZ error.
+  GenerateReferenceGraph: mockFn(() => (
+    <div data-testid="mock-reference-graph">Reference Graph</div>
+  )),
 }));
 
 vi.mock("@/lib/api/fetch-client", () => ({
@@ -27,11 +33,6 @@ vi.mock("@/lib/api/fetch-client", () => ({
     pets: [10, 20],
   }),
 }));
-
-import { GenerateReferenceGraph } from "@/features/graph";
-import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
-
-import { ReferenceData } from "../components/reference-data";
 
 const defaultProps: React.ComponentProps<typeof ReferenceData> = {
   CurrentDates: [new Date("2023-06-01"), new Date("2023-06-02")],

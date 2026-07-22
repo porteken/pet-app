@@ -415,7 +415,7 @@ export async function fetchTrendGraphRows(
   const buildQuery = (selectedSeason?: GraphSeason) => {
     let query = getDb()
       .selectFrom("pet_year_stats")
-      .select(({ ref }) => ["location_id", "year", ref(metricColumn).as("pet")])
+      .select((eb) => ["location_id", "year", eb.ref(metricColumn).as("pet")])
       .where("location_id", "=", locationId);
 
     if (selectedSeason !== undefined) {
@@ -447,8 +447,8 @@ export function fetchReferenceGraphRows(locationId: number, year: string) {
   return withDbRetry(() =>
     getDb()
       .selectFrom("pet")
-      .select(({ ref }) => [
-        sql<string>`cast(${ref("date")} as text)`.as("date"),
+      .select((eb) => [
+        sql<string>`cast(${eb.ref("date")} as text)`.as("date"),
         "location_id",
         "pet",
       ])

@@ -75,19 +75,25 @@ afterAll(() => {
   server.close();
 });
 
+// jsdom does not implement these DOM APIs; stub them with no-ops so Radix UI
+// and chart components can call them during tests.
+const noop = () => {
+  /* jsdom stub: no-op */
+};
+
 if (typeof globalThis.HTMLElement.prototype.hasPointerCapture !== "function") {
   globalThis.HTMLElement.prototype.hasPointerCapture = () => false;
 }
 if (
   typeof globalThis.HTMLElement.prototype.releasePointerCapture !== "function"
 ) {
-  globalThis.HTMLElement.prototype.releasePointerCapture = () => {};
+  globalThis.HTMLElement.prototype.releasePointerCapture = noop;
 }
 if (typeof globalThis.HTMLElement.prototype.setPointerCapture !== "function") {
-  globalThis.HTMLElement.prototype.setPointerCapture = () => {};
+  globalThis.HTMLElement.prototype.setPointerCapture = noop;
 }
 if (typeof globalThis.HTMLElement.prototype.scrollIntoView !== "function") {
-  globalThis.HTMLElement.prototype.scrollIntoView = () => {};
+  globalThis.HTMLElement.prototype.scrollIntoView = noop;
 }
 
 vi.spyOn(globalThis.HTMLElement.prototype, "hasPointerCapture").mockReturnValue(
@@ -96,11 +102,11 @@ vi.spyOn(globalThis.HTMLElement.prototype, "hasPointerCapture").mockReturnValue(
 vi.spyOn(
   globalThis.HTMLElement.prototype,
   "releasePointerCapture",
-).mockImplementation(() => {});
+).mockImplementation(noop);
 vi.spyOn(
   globalThis.HTMLElement.prototype,
   "setPointerCapture",
-).mockImplementation(() => {});
+).mockImplementation(noop);
 vi.spyOn(globalThis.HTMLElement.prototype, "scrollIntoView").mockImplementation(
-  () => {},
+  noop,
 );

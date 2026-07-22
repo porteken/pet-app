@@ -5,7 +5,11 @@ import { MoonStar, SunMedium } from "lucide-react";
 import { useTheme } from "next-themes";
 import * as React from "react";
 
-const emptySubscribe = () => () => {};
+// Never-changing store for useSyncExternalStore (used only to detect mount);
+// there is nothing to subscribe to, so the returned unsubscribe is a no-op.
+const emptySubscribe = () => () => {
+  /* no-op */
+};
 
 export const ThemeToggle = () => {
   const { resolvedTheme, setTheme } = useTheme();

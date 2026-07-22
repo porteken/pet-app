@@ -1,5 +1,3 @@
-import "./module-mocks";
-
 import { vi } from "vitest";
 
 import {
@@ -8,9 +6,12 @@ import {
   createMockValidation,
   setupSuccessfulValidations,
 } from "./mocks";
+import * as moduleMocks from "./module-mocks";
 
 import type { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
 import type { cookies as cookiesFunction } from "next/headers";
+
+void moduleMocks;
 
 export const setupApiClientTest = async () => {
   const mockValidation = createMockValidation();

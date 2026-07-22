@@ -1,5 +1,4 @@
-import "@testing-library/jest-dom";
-
+import { ToastProvider } from "@/components/ui/toast";
 import {
   act,
   fireEvent,
@@ -8,6 +7,9 @@ import {
   screen,
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { BasisProvider, readCookieBasis, usePetBasis } from "../basis-provider";
+import { BasisToggle } from "../basis-toggle";
 
 vi.unmock("@/components/app/basis-provider");
 
@@ -25,11 +27,6 @@ vi.mock("next/navigation", () => ({
     refresh: routerRefreshMock,
   }),
 }));
-
-import { ToastProvider } from "@/components/ui/toast";
-
-import { BasisProvider, readCookieBasis, usePetBasis } from "../basis-provider";
-import { BasisToggle } from "../basis-toggle";
 
 let cookieValue = "";
 

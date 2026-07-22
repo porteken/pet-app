@@ -6,7 +6,11 @@ import {
   waitForStableSelect,
 } from "./utils/custom-select";
 import { waitForLocationDetailsPage } from "./utils/map-page";
-import { gotoRankingsPage, getFirstRow } from "./utils/rankings-page";
+import {
+  expandHeatStressLegend,
+  gotoRankingsPage,
+  getFirstRow,
+} from "./utils/rankings-page";
 
 test.describe("Rankings Page", () => {
   test("should render rankings page with table, filters, and legend", async ({
@@ -36,15 +40,7 @@ test.describe("Rankings Page", () => {
       "Select City",
     );
 
-    // The legend is always shown on wide (xl) viewports but collapses behind a
-    // toggle button on narrower ones; expand it first when that toggle is
-    // present so the assertions below hold on every viewport.
-    const legendToggle = page.getByRole("button", {
-      name: /Thermal Stress Index/u,
-    });
-    if (await legendToggle.isVisible().catch(() => false)) {
-      await legendToggle.click();
-    }
+    await expandHeatStressLegend(page);
 
     const legendHeading = page.getByRole("heading", {
       name: "Thermal Stress Index",

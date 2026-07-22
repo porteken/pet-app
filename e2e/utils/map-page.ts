@@ -79,23 +79,24 @@ const exposedGraphMeasureWatcher = new WeakSet<Page>();
 // document/MutationObserver/window only exist in that browser context, and
 // `window` (rather than globalThis) is required for the Window augmentation
 // above to type-check.
-/* oxlint-disable unicorn/consistent-function-scoping, unicorn/prefer-global-this -- serialized and sent to the browser, not shared with outer Node scope */
 function installGraphMeasureDuplicateWatcher(): void {
-  const check = (): void => {
+  const observer = new MutationObserver(() => {
     if (document.querySelectorAll("#graph-measure").length > 1) {
       window.graphMeasureDuplicateCallback?.(
         document.documentElement.outerHTML,
       );
     }
-  };
+  });
 
-  check();
-  new MutationObserver(check).observe(document.body, {
+  // Run an initial check, then watch for later duplicates.
+  observer.observe(document.body, {
     childList: true,
     subtree: true,
   });
+  if (document.querySelectorAll("#graph-measure").length > 1) {
+    window.graphMeasureDuplicateCallback?.(document.documentElement.outerHTML);
+  }
 }
-/* oxlint-enable unicorn/consistent-function-scoping, unicorn/prefer-global-this */
 
 /**
  * `select#graph-measure` intermittently resolves to 2 elements in CI (see
@@ -134,7 +135,9 @@ async function watchForDuplicateGraphMeasureSelect(
           body: capturedHtml,
           contentType: "text/html",
         })
-        .catch(() => {});
+        .catch(() => {
+          /* best-effort attachment; ignore failures */
+        });
     }
   };
 }

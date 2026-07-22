@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { GET } from "../route";
+
 interface ForecastData {
   forecastValues: number[];
   forecastYears: number[];
@@ -27,8 +29,6 @@ vi.mock("@/lib/api/fetch-server", () => ({
 vi.mock("@/lib/utils/validation", () => ({
   validateLocationId: mockValidateLocationId,
 }));
-
-import { GET } from "../route";
 
 describe("get /api/data/forecast", () => {
   beforeEach(() => {

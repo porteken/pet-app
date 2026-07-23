@@ -5,8 +5,11 @@ import {
 } from "@/lib/api/schemas";
 import {
   DEFAULT_GRAPH_SEASON,
+  DEFAULT_PET_BASIS,
   type GraphSeason,
   normalizeGraphSeason,
+  normalizePetBasis,
+  type PetBasis,
 } from "@/lib/constants";
 import { FetchError } from "@/lib/utils/errors";
 import { validateLocationId, validateYear } from "@/lib/utils/validation";
@@ -40,8 +43,10 @@ export async function FetchReferenceGraphData(
   year: string,
   locationId: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
+  basis: PetBasis = DEFAULT_PET_BASIS,
 ): Promise<ReferenceGraphDataProperties> {
   const resolvedSeason = normalizeGraphSeason(season);
+  const resolvedBasis = normalizePetBasis(basis);
 
   if (!validateYear(year)) {
     throw new FetchError("Invalid year format. Must be a 4-digit year.");
@@ -54,6 +59,7 @@ export async function FetchReferenceGraphData(
   const response = await apiRequest(async () => {
     const payload = await fetchApiJson(
       `/api/data/reference?${buildQueryString({
+        basis: resolvedBasis,
         locationId,
         season: resolvedSeason,
         year,

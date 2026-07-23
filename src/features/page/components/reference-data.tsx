@@ -1,10 +1,15 @@
 "use client";
 
+import { usePetBasis } from "@/components/app/basis-provider";
 import { ChartSkeleton } from "@/components/app/chart-skeleton";
 import { ErrorGraphDisplay } from "@/features/home/components/error-graph-display";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { getReferenceGraphQueryOptions } from "@/lib/api/query-client";
-import { DEFAULT_GRAPH_SEASON, GRAPH_CONFIG } from "@/lib/constants";
+import {
+  DEFAULT_GRAPH_SEASON,
+  GRAPH_CONFIG,
+  type PetBasis,
+} from "@/lib/constants";
 import { yearOptions } from "@/lib/utils/select-options";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
@@ -15,6 +20,7 @@ interface ReferenceDataProperties {
   CurrentPets: number[];
   id: number;
   initialHasError?: boolean;
+  initialPetBasis: PetBasis;
   initialReferenceYear: string;
   onReferenceYearChange: (referenceYear: string) => void;
   referenceYear: string;
@@ -43,6 +49,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   CurrentPets,
   id,
   initialHasError = false,
+  initialPetBasis,
   initialReferenceYear,
   onReferenceYearChange,
   referenceYear,
@@ -54,26 +61,58 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   );
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
+  const { basis } = usePetBasis();
 
   const showReferenceLegend = !isMobileViewport || isMobileLegendOpen;
 
-  const initialReferenceData = React.useMemo(() => {
-    const hasValidInitialData =
-      CurrentDates.length > 0 &&
-      CurrentPets.length === CurrentDates.length &&
-      ReferencePets.length === CurrentDates.length;
+  const currentYearKey = String(GRAPH_CONFIG.YEAR_RANGE.END);
 
-    return hasValidInitialData
-      ? { dates: CurrentDates, pets: ReferencePets }
-      : undefined;
-  }, [CurrentDates, CurrentPets.length, ReferencePets]);
+  const hasValidInitialData =
+    CurrentDates.length > 0 &&
+    CurrentPets.length === CurrentDates.length &&
+    ReferencePets.length === CurrentDates.length;
+  const isInitialBasis = basis === initialPetBasis;
+
+  const initialReferenceData = React.useMemo(
+    () =>
+      hasValidInitialData
+        ? { dates: CurrentDates, pets: ReferencePets }
+        : undefined,
+    [hasValidInitialData, CurrentDates, ReferencePets],
+  );
+
+  const initialCurrentData = React.useMemo(
+    () =>
+      hasValidInitialData
+        ? { dates: CurrentDates, pets: CurrentPets }
+        : undefined,
+    [hasValidInitialData, CurrentDates, CurrentPets],
+  );
 
   const referenceQuery = useQuery({
-    ...getReferenceGraphQueryOptions(id, referenceYear),
+    ...getReferenceGraphQueryOptions(
+      id,
+      referenceYear,
+      DEFAULT_GRAPH_SEASON,
+      basis,
+    ),
     initialData:
-      referenceYear === initialReferenceYear ? initialReferenceData : undefined,
+      referenceYear === initialReferenceYear && isInitialBasis
+        ? initialReferenceData
+        : undefined,
   });
 
+  const currentQuery = useQuery({
+    ...getReferenceGraphQueryOptions(
+      id,
+      currentYearKey,
+      DEFAULT_GRAPH_SEASON,
+      basis,
+    ),
+    initialData: isInitialBasis ? initialCurrentData : undefined,
+  });
+
+  const currentPets = currentQuery.data?.pets ?? CurrentPets;
   const referenceGraphSnapshot = referenceQuery.data;
   const hasReferenceError =
     referenceQuery.isError || (initialHasError && !referenceQuery.data);
@@ -163,7 +202,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
                   >
                     <div className="h-full min-w-full" style={containerStyle}>
                       <GenerateReferenceGraph
-                        currentPets={CurrentPets}
+                        currentPets={currentPets}
                         currentYear={
                           CurrentDates.at(-1)?.getUTCFullYear() ??
                           GRAPH_CONFIG.YEAR_RANGE.END

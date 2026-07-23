@@ -44,7 +44,8 @@ export const queryKeys = {
     locationId: number,
     year: string,
     season: GraphSeason = DEFAULT_GRAPH_SEASON,
-  ) => ["reference-graph", locationId, year, season] as const,
+    basis: PetBasis = DEFAULT_PET_BASIS,
+  ) => ["reference-graph", locationId, year, season, basis] as const,
   trendGraph: (
     locationId: number,
     option: string,
@@ -57,9 +58,10 @@ export const getReferenceGraphQueryOptions = (
   locationId: number,
   year: string,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
+  basis: PetBasis = DEFAULT_PET_BASIS,
 ) => ({
-  queryFn: () => FetchReferenceGraphData(year, locationId, season),
-  queryKey: queryKeys.referenceGraph(locationId, year, season),
+  queryFn: () => FetchReferenceGraphData(year, locationId, season, basis),
+  queryKey: queryKeys.referenceGraph(locationId, year, season, basis),
 });
 
 export const getTrendGraphQueryOptions = (

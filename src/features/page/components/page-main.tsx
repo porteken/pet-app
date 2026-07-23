@@ -107,6 +107,7 @@ const Main: FC<PageProperties> = ({
             CurrentPets={CurrentPets}
             id={id}
             initialHasError={graphDataError}
+            initialPetBasis={initialPetBasis}
             initialReferenceYear={initialReferenceYear}
             onReferenceYearChange={handleReferenceYearChange}
             referenceYear={selectedReferenceYear}

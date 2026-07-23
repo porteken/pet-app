@@ -95,10 +95,6 @@ vi.mock("@/components/ui/toast", () => ({
 }));
 
 vi.mock("@/features/graph", () => ({
-  // Returns the element lazily from the mock implementation rather than via
-  // mockReturnValue: this factory is hoisted and triggered by the top-level
-  // `@/features/graph` import before the auto-injected jsx-runtime import has
-  // initialized, so evaluating JSX at factory time would throw a TDZ error.
   GenerateTrendGraph: mockFn(() => (
     <div data-testid="mock-trend-graph">Trend Graph</div>
   )),

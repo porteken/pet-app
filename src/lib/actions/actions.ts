@@ -105,7 +105,6 @@ export async function setPetBasis(basis: string) {
   }
 
   const cookieStore = await cookies();
-  // Not httpOnly: BasisProvider reads this cookie client-side (see readCookieBasis).
   cookieStore.set(PET_BASIS_COOKIE_NAME, basis, {
     ...PREFERENCE_COOKIE_OPTIONS,
     httpOnly: false,

@@ -160,10 +160,6 @@ test.describe("Rankings Page", () => {
     await expect(seasonFilter).toContainText("Summer");
     await expect(getFirstRow(page)).toBeVisible({ timeout: 10_000 });
 
-    // Selecting a season persists it via a fire-and-forget server action that
-    // writes the rankings-season cookie. Wait for that write to land before
-    // reloading; otherwise the reload can beat the cookie and the server
-    // re-renders with the default season.
     await expect(async () => {
       const cookies = await page.context().cookies();
       const seasonCookie = cookies.find(

@@ -75,8 +75,6 @@ afterAll(() => {
   server.close();
 });
 
-// jsdom does not implement these DOM APIs; stub them with no-ops so Radix UI
-// and chart components can call them during tests.
 const noop = () => {
   /* jsdom stub: no-op */
 };

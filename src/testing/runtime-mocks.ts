@@ -122,8 +122,6 @@ const LOCATIONS = [
   },
 ] as const;
 
-// Daily-average-basis mock values are offset from the daily-max-basis
-// values by a flat amount so the two bases are distinguishable in tests.
 const AVG_BASIS_OFFSET = -1.5;
 
 const round = (value: number) => Math.round(value * 100) / 100;

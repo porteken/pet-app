@@ -132,8 +132,6 @@ const getRuntimeTrendRows = (
       )
       .map<TrendGraphRow>((row) => ({
         location_id: row.location_id,
-        // max_pet_avg is nullable in the schema, but mock rows always
-        // populate every metric column with a finite number.
         pet: Number(row[metricColumn]),
         year: row.year,
       })),
@@ -352,8 +350,6 @@ async function fetchCityRankingsAvgBasisRows(
     }
 
     if (isMissingAvgBasisRankingsColumnError(error)) {
-      // The deployed view predates the max_pet_avg/change_from_2000_avg/
-      // future_*_avg columns; fall back to the pre-basis-toggle mixed select.
       try {
         return await withDbRetry(() =>
           buildAvgBasisRankingsQuery(year, season, true).execute(),
@@ -569,8 +565,6 @@ export function fetchForecastRows(
       }
 
       if (useAvgColumns && isMissingAvgColumnError(error)) {
-        // The deployed table predates the pet_avg/lower_avg/upper_avg
-        // columns; its plain columns already hold this basis's data.
         return runQuery(selectedSeason, false);
       }
 

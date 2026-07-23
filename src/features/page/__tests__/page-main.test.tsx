@@ -22,10 +22,6 @@ const renderWithQueryClient = (ui: React.ReactElement) => {
 };
 
 vi.mock("@/features/graph", () => ({
-  // Returns the element lazily from the mock implementation rather than via
-  // mockReturnValue: this factory is hoisted and triggered by the top-level
-  // `@/features/graph` import before the auto-injected jsx-runtime import has
-  // initialized, so evaluating JSX at factory time would throw a TDZ error.
   GenerateReferenceGraph: mockFn(() => <div data-testid="reference-graph" />),
   GenerateTrendGraph: mockFn(() => <div data-testid="trend-graph" />),
 }));

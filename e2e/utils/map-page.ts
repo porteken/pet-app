@@ -75,10 +75,6 @@ declare global {
 const graphMeasureDuplicateHtml = new WeakMap<Page, string>();
 const exposedGraphMeasureWatcher = new WeakSet<Page>();
 
-// Runs inside the page via page.evaluate() below, not in this Node process —
-// document/MutationObserver/window only exist in that browser context, and
-// `window` (rather than globalThis) is required for the Window augmentation
-// above to type-check.
 function installGraphMeasureDuplicateWatcher(): void {
   const observer = new MutationObserver(() => {
     if (document.querySelectorAll("#graph-measure").length > 1) {
@@ -88,7 +84,6 @@ function installGraphMeasureDuplicateWatcher(): void {
     }
   });
 
-  // Run an initial check, then watch for later duplicates.
   observer.observe(document.body, {
     childList: true,
     subtree: true,
@@ -98,17 +93,6 @@ function installGraphMeasureDuplicateWatcher(): void {
   }
 }
 
-/**
- * `select#graph-measure` intermittently resolves to 2 elements in CI (see
- * flaky-test investigation), but the duplicate self-heals within
- * milliseconds — by the time the surrounding assertion's timeout elapses
- * (whether it passes on a later poll or ultimately fails), the DOM has
- * already returned to normal, so a catch-block snapshot never captures the
- * actual duplicated state. A MutationObserver installed in the page
- * captures `document.documentElement.outerHTML` synchronously, in-browser,
- * the instant a duplicate is observed, so there's no race with the
- * duplicate healing before we can inspect it.
- */
 async function watchForDuplicateGraphMeasureSelect(
   page: Page,
 ): Promise<() => Promise<void>> {
@@ -176,13 +160,6 @@ export async function waitForLocationDetailsPage(
     await watchForDuplicateGraphMeasureSelect(page);
   const graphMeasure = page.locator("select#graph-measure");
   try {
-    // WebKit intermittently renders a second #graph-measure for a few
-    // milliseconds during navigation. Asserting on the strict locator would
-    // throw a "resolved to 2 elements" strict-mode violation the instant that
-    // happens; instead wait for the DOM to settle back to a single instance.
-    // A genuinely persistent duplicate still fails here (with the captured-DOM
-    // diagnostic attached), so this waits out the transient case without
-    // masking a real regression.
     await expect(graphMeasure).toHaveCount(1, {
       timeout: LOCATION_DETAILS_TIMEOUT,
     });

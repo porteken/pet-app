@@ -47,6 +47,7 @@ interface PetTable {
   date: Date | string;
   location_id: number;
   pet: NumericLike;
+  pet_avg: NumericLike | null;
 }
 
 export interface PetYearStatsTable {

@@ -155,9 +155,10 @@ const getRuntimeReferenceRows = (
 
   const mapped =
     basis === "avg"
-      ? filtered
-          .filter((row) => row.pet_avg !== null)
-          .map((row) => ({ ...row, pet: row.pet_avg }))
+      ? filtered.map((row) => {
+          Object.assign(row, { pet: row.pet_avg });
+          return row;
+        })
       : filtered;
 
   return sortBy(mapped, "date");

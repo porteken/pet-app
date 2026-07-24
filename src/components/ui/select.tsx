@@ -231,7 +231,9 @@ const Select = ({
 
   React.useEffect(() => {
     if (!open || !searchable) {
-      return () => {};
+      return () => {
+        // no cleanup needed
+      };
     }
 
     const frame = requestAnimationFrame(() => {

@@ -119,7 +119,9 @@ async function watchForDuplicateGraphMeasureSelect(
           body: capturedHtml,
           contentType: "text/html",
         })
-        .catch(() => {});
+        .catch(() => {
+          // ignore attachment errors
+        });
     }
   };
 }

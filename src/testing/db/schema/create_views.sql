@@ -375,7 +375,6 @@ RETURN NULL ;
 END IF ;
 
 linear_model.cv_rmse := public.pet_rolling_origin_rmse(years, pet_values, 1, 12) ;
--- Option C from forecast_analysis.md: keep the public forecast linear-only.
 RETURN linear_model ;
 END
 $$ ;

@@ -38,7 +38,7 @@ export const ChartResponsiveContainer = ({
     const container = containerReference.current;
     if (!container) {
       return () => {
-        /* no cleanup needed */
+        // no cleanup needed
       };
     }
 
@@ -62,7 +62,7 @@ export const ChartResponsiveContainer = ({
 
       setIsReady(true);
       return () => {
-        /* no cleanup needed */
+        // no cleanup needed
       };
     }
 

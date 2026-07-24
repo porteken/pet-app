@@ -140,7 +140,7 @@ const Home: FC<MapProperties> = ({
 
       const result = deriveTrendAnalysis(
         trendQuery.data,
-        forecastQuery.data ?? undefined,
+        forecastEnabled ? (forecastQuery.data ?? undefined) : undefined,
         selectedGraphMeasure,
         selectedGraphSeason,
       );
@@ -153,6 +153,7 @@ const Home: FC<MapProperties> = ({
     }, [
       trendQuery.data,
       forecastQuery.data,
+      forecastEnabled,
       selectedGraphMeasure,
       selectedGraphSeason,
     ]);
@@ -218,9 +219,7 @@ const Home: FC<MapProperties> = ({
           basis: prefetchBasis,
           season: graphSeason,
         });
-      } catch {
-        // Ignore speculative prefetch failures.
-      }
+      } catch {}
     },
     [queryClient],
   );

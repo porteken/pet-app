@@ -232,7 +232,7 @@ const Select = ({
   React.useEffect(() => {
     if (!open || !searchable) {
       return () => {
-        /* no cleanup needed */
+        // no cleanup needed
       };
     }
 

@@ -14,14 +14,14 @@ import {
 import { FetchError } from "@/lib/utils/errors";
 import { validateLocationId, validateYear } from "@/lib/utils/validation";
 
-import { apiRequest, fetchApiJson, hasError } from "./api-client";
+import {
+  apiRequest,
+  buildQueryString,
+  fetchApiJson,
+  hasError,
+} from "./api-client";
 
 import type { ReferenceGraphDataProperties } from "@/types/types";
-
-const buildQueryString = (params: Record<string, number | string>) =>
-  new URLSearchParams(
-    Object.entries(params).map(([key, value]) => [key, String(value)]),
-  ).toString();
 
 const parseWithFetchError = <T>(
   resource: string,

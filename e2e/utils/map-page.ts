@@ -120,7 +120,7 @@ async function watchForDuplicateGraphMeasureSelect(
           contentType: "text/html",
         })
         .catch(() => {
-          /* best-effort attachment; ignore failures */
+          // ignore attachment errors
         });
     }
   };

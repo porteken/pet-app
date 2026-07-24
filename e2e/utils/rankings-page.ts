@@ -22,13 +22,6 @@ export function getFirstRow(page: Page): Locator {
   return page.locator("table tbody tr").first();
 }
 
-/**
- * Expands the thermal-stress legend when it is collapsed behind a toggle.
- *
- * The legend is always shown on wide (xl) viewports but collapses behind a
- * toggle button on narrower ones; expanding it first keeps legend assertions
- * valid on every viewport.
- */
 export async function expandHeatStressLegend(page: Page): Promise<void> {
   const legendToggle = page.getByRole("button", {
     name: /Thermal Stress Index/u,

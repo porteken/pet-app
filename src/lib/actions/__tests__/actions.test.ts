@@ -183,36 +183,60 @@ describe("setForecastPreferences", () => {
     );
   });
 
-  it("ignores forecast years ahead below the minimum without setting a cookie", async () => {
-    await setForecastPreferences(true, 1);
+  it.each([
+    { description: "below the minimum", forecastYearsAhead: 1 },
+    { description: "above the maximum", forecastYearsAhead: 1000 },
+    { description: "a non-integer", forecastYearsAhead: 10.5 },
+  ])(
+    "ignores forecast years ahead $description without setting a cookie",
+    async ({ forecastYearsAhead }) => {
+      await setForecastPreferences(true, forecastYearsAhead);
 
-    expect(mockSet).not.toHaveBeenCalled();
-  });
-
-  it("ignores forecast years ahead above the maximum without setting a cookie", async () => {
-    await setForecastPreferences(true, 1000);
-
-    expect(mockSet).not.toHaveBeenCalled();
-  });
-
-  it("ignores a non-integer forecast years ahead value without setting a cookie", async () => {
-    await setForecastPreferences(true, 10.5);
-
-    expect(mockSet).not.toHaveBeenCalled();
-  });
+      expect(mockSet).not.toHaveBeenCalled();
+    },
+  );
 });
-
-vi.mock("next/headers", () => ({
-  cookies: mockFn().mockResolvedValue({
-    set: mockFn(),
-  }),
-}));
 
 vi.mock("next/cache", () => ({
   revalidatePath: mockFn(),
 }));
 
-describe("setRankingsYear", () => {
+const rankingsCases = [
+  {
+    action: "setRankingsYear",
+    cookieName: "rankings-year",
+    cookieValue: "2020",
+    invalidReason: "a year outside the configured range",
+    setInvalid: () => setRankingsYear(1999),
+    setValid: () => setRankingsYear(2020),
+  },
+  {
+    action: "setRankingsState",
+    cookieName: "rankings-state",
+    cookieValue: "TX",
+    invalidReason: "a state value with disallowed characters",
+    setInvalid: () => setRankingsState("TX; DROP TABLE locations;"),
+    setValid: () => setRankingsState("TX"),
+  },
+  {
+    action: "setRankingsSeason",
+    cookieName: "rankings-season",
+    cookieValue: "Winter",
+    invalidReason: "an invalid season",
+    setInvalid: () => setRankingsSeason("Not A Season" as GraphSeason),
+    setValid: () => setRankingsSeason("Winter"),
+  },
+  {
+    action: "setRankingsHeatStress",
+    cookieName: "rankings-heat-stress",
+    cookieValue: "Moderate Heat Stress",
+    invalidReason: "an unrecognized heat stress level",
+    setInvalid: () => setRankingsHeatStress("Moderate"),
+    setValid: () => setRankingsHeatStress("Moderate Heat Stress"),
+  },
+] as const;
+
+describe("rankings preference actions", () => {
   let mockSet: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
@@ -223,162 +247,48 @@ describe("setRankingsYear", () => {
     mockSet = vi.mocked(cookiesResult.set);
   });
 
-  it("sets the rankings year cookie with correct parameters", async () => {
-    await setRankingsYear(2020);
+  it.each(rankingsCases)(
+    "$action sets the $cookieName cookie with correct parameters",
+    async ({ cookieName, cookieValue, setValid }) => {
+      await setValid();
 
-    expect(mockSet).toHaveBeenCalledWith(
-      "rankings-year",
-      "2020",
-      expect.objectContaining({
-        httpOnly: true,
-        path: "/",
-        sameSite: "lax",
-        secure: false,
-      }),
-    );
-  });
+      expect(mockSet).toHaveBeenCalledWith(
+        cookieName,
+        cookieValue,
+        expect.objectContaining({
+          httpOnly: true,
+          path: "/",
+          sameSite: "lax",
+          secure: false,
+        }),
+      );
+    },
+  );
 
-  it("calls revalidatePath with /rankings", async () => {
-    const { revalidatePath } = await import("next/cache");
+  it.each(rankingsCases)(
+    "$action calls revalidatePath with /rankings",
+    async ({ setValid }) => {
+      const { revalidatePath } = await import("next/cache");
 
-    await setRankingsYear(2020);
+      await setValid();
 
-    expect(revalidatePath).toHaveBeenCalledWith("/rankings");
-  });
+      expect(revalidatePath).toHaveBeenCalledWith("/rankings");
+    },
+  );
 
-  it("ignores a year outside the configured range without setting a cookie", async () => {
-    const { revalidatePath } = await import("next/cache");
+  it.each(rankingsCases)(
+    "$action ignores $invalidReason without setting a cookie",
+    async ({ setInvalid }) => {
+      const { revalidatePath } = await import("next/cache");
 
-    await setRankingsYear(1999);
+      await setInvalid();
 
-    expect(mockSet).not.toHaveBeenCalled();
-    expect(revalidatePath).not.toHaveBeenCalled();
-  });
-});
+      expect(mockSet).not.toHaveBeenCalled();
+      expect(revalidatePath).not.toHaveBeenCalled();
+    },
+  );
 
-describe("setRankingsState", () => {
-  let mockSet: ReturnType<typeof vi.fn>;
-
-  beforeEach(async () => {
-    vi.clearAllMocks();
-
-    const { cookies } = await import("next/headers");
-    const cookiesResult = await cookies();
-    mockSet = vi.mocked(cookiesResult.set);
-  });
-
-  it("sets the rankings state cookie with correct parameters", async () => {
-    await setRankingsState("TX");
-
-    expect(mockSet).toHaveBeenCalledWith(
-      "rankings-state",
-      "TX",
-      expect.objectContaining({
-        httpOnly: true,
-        path: "/",
-        sameSite: "lax",
-        secure: false,
-      }),
-    );
-  });
-
-  it("calls revalidatePath with /rankings", async () => {
-    const { revalidatePath } = await import("next/cache");
-
-    await setRankingsState("NY");
-
-    expect(revalidatePath).toHaveBeenCalledWith("/rankings");
-  });
-
-  it("ignores a state value with disallowed characters without setting a cookie", async () => {
-    const { revalidatePath } = await import("next/cache");
-
-    await setRankingsState("TX; DROP TABLE locations;");
-
-    expect(mockSet).not.toHaveBeenCalled();
-    expect(revalidatePath).not.toHaveBeenCalled();
-  });
-});
-
-describe("setRankingsSeason", () => {
-  let mockSet: ReturnType<typeof vi.fn>;
-
-  beforeEach(async () => {
-    vi.clearAllMocks();
-
-    const { cookies } = await import("next/headers");
-    const cookiesResult = await cookies();
-    mockSet = vi.mocked(cookiesResult.set);
-  });
-
-  it("sets the rankings season cookie with correct parameters", async () => {
-    await setRankingsSeason("Winter");
-
-    expect(mockSet).toHaveBeenCalledWith(
-      "rankings-season",
-      "Winter",
-      expect.objectContaining({
-        httpOnly: true,
-        path: "/",
-        sameSite: "lax",
-        secure: false,
-      }),
-    );
-  });
-
-  it("calls revalidatePath with /rankings", async () => {
-    const { revalidatePath } = await import("next/cache");
-
-    await setRankingsSeason("Spring");
-
-    expect(revalidatePath).toHaveBeenCalledWith("/rankings");
-  });
-
-  it("ignores an invalid season without setting a cookie", async () => {
-    const { revalidatePath } = await import("next/cache");
-
-    await setRankingsSeason("Not A Season" as GraphSeason);
-
-    expect(mockSet).not.toHaveBeenCalled();
-    expect(revalidatePath).not.toHaveBeenCalled();
-  });
-});
-
-describe("setRankingsHeatStress", () => {
-  let mockSet: ReturnType<typeof vi.fn>;
-
-  beforeEach(async () => {
-    vi.clearAllMocks();
-
-    const { cookies } = await import("next/headers");
-    const cookiesResult = await cookies();
-    mockSet = vi.mocked(cookiesResult.set);
-  });
-
-  it("sets the rankings heat stress cookie with correct parameters", async () => {
-    await setRankingsHeatStress("Moderate Heat Stress");
-
-    expect(mockSet).toHaveBeenCalledWith(
-      "rankings-heat-stress",
-      "Moderate Heat Stress",
-      expect.objectContaining({
-        httpOnly: true,
-        path: "/",
-        sameSite: "lax",
-        secure: false,
-      }),
-    );
-  });
-
-  it("calls revalidatePath with /rankings", async () => {
-    const { revalidatePath } = await import("next/cache");
-
-    await setRankingsHeatStress("Strong Heat Stress");
-
-    expect(revalidatePath).toHaveBeenCalledWith("/rankings");
-  });
-
-  it("allows clearing the filter with an empty string", async () => {
+  it("setRankingsHeatStress allows clearing the filter with an empty string", async () => {
     await setRankingsHeatStress("");
 
     expect(mockSet).toHaveBeenCalledWith(
@@ -386,15 +296,6 @@ describe("setRankingsHeatStress", () => {
       "",
       expect.any(Object),
     );
-  });
-
-  it("ignores an unrecognized heat stress level without setting a cookie", async () => {
-    const { revalidatePath } = await import("next/cache");
-
-    await setRankingsHeatStress("Moderate");
-
-    expect(mockSet).not.toHaveBeenCalled();
-    expect(revalidatePath).not.toHaveBeenCalled();
   });
 });
 
@@ -404,51 +305,33 @@ describe("cookie security", () => {
     vi.unstubAllEnvs();
   });
 
-  it("sets secure cookies in production outside of e2e test runs", async () => {
-    vi.resetModules();
-    vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("NEXT_PUBLIC_E2E_TEST", "false");
+  it.each([
+    { description: "outside of e2e test runs", e2e: "false", secure: true },
+    { description: "during e2e test runs", e2e: "true", secure: false },
+  ])(
+    "sets secure=$secure on cookies in production $description",
+    async ({ e2e, secure }) => {
+      vi.resetModules();
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("NEXT_PUBLIC_E2E_TEST", e2e);
 
-    vi.doMock("next/headers", () => ({
-      cookies: mockFn().mockResolvedValue({ set: mockFn() }),
-    }));
-    vi.doMock("next/cache", () => ({ revalidatePath: mockFn() }));
+      vi.doMock("next/headers", () => ({
+        cookies: mockFn().mockResolvedValue({ set: mockFn() }),
+      }));
+      vi.doMock("next/cache", () => ({ revalidatePath: mockFn() }));
 
-    const actionsModule = await import("../actions");
-    const { cookies } = await import("next/headers");
-    const cookiesResult = await cookies();
-    const mockSet = vi.mocked(cookiesResult.set);
+      const actionsModule = await import("../actions");
+      const { cookies } = await import("next/headers");
+      const cookiesResult = await cookies();
+      const mockSet = vi.mocked(cookiesResult.set);
 
-    await actionsModule.setGraphMeasure("avg");
+      await actionsModule.setGraphMeasure("avg");
 
-    expect(mockSet).toHaveBeenCalledWith(
-      "graph-measure",
-      "avg",
-      expect.objectContaining({ secure: true }),
-    );
-  });
-
-  it("does not set secure cookies during production e2e test runs", async () => {
-    vi.resetModules();
-    vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("NEXT_PUBLIC_E2E_TEST", "true");
-
-    vi.doMock("next/headers", () => ({
-      cookies: mockFn().mockResolvedValue({ set: mockFn() }),
-    }));
-    vi.doMock("next/cache", () => ({ revalidatePath: mockFn() }));
-
-    const actionsModule = await import("../actions");
-    const { cookies } = await import("next/headers");
-    const cookiesResult = await cookies();
-    const mockSet = vi.mocked(cookiesResult.set);
-
-    await actionsModule.setGraphMeasure("avg");
-
-    expect(mockSet).toHaveBeenCalledWith(
-      "graph-measure",
-      "avg",
-      expect.objectContaining({ secure: false }),
-    );
-  });
+      expect(mockSet).toHaveBeenCalledWith(
+        "graph-measure",
+        "avg",
+        expect.objectContaining({ secure }),
+      );
+    },
+  );
 });

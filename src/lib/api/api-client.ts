@@ -17,6 +17,13 @@ export type ApiResponse<T> =
 
 type ErrorHandler = (error: Error) => void;
 
+export const buildQueryString = (
+  params: Record<string, number | string>,
+): string =>
+  new URLSearchParams(
+    Object.entries(params).map(([key, value]) => [key, String(value)]),
+  ).toString();
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 

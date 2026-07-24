@@ -191,6 +191,35 @@ interface FetchGraphDataOptions {
   season: GraphSeason;
 }
 
+// Forecast data is optional: skip the fetch when disabled and swallow any
+// failure so it never affects the primary graph data.
+const fetchOptionalForecastData = async ({
+  basis,
+  forecastEnabled,
+  forecastYearsAhead,
+  locationId,
+  measure,
+  season,
+}: Omit<FetchGraphDataOptions, "referenceYear">): Promise<
+  ForecastGraphData | undefined
+> => {
+  let forecastData: ForecastGraphData | undefined;
+
+  if (forecastEnabled) {
+    try {
+      forecastData = await FetchForecastData(locationId, forecastYearsAhead, {
+        basis,
+        option: measure,
+        season,
+      });
+    } catch {
+      // Optional data; leave forecastData unset on failure.
+    }
+  }
+
+  return forecastData;
+};
+
 const fetchGraphData = async ({
   basis,
   forecastEnabled,
@@ -200,15 +229,7 @@ const fetchGraphData = async ({
   referenceYear,
   season,
 }: FetchGraphDataOptions): Promise<GraphData> => {
-  const forecastPromise = forecastEnabled
-    ? FetchForecastData(locationId, forecastYearsAhead, {
-        basis,
-        option: measure,
-        season,
-      })
-    : undefined;
-
-  const [trendResult, currentResult, referenceResult] =
+  const [trendResult, currentResult, referenceResult, forecastResult] =
     await Promise.allSettled([
       FetchTrendGraphData(measure, locationId, season, basis),
       FetchReferenceGraphData(
@@ -223,21 +244,21 @@ const fetchGraphData = async ({
         DEFAULT_GRAPH_SEASON,
         basis,
       ),
+      fetchOptionalForecastData({
+        basis,
+        forecastEnabled,
+        forecastYearsAhead,
+        locationId,
+        measure,
+        season,
+      }),
     ]);
-
-  let forecastData: ForecastGraphData | undefined;
-  if (forecastPromise) {
-    try {
-      forecastData = await forecastPromise;
-    } catch {
-      // Forecast data is optional; leave forecastData unset on failure.
-    }
-  }
 
   const emptyGraphData = createEmptyGraphData();
   const trendData = getFulfilledValue(trendResult);
   const currentData = getFulfilledValue(currentResult);
   const referenceData = getFulfilledValue(referenceResult);
+  const forecastData = getFulfilledValue(forecastResult);
   const graphDataError =
     trendResult.status === "rejected" &&
     currentResult.status === "rejected" &&

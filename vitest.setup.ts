@@ -75,9 +75,7 @@ afterAll(() => {
   server.close();
 });
 
-const noop = () => {
-  /* jsdom stub: no-op */
-};
+const noop = () => {};
 
 if (typeof globalThis.HTMLElement.prototype.hasPointerCapture !== "function") {
   globalThis.HTMLElement.prototype.hasPointerCapture = () => false;

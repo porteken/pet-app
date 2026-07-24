@@ -37,9 +37,7 @@ export const ChartResponsiveContainer = ({
   React.useEffect(() => {
     const container = containerReference.current;
     if (!container) {
-      return () => {
-        /* no cleanup needed */
-      };
+      return () => {};
     }
 
     if (
@@ -61,9 +59,7 @@ export const ChartResponsiveContainer = ({
       }
 
       setIsReady(true);
-      return () => {
-        /* no cleanup needed */
-      };
+      return () => {};
     }
 
     const updateReadiness = (width: number, height: number) => {

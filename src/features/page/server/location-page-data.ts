@@ -191,8 +191,6 @@ interface FetchGraphDataOptions {
   season: GraphSeason;
 }
 
-// Forecast data is optional: skip the fetch when disabled and swallow any
-// failure so it never affects the primary graph data.
 const fetchOptionalForecastData = async ({
   basis,
   forecastEnabled,
@@ -212,9 +210,7 @@ const fetchOptionalForecastData = async ({
         option: measure,
         season,
       });
-    } catch {
-      // Optional data; leave forecastData unset on failure.
-    }
+    } catch {}
   }
 
   return forecastData;

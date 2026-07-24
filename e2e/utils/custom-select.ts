@@ -5,16 +5,6 @@ const CUSTOM_SELECT_OPTION_TEST_ID = "searchable-select-option";
 const CUSTOM_SELECT_TIMEOUT = 10_000;
 const CUSTOM_SELECT_OPEN_ATTEMPT_TIMEOUT = 1500;
 
-/**
- * A rankings/graph filter trigger intermittently resolves to 2 elements for a
- * few milliseconds during hydration and after a filter change triggers a
- * `revalidatePath` router refresh (the server component subtree re-renders
- * before React reconciles the old and new copies). Any strict-locator
- * assertion evaluated in that window throws a "resolved to 2 elements"
- * violation, so wait for the DOM to settle back to a single instance before
- * asserting. A genuinely persistent duplicate still fails here rather than
- * being masked.
- */
 export async function waitForStableSelect(select: Locator): Promise<void> {
   await expect(select).toHaveCount(1, { timeout: CUSTOM_SELECT_TIMEOUT });
 }

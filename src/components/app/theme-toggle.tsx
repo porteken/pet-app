@@ -5,9 +5,7 @@ import { MoonStar, SunMedium } from "lucide-react";
 import { useTheme } from "next-themes";
 import * as React from "react";
 
-const emptySubscribe = () => () => {
-  /* no-op */
-};
+const emptySubscribe = () => () => {};
 
 export const ThemeToggle = () => {
   const { resolvedTheme, setTheme } = useTheme();

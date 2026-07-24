@@ -172,7 +172,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
 
     const result = deriveTrendAnalysis(
       trendQuery.data,
-      forecastQuery.data ?? undefined,
+      forecastEnabled ? (forecastQuery.data ?? undefined) : undefined,
       selectedGraphMeasure,
       graphSeason,
     );
@@ -182,7 +182,13 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       heatStressDescription: result.heatStressDescription,
       trendGraphSnapshot: result.snapshot,
     };
-  }, [trendQuery.data, forecastQuery.data, selectedGraphMeasure, graphSeason]);
+  }, [
+    trendQuery.data,
+    forecastQuery.data,
+    forecastEnabled,
+    selectedGraphMeasure,
+    graphSeason,
+  ]);
   const hasTrendError = trendQuery.isError;
 
   const handleGraphMeasureChange = React.useCallback(

@@ -199,16 +199,6 @@ vi.mock("@/components/app/forecast-controls", () => ({
   ),
 }));
 
-const mockLocationOptions = [
-  {
-    items: [
-      { key: 1, title: "New York, NY" },
-      { key: 2, title: "Los Angeles, CA" },
-    ],
-    title: "Major Cities",
-  },
-];
-
 const mockLocations = [
   {
     city: "New York",
@@ -233,7 +223,6 @@ const defaultProps: React.ComponentProps<typeof Home> = {
   initialForecastYearsAhead: 10,
   initialGraphMeasure: "avg",
   initialGraphSeason: "Annual",
-  LocationOptions: mockLocationOptions,
   locations: mockLocations,
 };
 

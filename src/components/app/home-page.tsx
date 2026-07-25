@@ -27,7 +27,7 @@ const HomePage = async () => {
     initialGraphMeasure,
     initialGraphSeason,
     initialForecastPreferences,
-    { LocationOptions, locations },
+    { locations },
   ] = results;
 
   return (
@@ -37,7 +37,6 @@ const HomePage = async () => {
         initialForecastYearsAhead={initialForecastPreferences.yearsAhead}
         initialGraphMeasure={initialGraphMeasure}
         initialGraphSeason={initialGraphSeason}
-        LocationOptions={LocationOptions}
         locations={locations}
       />
     </HomeQueryProvider>

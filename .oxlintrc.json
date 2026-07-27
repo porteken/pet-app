@@ -222,6 +222,7 @@
     {
       "files": [
         "src/testing/setup.ts",
+        "src/testing/test-utilities.ts",
         "vitest.setup.ts",
         "playwright.config.ts"
       ],

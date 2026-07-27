@@ -1,3 +1,5 @@
+import "./module-mocks";
+
 import { vi } from "vitest";
 
 import {
@@ -6,7 +8,6 @@ import {
   createMockValidation,
   setupSuccessfulValidations,
 } from "./mocks";
-import * as _moduleMocks from "./module-mocks";
 
 import type { SimpleLinearRegression } from "@/lib/utils/simple-linear-regression";
 import type { cookies as cookiesFunction } from "next/headers";

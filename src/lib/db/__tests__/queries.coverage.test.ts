@@ -138,7 +138,7 @@ describe("queries isMissingColumnError + fallback branches", () => {
     });
 
     it("falls back to location_id column on PGRST204 id-missing error", async () => {
-      const idError = makePGRST204Error("locations", "id");
+      const idError = makePGRST204Error("pet_locations", "id");
       const fallbackRows = [
         { location_id: 1, city: "Boston", lat: 42, lng: -71, state: "MA" },
       ];

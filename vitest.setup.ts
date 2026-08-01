@@ -47,8 +47,7 @@ console.error = (...args: unknown[]) => {
   originalConsoleError(...args);
 };
 
-const originalConsoleWarn = console.warn;
-console.warn = (...args: unknown[]) => {
+vi.spyOn(console, "warn").mockImplementation((...args: unknown[]) => {
   if (
     typeof args[0] === "string" &&
     (args[0].includes("Cannot get CSS styles from text's parentNode") ||
@@ -57,8 +56,8 @@ console.warn = (...args: unknown[]) => {
   ) {
     return;
   }
-  originalConsoleWarn(...args);
-};
+  originalConsoleError(...args);
+});
 
 process.env.NEXT_PUBLIC_E2E_TEST ??= "false";
 process.env.E2E_USE_RUNTIME_MOCKS ??= "false";

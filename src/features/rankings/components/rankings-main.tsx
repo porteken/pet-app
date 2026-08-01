@@ -585,7 +585,7 @@ export function RankingsMain({
             try {
               await action();
             } catch (error) {
-              console.warn("Failed to persist rankings preference", error);
+              console.error("Failed to persist rankings preference", error);
               Sentry.captureException(error, {
                 tags: { errorSource: "persistPreference" },
               });

@@ -184,7 +184,7 @@ const getRuntimeHistoricalYearRow = (
 
 const buildLocationRowsQuery = (selectedColumn: LocationIdentifierColumn) =>
   getDb()
-    .selectFrom("locations")
+    .selectFrom("pet_locations")
     .select(
       selectedColumn === "id"
         ? ["city", "lat", "lng", "id", "state"]
@@ -400,7 +400,7 @@ export async function fetchLocationRows(column: LocationIdentifierColumn) {
   try {
     return await withDbRetry(() => buildLocationRowsQuery(column).execute());
   } catch (error) {
-    if (column === "id" && isMissingColumnError(error, "locations", "id")) {
+    if (column === "id" && isMissingColumnError(error, "pet_locations", "id")) {
       return buildLocationRowsQuery("location_id").execute();
     }
 

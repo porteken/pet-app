@@ -66,7 +66,7 @@ export interface PetYearStatsTable {
 
 export interface Database {
   city_rankings_view: CityRankingsViewTable;
-  locations: LocationsTable;
+  pet_locations: LocationsTable;
   pet: PetTable;
   pet_forecast: PetForecastTable;
   pet_forecast_max: PetForecastTable;

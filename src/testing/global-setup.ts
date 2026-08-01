@@ -40,7 +40,7 @@ export async function seedTestPostgres(
       )
       .join(", ");
     await client.query(
-      `INSERT INTO locations (id, city, state, lat, lng) VALUES ${locationValues};`,
+      `INSERT INTO pet_locations (id, city, state, lat, lng) VALUES ${locationValues};`,
     );
   }
 

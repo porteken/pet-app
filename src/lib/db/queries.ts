@@ -423,7 +423,8 @@ export async function fetchTrendGraphRows(
     let query = getDb()
       .selectFrom("pet_year_stats")
       .select((eb) => ["location_id", "year", eb.ref(metricColumn).as("pet")])
-      .where("location_id", "=", locationId);
+      .where("location_id", "=", locationId)
+      .where(metricColumn, "is not", null);
 
     if (selectedSeason !== undefined) {
       query = query.where("season", "=", selectedSeason);

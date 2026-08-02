@@ -1,6 +1,8 @@
 # Historical PET USA
 
-A comprehensive web application hosted [here](https://pet-app-ashen.vercel.app) that visualizes Physiological Equivalent Temperature (PET) data for the top 500 largest cities in the Contiguous United States from 2000 to 2025. The data pipeline for getting the data is [here](https://github.com/porteken/pet-data).
+> **Archived:** This project is no longer actively maintained.
+
+A comprehensive web application that visualizes Physiological Equivalent Temperature (PET) data for the top 500 largest cities in the Contiguous United States from 2000 to 2025. The data pipeline for getting the data is [here](https://github.com/porteken/pet-data).
 
 ## Features
 
@@ -38,4 +40,4 @@ Based on [this study](https://bjsm.bmj.com/content/55/15/825), PET may provide b
 - **Data**: Postgres, Kysely
 - **Monitoring**: Sentry
 - **Testing**: Vitest, Playwright, Test Containers
-- **Deployment**: Vercel
+- **Deplyoment**: Vercel

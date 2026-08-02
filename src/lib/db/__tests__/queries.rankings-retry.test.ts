@@ -225,11 +225,22 @@ describe("fetchTrendGraphRows and fetchReferenceGraphRows query building", () =>
 
   it("builds and executes the trend graph query", async () => {
     const rows = [{ location_id: 1, pet: 20, year: 2020 }];
-    mockSelectFromQueue([async () => rows]);
+    const [query] = mockSelectFromQueue([async () => rows]);
 
     const result = await fetchTrendGraphRows(1, "avg", "Annual", "max");
 
     expect(result).toBe(rows);
+    expect(query?.where).toHaveBeenCalledWith("avg_pet", "is not", null);
+  });
+
+  it("excludes historical rows without daily-average PET", async () => {
+    const rows = [{ location_id: 1, pet: 18, year: 2025 }];
+    const [query] = mockSelectFromQueue([async () => rows]);
+
+    const result = await fetchTrendGraphRows(1, "avg", "Annual", "avg");
+
+    expect(result).toBe(rows);
+    expect(query?.where).toHaveBeenCalledWith("avg_pet_avg", "is not", null);
   });
 
   it("builds and executes the reference graph query", async () => {
